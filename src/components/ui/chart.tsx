@@ -102,6 +102,15 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+type TooltipPayload = {
+  dataKey?: string | number
+  name?: string
+  value?: number | string
+  payload?: Record<string, unknown>
+  color?: string
+  fill?: string
+}
+
 function ChartTooltipContent({
   active,
   payload,
@@ -116,8 +125,10 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: Omit<React.ComponentProps<typeof RechartsPrimitive.Tooltip>, 'active' | 'payload'> &
   React.ComponentProps<"div"> & {
+    active?: boolean
+    payload?: TooltipPayload[]
     hideLabel?: boolean
     hideIndicator?: boolean
     indicator?: "line" | "dot" | "dashed"
