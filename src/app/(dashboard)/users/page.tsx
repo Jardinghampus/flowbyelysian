@@ -1,56 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { StatCards } from "./components/stat-cards"
 import { DataTable } from "./components/data-table"
 
 import initialUsersData from "./data.json"
 
-interface User {
+export interface User {
   id: number
   name: string
-  email: string
-  avatar: string
-  role: string
-  plan: string
-  billing: string
-  status: string
-  joinedDate: string
-  lastLogin: string
+  area: string
+  role: "Leasing" | "Sales"
+  whatsapp: string
+  title: string
 }
 
-interface UserFormValues {
+export interface UserFormValues {
   name: string
-  email: string
-  role: string
-  plan: string
-  billing: string
-  status: string
+  area: string
+  role: "Leasing" | "Sales"
+  whatsapp: string
+  title: string
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsersData)
-
-  const generateAvatar = (name: string) => {
-    const names = name.split(" ")
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[1][0]}`.toUpperCase()
-    }
-    return name.substring(0, 2).toUpperCase()
-  }
+  const [users, setUsers] = useState<User[]>(initialUsersData as User[])
 
   const handleAddUser = (userData: UserFormValues) => {
     const newUser: User = {
-      id: Math.max(...users.map(u => u.id)) + 1,
+      id: Math.max(...users.map(u => u.id), 0) + 1,
       name: userData.name,
-      email: userData.email,
-      avatar: generateAvatar(userData.name),
+      area: userData.area,
       role: userData.role,
-      plan: userData.plan,
-      billing: userData.billing,
-      status: userData.status,
-      joinedDate: new Date().toISOString().split('T')[0],
-      lastLogin: new Date().toISOString().split('T')[0],
+      whatsapp: userData.whatsapp,
+      title: userData.title,
     }
     setUsers(prev => [newUser, ...prev])
   }
@@ -60,23 +42,46 @@ export default function UsersPage() {
   }
 
   const handleEditUser = (user: User) => {
-    // For now, just log the user to edit
-    // In a real app, you'd open an edit dialog
     console.log("Edit user:", user)
   }
 
+  const handleExport = () => {
+    const headers = ["Name", "Area", "Role", "WhatsApp", "Title"]
+    const csvContent = [
+      headers.join(","),
+      ...users.map(user =>
+        [user.name, user.area, user.role, user.whatsapp, user.title]
+          .map(field => `"${field}"`)
+          .join(",")
+      )
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `team-export-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="@container/main px-4 lg:px-6">
-        <StatCards />
-      </div>
-      
-      <div className="@container/main px-4 lg:px-6 mt-8 lg:mt-12">
-        <DataTable 
+    <div className="flex flex-col gap-4 py-4">
+      <div className="px-4 lg:px-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Team Members</h1>
+          <p className="text-muted-foreground">
+            Manage your team members and their information
+          </p>
+        </div>
+        <DataTable
           users={users}
           onDeleteUser={handleDeleteUser}
           onEditUser={handleEditUser}
           onAddUser={handleAddUser}
+          onExport={handleExport}
         />
       </div>
     </div>

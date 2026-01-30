@@ -17,11 +17,11 @@ import {
 import {
   ChevronDown,
   EllipsisVertical,
-  Eye,
   Pencil,
   Trash2,
   Download,
   Search,
+  Phone,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -58,23 +58,18 @@ import { UserFormDialog } from "./user-form-dialog"
 interface User {
   id: number
   name: string
-  email: string
-  avatar: string
-  role: string
-  plan: string
-  billing: string
-  status: string
-  joinedDate: string
-  lastLogin: string
+  area: string
+  role: "Leasing" | "Sales"
+  whatsapp: string
+  title: string
 }
 
 interface UserFormValues {
   name: string
-  email: string
-  role: string
-  plan: string
-  billing: string
-  status: string
+  area: string
+  role: "Leasing" | "Sales"
+  whatsapp: string
+  title: string
 }
 
 interface DataTableProps {
@@ -82,45 +77,33 @@ interface DataTableProps {
   onDeleteUser: (id: number) => void
   onEditUser: (user: User) => void
   onAddUser: (userData: UserFormValues) => void
+  onExport: () => void
 }
 
-export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTableProps) {
+export function DataTable({ users, onDeleteUser, onEditUser, onAddUser, onExport }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case "Leasing":
+        return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
+      case "Sales":
         return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20"
-      case "Pending":
-        return "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20"
-      case "Error":
-        return "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20"
-      case "Inactive":
-        return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/20"
       default:
         return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/20"
     }
   }
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "Admin":
-        return "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20"
-      case "Editor":
-        return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
-      case "Author":
-        return "text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20"
-      case "Maintainer":
-        return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20"
-      case "Subscriber":
-        return "text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20"
-      default:
-        return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/20"
+  const getInitials = (name: string) => {
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase()
     }
+    return name.substring(0, 2).toUpperCase()
   }
 
   const exactFilter = (row: Row<User>, columnId: string, value: string) => {
@@ -157,22 +140,30 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
     },
     {
       accessorKey: "name",
-      header: "User",
+      header: "Name",
       cell: ({ row }) => {
         const user = row.original
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="text-xs font-medium">
-                {user.avatar}
+                {getInitials(user.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
               <span className="font-medium">{user.name}</span>
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <span className="text-sm text-muted-foreground">{user.title}</span>
             </div>
           </div>
         )
+      },
+    },
+    {
+      accessorKey: "area",
+      header: "Area",
+      cell: ({ row }) => {
+        const area = row.getValue("area") as string
+        return <span className="font-medium">{area}</span>
       },
     },
     {
@@ -189,34 +180,30 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
       filterFn: exactFilter,
     },
     {
-      accessorKey: "plan",
-      header: "Plan",
+      accessorKey: "whatsapp",
+      header: "WhatsApp",
       cell: ({ row }) => {
-        const plan = row.getValue("plan") as string
-        return <span className="font-medium">{plan}</span>
-      },
-      filterFn: exactFilter,
-    },
-    {
-      accessorKey: "billing",
-      header: "Billing",
-      cell: ({ row }) => {
-        const billing = row.getValue("billing") as string
-        return <span className="text-sm">{billing}</span>
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string
+        const whatsapp = row.getValue("whatsapp") as string
         return (
-          <Badge variant="secondary" className={getStatusColor(status)}>
-            {status}
-          </Badge>
+          <a
+            href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400"
+          >
+            <Phone className="h-4 w-4" />
+            {whatsapp}
+          </a>
         )
       },
-      filterFn: exactFilter,
+    },
+    {
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => {
+        const title = row.getValue("title") as string
+        return <span className="text-sm text-muted-foreground">{title}</span>
+      },
     },
     {
       id: "actions",
@@ -225,10 +212,6 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
         const user = row.original
         return (
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer">
-              <Eye className="size-4" />
-              <span className="sr-only">View user</span>
-            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -246,14 +229,12 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer">
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  Send Email
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  Reset Password
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => window.open(`https://wa.me/${user.whatsapp.replace(/[^0-9]/g, "")}`, "_blank")}
+                >
+                  <Phone className="mr-2 size-4" />
+                  WhatsApp
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -262,7 +243,7 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
                   onClick={() => onDeleteUser(user.id)}
                 >
                   <Trash2 className="mr-2 size-4" />
-                  Delete User
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -294,8 +275,6 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
   })
 
   const roleFilter = table.getColumn("role")?.getFilterValue() as string
-  const planFilter = table.getColumn("plan")?.getFilterValue() as string
-  const statusFilter = table.getColumn("status")?.getFilterValue() as string
 
   return (
     <div className="w-full space-y-4">
@@ -304,7 +283,7 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder="Search team members..."
               value={globalFilter ?? ""}
               onChange={(event) => setGlobalFilter(String(event.target.value))}
               className="pl-9"
@@ -312,7 +291,7 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" className="cursor-pointer">
+          <Button variant="outline" className="cursor-pointer" onClick={onExport}>
             <Download className="mr-2 size-4" />
             Export
           </Button>
@@ -320,7 +299,7 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
         </div>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-4 sm:gap-4">
+      <div className="grid gap-2 sm:grid-cols-3 sm:gap-4">
         <div className="space-y-2">
           <Label htmlFor="role-filter" className="text-sm font-medium">
             Role
@@ -336,59 +315,12 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="Admin">Admin</SelectItem>
-              <SelectItem value="Author">Author</SelectItem>
-              <SelectItem value="Editor">Editor</SelectItem>
-              <SelectItem value="Maintainer">Maintainer</SelectItem>
-              <SelectItem value="Subscriber">Subscriber</SelectItem>
+              <SelectItem value="Leasing">Leasing</SelectItem>
+              <SelectItem value="Sales">Sales</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="plan-filter" className="text-sm font-medium">
-            Plan
-          </Label>
-          <Select
-            value={planFilter || ""}
-            onValueChange={(value) =>
-              table.getColumn("plan")?.setFilterValue(value === "all" ? "" : value)
-            }
-          >
-            <SelectTrigger className="cursor-pointer w-full" id="plan-filter">
-              <SelectValue placeholder="Select Plan" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Plans</SelectItem>
-              <SelectItem value="Basic">Basic</SelectItem>
-              <SelectItem value="Professional">Professional</SelectItem>
-              <SelectItem value="Enterprise">Enterprise</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="status-filter" className="text-sm font-medium">
-            Status
-          </Label>
-          <Select
-            value={statusFilter || ""}
-            onValueChange={(value) =>
-              table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
-            }
-          >
-            <SelectTrigger className="cursor-pointer w-full" id="status-filter">
-              <SelectValue placeholder="Select Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Error">Error</SelectItem>
-              <SelectItem value="Inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-
           <Label htmlFor="column-visibility" className="text-sm font-medium">
             Column Visibility
           </Label>
@@ -464,7 +396,7 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No team members found.
                 </TableCell>
               </TableRow>
             )}
@@ -473,7 +405,6 @@ export function DataTable({ users, onDeleteUser, onEditUser, onAddUser }: DataTa
       </div>
 
       <div className="flex items-center justify-between space-x-2 py-4">
-
         <div className="flex items-center space-x-2">
           <Label htmlFor="page-size" className="text-sm font-medium">
             Show
