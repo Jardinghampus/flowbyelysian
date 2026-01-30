@@ -16,6 +16,7 @@ import {
   LayoutTemplate,
   Users,
   FileText,
+  TrendingUp,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -44,12 +45,12 @@ const data = {
       label: "Dashboards",
       items: [
         {
-          title: "Dashboard 1",
+          title: "Dashboard",
           url: "/dashboard",
           icon: LayoutDashboard,
         },
         {
-          title: "Dashboard 2",
+          title: "Market",
           url: "/dashboard-2",
           icon: LayoutPanelLeft,
         },
@@ -58,6 +59,11 @@ const data = {
     {
       label: "Apps",
       items: [
+        {
+          title: "Performance",
+          url: "/performance",
+          icon: TrendingUp,
+        },
         {
           title: "Mail",
           url: "/mail",
