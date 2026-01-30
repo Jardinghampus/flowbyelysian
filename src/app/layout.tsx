@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProviderWrapper } from "@/components/clerk-provider-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 import { inter } from "@/lib/fonts";
@@ -17,16 +17,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${inter.variable} antialiased`}>
-        <body className={inter.className}>
+    <html lang="en" className={`${inter.variable} antialiased`}>
+      <body className={inter.className}>
+        <ClerkProviderWrapper>
           <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
             <SidebarConfigProvider>
               {children}
             </SidebarConfigProvider>
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProviderWrapper>
+      </body>
+    </html>
   );
 }
