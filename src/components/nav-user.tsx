@@ -8,6 +8,7 @@ import {
   CircleUser,
 } from "lucide-react"
 import Link from "next/link"
+import { SignOutButton, useUser } from "@clerk/nextjs"
 
 import { Logo } from "@/components/logo"
 import {
@@ -27,7 +28,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function NavUser({
-  user,
+  user: defaultUser,
 }: {
   user: {
     name: string
@@ -36,6 +37,10 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { user: clerkUser } = useUser()
+
+  const displayName = clerkUser?.fullName || clerkUser?.firstName || defaultUser.name
+  const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress || defaultUser.email
 
   return (
     <SidebarMenu>
@@ -50,9 +55,9 @@ export function NavUser({
                 < Logo size={28} />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {displayEmail}
                 </span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
@@ -70,9 +75,9 @@ export function NavUser({
                   < Logo size={28} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {displayEmail}
                   </span>
                 </div>
               </div>
@@ -99,12 +104,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <Link href="/sign-in">
+            <SignOutButton>
+              <DropdownMenuItem className="cursor-pointer">
                 <LogOut />
                 Log out
-              </Link>
-            </DropdownMenuItem>
+              </DropdownMenuItem>
+            </SignOutButton>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
