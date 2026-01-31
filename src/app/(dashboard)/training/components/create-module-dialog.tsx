@@ -36,6 +36,8 @@ export function CreateModuleDialog({
 }: CreateModuleDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [content, setContent] = useState("")
+  const [duration, setDuration] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
   const [videoType, setVideoType] = useState<"youtube" | "loom" | "">("")
   const [documents, setDocuments] = useState<{ name: string; url: string }[]>([])
@@ -45,6 +47,8 @@ export function CreateModuleDialog({
   const resetForm = () => {
     setTitle("")
     setDescription("")
+    setContent("")
+    setDuration("")
     setVideoUrl("")
     setVideoType("")
     setDocuments([])
@@ -58,6 +62,8 @@ export function CreateModuleDialog({
     onSubmit({
       title,
       description,
+      content,
+      duration: duration || undefined,
       videoUrl: videoUrl || undefined,
       videoType: videoType || undefined,
       documents,
@@ -119,27 +125,59 @@ export function CreateModuleDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Getting Started Guide"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="duration">Duration</Label>
+              <Input
+                id="duration"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="e.g., 15 min"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Getting Started Guide"
+            <Label htmlFor="description">Short Description *</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief overview shown on the card..."
+              rows={2}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
+            <Label htmlFor="content">Training Content *</Label>
             <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what this training module covers..."
-              rows={3}
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Full training content. Use markdown formatting:
+## Heading
+### Subheading
+- Bullet points
+1. Numbered lists
+**Bold text**"
+              rows={10}
               required
+              className="font-mono text-sm"
             />
+            <p className="text-xs text-muted-foreground">
+              Supports markdown: ## headings, **bold**, - lists, 1. numbered lists
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -232,7 +270,7 @@ export function CreateModuleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title || !description}>
+            <Button type="submit" disabled={!title || !description || !content}>
               Create Module
             </Button>
           </DialogFooter>

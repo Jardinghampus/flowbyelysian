@@ -18,6 +18,7 @@ import {
   FileText,
   TrendingUp,
   GraduationCap,
+  Building2,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -64,6 +65,11 @@ const data = {
           title: "Performance",
           url: "/performance",
           icon: TrendingUp,
+        },
+        {
+          title: "Inventory",
+          url: "/inventory",
+          icon: Building2,
         },
         {
           title: "Mail",

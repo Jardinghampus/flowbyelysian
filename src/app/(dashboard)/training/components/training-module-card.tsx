@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Play, Trash2, ExternalLink } from "lucide-react"
+import { FileText, Play, Trash2, ExternalLink, BookOpen, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -34,19 +34,21 @@ interface TrainingModuleCardProps {
   module: TrainingModule
   isAdmin: boolean
   onDelete: (id: string) => void
+  onView: () => void
 }
 
 export function TrainingModuleCard({
   module,
   isAdmin,
   onDelete,
+  onView,
 }: TrainingModuleCardProps) {
   const [showVideo, setShowVideo] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   return (
     <>
-      <Card className="flex flex-col">
+      <Card className="flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={onView}>
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -63,44 +65,67 @@ export function TrainingModuleCard({
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1">
-          {module.videoUrl && (
+        <CardContent className="flex-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex gap-2 mb-4">
             <Button
-              variant="outline"
-              className="w-full mb-4"
-              onClick={() => setShowVideo(true)}
+              variant="default"
+              className="flex-1"
+              onClick={onView}
             >
-              <Play className="mr-2 h-4 w-4" />
-              Watch Video
+              <BookOpen className="mr-2 h-4 w-4" />
+              Start Training
             </Button>
-          )}
+            {module.videoUrl && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowVideo(true)}
+              >
+                <Play className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
 
           {module.documents.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
-                Documents
+                {module.documents.length} Document{module.documents.length > 1 ? "s" : ""}
               </p>
-              {module.documents.map((doc, index) => (
+              {module.documents.slice(0, 2).map((doc, index) => (
                 <a
                   key={index}
                   href={doc.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-primary hover:underline"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <FileText className="h-4 w-4" />
                   {doc.name}
                   <ExternalLink className="h-3 w-3" />
                 </a>
               ))}
+              {module.documents.length > 2 && (
+                <p className="text-xs text-muted-foreground">
+                  +{module.documents.length - 2} more
+                </p>
+              )}
             </div>
           )}
         </CardContent>
 
-        <CardFooter className="flex items-center justify-between border-t pt-4">
-          <span className="text-xs text-muted-foreground">
-            Added {new Date(module.createdAt).toLocaleDateString()}
-          </span>
+        <CardFooter className="flex items-center justify-between border-t pt-4" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            {module.duration && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {module.duration}
+              </span>
+            )}
+            <span>
+              {new Date(module.createdAt).toLocaleDateString()}
+            </span>
+          </div>
           {isAdmin && (
             <Button
               variant="ghost"
