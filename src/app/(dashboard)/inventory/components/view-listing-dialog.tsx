@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, Pencil, MapPin, Ruler, DollarSign, Bed, Bath, Calendar } from "lucide-react"
+import { ExternalLink, Pencil, MapPin, Ruler, DollarSign, Bed, Bath, Calendar, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,6 +16,7 @@ interface ViewListingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   listing: Listing
+  canEdit: boolean
   onEdit: () => void
 }
 
@@ -30,18 +31,25 @@ const inquiryColors: Record<string, string> = {
   request: "bg-purple-500/10 text-purple-600 border-purple-500/20",
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-AE", {
+const transactionColors: Record<string, string> = {
+  sale: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  rent: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+}
+
+function formatPrice(price: number, transactionType: string): string {
+  const formatted = new Intl.NumberFormat("en-AE", {
     style: "currency",
     currency: "AED",
     maximumFractionDigits: 0,
   }).format(price)
+  return transactionType === "rent" ? `${formatted}/yr` : formatted
 }
 
 export function ViewListingDialog({
   open,
   onOpenChange,
   listing,
+  canEdit,
   onEdit,
 }: ViewListingDialogProps) {
   return (
@@ -52,6 +60,9 @@ export function ViewListingDialog({
             <div>
               <DialogTitle className="text-xl">{listing.title}</DialogTitle>
               <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className={transactionColors[listing.transactionType]}>
+                  For {listing.transactionType === "sale" ? "Sale" : "Rent"}
+                </Badge>
                 <Badge variant="outline" className={statusColors[listing.status]}>
                   {listing.status}
                 </Badge>
@@ -63,10 +74,12 @@ export function ViewListingDialog({
                 </Badge>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={onEdit}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            {canEdit && (
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
           </div>
         </DialogHeader>
 
@@ -106,7 +119,7 @@ export function ViewListingDialog({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <div>
               <p className="text-xs text-muted-foreground">Price</p>
-              <p className="font-medium">{formatPrice(listing.price)}</p>
+              <p className="font-medium">{formatPrice(listing.price, listing.transactionType)}</p>
             </div>
           </div>
 
@@ -137,6 +150,15 @@ export function ViewListingDialog({
             )}
           </div>
         )}
+
+        {/* Agent/Owner */}
+        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <div>
+            <p className="text-xs text-muted-foreground">Listed by</p>
+            <p className="font-medium">{listing.ownerName}</p>
+          </div>
+        </div>
 
         <Separator />
 

@@ -8,6 +8,7 @@ import {
   Trash2,
   Image as ImageIcon,
   Eye,
+  User,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +43,7 @@ import type { Listing } from "../page"
 
 interface InventoryTableProps {
   listings: Listing[]
+  currentUserId: string
   isAdmin: boolean
   onDelete: (id: string) => void
   onUpdate: (listing: Listing) => void
@@ -58,12 +60,18 @@ const inquiryColors: Record<string, string> = {
   request: "bg-purple-500/10 text-purple-600 border-purple-500/20",
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-AE", {
+const transactionColors: Record<string, string> = {
+  sale: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  rent: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+}
+
+function formatPrice(price: number, transactionType: string): string {
+  const formatted = new Intl.NumberFormat("en-AE", {
     style: "currency",
     currency: "AED",
     maximumFractionDigits: 0,
   }).format(price)
+  return transactionType === "rent" ? `${formatted}/yr` : formatted
 }
 
 function formatSize(size: number): string {
@@ -72,6 +80,7 @@ function formatSize(size: number): string {
 
 export function InventoryTable({
   listings,
+  currentUserId,
   isAdmin,
   onDelete,
   onUpdate,
@@ -81,6 +90,10 @@ export function InventoryTable({
   const [viewListing, setViewListing] = useState<Listing | null>(null)
 
   const listingToDelete = listings.find((l) => l.id === deleteId)
+
+  const canModify = (listing: Listing) => {
+    return listing.ownerId === currentUserId || isAdmin
+  }
 
   return (
     <>
@@ -93,101 +106,128 @@ export function InventoryTable({
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Size</TableHead>
               <TableHead className="text-right">Price</TableHead>
+              <TableHead>For</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Inquiry</TableHead>
+              <TableHead>Agent</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No listings found. Add your first listing to get started.
                 </TableCell>
               </TableRow>
             ) : (
-              listings.map((listing) => (
-                <TableRow key={listing.id} className="cursor-pointer" onClick={() => setViewListing(listing)}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {listing.images.length > 0 ? (
-                        <img
-                          src={listing.images[0]}
-                          alt={listing.title}
-                          className="h-10 w-10 rounded object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+              listings.map((listing) => {
+                const isOwner = listing.ownerId === currentUserId
+                return (
+                  <TableRow
+                    key={listing.id}
+                    className={`cursor-pointer ${isOwner ? "bg-primary/5" : ""}`}
+                    onClick={() => setViewListing(listing)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {listing.images.length > 0 ? (
+                          <img
+                            src={listing.images[0]}
+                            alt={listing.title}
+                            className="h-10 w-10 rounded object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium line-clamp-1">{listing.title}</p>
+                          {listing.bedrooms && (
+                            <p className="text-xs text-muted-foreground">
+                              {listing.bedrooms} BR | {listing.bathrooms} BA
+                            </p>
+                          )}
                         </div>
-                      )}
-                      <div>
-                        <p className="font-medium line-clamp-1">{listing.title}</p>
-                        {listing.bedrooms && (
-                          <p className="text-xs text-muted-foreground">
-                            {listing.bedrooms} BR | {listing.bathrooms} BA
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{listing.area}</TableCell>
-                  <TableCell className="capitalize">{listing.type}</TableCell>
-                  <TableCell className="text-right">{formatSize(listing.size)}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatPrice(listing.price)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={statusColors[listing.status]}>
-                      {listing.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={inquiryColors[listing.inquiryType]}>
-                      {listing.inquiryType}
-                    </Badge>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setViewListing(listing)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditListing(listing)}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        {listing.propertyFinderUrl && (
-                          <DropdownMenuItem asChild>
-                            <a
-                              href={listing.propertyFinderUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              PropertyFinder
-                            </a>
+                    </TableCell>
+                    <TableCell>{listing.area}</TableCell>
+                    <TableCell className="capitalize">{listing.type}</TableCell>
+                    <TableCell className="text-right">{formatSize(listing.size)}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatPrice(listing.price, listing.transactionType)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={transactionColors[listing.transactionType]}>
+                        {listing.transactionType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Badge variant="outline" className={statusColors[listing.status]}>
+                          {listing.status}
+                        </Badge>
+                        <Badge variant="outline" className={inquiryColors[listing.inquiryType]}>
+                          {listing.inquiryType}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <User className="h-3 w-3 text-muted-foreground" />
+                        <span className={`text-sm ${isOwner ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                          {isOwner ? "You" : listing.ownerName}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setViewListing(listing)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => setDeleteId(listing.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+                          {canModify(listing) && (
+                            <DropdownMenuItem onClick={() => setEditListing(listing)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+                          {listing.propertyFinderUrl && (
+                            <DropdownMenuItem asChild>
+                              <a
+                                href={listing.propertyFinderUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                PropertyFinder
+                              </a>
+                            </DropdownMenuItem>
+                          )}
+                          {canModify(listing) && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setDeleteId(listing.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>
@@ -237,6 +277,7 @@ export function InventoryTable({
           open={!!viewListing}
           onOpenChange={() => setViewListing(null)}
           listing={viewListing}
+          canEdit={canModify(viewListing)}
           onEdit={() => {
             setEditListing(viewListing)
             setViewListing(null)

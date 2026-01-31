@@ -21,12 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Listing, ListingStatus, ListingType, InquiryType } from "../page"
+import type { Listing, ListingStatus, ListingType, InquiryType, TransactionType } from "../page"
 
 interface CreateListingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId">) => void
+  onSubmit: (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => void
 }
 
 const areas = [
@@ -60,6 +60,7 @@ export function CreateListingDialog({
   const [type, setType] = useState<ListingType>("villa")
   const [status, setStatus] = useState<ListingStatus>("live")
   const [inquiryType, setInquiryType] = useState<InquiryType>("stock")
+  const [transactionType, setTransactionType] = useState<TransactionType>("sale")
   const [notes, setNotes] = useState("")
   const [propertyFinderUrl, setPropertyFinderUrl] = useState("")
   const [images, setImages] = useState<string[]>([])
@@ -77,6 +78,7 @@ export function CreateListingDialog({
     setType("villa")
     setStatus("live")
     setInquiryType("stock")
+    setTransactionType("sale")
     setNotes("")
     setPropertyFinderUrl("")
     setImages([])
@@ -97,6 +99,7 @@ export function CreateListingDialog({
       type,
       status,
       inquiryType,
+      transactionType,
       notes,
       propertyFinderUrl: propertyFinderUrl || undefined,
       images,
@@ -249,7 +252,20 @@ export function CreateListingDialog({
           </div>
 
           {/* Status */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label>Transaction Type *</Label>
+              <Select value={transactionType} onValueChange={(v) => setTransactionType(v as TransactionType)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sale">For Sale</SelectItem>
+                  <SelectItem value="rent">For Rent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label>Listing Status *</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as ListingStatus)}>
