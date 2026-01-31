@@ -17,6 +17,7 @@ import {
   Users,
   FileText,
   TrendingUp,
+  GraduationCap,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -93,6 +94,11 @@ const data = {
           title: "SEO Generator",
           url: "/seo-generator",
           icon: FileText,
+        },
+        {
+          title: "Training",
+          url: "/training",
+          icon: GraduationCap,
         },
       ],
     },
