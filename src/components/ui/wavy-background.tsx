@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 
 export const WavyBackground = ({
   children,
@@ -10,7 +10,6 @@ export const WavyBackground = ({
   colors,
   waveWidth,
   backgroundFill,
-  blur = 10,
   speed = "fast",
   waveOpacity = 0.5,
   ...props
@@ -21,23 +20,13 @@ export const WavyBackground = ({
   colors?: string[]
   waveWidth?: number
   backgroundFill?: string
-  blur?: number
   speed?: "slow" | "fast"
   waveOpacity?: number
   [key: string]: unknown
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const getSpeed = () => {
-    switch (speed) {
-      case "slow":
-        return 0.001
-      case "fast":
-        return 0.002
-      default:
-        return 0.001
-    }
-  }
+  const animationRef = useRef<number | undefined>(undefined)
+  const ntRef = useRef<number>(0)
 
   const waveColors = colors ?? [
     "#38bdf8",
@@ -47,6 +36,17 @@ export const WavyBackground = ({
     "#22d3ee",
   ]
 
+  const getSpeed = useCallback(() => {
+    switch (speed) {
+      case "slow":
+        return 0.015
+      case "fast":
+        return 0.03
+      default:
+        return 0.02
+    }
+  }, [speed])
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -54,62 +54,73 @@ export const WavyBackground = ({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    let w = canvas.width = canvas.offsetWidth
-    let h = canvas.height = canvas.offsetHeight
-    let nt = 0
-    let animationId: number
-
-    ctx.filter = `blur(${blur}px)`
-
-    const handleResize = () => {
-      if (!ctx || !canvas) return
-      w = ctx.canvas.width = canvas.offsetWidth
-      h = ctx.canvas.height = canvas.offsetHeight
-      ctx.filter = `blur(${blur}px)`
+    const setCanvasSize = () => {
+      const rect = canvas.getBoundingClientRect()
+      canvas.width = rect.width * window.devicePixelRatio
+      canvas.height = rect.height * window.devicePixelRatio
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
     }
 
-    window.addEventListener("resize", handleResize)
+    setCanvasSize()
 
-    // Simple noise function using sine waves
-    const noise = (x: number, y: number, t: number) => {
-      return Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t) * 0.5 +
-             Math.sin(x * 0.02 - t * 0.5) * 0.3 +
-             Math.cos(y * 0.015 + t * 0.8) * 0.2
-    }
+    const w = () => canvas.getBoundingClientRect().width
+    const h = () => canvas.getBoundingClientRect().height
 
-    const drawWave = (n: number) => {
-      if (!ctx) return
-      for (let i = 0; i < n; i++) {
+    const drawWave = (time: number) => {
+      const width = w()
+      const height = h()
+
+      // Clear canvas
+      ctx.fillStyle = backgroundFill || "rgba(0, 0, 0, 1)"
+      ctx.fillRect(0, 0, width, height)
+
+      // Draw multiple wave layers
+      for (let i = 0; i < 5; i++) {
         ctx.beginPath()
         ctx.lineWidth = waveWidth || 50
         ctx.strokeStyle = waveColors[i % waveColors.length]
-        for (let x = 0; x < w; x += 5) {
-          const y = noise(x, i * 100, nt) * 100
-          ctx.lineTo(x, y + h * 0.5)
+        ctx.globalAlpha = waveOpacity
+
+        const yOffset = height * 0.5 + (i - 2) * 30
+
+        for (let x = 0; x <= width; x += 3) {
+          // Multiple sine waves for more organic movement
+          const y =
+            Math.sin(x * 0.008 + time + i * 0.5) * 40 +
+            Math.sin(x * 0.012 + time * 1.5 + i * 0.3) * 30 +
+            Math.sin(x * 0.005 + time * 0.8 + i * 0.7) * 25
+
+          if (x === 0) {
+            ctx.moveTo(x, yOffset + y)
+          } else {
+            ctx.lineTo(x, yOffset + y)
+          }
         }
+
         ctx.stroke()
-        ctx.closePath()
       }
     }
 
-    const render = () => {
-      if (!ctx) return
-      nt += getSpeed()
-      ctx.fillStyle = backgroundFill || "rgba(0, 0, 0, 1)"
-      ctx.globalAlpha = waveOpacity || 0.5
-      ctx.fillRect(0, 0, w, h)
-      drawWave(5)
-      animationId = requestAnimationFrame(render)
+    const animate = () => {
+      ntRef.current += getSpeed()
+      drawWave(ntRef.current)
+      animationRef.current = requestAnimationFrame(animate)
     }
 
-    render()
+    const handleResize = () => {
+      setCanvasSize()
+    }
+
+    window.addEventListener("resize", handleResize)
+    animate()
 
     return () => {
-      cancelAnimationFrame(animationId)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
       window.removeEventListener("resize", handleResize)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blur, backgroundFill, waveOpacity, speed, waveWidth])
+  }, [backgroundFill, waveOpacity, waveWidth, waveColors, getSpeed])
 
   return (
     <div
