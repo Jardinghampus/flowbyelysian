@@ -2,31 +2,29 @@
 
 import * as React from "react"
 import {
-  LayoutPanelLeft,
   LayoutDashboard,
-  Mail,
+  Building2,
   CheckSquare,
   MessageCircle,
   Calendar,
-  Shield,
-  AlertTriangle,
-  Settings,
-  HelpCircle,
-  CreditCard,
-  LayoutTemplate,
   Users,
-  FileText,
-  TrendingUp,
   GraduationCap,
-  Building2,
-  UserCog,
   Sparkles,
+  UserCog,
+  Settings,
+  LogOut,
+  Moon,
+  Sun,
+  TrendingUp,
 } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
+import { useClerk, useUser } from "@clerk/nextjs"
 import { Logo } from "@/components/logo"
-
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Switch } from "@/components/ui/switch"
 import {
   Sidebar,
   SidebarContent,
@@ -35,242 +33,215 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "Flow User",
-    email: "user@elysian.flow",
-    avatar: "",
+const navItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
   },
-  navGroups: [
-    {
-      label: "Dashboards",
-      items: [
-        {
-          title: "Dashboard",
-          url: "/dashboard",
-          icon: LayoutDashboard,
-        },
-        {
-          title: "Market",
-          url: "/dashboard-2",
-          icon: LayoutPanelLeft,
-        },
-      ],
-    },
-    {
-      label: "Apps",
-      items: [
-        {
-          title: "Performance",
-          url: "/performance",
-          icon: TrendingUp,
-        },
-        {
-          title: "Inventory",
-          url: "/inventory",
-          icon: Building2,
-        },
-        {
-          title: "Mail",
-          url: "/mail",
-          icon: Mail,
-        },
-        {
-          title: "Tasks",
-          url: "/tasks",
-          icon: CheckSquare,
-        },
-        {
-          title: "Chat",
-          url: "/chat",
-          icon: MessageCircle,
-        },
-        {
-          title: "Calendar",
-          url: "/calendar",
-          icon: Calendar,
-        },
-        {
-          title: "Users",
-          url: "/users",
-          icon: Users,
-        },
-        {
-          title: "SEO Generator",
-          url: "/seo-generator",
-          icon: FileText,
-        },
-        {
-          title: "Training",
-          url: "/training",
-          icon: GraduationCap,
-        },
-        {
-          title: "RERA Assistant",
-          url: "/ai-assistant",
-          icon: Sparkles,
-        },
-        {
-          title: "Admin",
-          url: "/admin",
-          icon: UserCog,
-        },
-      ],
-    },
-    {
-      label: "Pages",
-      items: [
-        {
-          title: "Landing",
-          url: "/landing",
-          target: "_blank",
-          icon: LayoutTemplate,
-        },
-        {
-          title: "Auth Pages",
-          url: "#",
-          icon: Shield,
-          items: [
-            {
-              title: "Sign In 1",
-              url: "/sign-in",
-            },
-            {
-              title: "Sign In 2",
-              url: "/sign-in-2",
-            },
-            {
-              title: "Sign In 3",
-              url: "/sign-in-3",
-            },
-            {
-              title: "Sign Up 1",
-              url: "/sign-up",
-            },
-            {
-              title: "Sign Up 2",
-              url: "/sign-up-2",
-            },
-            {
-              title: "Sign Up 3",
-              url: "/sign-up-3",
-            },
-            {
-              title: "Forgot Password 1",
-              url: "/forgot-password",
-            },
-            {
-              title: "Forgot Password 2",
-              url: "/forgot-password-2",
-            },
-            {
-              title: "Forgot Password 3",
-              url: "/forgot-password-3",
-            }
-          ],
-        },
-        {
-          title: "Errors",
-          url: "#",
-          icon: AlertTriangle,
-          items: [
-            {
-              title: "Unauthorized",
-              url: "/errors/unauthorized",
-            },
-            {
-              title: "Forbidden",
-              url: "/errors/forbidden",
-            },
-            {
-              title: "Not Found",
-              url: "/errors/not-found",
-            },
-            {
-              title: "Internal Server Error",
-              url: "/errors/internal-server-error",
-            },
-            {
-              title: "Under Maintenance",
-              url: "/errors/under-maintenance",
-            },
-          ],
-        },
-        {
-          title: "Settings",
-          url: "#",
-          icon: Settings,
-          items: [
-            {
-              title: "User Settings",
-              url: "/settings/user",
-            },
-            {
-              title: "Account Settings",
-              url: "/settings/account",
-            },
-            {
-              title: "Plans & Billing",
-              url: "/settings/billing",
-            },
-            {
-              title: "Appearance",
-              url: "/settings/appearance",
-            },
-            {
-              title: "Notifications",
-              url: "/settings/notifications",
-            },
-            {
-              title: "Connections",
-              url: "/settings/connections",
-            },
-          ],
-        },
-        {
-          title: "FAQs",
-          url: "/faqs",
-          icon: HelpCircle,
-        },
-        {
-          title: "Pricing",
-          url: "/pricing",
-          icon: CreditCard,
-        },
-      ],
-    },
-  ],
-}
+  {
+    title: "Inventory",
+    url: "/inventory",
+    icon: Building2,
+  },
+  {
+    title: "Performance",
+    url: "/performance",
+    icon: TrendingUp,
+  },
+  {
+    title: "Tasks",
+    url: "/tasks",
+    icon: CheckSquare,
+  },
+  {
+    title: "Chat",
+    url: "/chat",
+    icon: MessageCircle,
+  },
+  {
+    title: "Calendar",
+    url: "/calendar",
+    icon: Calendar,
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: Users,
+  },
+  {
+    title: "Training",
+    url: "/training",
+    icon: GraduationCap,
+  },
+  {
+    title: "RERA Assistant",
+    url: "/ai-assistant",
+    icon: Sparkles,
+  },
+  {
+    title: "Admin",
+    url: "/admin",
+    icon: UserCog,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+  const { signOut } = useClerk()
+  const { user } = useUser()
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
+
+  const handleSignOut = () => {
+    signOut({ redirectUrl: "/sign-in" })
+  }
+
+  const userInitials = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`
+    : user?.firstName?.[0] || "U"
+
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" {...props}>
+      {/* Header with Logo */}
+      <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Logo size={24} className="text-current" />
+              <Link href="/dashboard" className="flex items-center gap-3">
+                <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Logo size={22} className="text-current" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Flow</span>
-                  <span className="truncate text-xs">by Elysian</span>
-                </div>
+                {!isCollapsed && (
+                  <span className="font-bold text-lg tracking-tight">FLOW</span>
+                )}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        {data.navGroups.map((group) => (
-          <NavMain key={group.label} label={group.label} items={group.items} />
-        ))}
+
+      {/* User Profile Section */}
+      <div className={cn(
+        "px-3 py-4 border-b border-sidebar-border",
+        isCollapsed && "px-2 py-3"
+      )}>
+        <div className={cn(
+          "flex items-center gap-3",
+          isCollapsed && "justify-center"
+        )}>
+          <Avatar className={cn("h-10 w-10", isCollapsed && "h-8 w-8")}>
+            <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium truncate">
+                {user?.fullName || "Flow User"}
+              </span>
+              <span className="text-xs text-muted-foreground truncate">
+                Real Estate Agent
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <SidebarContent className="px-2 py-2">
+        <SidebarMenu className="space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.title}
+                  className={cn(
+                    "relative h-10 transition-colors",
+                    isActive && "bg-primary/10 text-primary font-medium",
+                    isActive && "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-6 before:w-1 before:rounded-r-full before:bg-primary"
+                  )}
+                >
+                  <Link href={item.url}>
+                    <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
+
+      {/* Footer */}
+      <SidebarFooter className="border-t border-sidebar-border px-2 py-2">
+        <SidebarMenu className="space-y-1">
+          {/* Settings */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              tooltip="Settings"
+              className="h-10"
+              isActive={pathname.startsWith("/settings")}
+            >
+              <Link href="/settings/user">
+                <Settings className="h-5 w-5" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Logout */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Logout"
+              className="h-10 text-muted-foreground hover:text-foreground"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Dark Mode Toggle */}
+          <SidebarMenuItem>
+            <div className={cn(
+              "flex items-center h-10 px-2 rounded-md",
+              isCollapsed && "justify-center"
+            )}>
+              {isCollapsed ? (
+                <button
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="p-1 rounded-md hover:bg-sidebar-accent"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </button>
+              ) : (
+                <>
+                  <Moon className="h-5 w-5 text-muted-foreground" />
+                  <span className="ml-3 text-sm flex-1">Dark Mode</span>
+                  <Switch
+                    checked={theme === "dark"}
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                </>
+              )}
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   )
