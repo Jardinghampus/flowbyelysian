@@ -129,7 +129,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
-      <SidebarBody className="justify-between gap-10 border-r border-neutral-200 dark:border-neutral-700">
+      <SidebarBody className="justify-between gap-6 md:gap-10 border-r border-neutral-200 dark:border-neutral-800">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
           {open ? <LogoFull /> : <LogoIcon />}
@@ -153,7 +153,7 @@ export function AppSidebar() {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col gap-1 border-t border-neutral-200 dark:border-neutral-700 pt-4">
+        <div className="flex flex-col gap-1 border-t border-neutral-200 dark:border-neutral-800 pt-4">
           {/* Settings */}
           {bottomLinks.map((item, idx) => {
             const isActive = pathname.startsWith(item.href)
@@ -174,11 +174,13 @@ export function AppSidebar() {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className={cn(
               "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md transition-colors",
-              "text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-200"
+              "text-neutral-600 dark:text-neutral-400",
+              "hover:bg-neutral-100 dark:hover:bg-neutral-900",
+              "hover:text-black dark:hover:text-[#00d4ff]"
             )}
           >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5 flex-shrink-0" />
+              <Sun className="h-5 w-5 flex-shrink-0 text-[#00d4ff]" />
             ) : (
               <Moon className="h-5 w-5 flex-shrink-0" />
             )}

@@ -6,7 +6,6 @@ import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { ThemeCustomizer, ThemeCustomizerTrigger } from "@/components/theme-customizer"
 import { RoleProvider } from "@/contexts/role-context"
-import { cn } from "@/lib/utils"
 
 export default function DashboardLayout({
   children,
@@ -17,7 +16,7 @@ export default function DashboardLayout({
 
   return (
     <RoleProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-neutral-900">
+      <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-white dark:bg-black">
         {/* Aceternity Sidebar */}
         <AppSidebar />
 
@@ -34,8 +33,10 @@ export default function DashboardLayout({
           </div>
         </main>
 
-        {/* Theme Customizer */}
-        <ThemeCustomizerTrigger onClick={() => setThemeCustomizerOpen(true)} />
+        {/* Theme Customizer - Hidden on Mobile */}
+        <div className="hidden md:block">
+          <ThemeCustomizerTrigger onClick={() => setThemeCustomizerOpen(true)} />
+        </div>
         <ThemeCustomizer
           open={themeCustomizerOpen}
           onOpenChange={setThemeCustomizerOpen}

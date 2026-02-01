@@ -87,7 +87,7 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] flex-shrink-0",
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-black w-[300px] flex-shrink-0",
         className
       )}
       animate={{
@@ -112,13 +112,19 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
+          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 w-full"
         )}
         {...props}
       >
-        <div className="flex justify-end z-20 w-full">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-primary-foreground font-bold text-sm">F</span>
+          </div>
+          <span className="font-bold text-lg">FLOW</span>
+        </div>
+        <div className="flex z-20">
           <Menu
-            className="text-neutral-800 dark:text-neutral-200 cursor-pointer"
+            className="text-neutral-800 dark:text-neutral-200 cursor-pointer h-6 w-6"
             onClick={() => setOpen(!open)}
           />
         </div>
@@ -133,15 +139,15 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+                "fixed h-full w-full inset-0 bg-white dark:bg-black p-6 z-[100] flex flex-col justify-between overflow-y-auto",
                 className
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                className="absolute right-6 top-6 z-50 text-neutral-800 dark:text-neutral-200 cursor-pointer p-2"
                 onClick={() => setOpen(!open)}
               >
-                <X />
+                <X className="h-6 w-6" />
               </div>
               {children}
             </motion.div>
