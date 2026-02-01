@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Building2,
   UserCog,
+  Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/logo"
@@ -105,6 +106,11 @@ const data = {
           title: "Training",
           url: "/training",
           icon: GraduationCap,
+        },
+        {
+          title: "RERA Assistant",
+          url: "/ai-assistant",
+          icon: Sparkles,
         },
         {
           title: "Admin",
