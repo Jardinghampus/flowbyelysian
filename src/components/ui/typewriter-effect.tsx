@@ -119,6 +119,7 @@ export const SimpleTypewriter = ({
   const [displayedText, setDisplayedText] = useState("")
   const [showCursor, setShowCursor] = useState(true)
   const [started, setStarted] = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
     const delayTimeout = setTimeout(() => {
@@ -136,32 +137,35 @@ export const SimpleTypewriter = ({
       }, speed)
       return () => clearTimeout(timeout)
     } else {
-      // Hide cursor after typing is complete
+      // Hide cursor completely after typing is complete
       const cursorTimeout = setTimeout(() => {
+        setIsComplete(true)
         setShowCursor(false)
-      }, 1500)
+      }, 800)
       return () => clearTimeout(cursorTimeout)
     }
   }, [displayedText, text, speed, started])
 
-  // Cursor blink effect
+  // Cursor blink effect only while typing
   useEffect(() => {
-    if (!showCursor) return
+    if (isComplete) return
     const interval = setInterval(() => {
       setShowCursor((prev) => !prev)
     }, 530)
     return () => clearInterval(interval)
-  }, [])
+  }, [isComplete])
 
   return (
     <span className={className}>
       {displayedText}
-      <span
-        className={cn(
-          "inline-block w-[3px] h-[1em] ml-1 bg-current transition-opacity",
-          showCursor || displayedText.length < text.length ? "opacity-100" : "opacity-0"
-        )}
-      />
+      {!isComplete && (
+        <span
+          className={cn(
+            "inline-block w-[3px] h-[1em] ml-1 bg-current transition-opacity",
+            showCursor ? "opacity-100" : "opacity-0"
+          )}
+        />
+      )}
     </span>
   )
 }

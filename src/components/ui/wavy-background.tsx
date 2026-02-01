@@ -10,6 +10,7 @@ export const WavyBackground = ({
   colors,
   waveWidth,
   backgroundFill,
+  blur = 0,
   speed = "fast",
   waveOpacity = 0.5,
   ...props
@@ -20,6 +21,7 @@ export const WavyBackground = ({
   colors?: string[]
   waveWidth?: number
   backgroundFill?: string
+  blur?: number
   speed?: "slow" | "fast"
   waveOpacity?: number
   [key: string]: unknown
@@ -39,11 +41,11 @@ export const WavyBackground = ({
   const getSpeed = useCallback(() => {
     switch (speed) {
       case "slow":
-        return 0.015
+        return 0.008
       case "fast":
-        return 0.03
+        return 0.015
       default:
-        return 0.02
+        return 0.01
     }
   }, [speed])
 
@@ -132,6 +134,7 @@ export const WavyBackground = ({
       <canvas
         className="absolute inset-0 z-0 w-full h-full"
         ref={canvasRef}
+        style={{ filter: blur > 0 ? `blur(${blur}px)` : undefined }}
       />
       <div className={cn("relative z-10", className)} {...props}>
         {children}

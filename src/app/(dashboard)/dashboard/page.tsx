@@ -19,8 +19,9 @@ export default function Page() {
         containerClassName="min-h-[280px] rounded-xl mx-4 lg:mx-6"
         className="max-w-4xl mx-auto pb-8 pt-8 flex flex-col items-center justify-center"
         colors={["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"]}
-        waveOpacity={0.5}
-        speed="fast"
+        waveOpacity={0.6}
+        blur={4}
+        speed="slow"
         backgroundFill="rgba(0, 0, 0, 0.95)"
       >
         <h1 className="text-2xl md:text-4xl lg:text-5xl text-white font-bold text-center">
