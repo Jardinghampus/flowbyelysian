@@ -1,6 +1,9 @@
+"use client"
+
 import { ChartAreaInteractive } from "./components/chart-area-interactive"
 import { DataTable } from "./components/data-table"
 import { SectionCards } from "./components/section-cards"
+import { WavyBackground } from "@/components/ui/wavy-background"
 
 import data from "./data/data.json"
 import pastPerformanceData from "./data/past-performance-data.json"
@@ -10,13 +13,23 @@ import focusDocumentsData from "./data/focus-documents-data.json"
 export default function Page() {
   return (
     <>
-      {/* Page Title and Description */}
-      <div className="px-4 lg:px-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to your admin dashboard</p>
-        </div>
-      </div>
+      {/* Hero Section with Wavy Background */}
+      <WavyBackground
+        containerClassName="min-h-[280px] rounded-xl mx-4 lg:mx-6"
+        className="max-w-4xl mx-auto pb-8 pt-8"
+        colors={["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"]}
+        waveOpacity={0.3}
+        blur={15}
+        speed="slow"
+        backgroundFill="rgba(0, 0, 0, 0.9)"
+      >
+        <h1 className="text-2xl md:text-4xl lg:text-5xl text-white font-bold text-center">
+          Welcome to Flow
+        </h1>
+        <p className="text-base md:text-lg mt-4 text-white/80 font-normal text-center">
+          Your real estate dashboard powered by Elysian
+        </p>
+      </WavyBackground>
 
       <div className="@container/main px-4 lg:px-6 space-y-6">
         <SectionCards />

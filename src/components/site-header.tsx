@@ -42,7 +42,7 @@ export function SiteHeader() {
                 target="_blank"
                 className="dark:text-foreground"
               >
-                Landing Page
+                Flow by Elysian
               </a>
             </Button>
             <ModeToggle />

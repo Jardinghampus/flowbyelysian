@@ -1,9 +1,28 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Sparkles } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Plus, Sparkles, Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
 import { InventoryTable } from "./components/inventory-table"
 import { CreateListingDialog } from "./components/create-listing-dialog"
 import { AIMatchingDialog } from "./components/ai-matching-dialog"
@@ -166,15 +185,90 @@ const initialListings: Listing[] = [
   },
 ]
 
+// Get unique areas from listings
+const AREAS = [
+  "Emirates Hills",
+  "Downtown Dubai",
+  "Al Murooj",
+  "Tilal Al Ghaf",
+  "Dubai Marina",
+  "Arabian Ranches",
+  "Palm Jumeirah",
+  "Business Bay",
+  "JBR",
+  "DIFC",
+]
+
+interface Filters {
+  search: string
+  area: string
+  propertyType: string
+  transactionType: string
+  status: string
+  inquiryType: string
+  minPrice: string
+  maxPrice: string
+  minSize: string
+  maxSize: string
+  bedrooms: string
+  agent: string
+}
+
+const defaultFilters: Filters = {
+  search: "",
+  area: "all",
+  propertyType: "all",
+  transactionType: "all",
+  status: "all",
+  inquiryType: "all",
+  minPrice: "",
+  maxPrice: "",
+  minSize: "",
+  maxSize: "",
+  bedrooms: "all",
+  agent: "all",
+}
+
 export default function InventoryPage() {
   const [listings, setListings] = useState<Listing[]>(initialListings)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [filters, setFilters] = useState<Filters>(defaultFilters)
   const [activeTab, setActiveTab] = useState<"all" | "mine" | ListingStatus | InquiryType | TransactionType>("all")
   const { isAdmin } = useRole()
 
   const currentUserId = CURRENT_USER_ID
   const currentUserName = CURRENT_USER_NAME
+
+  // Get unique agents from listings
+  const agents = useMemo(() => {
+    const uniqueAgents = new Map<string, string>()
+    listings.forEach((l) => uniqueAgents.set(l.ownerId, l.ownerName))
+    return Array.from(uniqueAgents, ([id, name]) => ({ id, name }))
+  }, [listings])
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (filters.search) count++
+    if (filters.area !== "all") count++
+    if (filters.propertyType !== "all") count++
+    if (filters.transactionType !== "all") count++
+    if (filters.status !== "all") count++
+    if (filters.inquiryType !== "all") count++
+    if (filters.minPrice) count++
+    if (filters.maxPrice) count++
+    if (filters.minSize) count++
+    if (filters.maxSize) count++
+    if (filters.bedrooms !== "all") count++
+    if (filters.agent !== "all") count++
+    return count
+  }, [filters])
+
+  const resetFilters = () => {
+    setFilters(defaultFilters)
+  }
 
   const handleCreateListing = (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
     const newListing: Listing = {
@@ -210,24 +304,84 @@ export default function InventoryPage() {
   }
 
   const getFilteredListings = () => {
+    let filtered = [...listings]
+
+    // Apply tab filter first
     switch (activeTab) {
-      case "all":
-        return listings
       case "mine":
-        return listings.filter((l) => l.ownerId === currentUserId)
+        filtered = filtered.filter((l) => l.ownerId === currentUserId)
+        break
       case "stock":
       case "request":
-        return listings.filter((l) => l.inquiryType === activeTab)
+        filtered = filtered.filter((l) => l.inquiryType === activeTab)
+        break
       case "sale":
       case "rent":
-        return listings.filter((l) => l.transactionType === activeTab)
+        filtered = filtered.filter((l) => l.transactionType === activeTab)
+        break
       case "live":
       case "pocket":
       case "unofficial":
-        return listings.filter((l) => l.status === activeTab)
-      default:
-        return listings
+        filtered = filtered.filter((l) => l.status === activeTab)
+        break
     }
+
+    // Apply advanced filters
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      filtered = filtered.filter(
+        (l) =>
+          l.title.toLowerCase().includes(searchLower) ||
+          l.area.toLowerCase().includes(searchLower) ||
+          l.notes.toLowerCase().includes(searchLower)
+      )
+    }
+
+    if (filters.area !== "all") {
+      filtered = filtered.filter((l) => l.area === filters.area)
+    }
+
+    if (filters.propertyType !== "all") {
+      filtered = filtered.filter((l) => l.type === filters.propertyType)
+    }
+
+    if (filters.transactionType !== "all") {
+      filtered = filtered.filter((l) => l.transactionType === filters.transactionType)
+    }
+
+    if (filters.status !== "all") {
+      filtered = filtered.filter((l) => l.status === filters.status)
+    }
+
+    if (filters.inquiryType !== "all") {
+      filtered = filtered.filter((l) => l.inquiryType === filters.inquiryType)
+    }
+
+    if (filters.minPrice) {
+      filtered = filtered.filter((l) => l.price >= Number(filters.minPrice))
+    }
+
+    if (filters.maxPrice) {
+      filtered = filtered.filter((l) => l.price <= Number(filters.maxPrice))
+    }
+
+    if (filters.minSize) {
+      filtered = filtered.filter((l) => l.size >= Number(filters.minSize))
+    }
+
+    if (filters.maxSize) {
+      filtered = filtered.filter((l) => l.size <= Number(filters.maxSize))
+    }
+
+    if (filters.bedrooms !== "all") {
+      filtered = filtered.filter((l) => l.bedrooms === Number(filters.bedrooms))
+    }
+
+    if (filters.agent !== "all") {
+      filtered = filtered.filter((l) => l.ownerId === filters.agent)
+    }
+
+    return filtered
   }
 
   const myListingsCount = listings.filter((l) => l.ownerId === currentUserId).length
@@ -247,6 +401,226 @@ export default function InventoryPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {activeFilterCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Filter Listings</SheetTitle>
+                  <SheetDescription>
+                    Apply filters to narrow down your search
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid gap-6 py-6">
+                  {/* Search */}
+                  <div className="space-y-2">
+                    <Label>Search</Label>
+                    <Input
+                      placeholder="Search by title, area, notes..."
+                      value={filters.search}
+                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Area & Property Type */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Area</Label>
+                      <Select
+                        value={filters.area}
+                        onValueChange={(v) => setFilters({ ...filters, area: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Areas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Areas</SelectItem>
+                          {AREAS.map((area) => (
+                            <SelectItem key={area} value={area}>
+                              {area}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Property Type</Label>
+                      <Select
+                        value={filters.propertyType}
+                        onValueChange={(v) => setFilters({ ...filters, propertyType: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="villa">Villa</SelectItem>
+                          <SelectItem value="apartment">Apartment</SelectItem>
+                          <SelectItem value="townhouse">Townhouse</SelectItem>
+                          <SelectItem value="penthouse">Penthouse</SelectItem>
+                          <SelectItem value="plot">Plot</SelectItem>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="retail">Retail</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Transaction & Status */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Transaction Type</Label>
+                      <Select
+                        value={filters.transactionType}
+                        onValueChange={(v) => setFilters({ ...filters, transactionType: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="sale">For Sale</SelectItem>
+                          <SelectItem value="rent">For Rent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Listing Status</Label>
+                      <Select
+                        value={filters.status}
+                        onValueChange={(v) => setFilters({ ...filters, status: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="live">Live</SelectItem>
+                          <SelectItem value="pocket">Pocket</SelectItem>
+                          <SelectItem value="unofficial">Unofficial</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Inquiry & Bedrooms */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Inquiry Type</Label>
+                      <Select
+                        value={filters.inquiryType}
+                        onValueChange={(v) => setFilters({ ...filters, inquiryType: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All</SelectItem>
+                          <SelectItem value="stock">Stock</SelectItem>
+                          <SelectItem value="request">Request</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Bedrooms</Label>
+                      <Select
+                        value={filters.bedrooms}
+                        onValueChange={(v) => setFilters({ ...filters, bedrooms: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Any</SelectItem>
+                          <SelectItem value="1">1 Bedroom</SelectItem>
+                          <SelectItem value="2">2 Bedrooms</SelectItem>
+                          <SelectItem value="3">3 Bedrooms</SelectItem>
+                          <SelectItem value="4">4 Bedrooms</SelectItem>
+                          <SelectItem value="5">5+ Bedrooms</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="space-y-2">
+                    <Label>Price Range (AED)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="number"
+                        placeholder="Min Price"
+                        value={filters.minPrice}
+                        onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Max Price"
+                        value={filters.maxPrice}
+                        onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Size Range */}
+                  <div className="space-y-2">
+                    <Label>Size Range (sqft)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="number"
+                        placeholder="Min Size"
+                        value={filters.minSize}
+                        onChange={(e) => setFilters({ ...filters, minSize: e.target.value })}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Max Size"
+                        value={filters.maxSize}
+                        onChange={(e) => setFilters({ ...filters, maxSize: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Agent */}
+                  <div className="space-y-2">
+                    <Label>Agent</Label>
+                    <Select
+                      value={filters.agent}
+                      onValueChange={(v) => setFilters({ ...filters, agent: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Agents" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Agents</SelectItem>
+                        {agents.map((agent) => (
+                          <SelectItem key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <SheetFooter>
+                  <Button variant="outline" onClick={resetFilters}>
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                  <Button onClick={() => setIsFilterOpen(false)}>
+                    Apply Filters
+                  </Button>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
             <Button variant="outline" onClick={() => setIsMatchingOpen(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
               AI Matching
