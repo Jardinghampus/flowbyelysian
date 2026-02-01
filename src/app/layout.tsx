@@ -4,7 +4,6 @@ import "./globals.css";
 import { ClerkProviderWrapper } from "@/components/clerk-provider-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarConfigProvider } from "@/contexts/sidebar-context";
-import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Flow by Elysian",
@@ -17,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
-      <body className={inter.className}>
+    <html lang="en" className="antialiased">
+      <body className="font-sans">
         <ClerkProviderWrapper>
           <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
             <SidebarConfigProvider>

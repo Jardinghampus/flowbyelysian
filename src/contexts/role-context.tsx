@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react"
-import { useUser } from "@clerk/nextjs"
 
 export type UserRole = "admin" | "user"
 
@@ -20,18 +19,52 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const { user, isLoaded } = useUser()
   const [role, setRole] = useState<UserRole>("user")
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (isLoaded && user) {
-      const email = user.primaryEmailAddress?.emailAddress || ""
-      const isAdminUser = ADMIN_EMAILS.includes(email.toLowerCase())
-      setRole(isAdminUser ? "admin" : "user")
-    }
-  }, [isLoaded, user])
+    setMounted(true)
+    // Dynamically import Clerk to avoid SSR issues
+    import("@clerk/nextjs").then(({ useUser }) => {
+      // We can't use hooks here, so we'll use Clerk's client-side API instead
+    }).catch(() => {})
+  }, [])
 
-  const userEmail = user?.primaryEmailAddress?.emailAddress || null
+  // Use a separate effect to fetch user data on the client
+  useEffect(() => {
+    if (!mounted) return
+
+    // Use Clerk's window object if available
+    const checkUser = async () => {
+      try {
+        // Access Clerk from window if available
+        const clerk = (window as unknown as { Clerk?: { user?: { primaryEmailAddress?: { emailAddress?: string } } } }).Clerk
+        if (clerk?.user) {
+          const email = clerk.user.primaryEmailAddress?.emailAddress || ""
+          setUserEmail(email)
+          const isAdminUser = ADMIN_EMAILS.includes(email.toLowerCase())
+          setRole(isAdminUser ? "admin" : "user")
+        }
+      } catch {
+        // Silently fail during SSR
+      }
+    }
+
+    // Poll for Clerk to be ready
+    const interval = setInterval(() => {
+      const clerk = (window as unknown as { Clerk?: { user?: { primaryEmailAddress?: { emailAddress?: string } } } }).Clerk
+      if (clerk?.user) {
+        checkUser()
+        clearInterval(interval)
+      }
+    }, 100)
+
+    // Also try immediately
+    checkUser()
+
+    return () => clearInterval(interval)
+  }, [mounted])
 
   return (
     <RoleContext.Provider value={{ role, setRole, isAdmin: role === "admin", userEmail }}>

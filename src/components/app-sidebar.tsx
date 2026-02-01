@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import dynamic from "next/dynamic"
 import {
   LayoutDashboard,
   Building2,
@@ -16,21 +17,49 @@ import {
   Moon,
   Sun,
   TrendingUp,
-  ArrowLeft,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { useClerk, useUser } from "@clerk/nextjs"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
-import Image from "next/image"
 import {
   Sidebar,
   SidebarBody,
   SidebarLink,
 } from "@/components/ui/aceternity-sidebar"
+
+// Dynamic imports for Clerk-dependent components with ssr: false
+const SidebarUserInfo = dynamic(
+  () => import("@/components/sidebar-user-info").then(mod => mod.SidebarUserInfo),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mt-6 mb-4 pb-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-center">
+        <div className="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
+      </div>
+    )
+  }
+)
+
+const SidebarLogoutButton = dynamic(
+  () => import("@/components/sidebar-user-info").then(mod => mod.SidebarLogoutButton),
+  {
+    ssr: false,
+    loading: () => (
+      <button
+        className={cn(
+          "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md transition-colors",
+          "text-neutral-500"
+        )}
+        disabled
+      >
+        <LogOut className="h-5 w-5 flex-shrink-0" />
+      </button>
+    )
+  }
+)
 
 const navItems = [
   {
@@ -96,13 +125,7 @@ const bottomLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const { signOut } = useClerk()
-  const { user } = useUser()
   const [open, setOpen] = useState(false)
-
-  const handleSignOut = () => {
-    signOut({ redirectUrl: "/sign-in" })
-  }
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
@@ -112,54 +135,7 @@ export function AppSidebar() {
           {open ? <LogoFull /> : <LogoIcon />}
 
           {/* User Profile */}
-          <div className={cn(
-            "mt-6 mb-4 pb-4 border-b border-neutral-200 dark:border-neutral-700",
-            !open && "flex justify-center"
-          )}>
-            {open ? (
-              <div className="flex items-center gap-3 px-2">
-                {user?.imageUrl ? (
-                  <Image
-                    src={user.imageUrl}
-                    className="h-10 w-10 flex-shrink-0 rounded-full"
-                    width={40}
-                    height={40}
-                    alt="Avatar"
-                  />
-                ) : (
-                  <div className="h-10 w-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-medium text-sm">
-                      {user?.firstName?.[0] || "U"}
-                    </span>
-                  </div>
-                )}
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 truncate">
-                    {user?.fullName || "Flow User"}
-                  </span>
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
-                    Real Estate Agent
-                  </span>
-                </div>
-              </div>
-            ) : (
-              user?.imageUrl ? (
-                <Image
-                  src={user.imageUrl}
-                  className="h-8 w-8 flex-shrink-0 rounded-full"
-                  width={32}
-                  height={32}
-                  alt="Avatar"
-                />
-              ) : (
-                <div className="h-8 w-8 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-medium text-xs">
-                    {user?.firstName?.[0] || "U"}
-                  </span>
-                </div>
-              )
-            )}
-          </div>
+          <SidebarUserInfo open={open} />
 
           {/* Main Navigation */}
           <div className="flex flex-col gap-1">
@@ -191,24 +167,7 @@ export function AppSidebar() {
           })}
 
           {/* Logout */}
-          <button
-            onClick={handleSignOut}
-            className={cn(
-              "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md transition-colors",
-              "text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-200"
-            )}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            <motion.span
-              animate={{
-                display: open ? "inline-block" : "none",
-                opacity: open ? 1 : 0,
-              }}
-              className="text-sm whitespace-pre"
-            >
-              Logout
-            </motion.span>
-          </button>
+          <SidebarLogoutButton open={open} />
 
           {/* Dark Mode Toggle */}
           <button
