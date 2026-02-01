@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { CommandSearch, SearchTrigger } from "@/components/command-search"
-import { ModeToggle } from "@/components/mode-toggle"
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false)
@@ -38,7 +37,6 @@ export function SiteHeader() {
                 Flow by Elysian
               </a>
             </Button>
-            <ModeToggle />
           </div>
         </div>
       </header>
