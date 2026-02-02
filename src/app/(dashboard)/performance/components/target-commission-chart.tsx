@@ -16,11 +16,11 @@ import agentData from "../../dashboard/data/agent-performance.json"
 const chartConfig = {
   sales: {
     label: "Sales",
-    color: "hsl(var(--chart-1))",
+    color: "#8b5cf6", // Purple
   },
   leasing: {
     label: "Leasing",
-    color: "hsl(var(--chart-2))",
+    color: "#3b82f6", // Blue
   },
 } satisfies ChartConfig
 
@@ -38,11 +38,11 @@ export function TargetCommissionChart() {
   const leasingPercent = totals.leasingActualPercent
 
   const salesChartData = [
-    { name: "sales", value: Math.min(salesPercent, 100), fill: "hsl(var(--chart-1))" },
+    { name: "sales", value: Math.min(salesPercent, 100), fill: "url(#salesGradient)" },
   ]
 
   const leasingChartData = [
-    { name: "leasing", value: Math.min(leasingPercent, 100), fill: "hsl(var(--chart-2))" },
+    { name: "leasing", value: Math.min(leasingPercent, 100), fill: "url(#leasingGradient)" },
   ]
 
   return (
@@ -68,6 +68,13 @@ export function TargetCommissionChart() {
               innerRadius={80}
               outerRadius={110}
             >
+              <defs>
+                <linearGradient id="salesGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#a855f7" />
+                  <stop offset="50%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#6366f1" />
+                </linearGradient>
+              </defs>
               <PolarGrid
                 gridType="circle"
                 radialLines={false}
@@ -151,6 +158,13 @@ export function TargetCommissionChart() {
               innerRadius={80}
               outerRadius={110}
             >
+              <defs>
+                <linearGradient id="leasingGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#60a5fa" />
+                  <stop offset="50%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
               <PolarGrid
                 gridType="circle"
                 radialLines={false}

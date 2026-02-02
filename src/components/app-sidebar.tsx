@@ -17,6 +17,7 @@ import {
   Moon,
   Sun,
   TrendingUp,
+  Mail,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -86,6 +87,11 @@ const navItems = [
     label: "Chat",
     href: "/chat",
     icon: <MessageCircle className="h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Gmail",
+    href: "/mail",
+    icon: <Mail className="h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Calendar",
