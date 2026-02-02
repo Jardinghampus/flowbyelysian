@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { Plus } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Plus, Save } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { TrainingModuleCard } from "./components/training-module-card"
 import { TrainingModuleView } from "./components/training-module-view"
@@ -101,24 +102,67 @@ The Flow SEO Generator uses AI to optimize your property descriptions:
   },
 ]
 
+const STORAGE_KEY = "flow-training-modules"
+
 export default function TrainingPage() {
-  const [modules, setModules] = useState<TrainingModule[]>(initialModules)
+  const [modules, setModules] = useState<TrainingModule[]>([])
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
   const { isAdmin } = useRole()
+
+  // Load modules from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        try {
+          setModules(JSON.parse(saved))
+        } catch {
+          setModules(initialModules)
+        }
+      } else {
+        setModules(initialModules)
+      }
+      setIsLoaded(true)
+    }
+  }, [])
+
+  // Save modules to localStorage whenever they change
+  useEffect(() => {
+    if (isLoaded && typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(modules))
+    }
+  }, [modules, isLoaded])
 
   const handleCreateModule = (module: Omit<TrainingModule, "id" | "createdAt">) => {
     const newModule: TrainingModule = {
       ...module,
+      title: module.title || "Untitled Module",
+      description: module.description || "",
+      content: module.content || "",
       id: Date.now().toString(),
       createdAt: new Date().toISOString().split("T")[0],
     }
     setModules([newModule, ...modules])
     setIsCreateOpen(false)
+    toast.success("Module Created", {
+      description: "Training module has been saved.",
+    })
   }
 
   const handleDeleteModule = (id: string) => {
     setModules(modules.filter((m) => m.id !== id))
+    toast.success("Module Deleted", {
+      description: "Training module has been removed.",
+    })
+  }
+
+  const handleUpdateModule = (updatedModule: TrainingModule) => {
+    setModules(modules.map((m) => (m.id === updatedModule.id ? updatedModule : m)))
+    toast.success("Module Updated", {
+      description: "Training module has been saved.",
+    })
   }
 
   if (selectedModule) {

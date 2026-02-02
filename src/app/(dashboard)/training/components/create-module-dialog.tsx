@@ -127,13 +127,12 @@ export function CreateModuleDialog({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Getting Started Guide"
-                required
               />
             </div>
             <div className="space-y-2">
@@ -148,19 +147,18 @@ export function CreateModuleDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Short Description *</Label>
+            <Label htmlFor="description">Short Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief overview shown on the card..."
               rows={2}
-              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Training Content *</Label>
+            <Label htmlFor="content">Training Content</Label>
             <Textarea
               id="content"
               value={content}
@@ -172,7 +170,6 @@ export function CreateModuleDialog({
 1. Numbered lists
 **Bold text**"
               rows={10}
-              required
               className="font-mono text-sm"
             />
             <p className="text-xs text-muted-foreground">
@@ -270,7 +267,7 @@ export function CreateModuleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title || !description || !content}>
+            <Button type="submit">
               Create Module
             </Button>
           </DialogFooter>
