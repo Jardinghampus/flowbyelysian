@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, FormEvent } from "react"
-import { Send, Bot, User, Sparkles, Trash2, Building2 } from "lucide-react"
+import { Send, Bot, User, Sparkles, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -259,34 +259,6 @@ export default function AIAssistantPage() {
                           >
                             {question}
                           </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Listings Preview */}
-                    <div className="space-y-2 pt-4 border-t">
-                      <p className="text-sm font-medium flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        Available Listings ({sampleListings.length})
-                      </p>
-                      <div className="grid gap-2">
-                        {sampleListings.slice(0, 3).map((listing, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm"
-                          >
-                            <div>
-                              <p className="font-medium">{listing.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {listing.area} - {listing.bedrooms} BR - {listing.size.toLocaleString()} sqft
-                              </p>
-                            </div>
-                            <Badge variant={listing.transactionType === "sale" ? "default" : "secondary"}>
-                              {listing.transactionType === "sale"
-                                ? `AED ${(listing.price / 1000000).toFixed(1)}M`
-                                : `AED ${(listing.price / 1000).toFixed(0)}K/yr`}
-                            </Badge>
-                          </div>
                         ))}
                       </div>
                     </div>
