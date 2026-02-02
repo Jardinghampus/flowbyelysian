@@ -103,7 +103,7 @@ const navItems = [
     icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "RERA Assistant",
+    label: "AI Bot",
     href: "/ai-assistant",
     icon: <Sparkles className="h-5 w-5 flex-shrink-0" />,
   },
