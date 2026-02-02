@@ -5,9 +5,6 @@ import dynamic from "next/dynamic"
 import {
   LayoutDashboard,
   Building2,
-  CheckSquare,
-  MessageCircle,
-  Calendar,
   Users,
   GraduationCap,
   Sparkles,
@@ -79,27 +76,12 @@ const navItems = [
     icon: <TrendingUp className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Tasks",
-    href: "/tasks",
-    icon: <CheckSquare className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Chat",
-    href: "/chat",
-    icon: <MessageCircle className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
     label: "Gmail",
     href: "/mail",
     icon: <Mail className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Calendar",
-    href: "/calendar",
-    icon: <Calendar className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Users",
+    label: "Contacts",
     href: "/users",
     icon: <Users className="h-5 w-5 flex-shrink-0" />,
   },
