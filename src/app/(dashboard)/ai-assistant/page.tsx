@@ -15,69 +15,7 @@ interface ChatMessage {
   content: string
 }
 
-// Sample listings data - in production this would come from your state/API
-const sampleListings = [
-  {
-    title: "Luxury Villa with Pool",
-    area: "Emirates Hills",
-    type: "villa",
-    transactionType: "sale",
-    price: 15000000,
-    size: 8500,
-    bedrooms: 5,
-    status: "live",
-    ownerName: "Ahmed Hassan",
-    notes: "Corner plot, upgraded kitchen, private pool",
-  },
-  {
-    title: "Modern Apartment Downtown",
-    area: "Downtown Dubai",
-    type: "apartment",
-    transactionType: "rent",
-    price: 180000,
-    size: 1800,
-    bedrooms: 2,
-    status: "live",
-    ownerName: "Sarah Miller",
-    notes: "Burj Khalifa view, high floor, yearly rent",
-  },
-  {
-    title: "Family Villa in Murooj",
-    area: "Al Murooj",
-    type: "villa",
-    transactionType: "sale",
-    price: 8500000,
-    size: 5200,
-    bedrooms: 4,
-    status: "pocket",
-    ownerName: "Ahmed Hassan",
-    notes: "Quiet community, near school, motivated seller",
-  },
-  {
-    title: "Penthouse Marina",
-    area: "Dubai Marina",
-    type: "penthouse",
-    transactionType: "rent",
-    price: 450000,
-    size: 4200,
-    bedrooms: 3,
-    status: "live",
-    ownerName: "Omar Khan",
-    notes: "Full sea view, private terrace, luxury finish",
-  },
-  {
-    title: "Townhouse Arabian Ranches",
-    area: "Arabian Ranches",
-    type: "townhouse",
-    transactionType: "sale",
-    price: 5200000,
-    size: 3800,
-    bedrooms: 4,
-    status: "live",
-    ownerName: "Sarah Miller",
-    notes: "Community pool access, landscaped garden",
-  },
-]
+
 
 const suggestedQuestions = [
   "What are the RERA regulations for renting in Dubai?",
@@ -126,7 +64,7 @@ export default function AIAssistantPage() {
             role: m.role,
             content: m.content,
           })),
-          listings: sampleListings,
+
         }),
       })
 
@@ -189,10 +127,10 @@ export default function AIAssistantPage() {
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-primary" />
-              RERA Assistant
+              Assistant
             </h1>
             <p className="text-muted-foreground">
-              AI-powered assistant for Dubai real estate regulations and listings
+              AI-powered assistant for real estate
             </p>
           </div>
           {messages.length > 0 && (
@@ -229,7 +167,7 @@ export default function AIAssistantPage() {
                       <div className="flex-1 space-y-2">
                         <div className="rounded-lg bg-muted p-3">
                           <p className="text-sm">
-                            Hello! I&apos;m your RERA Assistant. I can help you with:
+                            Hello! I&apos;m your Assistant. I can help you with:
                           </p>
                           <ul className="mt-2 text-sm list-disc list-inside space-y-1 text-muted-foreground">
                             <li>Dubai real estate regulations and laws</li>
@@ -263,33 +201,7 @@ export default function AIAssistantPage() {
                       </div>
                     </div>
 
-                    {/* Listings Preview */}
-                    <div className="space-y-2 pt-4 border-t">
-                      <p className="text-sm font-medium flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
-                        Available Listings ({sampleListings.length})
-                      </p>
-                      <div className="grid gap-2">
-                        {sampleListings.slice(0, 3).map((listing, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm"
-                          >
-                            <div>
-                              <p className="font-medium">{listing.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {listing.area} - {listing.bedrooms} BR - {listing.size.toLocaleString()} sqft
-                              </p>
-                            </div>
-                            <Badge variant={listing.transactionType === "sale" ? "default" : "secondary"}>
-                              {listing.transactionType === "sale"
-                                ? `AED ${(listing.price / 1000000).toFixed(1)}M`
-                                : `AED ${(listing.price / 1000).toFixed(0)}K/yr`}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+
                   </div>
                 )}
 
