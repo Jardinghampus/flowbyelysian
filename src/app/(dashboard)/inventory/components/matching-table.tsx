@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { BackgroundGradient } from "@/components/ui/background-gradient"
 import type { Listing } from "../page"
 
 interface MatchingTableProps {
@@ -237,8 +238,9 @@ export function MatchingTable({ listings, currentUserId }: MatchingTableProps) {
   }
 
   return (
-    <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+    <BackgroundGradient className="rounded-[22px] mb-6" containerClassName="mb-6">
+      <Card className="border-0 bg-background dark:bg-zinc-900 rounded-[20px]">
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -341,6 +343,7 @@ export function MatchingTable({ listings, currentUserId }: MatchingTableProps) {
         </CollapsibleContent>
       </Collapsible>
     </Card>
+    </BackgroundGradient>
   )
 }
 
