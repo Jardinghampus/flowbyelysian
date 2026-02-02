@@ -50,7 +50,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 type Agent = {
   id: number
@@ -177,7 +177,6 @@ export function AgentPerformanceEditor() {
     role: "Sales",
     target: 40000,
   })
-  const { toast } = useToast()
 
   const startEditing = (agent: Agent) => {
     setEditingId(agent.id)
@@ -196,18 +195,15 @@ export function AgentPerformanceEditor() {
     setEditingId(null)
     setEditedAgent(null)
 
-    toast({
-      title: "Agent Updated",
+    toast.success("Agent Updated", {
       description: `${editedAgent.name}'s data has been saved.`,
     })
   }
 
   const handleAddAgent = () => {
     if (!newAgent.name) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Please enter an agent name.",
-        variant: "destructive",
       })
       return
     }
@@ -245,8 +241,7 @@ export function AgentPerformanceEditor() {
     })
     setIsAddDialogOpen(false)
 
-    toast({
-      title: "Agent Added",
+    toast.success("Agent Added", {
       description: `${agent.name} has been added to the system.`,
     })
   }
@@ -255,8 +250,7 @@ export function AgentPerformanceEditor() {
     const agent = agents.find((a) => a.id === id)
     setAgents(agents.filter((a) => a.id !== id))
 
-    toast({
-      title: "Agent Deleted",
+    toast.success("Agent Deleted", {
       description: `${agent?.name} has been removed from the system.`,
     })
   }

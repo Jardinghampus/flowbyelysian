@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/hooks/use-theme"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
