@@ -75,6 +75,24 @@
   --sidebar-accent-foreground: #000000;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #000000;
+
+  /* Mobile Fluid Sizing System */
+  /* Target range: 320px - 430px for strict mobile scaling, can extrapolate */
+  --fluid-min-width: 320;
+  --fluid-max-width: 430;
+
+  --fluid-screen: 100vw;
+  --fluid-bp: calc((var(--fluid-screen) - var(--fluid-min-width) * 1px) / (var(--fluid-max-width) - var(--fluid-min-width)));
+
+  /* Safe Area Insets (Defaults, updated by hook/env) */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+
+  /* Fluid Spacing Primitive */
+  /* Scaling factor that goes from 0 at 320px to 1 at 430px */
+  --scale-factor: clamp(0, var(--fluid-bp), 1);
 }
 
 .dark {
@@ -115,6 +133,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
@@ -123,7 +142,8 @@
 }
 
 /* Ensure consistent font rendering across different DPI levels */
-@media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+@media (-webkit-min-device-pixel-ratio: 1.5),
+(min-resolution: 144dpi) {
   body {
     -webkit-font-smoothing: subpixel-antialiased;
   }
@@ -137,13 +157,14 @@
 
 /* Fix for right-side inset variant support */
 @media (min-width: 768px) {
+
   /* Right sidebar inset variant - margin adjustments */
-  [data-side="right"][data-variant="inset"] ~ [data-slot="sidebar-inset"] {
+  [data-side="right"][data-variant="inset"]~[data-slot="sidebar-inset"] {
     margin-right: 0 !important;
   }
 
   /* Right sidebar inset variant - collapsed state margin */
-  [data-side="right"][data-variant="inset"][data-state="collapsed"] ~ [data-slot="sidebar-inset"] {
+  [data-side="right"][data-variant="inset"][data-state="collapsed"]~[data-slot="sidebar-inset"] {
     margin-right: 0.5rem !important;
   }
 }
@@ -158,8 +179,10 @@ html {
   0% {
     transform: translateX(0);
   }
+
   100% {
-    transform: translateX(-144rem); /* 12 items * 12rem = 144rem */
+    transform: translateX(-144rem);
+    /* 12 items * 12rem = 144rem */
   }
 }
 
@@ -169,4 +192,64 @@ html {
 
 .animate-logo-scroll:hover {
   animation-play-state: paused;
+}
+
+/* Fluid Utilities */
+@layer utilities {
+
+  /* Fluid Typography: Scales between min (at 320px) and max (at 430px) */
+  .text-fluid-sm {
+    font-size: calc(0.875rem + 0.125 * 1rem * var(--scale-factor));
+    /* 14px -> 16px */
+  }
+
+  .text-fluid-base {
+    font-size: calc(1rem + 0.125 * 1rem * var(--scale-factor));
+    /* 16px -> 18px */
+  }
+
+  .text-fluid-lg {
+    font-size: calc(1.125rem + 0.25 * 1rem * var(--scale-factor));
+    /* 18px -> 22px */
+  }
+
+  .text-fluid-xl {
+    font-size: calc(1.25rem + 0.5 * 1rem * var(--scale-factor));
+    /* 20px -> 28px */
+  }
+
+  /* Fluid Spacing */
+  .p-fluid {
+    padding: calc(1rem + 0.5 * 1rem * var(--scale-factor));
+    /* 16px -> 24px */
+  }
+
+  .gap-fluid {
+    gap: calc(0.5rem + 0.5 * 1rem * var(--scale-factor));
+    /* 8px -> 16px */
+  }
+
+  /* Safe Area Spacing helpers */
+  .pt-safe {
+    padding-top: max(1rem, var(--sat));
+  }
+
+  .pb-safe {
+    padding-bottom: max(1rem, var(--sab));
+  }
+
+  .pl-safe {
+    padding-left: max(1rem, var(--sal));
+  }
+
+  .pr-safe {
+    padding-right: max(1rem, var(--sar));
+  }
+
+  /* Full height fix */
+  .h-screen-safe {
+    height: calc(100vh - var(--sat) - var(--sab));
+    /* Fallback */
+    height: calc(var(--vh, 1vh) * 100 - var(--sat) - var(--sab));
+  }
 }
