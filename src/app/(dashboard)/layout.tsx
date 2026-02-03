@@ -16,16 +16,16 @@ export default function DashboardLayout({
 
   return (
     <RoleProvider>
-      <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-white dark:bg-black">
+      <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-white dark:bg-black w-full max-w-full">
         {/* Aceternity Sidebar */}
         <AppSidebar />
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
           <SiteHeader />
-          <div className="flex-1 overflow-y-auto">
-            <div className="@container/main flex flex-col gap-2">
-              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="@container/main flex flex-col gap-2 w-full max-w-full">
+              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 w-full max-w-full">
                 {children}
               </div>
             </div>

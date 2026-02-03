@@ -8,6 +8,12 @@ import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 export const metadata: Metadata = {
   title: "Flow by Elysian",
   description: "Modern dashboard and workflow management by Elysian",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({
