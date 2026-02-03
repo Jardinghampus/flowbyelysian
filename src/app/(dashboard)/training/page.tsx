@@ -284,10 +284,11 @@ export default function TrainingPage() {
         try {
           const parsed = JSON.parse(saved) as TrainingModule[]
           // Normalize data: ensure all required fields exist
-          const normalized = parsed.map((module) => ({
+          const normalized = parsed.map((module: any) => ({
             id: module.id || Date.now().toString(),
             title: module.title || "Untitled Module",
             description: module.description || "",
+            category: module.category || "way-of-work",
             content: module.content || "",
             videoUrl: module.videoUrl,
             videoType: module.videoType,
