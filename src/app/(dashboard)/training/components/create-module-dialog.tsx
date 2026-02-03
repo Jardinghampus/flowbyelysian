@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { TrainingModule } from "../page"
+import type { TrainingModule, TrainingCategory } from "../page"
 
 interface CreateModuleDialogProps {
   open: boolean
@@ -36,6 +36,7 @@ export function CreateModuleDialog({
 }: CreateModuleDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [category, setCategory] = useState<TrainingCategory>("way-of-work")
   const [content, setContent] = useState("")
   const [duration, setDuration] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
@@ -47,6 +48,7 @@ export function CreateModuleDialog({
   const resetForm = () => {
     setTitle("")
     setDescription("")
+    setCategory("way-of-work")
     setContent("")
     setDuration("")
     setVideoUrl("")
@@ -62,6 +64,7 @@ export function CreateModuleDialog({
     onSubmit({
       title,
       description,
+      category,
       content,
       duration: duration || undefined,
       videoUrl: videoUrl || undefined,
@@ -135,6 +138,25 @@ export function CreateModuleDialog({
                 placeholder="e.g., Getting Started Guide"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={category}
+                onValueChange={(v) => setCategory(v as TrainingCategory)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rera">RERA</SelectItem>
+                  <SelectItem value="tips">Tips</SelectItem>
+                  <SelectItem value="way-of-work">Way of Work</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="duration">Duration</Label>
               <Input
