@@ -15,6 +15,7 @@ import {
   Sun,
   TrendingUp,
   Mail,
+  Newspaper,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -79,6 +80,11 @@ const navItems = [
     label: "Gmail",
     href: "/mail",
     icon: <Mail className="h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "News",
+    href: "/news",
+    icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Contacts",
