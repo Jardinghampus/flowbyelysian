@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TrainingModuleCard } from "./components/training-module-card"
@@ -12,6 +12,7 @@ export interface TrainingModule {
   id: string
   title: string
   description: string
+  category: string
   content: string // Full training content/text
   videoUrl?: string
   videoType?: "youtube" | "loom"
@@ -25,7 +26,8 @@ const initialModules: TrainingModule[] = [
   {
     id: "1",
     title: "Getting Started with Flow",
-    description: "Learn the basics of using Flow by Elysian. This module covers navigation, key features, and best practices.",
+    description: "Learn the basics of a new app. This module covers navigation, key features, and best practices.",
+    category: "General",
     content: `## Welcome to Flow by Elysian
 
 This comprehensive training module will guide you through the essential features of our platform.
@@ -65,6 +67,7 @@ First, familiarize yourself with the dashboard layout. The sidebar on the left p
     id: "2",
     title: "Advanced SEO Techniques",
     description: "Master the SEO Generator tool to create compelling property descriptions that rank well.",
+    category: "SEO",
     content: `## Mastering Property SEO
 
 Learn how to create property descriptions that attract buyers and rank well on search engines.
@@ -106,6 +109,36 @@ export default function TrainingPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null)
   const { isAdmin } = useRole()
+
+  useEffect(() => {
+    try {
+      const storedModules = localStorage.getItem("trainingModules")
+      if (storedModules) {
+        const parsedModules = JSON.parse(storedModules)
+        // Ensure data consistency
+        const normalized = parsedModules.map((module: any) => ({
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          category: module.category || "General", // Add category with a fallback
+          content: module.content,
+          videoUrl: module.videoUrl,
+          videoType: module.videoType,
+          documents: module.documents || [],
+          duration: module.duration,
+          createdAt: module.createdAt || new Date().toISOString().split("T")[0],
+        }))
+        setModules(normalized)
+      }
+    } catch (error) {
+      console.error("Failed to parse training modules from localStorage:", error)
+      setModules(initialModules)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("trainingModules", JSON.stringify(modules))
+  }, [modules])
 
   const handleCreateModule = (module: Omit<TrainingModule, "id" | "createdAt">) => {
     const newModule: TrainingModule = {

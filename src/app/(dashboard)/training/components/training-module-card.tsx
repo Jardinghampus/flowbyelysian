@@ -57,11 +57,16 @@ export function TrainingModuleCard({
                 {module.description}
               </CardDescription>
             </div>
-            {module.videoType && (
-              <Badge variant="secondary" className="ml-2 shrink-0">
-                {module.videoType === "youtube" ? "YouTube" : "Loom"}
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {module.category && (
+                <Badge variant="outline">{module.category}</Badge>
+              )}
+              {module.videoType && (
+                <Badge variant="secondary" className="shrink-0">
+                  {module.videoType === "youtube" ? "YouTube" : "Loom"}
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
 

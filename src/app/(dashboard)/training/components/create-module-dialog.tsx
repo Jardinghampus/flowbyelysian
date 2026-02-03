@@ -36,6 +36,7 @@ export function CreateModuleDialog({
 }: CreateModuleDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [category, setCategory] = useState("General")
   const [content, setContent] = useState("")
   const [duration, setDuration] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
@@ -47,6 +48,7 @@ export function CreateModuleDialog({
   const resetForm = () => {
     setTitle("")
     setDescription("")
+    setCategory("General")
     setContent("")
     setDuration("")
     setVideoUrl("")
@@ -62,6 +64,7 @@ export function CreateModuleDialog({
     onSubmit({
       title,
       description,
+      category,
       content,
       duration: duration || undefined,
       videoUrl: videoUrl || undefined,
@@ -137,13 +140,22 @@ export function CreateModuleDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration</Label>
-              <Input
-                id="duration"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g., 15 min"
-              />
+              <Label htmlFor="category">Category *</Label>
+              <Select
+                value={category}
+                onValueChange={setCategory}
+              >
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="General">General</SelectItem>
+                  <SelectItem value="SEO">SEO</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Legal">Legal</SelectItem>
+                  <SelectItem value="Onboarding">Onboarding</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -183,6 +195,15 @@ export function CreateModuleDialog({
           <div className="space-y-4">
             <Label>Video (Optional)</Label>
             <div className="grid gap-4 sm:grid-cols-2">
+               <div className="space-y-2">
+                <Label htmlFor="duration">Duration</Label>
+                <Input
+                  id="duration"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="e.g., 15 min"
+                />
+              </div>
               <div className="space-y-2">
                 <Input
                   value={videoUrl}
