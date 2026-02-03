@@ -238,7 +238,7 @@ export function MatchingTable({ listings, currentUserId }: MatchingTableProps) {
   }
 
   return (
-    <BackgroundGradient className="rounded-[22px] mb-6" containerClassName="mb-6">
+    <BackgroundGradient className="rounded-[22px] p-[2px]" containerClassName="mb-6">
       <Card className="border-0 bg-background dark:bg-zinc-900 rounded-[20px]">
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CardHeader className="pb-2">
