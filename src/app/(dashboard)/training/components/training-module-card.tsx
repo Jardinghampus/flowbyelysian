@@ -103,7 +103,7 @@ export function TrainingModuleCard({
             )}
           </div>
 
-          {module.documents.length > 0 && (
+          {(module.documents?.length || 0) > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
                 {module.documents.length} Document{module.documents.length > 1 ? "s" : ""}

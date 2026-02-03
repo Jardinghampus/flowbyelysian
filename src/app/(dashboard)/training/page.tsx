@@ -282,8 +282,22 @@ export default function TrainingPage() {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         try {
-          setModules(JSON.parse(saved))
-        } catch {
+          const parsed = JSON.parse(saved) as TrainingModule[]
+          // Normalize data: ensure all required fields exist
+          const normalized = parsed.map((module) => ({
+            id: module.id || Date.now().toString(),
+            title: module.title || "Untitled Module",
+            description: module.description || "",
+            content: module.content || "",
+            videoUrl: module.videoUrl,
+            videoType: module.videoType,
+            documents: Array.isArray(module.documents) ? module.documents : [],
+            duration: module.duration,
+            createdAt: module.createdAt || new Date().toISOString().split("T")[0],
+          }))
+          setModules(normalized)
+        } catch (error) {
+          console.error("Failed to parse training modules from localStorage:", error)
           setModules(initialModules)
         }
       } else {
