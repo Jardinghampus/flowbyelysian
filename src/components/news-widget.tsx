@@ -18,12 +18,14 @@ interface NewsWidgetProps {
   query?: string;
   maxArticles?: number;
   className?: string;
+  title?: string;
 }
 
 export default function NewsWidget({
-  query = 'Dubai real estate',
+  query = 'Dubai real estate investment OR UAE property market',
   maxArticles = 5,
   className = '',
+  title = 'Investment News',
 }: NewsWidgetProps) {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function NewsWidget({
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Newspaper className="w-5 h-5" />
-            Latest News
+            {title}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -96,7 +98,7 @@ export default function NewsWidget({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Newspaper className="w-5 h-5" />
-            Latest News
+            {title}
           </CardTitle>
           <Link
             href="/news"

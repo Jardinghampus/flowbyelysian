@@ -10,10 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function NewsFeed() {
-  const [searchQuery, setSearchQuery] = useState('Dubai real estate');
-  const [activeQuery, setActiveQuery] = useState('Dubai real estate');
+  const [searchQuery, setSearchQuery] = useState('Dubai real estate investment');
+  const [activeQuery, setActiveQuery] = useState('Dubai real estate investment');
   const [sortBy, setSortBy] = useState<'relevancy' | 'popularity' | 'publishedAt'>('publishedAt');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
   const { data, loading, error, refetch } = useNews({
     query: activeQuery,
@@ -24,16 +25,35 @@ export default function NewsFeed() {
 
   const handleSearch = () => {
     setActiveQuery(searchQuery);
+    setActiveCategory('custom');
     setCurrentPage(1);
   };
 
-  const quickFilters = [
-    { label: 'Dubai Real Estate', query: 'Dubai real estate OR property Dubai' },
-    { label: 'Palm Jumeirah', query: 'Palm Jumeirah property OR villa' },
-    { label: 'Luxury Villas', query: 'Dubai luxury villa OR mansion' },
-    { label: 'Market News', query: 'Dubai property market OR real estate trends' },
-    { label: 'Investments', query: 'Dubai real estate investment OR property investment' },
+  // Investment & Market categories
+  const categories = [
+    { id: 'all', label: 'All News', query: 'Dubai real estate investment OR UAE property market' },
+    { id: 'market', label: 'Market Trends', query: 'Dubai property market trends OR UAE real estate forecast OR Dubai housing prices' },
+    { id: 'investment', label: 'Investment', query: 'Dubai real estate investment OR property ROI Dubai OR rental yield UAE' },
+    { id: 'offplan', label: 'Off-Plan', query: 'Dubai off-plan property OR new development Dubai OR pre-launch Dubai' },
+    { id: 'luxury', label: 'Luxury', query: 'Dubai luxury real estate OR premium villa Dubai OR penthouse Dubai' },
   ];
+
+  // Location-specific filters
+  const locationFilters = [
+    { label: 'Palm Jumeirah', query: 'Palm Jumeirah property investment' },
+    { label: 'Downtown', query: 'Downtown Dubai real estate investment' },
+    { label: 'Dubai Marina', query: 'Dubai Marina property market' },
+    { label: 'Business Bay', query: 'Business Bay Dubai investment' },
+    { label: 'JVC', query: 'JVC Dubai property investment affordable' },
+    { label: 'Dubai Hills', query: 'Dubai Hills Estate property' },
+  ];
+
+  const handleCategoryChange = (category: typeof categories[0]) => {
+    setActiveCategory(category.id);
+    setSearchQuery(category.query);
+    setActiveQuery(category.query);
+    setCurrentPage(1);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -73,9 +93,25 @@ export default function NewsFeed() {
             </Button>
           </div>
 
-          {/* Quick Filters */}
+          {/* Category Tabs */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {quickFilters.map((filter) => (
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={activeCategory === category.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleCategoryChange(category)}
+                className="transition-all"
+              >
+                {category.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Location Filters */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="text-sm text-muted-foreground mr-2 self-center">Locations:</span>
+            {locationFilters.map((filter) => (
               <Badge
                 key={filter.label}
                 variant={activeQuery === filter.query ? 'default' : 'secondary'}
@@ -83,6 +119,7 @@ export default function NewsFeed() {
                 onClick={() => {
                   setSearchQuery(filter.query);
                   setActiveQuery(filter.query);
+                  setActiveCategory('custom');
                   setCurrentPage(1);
                 }}
               >
