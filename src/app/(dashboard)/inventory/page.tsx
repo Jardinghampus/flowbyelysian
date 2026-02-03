@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge"
 import { InventoryTable } from "./components/inventory-table"
 import { CreateListingDialog } from "./components/create-listing-dialog"
 import { AIMatchingDialog } from "./components/ai-matching-dialog"
+import { MatchingTable, getUserMatches } from "./components/matching-table"
+import { MyMatchesView } from "./components/my-matches-view"
 import { useRole } from "@/contexts/role-context"
 
 export type ListingStatus = "live" | "pocket" | "unofficial"
@@ -235,7 +237,7 @@ export default function InventoryPage() {
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
-  const [activeTab, setActiveTab] = useState<"all" | "mine" | ListingStatus | InquiryType | TransactionType>("all")
+  const [activeTab, setActiveTab] = useState<"all" | "mine" | "mymatches" | ListingStatus | InquiryType | TransactionType>("all")
   const { isAdmin } = useRole()
 
   const currentUserId = CURRENT_USER_ID
@@ -389,10 +391,17 @@ export default function InventoryPage() {
   const requestCount = listings.filter((l) => l.inquiryType === "request").length
   const saleCount = listings.filter((l) => l.transactionType === "sale").length
   const rentCount = listings.filter((l) => l.transactionType === "rent").length
+  const myMatchesCount = useMemo(() => getUserMatches(listings, currentUserId).length, [listings, currentUserId])
+
+  // Get my matches for the tab view
+  const myMatches = useMemo(() => getUserMatches(listings, currentUserId), [listings, currentUserId])
 
   return (
     <>
       <div className="px-4 lg:px-6">
+        {/* AI Matching Table at top */}
+        <MatchingTable listings={listings} currentUserId={currentUserId} />
+
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
@@ -638,6 +647,9 @@ export default function InventoryPage() {
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="all">All ({listings.length})</TabsTrigger>
             <TabsTrigger value="mine">My Listings ({myListingsCount})</TabsTrigger>
+            <TabsTrigger value="mymatches" className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              My Matches ({myMatchesCount})
+            </TabsTrigger>
             <TabsTrigger value="sale">Sale ({saleCount})</TabsTrigger>
             <TabsTrigger value="rent">Rent ({rentCount})</TabsTrigger>
             <TabsTrigger value="live">Live</TabsTrigger>
@@ -647,15 +659,21 @@ export default function InventoryPage() {
             <TabsTrigger value="request">Requests ({requestCount})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value={activeTab} className="mt-4">
-            <InventoryTable
-              listings={getFilteredListings()}
-              currentUserId={currentUserId}
-              isAdmin={isAdmin}
-              onDelete={handleDeleteListing}
-              onUpdate={handleUpdateListing}
-            />
-          </TabsContent>
+          {activeTab === "mymatches" ? (
+            <TabsContent value="mymatches" className="mt-4">
+              <MyMatchesView matches={myMatches} />
+            </TabsContent>
+          ) : (
+            <TabsContent value={activeTab} className="mt-4">
+              <InventoryTable
+                listings={getFilteredListings()}
+                currentUserId={currentUserId}
+                isAdmin={isAdmin}
+                onDelete={handleDeleteListing}
+                onUpdate={handleUpdateListing}
+              />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 

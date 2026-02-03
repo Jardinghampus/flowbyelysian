@@ -130,11 +130,11 @@ const chartConfig = {
   },
   conversions: {
     label: "Conversions",
-    color: "var(--primary)",
+    color: "#8b5cf6", // Purple
   },
   deals: {
     label: "Deals Closed",
-    color: "var(--primary)",
+    color: "#3b82f6", // Blue
   },
 } satisfies ChartConfig
 
@@ -216,24 +216,24 @@ export function PerformanceChart() {
               <linearGradient id="fillConversions" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-conversions)"
+                  stopColor="#a855f7"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-conversions)"
+                  stopColor="#8b5cf6"
                   stopOpacity={0.1}
                 />
               </linearGradient>
               <linearGradient id="fillDeals" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-deals)"
+                  stopColor="#60a5fa"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-deals)"
+                  stopColor="#3b82f6"
                   stopOpacity={0.1}
                 />
               </linearGradient>

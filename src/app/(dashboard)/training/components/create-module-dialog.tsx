@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { TrainingModule } from "../page"
+import type { TrainingModule, TrainingCategory } from "../page"
 
 interface CreateModuleDialogProps {
   open: boolean
@@ -36,7 +36,7 @@ export function CreateModuleDialog({
 }: CreateModuleDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [category, setCategory] = useState("General")
+  const [category, setCategory] = useState<TrainingCategory>("way-of-work")
   const [content, setContent] = useState("")
   const [duration, setDuration] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
@@ -48,7 +48,7 @@ export function CreateModuleDialog({
   const resetForm = () => {
     setTitle("")
     setDescription("")
-    setCategory("General")
+    setCategory("way-of-work")
     setContent("")
     setDuration("")
     setVideoUrl("")
@@ -130,49 +130,57 @@ export function CreateModuleDialog({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Getting Started Guide"
-                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
+              <Label htmlFor="category">Category</Label>
               <Select
                 value={category}
-                onValueChange={setCategory}
+                onValueChange={(v) => setCategory(v as TrainingCategory)}
               >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="General">General</SelectItem>
-                  <SelectItem value="SEO">SEO</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Legal">Legal</SelectItem>
-                  <SelectItem value="Onboarding">Onboarding</SelectItem>
+                  <SelectItem value="rera">RERA</SelectItem>
+                  <SelectItem value="tips">Tips</SelectItem>
+                  <SelectItem value="way-of-work">Way of Work</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="duration">Duration</Label>
+              <Input
+                id="duration"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="e.g., 15 min"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="description">Short Description *</Label>
+            <Label htmlFor="description">Short Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief overview shown on the card..."
               rows={2}
-              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Training Content *</Label>
+            <Label htmlFor="content">Training Content</Label>
             <Textarea
               id="content"
               value={content}
@@ -184,7 +192,6 @@ export function CreateModuleDialog({
 1. Numbered lists
 **Bold text**"
               rows={10}
-              required
               className="font-mono text-sm"
             />
             <p className="text-xs text-muted-foreground">
@@ -195,15 +202,6 @@ export function CreateModuleDialog({
           <div className="space-y-4">
             <Label>Video (Optional)</Label>
             <div className="grid gap-4 sm:grid-cols-2">
-               <div className="space-y-2">
-                <Label htmlFor="duration">Duration</Label>
-                <Input
-                  id="duration"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="e.g., 15 min"
-                />
-              </div>
               <div className="space-y-2">
                 <Input
                   value={videoUrl}
@@ -291,7 +289,7 @@ export function CreateModuleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title || !description || !content}>
+            <Button type="submit">
               Create Module
             </Button>
           </DialogFooter>

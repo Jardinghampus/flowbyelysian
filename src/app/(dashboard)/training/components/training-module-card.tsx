@@ -28,13 +28,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import type { TrainingModule } from "../page"
+import type { TrainingModule, TrainingCategory } from "../page"
 
 interface TrainingModuleCardProps {
   module: TrainingModule
   isAdmin: boolean
   onDelete: (id: string) => void
   onView: () => void
+}
+
+const categoryLabels: Record<TrainingCategory, string> = {
+  "rera": "RERA",
+  "tips": "Tips",
+  "way-of-work": "Way of Work",
+}
+
+const categoryColors: Record<TrainingCategory, string> = {
+  "rera": "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  "tips": "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  "way-of-work": "bg-purple-500/10 text-purple-600 border-purple-500/20",
 }
 
 export function TrainingModuleCard({
@@ -50,22 +62,22 @@ export function TrainingModuleCard({
     <>
       <Card className="flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={onView}>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className={`shrink-0 text-xs ${categoryColors[module.category]}`}>
+                  {categoryLabels[module.category]}
+                </Badge>
+                {module.videoType && (
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {module.videoType === "youtube" ? "YouTube" : "Loom"}
+                  </Badge>
+                )}
+              </div>
               <CardTitle className="line-clamp-1">{module.title}</CardTitle>
               <CardDescription className="line-clamp-2">
                 {module.description}
               </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              {module.category && (
-                <Badge variant="outline">{module.category}</Badge>
-              )}
-              {module.videoType && (
-                <Badge variant="secondary" className="shrink-0">
-                  {module.videoType === "youtube" ? "YouTube" : "Loom"}
-                </Badge>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -91,7 +103,7 @@ export function TrainingModuleCard({
             )}
           </div>
 
-          {module.documents.length > 0 && (
+          {(module.documents?.length || 0) > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
                 {module.documents.length} Document{module.documents.length > 1 ? "s" : ""}

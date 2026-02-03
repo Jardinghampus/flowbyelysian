@@ -5,9 +5,6 @@ import dynamic from "next/dynamic"
 import {
   LayoutDashboard,
   Building2,
-  CheckSquare,
-  MessageCircle,
-  Calendar,
   Users,
   GraduationCap,
   Sparkles,
@@ -17,10 +14,12 @@ import {
   Moon,
   Sun,
   TrendingUp,
+  Mail,
+  Newspaper,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/hooks/use-theme"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
@@ -80,22 +79,17 @@ const navItems = [
     icon: <TrendingUp className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Tasks",
-    href: "/tasks",
-    icon: <CheckSquare className="h-5 w-5 flex-shrink-0" />,
+    label: "Gmail",
+    href: "/mail",
+    icon: <Mail className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Chat",
-    href: "/chat",
-    icon: <MessageCircle className="h-5 w-5 flex-shrink-0" />,
+    label: "News",
+    href: "/news",
+    icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Calendar",
-    href: "/calendar",
-    icon: <Calendar className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Users",
+    label: "Contacts",
     href: "/users",
     icon: <Users className="h-5 w-5 flex-shrink-0" />,
   },
@@ -105,7 +99,7 @@ const navItems = [
     icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "RERA Assistant",
+    label: "AI Bot",
     href: "/ai-assistant",
     icon: <Sparkles className="h-5 w-5 flex-shrink-0" />,
   },

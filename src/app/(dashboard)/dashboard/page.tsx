@@ -8,24 +8,24 @@ import { SimpleTypewriter } from "@/components/ui/typewriter-effect"
 
 export default function Page() {
   return (
-    <>
+    <div className="w-full max-w-full overflow-x-hidden">
       {/* Hero Section */}
-        <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl text-white font-bold text-center">
-          <SimpleTypewriter
-            text="Welcome to Flow"
-            speed={100}
-            delay={300}
-          />
-        </h1>
-        <p className="text-sm sm:text-base md:text-lg mt-3 sm:mt-4 text-white/80 font-normal text-center">
-          Your real estate dashboard powered by Elysian
-        </p>
+      <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl text-white font-bold text-center px-4">
+        <SimpleTypewriter
+          text="Welcome to Flow"
+          speed={100}
+          delay={300}
+        />
+      </h1>
+      <p className="text-sm sm:text-base md:text-lg mt-3 sm:mt-4 text-white/80 font-normal text-center px-4">
+        Your real estate dashboard powered by Elysian
+      </p>
 
-      <div className="@container/main px-4 lg:px-6 space-y-6">
+      <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full">
         <SectionCards />
         <ChartAreaInteractive />
         <AgentPerformanceTable />
       </div>
-    </>
+    </div>
   )
 }

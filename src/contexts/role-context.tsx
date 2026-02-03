@@ -2,18 +2,27 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react"
 
-export type UserRole = "admin" | "user"
+export type UserRole = "admin" | "agent" | "user"
 
 // Admin email addresses with full rights
 const ADMIN_EMAILS = [
   "jardinghampus@gmail.com",
+  "admin@admin.com",
+]
+
+// Agent email patterns - agents can add/delete their own listings but limited edit rights
+const AGENT_EMAILS = [
+  "agent@agent.com",
 ]
 
 interface RoleContextType {
   role: UserRole
   setRole: (role: UserRole) => void
   isAdmin: boolean
+  isAgent: boolean
   userEmail: string | null
+  canEditListing: (listingOwnerId: string, currentUserId: string) => boolean
+  canDeleteListing: (listingOwnerId: string, currentUserId: string) => boolean
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
@@ -43,8 +52,14 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         if (clerk?.user) {
           const email = clerk.user.primaryEmailAddress?.emailAddress || ""
           setUserEmail(email)
-          const isAdminUser = ADMIN_EMAILS.includes(email.toLowerCase())
-          setRole(isAdminUser ? "admin" : "user")
+          const emailLower = email.toLowerCase()
+          if (ADMIN_EMAILS.includes(emailLower)) {
+            setRole("admin")
+          } else if (AGENT_EMAILS.includes(emailLower)) {
+            setRole("agent")
+          } else {
+            setRole("user")
+          }
         }
       } catch {
         // Silently fail during SSR
@@ -66,8 +81,29 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval)
   }, [mounted])
 
+  // Permission helpers
+  const canEditListing = (listingOwnerId: string, currentUserId: string): boolean => {
+    if (role === "admin") return true // Admins can edit any listing
+    if (role === "agent") return listingOwnerId === currentUserId // Agents can only edit their own
+    return false // Regular users cannot edit
+  }
+
+  const canDeleteListing = (listingOwnerId: string, currentUserId: string): boolean => {
+    if (role === "admin") return true // Admins can delete any listing
+    if (role === "agent") return listingOwnerId === currentUserId // Agents can only delete their own
+    return false // Regular users cannot delete
+  }
+
   return (
-    <RoleContext.Provider value={{ role, setRole, isAdmin: role === "admin", userEmail }}>
+    <RoleContext.Provider value={{
+      role,
+      setRole,
+      isAdmin: role === "admin",
+      isAgent: role === "agent",
+      userEmail,
+      canEditListing,
+      canDeleteListing,
+    }}>
       {children}
     </RoleContext.Provider>
   )
