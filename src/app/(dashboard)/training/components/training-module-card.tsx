@@ -58,6 +58,9 @@ export function TrainingModuleCard({
   const [showVideo, setShowVideo] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
+  // Default category for backward compatibility
+  const category = module.category || "way-of-work"
+
   return (
     <>
       <Card className="flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={onView}>
@@ -65,8 +68,8 @@ export function TrainingModuleCard({
           <div className="flex items-start justify-between gap-2">
             <div className="space-y-1 flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className={`shrink-0 text-xs ${categoryColors[module.category]}`}>
-                  {categoryLabels[module.category]}
+                <Badge variant="outline" className={`shrink-0 text-xs ${categoryColors[category]}`}>
+                  {categoryLabels[category]}
                 </Badge>
                 {module.videoType && (
                   <Badge variant="secondary" className="shrink-0 text-xs">
