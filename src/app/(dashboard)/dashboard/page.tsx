@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { ChartAreaInteractive } from "./components/chart-area-interactive"
 import { SectionCards } from "./components/section-cards"
 import { AgentPerformanceTable } from "./components/agent-performance-table"
@@ -7,6 +8,12 @@ import { AgentPerformanceTable } from "./components/agent-performance-table"
 import { LayoutTextFlip } from "@/components/ui/layout-text-flip"
 
 export default function Page() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       {/* Hero Section */}
@@ -20,11 +27,13 @@ export default function Page() {
         Your real estate dashboard powered by Elysian
       </p>
 
-      <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full">
-        <SectionCards />
-        <ChartAreaInteractive />
-        <AgentPerformanceTable />
-      </div>
+      {mounted && (
+        <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full">
+          <SectionCards />
+          <ChartAreaInteractive />
+          <AgentPerformanceTable />
+        </div>
+      )}
     </div>
   )
 }

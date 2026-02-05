@@ -274,6 +274,7 @@ export default function TrainingPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [activeTab, setActiveTab] = useState<TrainingCategory | "all">("all")
   const { isAdmin } = useRole()
 
   // Load modules from localStorage on mount
@@ -370,8 +371,6 @@ export default function TrainingPage() {
       />
     )
   }
-
-  const [activeTab, setActiveTab] = useState<TrainingCategory | "all">("all")
 
   const filteredModules = activeTab === "all"
     ? modules
