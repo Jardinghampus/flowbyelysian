@@ -13,10 +13,20 @@ interface TrainingModuleViewProps {
 }
 
 export function TrainingModuleView({ module, onBack }: TrainingModuleViewProps) {
+  // Safe access to module properties
+  const title = module?.title || "Untitled Module"
+  const description = module?.description || ""
+  const content = module?.content || ""
+  const videoUrl = module?.videoUrl
+  const videoType = module?.videoType
+  const duration = module?.duration
+  const createdAt = module?.createdAt
+  const documents = Array.isArray(module?.documents) ? module.documents : []
+
   // Simple markdown-like rendering
-  const renderContent = (content: string) => {
-    if (!content) return null
-    const lines = content.split("\n")
+  const renderContent = (contentText: string) => {
+    if (!contentText) return null
+    const lines = contentText.split("\n")
     return lines.map((line, index) => {
       // Headers
       if (line.startsWith("### ")) {
@@ -97,37 +107,39 @@ export function TrainingModuleView({ module, onBack }: TrainingModuleViewProps) 
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              {module.title || "Untitled Module"}
+              {title}
             </h1>
-            {module.videoType && (
+            {videoType && (
               <Badge variant="secondary" className="text-sm">
-                {module.videoType === "youtube" ? "YouTube" : "Loom"}
+                {videoType === "youtube" ? "YouTube" : "Loom"}
               </Badge>
             )}
           </div>
-          {module.description && (
+          {description && (
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
-              {module.description}
+              {description}
             </p>
           )}
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-            {module.duration && (
+            {duration && (
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {module.duration}
+                {duration}
               </span>
             )}
-            <span>Added {new Date(module.createdAt).toLocaleDateString()}</span>
+            {createdAt && (
+              <span>Added {new Date(createdAt).toLocaleDateString()}</span>
+            )}
           </div>
         </div>
 
         {/* Video */}
-        {module.videoUrl && (
+        {videoUrl && (
           <Card className="mb-10 overflow-hidden shadow-lg">
             <CardContent className="p-0">
               <div className="aspect-video">
                 <iframe
-                  src={module.videoUrl}
+                  src={videoUrl}
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -138,23 +150,23 @@ export function TrainingModuleView({ module, onBack }: TrainingModuleViewProps) 
         )}
 
         {/* Content */}
-        {module.content && (
+        {content && (
           <Card className="mb-10 shadow-lg">
             <CardContent className="p-8 md:p-12">
               <div className="prose prose-lg dark:prose-invert max-w-none">
-                {renderContent(module.content)}
+                {renderContent(content)}
               </div>
             </CardContent>
           </Card>
         )}
 
         {/* Documents */}
-        {module.documents && module.documents.length > 0 && (
+        {documents.length > 0 && (
           <div className="mb-10">
             <Separator className="mb-8" />
             <h3 className="text-xl font-semibold mb-6 text-center">Resources & Documents</h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              {module.documents.map((doc, index) => (
+              {documents.map((doc, index) => (
                 <a
                   key={index}
                   href={doc.url}

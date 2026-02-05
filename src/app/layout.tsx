@@ -28,7 +28,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-sans">
+      <body className="font-michroma">
         <ClerkProviderWrapper>
           <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
             <SidebarConfigProvider>
