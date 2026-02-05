@@ -282,23 +282,40 @@ export default function TrainingPage() {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         try {
-          const parsed = JSON.parse(saved) as TrainingModule[]
+          const parsed = JSON.parse(saved)
+          // Ensure parsed is an array
+          if (!Array.isArray(parsed)) {
+            console.error("Training modules data is not an array, resetting...")
+            localStorage.removeItem(STORAGE_KEY)
+            setModules(initialModules)
+            setIsLoaded(true)
+            return
+          }
           // Normalize data: ensure all required fields exist
-          const normalized = parsed.map((module: any) => ({
-            id: module.id || Date.now().toString(),
-            title: module.title || "Untitled Module",
-            description: module.description || "",
-            category: module.category || "way-of-work",
-            content: module.content || "",
-            videoUrl: module.videoUrl,
-            videoType: module.videoType,
-            documents: Array.isArray(module.documents) ? module.documents : [],
-            duration: module.duration,
-            createdAt: module.createdAt || new Date().toISOString().split("T")[0],
-          }))
-          setModules(normalized)
+          const normalized = parsed.map((module: any) => {
+            // Skip null/undefined modules
+            if (!module || typeof module !== "object") {
+              return null
+            }
+            return {
+              id: module.id || Date.now().toString() + Math.random(),
+              title: module.title || "Untitled Module",
+              description: module.description || "",
+              category: module.category || "way-of-work",
+              content: module.content || "",
+              videoUrl: module.videoUrl || undefined,
+              videoType: module.videoType || undefined,
+              documents: Array.isArray(module.documents) ? module.documents : [],
+              duration: module.duration || undefined,
+              createdAt: module.createdAt || new Date().toISOString().split("T")[0],
+            }
+          }).filter(Boolean) as TrainingModule[]
+
+          setModules(normalized.length > 0 ? normalized : initialModules)
         } catch (error) {
           console.error("Failed to parse training modules from localStorage:", error)
+          // Clear corrupted data
+          localStorage.removeItem(STORAGE_KEY)
           setModules(initialModules)
         }
       } else {

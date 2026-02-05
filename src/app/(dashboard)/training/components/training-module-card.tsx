@@ -106,24 +106,26 @@ export function TrainingModuleCard({
             )}
           </div>
 
-          {(module.documents?.length || 0) > 0 && (
+          {Array.isArray(module.documents) && module.documents.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
                 {module.documents.length} Document{module.documents.length > 1 ? "s" : ""}
               </p>
               {module.documents.slice(0, 2).map((doc, index) => (
-                <a
-                  key={index}
-                  href={doc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-primary hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <FileText className="h-4 w-4" />
-                  {doc.name}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                doc && doc.name && doc.url ? (
+                  <a
+                    key={index}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <FileText className="h-4 w-4" />
+                    {doc.name}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : null
               ))}
               {module.documents.length > 2 && (
                 <p className="text-xs text-muted-foreground">
@@ -142,9 +144,11 @@ export function TrainingModuleCard({
                 {module.duration}
               </span>
             )}
-            <span>
-              {new Date(module.createdAt).toLocaleDateString()}
-            </span>
+            {module.createdAt && (
+              <span>
+                {new Date(module.createdAt).toLocaleDateString()}
+              </span>
+            )}
           </div>
           {isAdmin && (
             <Button

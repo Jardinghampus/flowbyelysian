@@ -21,7 +21,12 @@ export function TrainingModuleView({ module, onBack }: TrainingModuleViewProps) 
   const videoType = module?.videoType
   const duration = module?.duration
   const createdAt = module?.createdAt
-  const documents = Array.isArray(module?.documents) ? module.documents : []
+  // Filter out invalid documents
+  const documents = Array.isArray(module?.documents)
+    ? module.documents.filter(
+        (doc: any) => doc && typeof doc === "object" && doc.name && doc.url
+      )
+    : []
 
   // Simple markdown-like rendering
   const renderContent = (contentText: string) => {
