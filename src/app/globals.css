@@ -155,11 +155,31 @@
   }
 }
 
-/* Michroma Font */
-.font-michroma {
-  font-family: "Michroma", sans-serif;
+/* Work Sans Font - Clean, sharp and modern */
+.font-work-sans {
+  font-family: "Work Sans", sans-serif;
+  font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  letter-spacing: -0.01em;
+}
+
+/* Typography improvements for clarity and visibility */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Improved text rendering for readability */
+p, span, li, td, th {
+  line-height: 1.6;
+}
+
+/* Sharp, clean button and badge text */
+button, .badge, [role="button"] {
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 /* Ensure consistent font rendering across different DPI levels */
