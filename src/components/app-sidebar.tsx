@@ -17,6 +17,7 @@ import {
   Mail,
   Newspaper,
   MapPin,
+  FileText,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -64,11 +65,13 @@ const SidebarLogoutButton = dynamic(
 )
 
 const navItems = [
+  // Core
   {
     label: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0" />,
   },
+  // Properties
   {
     label: "Inventory",
     href: "/inventory",
@@ -79,36 +82,46 @@ const navItems = [
     href: "/areas",
     icon: <MapPin className="h-5 w-5 flex-shrink-0" />,
   },
+  // Analytics
   {
     label: "Performance",
     href: "/performance",
     icon: <TrendingUp className="h-5 w-5 flex-shrink-0" />,
   },
-  {
-    label: "Gmail",
-    href: "/mail",
-    icon: <Mail className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "News",
-    href: "/news",
-    icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
-  },
+  // CRM
   {
     label: "Contacts",
     href: "/users",
     icon: <Users className="h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Training",
-    href: "/training",
-    icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
+    label: "Gmail",
+    href: "/mail",
+    icon: <Mail className="h-5 w-5 flex-shrink-0" />,
   },
+  // AI Tools
   {
     label: "AI Bot",
     href: "/ai-assistant",
     icon: <Sparkles className="h-5 w-5 flex-shrink-0" />,
   },
+  {
+    label: "SEO Generator",
+    href: "/seo-generator",
+    icon: <FileText className="h-5 w-5 flex-shrink-0" />,
+  },
+  // Resources
+  {
+    label: "News",
+    href: "/news",
+    icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Training",
+    href: "/training",
+    icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
+  },
+  // Admin
   {
     label: "Admin",
     href: "/admin",
