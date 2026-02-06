@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Mail,
   Newspaper,
+  MapPin,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -72,6 +73,11 @@ const navItems = [
     label: "Inventory",
     href: "/inventory",
     icon: <Building2 className="h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Areas",
+    href: "/areas",
+    icon: <MapPin className="h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Performance",
