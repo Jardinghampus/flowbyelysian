@@ -116,7 +116,7 @@ export function AreaMarket({ marketData }: AreaMarketProps) {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`AED ${value}`, "Price/Sqft"]}
+                    formatter={(value) => [`AED ${value}`, "Price/Sqft"]}
                   />
                   <Area
                     type="monotone"
@@ -150,7 +150,7 @@ export function AreaMarket({ marketData }: AreaMarketProps) {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [value, "Transactions"]}
+                    formatter={(value) => [value, "Transactions"]}
                   />
                   <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -191,7 +191,7 @@ export function AreaMarket({ marketData }: AreaMarketProps) {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
-                    formatter={(value: number) => [`${value}%`, ""]}
+                    formatter={(value) => [`${value}%`, ""]}
                   />
                 </PieChart>
               </ResponsiveContainer>
