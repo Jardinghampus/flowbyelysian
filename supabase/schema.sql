@@ -277,3 +277,166 @@ select id,
   round((random() * -15)::numeric, 1),
   round((random() * 3 + 4)::numeric, 1)
 from areas;
+
+-- =============================================
+-- SEED DATA - Demo Listings
+-- =============================================
+
+insert into listings (title, area_id, area_name, size, price, type, status, inquiry_type, transaction_type, bedrooms, bathrooms, owner_id, owner_name, notes)
+select
+  case
+    when a.slug = 'palm-jumeirah' then 'Luxury Beachfront Villa with Private Beach'
+    when a.slug = 'downtown-dubai' then 'Premium 3BR with Burj Khalifa View'
+    when a.slug = 'dubai-marina' then 'Marina View 2BR Apartment'
+    when a.slug = 'tilal-al-ghaf' then 'Modern 4BR Villa with Lagoon Access'
+    else 'Spacious Family Home'
+  end,
+  a.id,
+  a.name,
+  case
+    when a.slug = 'palm-jumeirah' then 8500
+    when a.slug = 'emirates-hills' then 12000
+    when a.slug = 'tilal-al-ghaf' then 5500
+    else round((random() * 3000 + 1500)::numeric)
+  end,
+  case
+    when a.slug = 'palm-jumeirah' then 25000000
+    when a.slug = 'emirates-hills' then 45000000
+    when a.slug = 'downtown-dubai' then 4500000
+    when a.slug = 'tilal-al-ghaf' then 8500000
+    else round((random() * 5000000 + 1000000)::numeric)
+  end,
+  case
+    when a.slug in ('palm-jumeirah', 'emirates-hills', 'tilal-al-ghaf', 'arabian-ranches') then 'villa'::listing_type
+    when a.slug in ('downtown-dubai', 'dubai-marina', 'jbr', 'business-bay') then 'apartment'::listing_type
+    else 'townhouse'::listing_type
+  end,
+  'live'::listing_status,
+  'stock'::inquiry_type,
+  'sale'::transaction_type,
+  case
+    when a.slug in ('palm-jumeirah', 'emirates-hills') then 6
+    when a.slug = 'tilal-al-ghaf' then 4
+    else round((random() * 3 + 1)::numeric)
+  end,
+  case
+    when a.slug in ('palm-jumeirah', 'emirates-hills') then 7
+    when a.slug = 'tilal-al-ghaf' then 5
+    else round((random() * 2 + 2)::numeric)
+  end,
+  'demo-agent-1',
+  'Ahmed Hassan',
+  'Premium property with excellent ROI potential'
+from areas a
+limit 10;
+
+-- Add more rental listings
+insert into listings (title, area_id, area_name, size, price, type, status, inquiry_type, transaction_type, bedrooms, bathrooms, owner_id, owner_name)
+select
+  'Furnished ' || round((random() * 2 + 1)::numeric) || 'BR for Rent',
+  a.id,
+  a.name,
+  round((random() * 1500 + 800)::numeric),
+  round((random() * 150000 + 80000)::numeric),
+  'apartment'::listing_type,
+  'live'::listing_status,
+  'stock'::inquiry_type,
+  'rent'::transaction_type,
+  round((random() * 2 + 1)::numeric),
+  round((random() * 2 + 1)::numeric),
+  'demo-agent-2',
+  'Sarah Miller'
+from areas a
+where a.slug in ('dubai-marina', 'downtown-dubai', 'jbr', 'business-bay')
+limit 8;
+
+-- =============================================
+-- SEED DATA - Demo Client Requests
+-- =============================================
+
+insert into client_requests (client_name, budget, property_type, bedrooms, area_id, notes, status, agent_id, agent_name)
+select
+  case row_number() over ()
+    when 1 then 'Mohammed Al Rashid'
+    when 2 then 'James Wilson'
+    when 3 then 'Anna Petrova'
+    when 4 then 'Chen Wei'
+    else 'Client ' || row_number() over ()
+  end,
+  case
+    when a.slug = 'palm-jumeirah' then 20000000
+    when a.slug = 'emirates-hills' then 35000000
+    else round((random() * 8000000 + 2000000)::numeric)
+  end,
+  case
+    when a.slug in ('palm-jumeirah', 'emirates-hills', 'tilal-al-ghaf') then 'Villa'
+    else 'Apartment'
+  end,
+  round((random() * 3 + 2)::numeric),
+  a.id,
+  'Looking for investment property with good rental yield',
+  'active'::request_status,
+  'demo-agent-1',
+  'Ahmed Hassan'
+from areas a
+limit 6;
+
+-- =============================================
+-- SEED DATA - Training Modules
+-- =============================================
+
+insert into training_modules (title, description, category, content, video_url, video_type, duration) values
+  ('RERA Certification Basics', 'Learn the fundamentals of RERA certification and compliance requirements for Dubai real estate agents.', 'rera', 'This module covers all essential RERA requirements including licensing, renewal procedures, and compliance standards.', 'https://www.youtube.com/watch?v=example1', 'youtube', '45 mins'),
+  ('Property Valuation Methods', 'Master the art of property valuation using industry-standard methods and Dubai market specifics.', 'tips', 'Learn comparative market analysis, income approach, and cost approach methods for accurate property valuations.', 'https://www.youtube.com/watch?v=example2', 'youtube', '60 mins'),
+  ('Client Communication Best Practices', 'Develop excellent client relationships through effective communication strategies.', 'way-of-work', 'From initial contact to closing deals, learn how to communicate professionally with clients at every stage.', null, null, '30 mins'),
+  ('Dubai Market Analysis 2024', 'Understanding current market trends and predictions for the Dubai real estate market.', 'tips', 'Comprehensive analysis of Dubai property market including price trends, demand patterns, and investment opportunities.', 'https://www.loom.com/share/example', 'loom', '90 mins'),
+  ('Legal Framework for Property Sales', 'Essential legal knowledge for conducting property transactions in Dubai.', 'rera', 'Covers contracts, SPA requirements, escrow procedures, and legal compliance for property sales.', 'https://www.youtube.com/watch?v=example3', 'youtube', '75 mins'),
+  ('Digital Marketing for Real Estate', 'Learn to leverage digital channels for property marketing and lead generation.', 'way-of-work', 'Social media marketing, SEO, email campaigns, and digital advertising strategies for real estate.', null, null, '45 mins');
+
+-- =============================================
+-- SEED DATA - Demo Contacts (Agents)
+-- =============================================
+
+insert into contacts (clerk_user_id, name, email, phone, whatsapp, area_id, role, title) values
+  ('demo-agent-1', 'Ahmed Hassan', 'ahmed.hassan@elysian.ae', '+971501234567', '+971501234567', (select id from areas where slug = 'palm-jumeirah'), 'Sales', 'Senior Sales Consultant'),
+  ('demo-agent-2', 'Sarah Miller', 'sarah.miller@elysian.ae', '+971502345678', '+971502345678', (select id from areas where slug = 'dubai-marina'), 'Leasing', 'Leasing Specialist'),
+  ('demo-agent-3', 'Omar Khan', 'omar.khan@elysian.ae', '+971503456789', '+971503456789', (select id from areas where slug = 'tilal-al-ghaf'), 'Sales', 'Sales Consultant'),
+  ('demo-agent-4', 'Maria Santos', 'maria.santos@elysian.ae', '+971504567890', '+971504567890', (select id from areas where slug = 'downtown-dubai'), 'Sales', 'Senior Sales Consultant');
+
+-- =============================================
+-- SEED DATA - Agent Area Assignments
+-- =============================================
+
+insert into agent_area_assignments (agent_id, area_id, is_primary) values
+  ('demo-agent-1', (select id from areas where slug = 'palm-jumeirah'), true),
+  ('demo-agent-1', (select id from areas where slug = 'emirates-hills'), false),
+  ('demo-agent-2', (select id from areas where slug = 'dubai-marina'), true),
+  ('demo-agent-2', (select id from areas where slug = 'jbr'), false),
+  ('demo-agent-3', (select id from areas where slug = 'tilal-al-ghaf'), true),
+  ('demo-agent-3', (select id from areas where slug = 'arabian-ranches'), false),
+  ('demo-agent-4', (select id from areas where slug = 'downtown-dubai'), true),
+  ('demo-agent-4', (select id from areas where slug = 'business-bay'), false);
+
+-- =============================================
+-- SEED DATA - Agent Performance
+-- =============================================
+
+insert into agent_performance (agent_id, period_start, period_end, deals_count, commission_earned, listings_count, viewings_count) values
+  ('demo-agent-1', '2024-01-01', '2024-01-31', 3, 450000, 12, 28),
+  ('demo-agent-1', '2024-02-01', '2024-02-29', 4, 620000, 15, 35),
+  ('demo-agent-2', '2024-01-01', '2024-01-31', 8, 180000, 20, 45),
+  ('demo-agent-2', '2024-02-01', '2024-02-29', 10, 220000, 25, 52),
+  ('demo-agent-3', '2024-01-01', '2024-01-31', 2, 280000, 8, 18),
+  ('demo-agent-3', '2024-02-01', '2024-02-29', 3, 420000, 10, 22),
+  ('demo-agent-4', '2024-01-01', '2024-01-31', 5, 380000, 14, 32),
+  ('demo-agent-4', '2024-02-01', '2024-02-29', 6, 510000, 18, 40);
+
+-- =============================================
+-- SEED DATA - Sample Notifications
+-- =============================================
+
+insert into notifications (user_id, type, title, message, link, read) values
+  ('demo-agent-1', 'match', 'New Client Match', 'A new client request matches your listing in Palm Jumeirah', '/requests', false),
+  ('demo-agent-1', 'listing', 'Listing Update', 'Your listing "Luxury Beachfront Villa" received 5 new views today', '/inventory', true),
+  ('demo-agent-2', 'system', 'Training Available', 'New training module "Digital Marketing" is now available', '/training', false),
+  ('demo-agent-3', 'request', 'New Request', 'New client looking for 4BR villa in Tilal Al Ghaf', '/requests', false);
