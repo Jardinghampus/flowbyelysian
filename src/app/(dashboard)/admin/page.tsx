@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { Plus, Trash2, Shield, User, Search, TrendingUp, Users } from "lucide-react"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -53,79 +52,77 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { AgentPerformanceEditor } from "./components/agent-performance-editor"
+import { toast } from "sonner"
 
-type UserRole = "admin" | "user"
+type UserRole = "admin" | "agent"
 
 interface ManagedUser {
   id: string
   name: string
   email: string
   role: UserRole
-  createdAt: string
-  lastActive: string
+  area: string | null
+  createdAt: number
+  lastActiveAt: number | null
+  imageUrl: string | null
 }
-
-// Demo data - in production this would come from your database
-const DEMO_USERS: ManagedUser[] = [
-  {
-    id: "1",
-    name: "Hampus Jardinger",
-    email: "jardinghampus@gmail.com",
-    role: "admin",
-    createdAt: "2024-01-15",
-    lastActive: "2024-01-28",
-  },
-  {
-    id: "2",
-    name: "Ahmed Hassan",
-    email: "ahmed.hassan@elysian.ae",
-    role: "user",
-    createdAt: "2024-01-20",
-    lastActive: "2024-01-27",
-  },
-  {
-    id: "3",
-    name: "Sarah Miller",
-    email: "sarah.miller@elysian.ae",
-    role: "user",
-    createdAt: "2024-01-22",
-    lastActive: "2024-01-28",
-  },
-  {
-    id: "4",
-    name: "Omar Khan",
-    email: "omar.khan@elysian.ae",
-    role: "user",
-    createdAt: "2024-01-25",
-    lastActive: "2024-01-26",
-  },
-]
 
 export default function AdminPage() {
   const { isAdmin } = useRole()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("users")
-  const [users, setUsers] = useState<ManagedUser[]>(DEMO_USERS)
+  const [users, setUsers] = useState<ManagedUser[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isInviting, setIsInviting] = useState(false)
   const [newUser, setNewUser] = useState({
-    name: "",
     email: "",
-    role: "user" as UserRole,
+    firstName: "",
+    lastName: "",
+    role: "agent" as UserRole,
+    area: "",
   })
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await fetch("/api/admin/users")
+      if (!res.ok) {
+        if (res.status === 403) {
+          router.push("/dashboard")
+          return
+        }
+        throw new Error("Failed to fetch users")
+      }
+      const data = await res.json()
+      setUsers(data.users || [])
+    } catch (error) {
+      console.error("Error fetching users:", error)
+      toast.error("Failed to load users")
+    } finally {
+      setLoading(false)
+    }
+  }, [router])
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers()
+    }
+  }, [isAdmin, fetchUsers])
 
   // Redirect non-admins
   useEffect(() => {
-    if (!isAdmin) {
+    if (!isAdmin && !loading) {
       router.push("/dashboard")
     }
-  }, [isAdmin, router])
+  }, [isAdmin, router, loading])
 
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Access denied. Admin only.</p>
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -138,37 +135,93 @@ export default function AdminPage() {
     return matchesSearch && matchesRole
   })
 
-  const handleAddUser = () => {
-    if (!newUser.name || !newUser.email) return
-
-    const user: ManagedUser = {
-      id: Date.now().toString(),
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      createdAt: new Date().toISOString().split("T")[0],
-      lastActive: new Date().toISOString().split("T")[0],
+  const handleInviteUser = async () => {
+    if (!newUser.email) {
+      toast.error("Email is required")
+      return
     }
 
-    setUsers([...users, user])
-    setNewUser({ name: "", email: "", role: "user" })
-    setIsAddDialogOpen(false)
+    setIsInviting(true)
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role,
+          area: newUser.area || null,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to invite user")
+      }
+
+      toast.success("Invitation sent successfully")
+      setNewUser({ email: "", firstName: "", lastName: "", role: "agent", area: "" })
+      setIsAddDialogOpen(false)
+      fetchUsers()
+    } catch (error) {
+      console.error("Error inviting user:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to invite user")
+    } finally {
+      setIsInviting(false)
+    }
   }
 
-  const handleDeleteUser = (id: string) => {
-    setUsers(users.filter((user) => user.id !== id))
+  const handleDeleteUser = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to delete user")
+      }
+
+      toast.success("User deleted successfully")
+      setUsers(users.filter((user) => user.id !== id))
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to delete user")
+    }
   }
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    setUsers(
-      users.map((user) =>
-        user.id === userId ? { ...user, role: newRole } : user
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to update role")
+      }
+
+      setUsers(
+        users.map((user) =>
+          user.id === userId ? { ...user, role: newRole } : user
+        )
       )
-    )
+      toast.success("Role updated successfully")
+    } catch (error) {
+      console.error("Error updating role:", error)
+      toast.error("Failed to update role")
+    }
   }
 
   const adminCount = users.filter((u) => u.role === "admin").length
-  const userCount = users.filter((u) => u.role === "user").length
+  const agentCount = users.filter((u) => u.role === "agent").length
+
+  const formatDate = (timestamp: number | null) => {
+    if (!timestamp) return "Never"
+    return new Date(timestamp).toLocaleDateString()
+  }
 
   return (
     <>
@@ -218,11 +271,11 @@ export default function AdminPage() {
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Regular Users</CardTitle>
+                  <CardTitle className="text-sm font-medium">Agents</CardTitle>
                   <User className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{userCount}</div>
+                  <div className="text-2xl font-bold">{agentCount}</div>
                 </CardContent>
               </Card>
             </div>
@@ -240,32 +293,20 @@ export default function AdminPage() {
                   <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                       <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add User
+                        <Mail className="mr-2 h-4 w-4" />
+                        Invite User
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
+                        <DialogTitle>Invite New User</DialogTitle>
                         <DialogDescription>
-                          Add a new user to the system. They will receive an invitation
-                          email.
+                          Send an invitation email to add a new agent to your team.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="name">Name</Label>
-                          <Input
-                            id="name"
-                            value={newUser.name}
-                            onChange={(e) =>
-                              setNewUser({ ...newUser, name: e.target.value })
-                            }
-                            placeholder="John Doe"
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="email">Email</Label>
+                          <Label htmlFor="email">Email *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -273,8 +314,32 @@ export default function AdminPage() {
                             onChange={(e) =>
                               setNewUser({ ...newUser, email: e.target.value })
                             }
-                            placeholder="john@example.com"
+                            placeholder="agent@elysian.ae"
                           />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input
+                              id="firstName"
+                              value={newUser.firstName}
+                              onChange={(e) =>
+                                setNewUser({ ...newUser, firstName: e.target.value })
+                              }
+                              placeholder="John"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input
+                              id="lastName"
+                              value={newUser.lastName}
+                              onChange={(e) =>
+                                setNewUser({ ...newUser, lastName: e.target.value })
+                              }
+                              placeholder="Doe"
+                            />
+                          </div>
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor="role">Role</Label>
@@ -288,8 +353,31 @@ export default function AdminPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="agent">Agent</SelectItem>
                               <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="area">Assigned Area</Label>
+                          <Select
+                            value={newUser.area}
+                            onValueChange={(value) =>
+                              setNewUser({ ...newUser, area: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select an area" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tilal-al-ghaf">Tilal Al Ghaf</SelectItem>
+                              <SelectItem value="palm-jumeirah">Palm Jumeirah</SelectItem>
+                              <SelectItem value="dubai-marina">Dubai Marina</SelectItem>
+                              <SelectItem value="downtown-dubai">Downtown Dubai</SelectItem>
+                              <SelectItem value="arabian-ranches">Arabian Ranches</SelectItem>
+                              <SelectItem value="emirates-hills">Emirates Hills</SelectItem>
+                              <SelectItem value="business-bay">Business Bay</SelectItem>
+                              <SelectItem value="jbr">JBR</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -298,7 +386,19 @@ export default function AdminPage() {
                         <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                           Cancel
                         </Button>
-                        <Button onClick={handleAddUser}>Add User</Button>
+                        <Button onClick={handleInviteUser} disabled={isInviting}>
+                          {isInviting ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="mr-2 h-4 w-4" />
+                              Send Invitation
+                            </>
+                          )}
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -326,7 +426,7 @@ export default function AdminPage() {
                     <SelectContent>
                       <SelectItem value="all">All Roles</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="agent">Agent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -339,15 +439,22 @@ export default function AdminPage() {
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
-                        <TableHead>Created</TableHead>
+                        <TableHead>Area</TableHead>
+                        <TableHead>Joined</TableHead>
                         <TableHead>Last Active</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.length === 0 ? (
+                      {loading ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8">
+                          <TableCell colSpan={7} className="text-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                          </TableCell>
+                        </TableRow>
+                      ) : filteredUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8">
                             <p className="text-muted-foreground">No users found</p>
                           </TableCell>
                         </TableRow>
@@ -379,12 +486,19 @@ export default function AdminPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="admin">Admin</SelectItem>
-                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="agent">Agent</SelectItem>
                                 </SelectContent>
                               </Select>
                             </TableCell>
-                            <TableCell>{user.createdAt}</TableCell>
-                            <TableCell>{user.lastActive}</TableCell>
+                            <TableCell>
+                              {user.area ? (
+                                <Badge variant="outline">{user.area}</Badge>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>{formatDate(user.createdAt)}</TableCell>
+                            <TableCell>{formatDate(user.lastActiveAt)}</TableCell>
                             <TableCell className="text-right">
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -392,7 +506,6 @@ export default function AdminPage() {
                                     variant="ghost"
                                     size="sm"
                                     className="text-destructive hover:text-destructive"
-                                    disabled={user.email === "jardinghampus@gmail.com"}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -402,7 +515,7 @@ export default function AdminPage() {
                                     <AlertDialogTitle>Delete User</AlertDialogTitle>
                                     <AlertDialogDescription>
                                       Are you sure you want to delete {user.name}? This
-                                      action cannot be undone.
+                                      action cannot be undone and will remove all their data.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
