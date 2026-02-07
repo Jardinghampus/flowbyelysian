@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProviderWrapper } from "@/components/clerk-provider-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarConfigProvider } from "@/contexts/sidebar-context";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Flow by Elysian",
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
             <SidebarConfigProvider>
               {children}
+              <Toaster position="bottom-right" richColors closeButton />
             </SidebarConfigProvider>
           </ThemeProvider>
         </ClerkProviderWrapper>
