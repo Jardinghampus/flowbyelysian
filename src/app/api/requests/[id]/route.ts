@@ -11,7 +11,8 @@ export async function GET(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { data: clientRequest, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: clientRequest, error } = await (supabase as any)
       .from("client_requests")
       .select(`
         *,
@@ -50,7 +51,8 @@ export async function PATCH(
     const supabase = createServerClient()
 
     // Check ownership or admin status
-    const { data: existing } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any)
       .from("client_requests")
       .select("agent_id")
       .eq("id", id)
@@ -68,7 +70,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { data: clientRequest, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: clientRequest, error } = await (supabase as any)
       .from("client_requests")
       .update({
         ...body,
@@ -105,7 +108,8 @@ export async function DELETE(
     const supabase = createServerClient()
 
     // Check ownership or admin status
-    const { data: existing } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any)
       .from("client_requests")
       .select("agent_id")
       .eq("id", id)
@@ -123,7 +127,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("client_requests")
       .delete()
       .eq("id", id)

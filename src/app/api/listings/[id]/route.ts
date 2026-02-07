@@ -11,7 +11,8 @@ export async function GET(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { data: listing, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: listing, error } = await (supabase as any)
       .from("listings")
       .select("*")
       .eq("id", id)
@@ -47,7 +48,8 @@ export async function PATCH(
     const supabase = createServerClient()
 
     // Check if user owns the listing or is admin
-    const { data: existing } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any)
       .from("listings")
       .select("owner_id")
       .eq("id", id)
@@ -66,7 +68,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { data: listing, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: listing, error } = await (supabase as any)
       .from("listings")
       .update({
         ...body,
@@ -103,7 +106,8 @@ export async function DELETE(
     const supabase = createServerClient()
 
     // Check ownership
-    const { data: existing } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any)
       .from("listings")
       .select("owner_id")
       .eq("id", id)
@@ -122,7 +126,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { error } = await supabase.from("listings").delete().eq("id", id)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from("listings").delete().eq("id", id)
 
     if (error) throw error
 

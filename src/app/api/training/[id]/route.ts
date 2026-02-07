@@ -11,7 +11,8 @@ export async function GET(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { data: module, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: module, error } = await (supabase as any)
       .from("training_modules")
       .select("*")
       .eq("id", id)
@@ -55,7 +56,8 @@ export async function PATCH(
     const body = await request.json()
     const supabase = createServerClient()
 
-    const { data: module, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: module, error } = await (supabase as any)
       .from("training_modules")
       .update({
         ...body,
@@ -100,7 +102,8 @@ export async function DELETE(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("training_modules")
       .delete()
       .eq("id", id)

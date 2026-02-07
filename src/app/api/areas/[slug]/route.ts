@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { auth } from "@clerk/nextjs/server"
+import type { Database } from "@/lib/types/database.types"
+
+// Type definitions for query results
+type AreaRow = Database["public"]["Tables"]["areas"]["Row"]
+type AreaUpdate = Database["public"]["Tables"]["areas"]["Update"]
+type MarketDataRow = { avg_price_sqft: number | null; total_transactions: number | null; avg_rent_yield: number | null }
+type ListingRow = { id: string; owner_id: string; [key: string]: unknown }
+type RequestRow = { id: string; [key: string]: unknown }
+type AssignmentRow = { agent_id: string; is_primary: boolean }
+type ContactRow = { clerk_user_id: string | null; name: string; role: string | null; avatar_url: string | null; phone: string | null; whatsapp: string | null; email: string | null }
+type PerformanceRow = { agent_id: string; deals_count: number; commission_earned: number }
 
 // GET /api/areas/:slug - Get area details with listings, agents, requests
 export async function GET(
@@ -11,54 +22,71 @@ export async function GET(
     const { slug } = await params
     const supabase = createServerClient()
 
-    // Get area with market data
-    const { data: area, error: areaError } = await supabase
+    // Get area
+    const { data: areaData, error: areaError } = await supabase
       .from("areas")
-      .select(`
-        *,
-        area_market_data (*)
-      `)
+      .select("*")
       .eq("slug", slug)
       .single()
 
-    if (areaError || !area) {
+    if (areaError || !areaData) {
       return NextResponse.json({ error: "Area not found" }, { status: 404 })
     }
 
+    const area = areaData as AreaRow
+    const areaId = area.id
+
+    // Get market data for this area
+    const { data: marketDataRaw } = await supabase
+      .from("area_market_data")
+      .select("*")
+      .eq("area_id", areaId)
+      .single()
+    const marketData = marketDataRaw as MarketDataRow | null
+
     // Get listings for this area
-    const { data: listings } = await supabase
+    const { data: listingsRaw } = await supabase
       .from("listings")
       .select("*")
-      .eq("area_id", area.id)
+      .eq("area_id", areaId)
       .order("created_at", { ascending: false })
+    const listings = (listingsRaw || []) as ListingRow[]
 
     // Get client requests for this area
-    const { data: requests } = await supabase
+    const { data: requestsRaw } = await supabase
       .from("client_requests")
       .select("*")
-      .eq("area_id", area.id)
+      .eq("area_id", areaId)
       .order("created_at", { ascending: false })
+    const requests = (requestsRaw || []) as RequestRow[]
 
     // Get agents assigned to this area
-    const { data: agentAssignments } = await supabase
+    const { data: agentAssignmentsRaw } = await supabase
       .from("agent_area_assignments")
-      .select(`
-        *,
-        contacts (*)
-      `)
-      .eq("area_id", area.id)
+      .select("*")
+      .eq("area_id", areaId)
+    const agentAssignments = (agentAssignmentsRaw || []) as AssignmentRow[]
+
+    // Get contacts for the assigned agents
+    const agentIds = agentAssignments.map((a) => a.agent_id)
+
+    const { data: contactsRaw } = await supabase
+      .from("contacts")
+      .select("*")
+      .in("clerk_user_id", agentIds.length > 0 ? agentIds : [""])
+    const contacts = (contactsRaw || []) as ContactRow[]
 
     // Get agent performance data
-    const agentIds = agentAssignments?.map((a) => a.agent_id) || []
-    const { data: performance } = await supabase
+    const { data: performanceRaw } = await supabase
       .from("agent_performance")
       .select("*")
-      .in("agent_id", agentIds)
+      .in("agent_id", agentIds.length > 0 ? agentIds : [""])
+    const performance = (performanceRaw || []) as PerformanceRow[]
 
     // Transform agents data
-    const agents = agentAssignments?.map((assignment) => {
-      const perf = performance?.find((p) => p.agent_id === assignment.agent_id)
-      const contact = assignment.contacts
+    const agents = agentAssignments.map((assignment) => {
+      const perf = performance.find((p) => p.agent_id === assignment.agent_id)
+      const contact = contacts.find((c) => c.clerk_user_id === assignment.agent_id)
       return {
         id: assignment.agent_id,
         name: contact?.name || "Unknown",
@@ -68,31 +96,31 @@ export async function GET(
         email: contact?.email || "",
         deals: perf?.deals_count || 0,
         commission: perf?.commission_earned || 0,
-        listings: listings?.filter((l) => l.owner_id === assignment.agent_id).length || 0,
+        listings: listings.filter((l) => l.owner_id === assignment.agent_id).length,
       }
     })
 
     // Calculate stats
     const stats = {
-      totalListings: listings?.length || 0,
-      activeAgents: agents?.length || 0,
-      avgPrice: area.area_market_data?.[0]?.avg_price_sqft || 0,
-      totalDeals: area.area_market_data?.[0]?.total_transactions || 0,
-      avgRentYield: area.area_market_data?.[0]?.avg_rent_yield || 0,
+      totalListings: listings.length,
+      activeAgents: agents.length,
+      avgPrice: marketData?.avg_price_sqft || 0,
+      totalDeals: marketData?.total_transactions || 0,
+      avgRentYield: marketData?.avg_rent_yield || 0,
     }
 
     return NextResponse.json({
       area: {
-        id: area.id,
+        id: areaId,
         slug: area.slug,
         name: area.name,
         description: area.description,
         image: area.image,
         stats,
-        marketData: area.area_market_data?.[0] || null,
-        agents: agents || [],
-        listings: listings || [],
-        requests: requests || [],
+        marketData: marketData || null,
+        agents,
+        listings,
+        requests,
       },
     })
   } catch (error) {
@@ -116,10 +144,11 @@ export async function PATCH(
     }
 
     const { slug } = await params
-    const body = await request.json()
+    const body = await request.json() as AreaUpdate
     const supabase = createServerClient()
 
-    const { data: area, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: areaData, error } = await (supabase as any)
       .from("areas")
       .update(body)
       .eq("slug", slug)
@@ -128,7 +157,7 @@ export async function PATCH(
 
     if (error) throw error
 
-    return NextResponse.json({ area })
+    return NextResponse.json({ area: areaData })
   } catch (error) {
     console.error("Error updating area:", error)
     return NextResponse.json(
@@ -152,7 +181,8 @@ export async function DELETE(
     const { slug } = await params
     const supabase = createServerClient()
 
-    const { error } = await supabase.from("areas").delete().eq("slug", slug)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from("areas").delete().eq("slug", slug)
 
     if (error) throw error
 

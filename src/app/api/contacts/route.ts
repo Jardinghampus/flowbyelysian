@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get("role")
     const areaId = searchParams.get("areaId")
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from("contacts")
       .select(`
         *,
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const supabase = createServerClient()
 
-    const { data: contact, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: contact, error } = await (supabase as any)
       .from("contacts")
       .insert({
         ...body,

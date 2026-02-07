@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50")
     const offset = parseInt(searchParams.get("offset") || "0")
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from("listings")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
@@ -78,7 +79,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    const { data: listing, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: listing, error } = await (supabase as any)
       .from("listings")
       .insert(listingData)
       .select()

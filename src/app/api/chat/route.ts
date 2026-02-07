@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai"
 import { streamText } from "ai"
+import { auth } from "@clerk/nextjs/server"
 
 // RERA Dubai Real Estate Regulations Context
 const RERA_CONTEXT = `
@@ -62,6 +63,12 @@ You are an AI assistant specialized in Dubai real estate, RERA regulations, and 
 `
 
 export async function POST(req: Request) {
+  // Require authentication to prevent unauthorized API usage
+  const { userId } = await auth()
+  if (!userId) {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
   const { messages, listings } = await req.json()
 
   // Build context with current listings if provided

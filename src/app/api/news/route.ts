@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 
-const NEWS_API_KEY = process.env.NEWS_API_KEY || '90621552af1849e4b107c014ba78ae68';
+const NEWS_API_KEY = process.env.NEWS_API_KEY;
 const NEWS_API_BASE_URL = 'https://newsapi.org/v2';
+
+if (!NEWS_API_KEY) {
+  console.warn('NEWS_API_KEY not configured - news feature will not work');
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,6 +15,13 @@ export async function GET(request: Request) {
   const sortBy = searchParams.get('sortBy') || 'publishedAt';
 
   try {
+    if (!NEWS_API_KEY) {
+      return NextResponse.json(
+        { success: false, error: 'News API not configured', articles: [], totalResults: 0 },
+        { status: 503 }
+      );
+    }
+
     const response = await fetch(
       `${NEWS_API_BASE_URL}/everything?` +
         new URLSearchParams({

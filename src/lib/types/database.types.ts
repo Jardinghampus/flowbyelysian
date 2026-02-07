@@ -332,6 +332,38 @@ export type Database = {
           created_at?: string
         }
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: 'match' | 'listing' | 'request' | 'system'
+          title: string
+          message: string
+          link: string | null
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: 'match' | 'listing' | 'request' | 'system'
+          title: string
+          message: string
+          link?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: 'match' | 'listing' | 'request' | 'system'
+          title?: string
+          message?: string
+          link?: string | null
+          read?: boolean
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -348,6 +380,7 @@ export type Database = {
       training_category: 'rera' | 'tips' | 'way-of-work'
       video_type: 'youtube' | 'loom'
       agent_role: 'Sales' | 'Leasing'
+      notification_type: 'match' | 'listing' | 'request' | 'system'
     }
   }
 }

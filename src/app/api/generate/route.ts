@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { auth } from "@clerk/nextjs/server";
 
 // Lazy initialization to avoid build-time errors when OPENAI_API_KEY is not set
 function getOpenAIClient() {
@@ -9,6 +10,12 @@ function getOpenAIClient() {
 }
 
 export async function POST(req: NextRequest) {
+  // Require authentication to prevent unauthorized API usage
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const openai = getOpenAIClient();
   try {
     const {

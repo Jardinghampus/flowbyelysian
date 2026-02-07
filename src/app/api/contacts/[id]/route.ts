@@ -11,7 +11,8 @@ export async function GET(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { data: contact, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: contact, error } = await (supabase as any)
       .from("contacts")
       .select(`
         *,
@@ -49,7 +50,8 @@ export async function PATCH(
     const body = await request.json()
     const supabase = createServerClient()
 
-    const { data: contact, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: contact, error } = await (supabase as any)
       .from("contacts")
       .update(body)
       .eq("id", id)
@@ -82,7 +84,8 @@ export async function DELETE(
     const { id } = await params
     const supabase = createServerClient()
 
-    const { error } = await supabase.from("contacts").delete().eq("id", id)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from("contacts").delete().eq("id", id)
 
     if (error) throw error
 

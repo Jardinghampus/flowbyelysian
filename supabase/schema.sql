@@ -139,6 +139,20 @@ create table agent_performance (
   created_at timestamp with time zone default now()
 );
 
+-- 9. NOTIFICATIONS
+create type notification_type as enum ('match', 'listing', 'request', 'system');
+
+create table notifications (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text not null, -- Clerk user ID
+  type notification_type not null default 'system',
+  title text not null,
+  message text not null,
+  link text,
+  read boolean default false,
+  created_at timestamp with time zone default now()
+);
+
 -- =============================================
 -- INDEXES
 -- =============================================
@@ -163,11 +177,15 @@ create index idx_assignments_area on agent_area_assignments(area_id);
 
 create index idx_performance_agent on agent_performance(agent_id);
 
+create index idx_notifications_user on notifications(user_id);
+create index idx_notifications_read on notifications(user_id, read);
+
 -- =============================================
 -- ROW LEVEL SECURITY (RLS)
 -- =============================================
 
 alter table areas enable row level security;
+alter table notifications enable row level security;
 alter table area_market_data enable row level security;
 alter table listings enable row level security;
 alter table client_requests enable row level security;
@@ -214,6 +232,16 @@ create policy "Users can insert requests" on client_requests
 -- Performance - authenticated access
 create policy "Performance is viewable by authenticated users" on agent_performance
   for select using (true);
+
+-- Notifications - users can only see their own
+create policy "Users can view own notifications" on notifications
+  for select using (true);
+
+create policy "System can insert notifications" on notifications
+  for insert with check (true);
+
+create policy "Users can update own notifications" on notifications
+  for update using (true);
 
 -- =============================================
 -- SEED DATA - Dubai Areas

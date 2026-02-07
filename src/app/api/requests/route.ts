@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
     const areaId = searchParams.get("areaId")
     const agentId = searchParams.get("agentId")
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from("client_requests")
       .select(`
         *,
@@ -59,7 +60,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    const { data: clientRequest, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: clientRequest, error } = await (supabase as any)
       .from("client_requests")
       .insert(requestData)
       .select()

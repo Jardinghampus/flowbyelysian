@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
 
     const category = searchParams.get("category")
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from("training_modules")
       .select("*")
       .order("created_at", { ascending: false })
@@ -61,7 +62,8 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    const { data: module, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: module, error } = await (supabase as any)
       .from("training_modules")
       .insert(moduleData)
       .select()

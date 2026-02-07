@@ -2,40 +2,71 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { auth } from "@clerk/nextjs/server"
 
+// Type definitions
+type AreaRow = { id: string; slug: string; name: string; description: string | null; image: string | null }
+type MarketDataRow = { area_id: string; avg_price_sqft: number | null; total_transactions: number | null; avg_rent_yield: number | null }
+type ListingCountRow = { area_id: string }
+type AgentCountRow = { area_id: string }
+
 // GET /api/areas - List all areas with stats
 export async function GET() {
   try {
     const supabase = createServerClient()
 
-    const { data: areas, error } = await supabase
+    // Get areas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: areasRaw, error: areasError } = await (supabase as any)
       .from("areas")
-      .select(`
-        *,
-        area_market_data (*),
-        listings (count),
-        client_requests (count),
-        agent_area_assignments (count)
-      `)
+      .select("*")
       .order("name")
 
-    if (error) throw error
+    if (areasError) throw areasError
+
+    const areas = (areasRaw || []) as AreaRow[]
+
+    // Get market data for all areas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: marketDataRaw } = await (supabase as any)
+      .from("area_market_data")
+      .select("*")
+    const marketData = (marketDataRaw || []) as MarketDataRow[]
+
+    // Get listing counts
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: listingCountsRaw } = await (supabase as any)
+      .from("listings")
+      .select("area_id")
+    const listingCounts = (listingCountsRaw || []) as ListingCountRow[]
+
+    // Get agent counts
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: agentCountsRaw } = await (supabase as any)
+      .from("agent_area_assignments")
+      .select("area_id")
+    const agentCounts = (agentCountsRaw || []) as AgentCountRow[]
 
     // Transform data to match frontend expectations
-    const transformedAreas = areas?.map((area) => ({
-      id: area.id,
-      slug: area.slug,
-      name: area.name,
-      description: area.description,
-      image: area.image,
-      stats: {
-        totalListings: area.listings?.[0]?.count || 0,
-        activeAgents: area.agent_area_assignments?.[0]?.count || 0,
-        avgPrice: area.area_market_data?.[0]?.avg_price_sqft || 0,
-        totalDeals: area.area_market_data?.[0]?.total_transactions || 0,
-        avgRentYield: area.area_market_data?.[0]?.avg_rent_yield || 0,
-      },
-      marketData: area.area_market_data?.[0] || null,
-    }))
+    const transformedAreas = areas.map((area) => {
+      const areaMarketData = marketData.find((m) => m.area_id === area.id)
+      const listingsCount = listingCounts.filter((l) => l.area_id === area.id).length
+      const agentsCount = agentCounts.filter((a) => a.area_id === area.id).length
+
+      return {
+        id: area.id,
+        slug: area.slug,
+        name: area.name,
+        description: area.description,
+        image: area.image,
+        stats: {
+          totalListings: listingsCount,
+          activeAgents: agentsCount,
+          avgPrice: areaMarketData?.avg_price_sqft || 0,
+          totalDeals: areaMarketData?.total_transactions || 0,
+          avgRentYield: areaMarketData?.avg_rent_yield || 0,
+        },
+        marketData: areaMarketData || null,
+      }
+    })
 
     return NextResponse.json({ areas: transformedAreas })
   } catch (error) {
@@ -67,7 +98,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    const { data: area, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: areaRaw, error } = await (supabase as any)
       .from("areas")
       .insert({ name, slug, description, image })
       .select()
@@ -75,8 +107,11 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error
 
+    const area = areaRaw as AreaRow
+
     // Create default market data entry
-    await supabase.from("area_market_data").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("area_market_data").insert({
       area_id: area.id,
       avg_price_sqft: 0,
       avg_price_sqft_change: 0,
