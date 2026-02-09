@@ -82,7 +82,7 @@ export default function LandingPage() {
       {/* Contact CTA Section */}
       <section id="contact" className="py-24 bg-white">
         <div className="mx-auto max-w-4xl px-4 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-amber-600">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Start Your Journey
           </p>
           <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-6">

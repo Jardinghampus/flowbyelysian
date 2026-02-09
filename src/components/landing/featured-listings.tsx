@@ -81,18 +81,6 @@ const featuredListings: Listing[] = [
     image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2670&auto=format&fit=crop",
     type: "Mansion",
   },
-  {
-    id: "6",
-    title: "JBR Beachfront Apartment",
-    location: "JBR",
-    price: 3200000,
-    priceLabel: "AED 3.2M",
-    bedrooms: 2,
-    bathrooms: 2,
-    size: 1450,
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2670&auto=format&fit=crop",
-    type: "Apartment",
-  },
 ]
 
 const containerVariants = {
@@ -120,7 +108,7 @@ const itemVariants = {
 export function FeaturedListings() {
   const mainListing = featuredListings[0]
   const topRow = featuredListings.slice(1, 3)
-  const bottomRow = featuredListings.slice(3, 6)
+  const bottomRow = featuredListings.slice(3, 5)
 
   return (
     <section className="py-20 bg-white">

@@ -54,7 +54,7 @@ export function HeroSection() {
         >
           Discover Luxury
           <br />
-          <span className="text-blue-400">Living in Dubai</span>
+          <span className="text-blue-400">Elysian Secondary Real Estate</span>
         </motion.h1>
 
         <motion.p
@@ -63,8 +63,8 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="mb-10 max-w-2xl text-lg text-white/80 md:text-xl"
         >
-          From Palm Jumeirah villas to Marina penthouses, find your perfect home
-          with Dubai&apos;s premier real estate agency.
+          From Palm Jumeirah to exclusive villa communities to Marina penthouses,
+          find your perfect home or investment with Dubai&apos;s premier real estate agency.
         </motion.p>
 
         <motion.div

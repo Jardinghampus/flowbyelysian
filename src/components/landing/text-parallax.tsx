@@ -27,7 +27,7 @@ export function TextParallaxContent({
         paddingRight: IMG_PADDING,
       }}
     >
-      <div className="relative h-[150vh]">
+      <div className="relative h-[75vh]">
         <StickyImage imgUrl={imgUrl} />
         <OverlayCopy heading={heading} subheading={subheading} />
       </div>
@@ -60,7 +60,7 @@ function StickyImage({ imgUrl }: { imgUrl: string }) {
       className="sticky z-0 overflow-hidden rounded-3xl"
     >
       <motion.div
-        className="absolute inset-0 bg-neutral-950/70"
+        className="absolute inset-0 bg-white/70"
         style={{
           opacity,
         }}
@@ -92,7 +92,7 @@ function OverlayCopy({
         opacity,
       }}
       ref={targetRef}
-      className="absolute left-0 top-0 flex h-screen w-full flex-col items-center justify-center text-white"
+      className="absolute left-0 top-0 flex h-screen w-full flex-col items-center justify-center text-neutral-900"
     >
       <p className="mb-2 text-center text-xl md:mb-4 md:text-3xl">
         {subheading}
