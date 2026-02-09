@@ -52,8 +52,6 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-6 max-w-4xl text-5xl font-bold leading-tight md:text-7xl lg:text-8xl"
         >
-          Discover Luxury
-          <br />
           <span className="text-blue-400">Elysian Secondary Real Estate</span>
         </motion.h1>
 
