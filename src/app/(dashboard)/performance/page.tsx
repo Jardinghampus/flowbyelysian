@@ -4,6 +4,11 @@ import { TopPerformers } from "./components/top-performers"
 import { TargetCommissionChart } from "./components/target-commission-chart"
 import { MarketData } from "./components/market-data"
 import { AgentPerformanceTable } from "../dashboard/components/agent-performance-table"
+import { PersonalTargets } from "./components/personal-targets"
+import { AICoach } from "./components/ai-coach"
+import { MonthlyReportDownload } from "./components/monthly-report"
+import { Leaderboard } from "./components/leaderboard"
+import { Achievements } from "./components/achievements"
 
 export default function PerformancePage() {
   return (
@@ -17,7 +22,22 @@ export default function PerformancePage() {
       </div>
 
       <div className="@container/main px-4 lg:px-6 space-y-6">
-        {/* Agent Performance Table - At the top as requested */}
+        {/* Personal Targets and AI Coach - Side by side */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <PersonalTargets />
+          <AICoach />
+        </div>
+
+        {/* Gamification - Leaderboard and Achievements */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Leaderboard />
+          <Achievements />
+        </div>
+
+        {/* Monthly Report Download */}
+        <MonthlyReportDownload />
+
+        {/* Agent Performance Table */}
         <AgentPerformanceTable />
 
         {/* Top Performers - #1 Sales and #1 Rentals */}

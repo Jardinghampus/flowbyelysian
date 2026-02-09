@@ -153,6 +153,106 @@ create table notifications (
   created_at timestamp with time zone default now()
 );
 
+-- 10. MONTHLY KPI HISTORY (12-month rolling window)
+create table monthly_kpi_history (
+  id uuid primary key default uuid_generate_v4(),
+  agent_id text not null, -- Clerk user ID
+  year integer not null,
+  month integer not null check (month >= 1 and month <= 12),
+  -- Core metrics
+  deals_closed integer default 0,
+  deals_target integer default 0,
+  revenue numeric default 0,
+  revenue_target numeric default 0,
+  commission_earned numeric default 0,
+  commission_target numeric default 0,
+  -- Activity metrics
+  listings_created integer default 0,
+  listings_target integer default 0,
+  viewings_conducted integer default 0,
+  viewings_target integer default 0,
+  leads_generated integer default 0,
+  leads_converted integer default 0,
+  -- Response metrics
+  avg_response_time_mins integer default 0,
+  client_satisfaction_score numeric default 0,
+  -- Computed metrics
+  conversion_rate numeric generated always as (
+    case when viewings_conducted > 0 then (deals_closed::numeric / viewings_conducted::numeric * 100) else 0 end
+  ) stored,
+  target_achievement_pct numeric generated always as (
+    case when deals_target > 0 then (deals_closed::numeric / deals_target::numeric * 100) else 0 end
+  ) stored,
+  -- Timestamps
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  -- Unique constraint for one record per agent per month
+  unique(agent_id, year, month)
+);
+
+-- 11. AGENT PERSONAL TARGETS
+create table agent_targets (
+  id uuid primary key default uuid_generate_v4(),
+  agent_id text not null unique, -- Clerk user ID
+  -- Monthly targets (can be adjusted by agent)
+  deals_target integer default 3,
+  commission_target numeric default 100000,
+  listings_target integer default 10,
+  viewings_target integer default 20,
+  -- Target notes
+  notes text,
+  -- Timestamps
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- 12. ACHIEVEMENTS/BADGES
+create type achievement_rarity as enum ('common', 'rare', 'epic', 'legendary');
+create type achievement_category as enum ('sales', 'streak', 'milestone', 'special');
+
+create table achievements (
+  id uuid primary key default uuid_generate_v4(),
+  code text unique not null, -- e.g., 'first_deal', 'million_maker'
+  name text not null,
+  description text not null,
+  category achievement_category not null,
+  rarity achievement_rarity not null,
+  icon text, -- Icon name or URL
+  points integer default 10,
+  -- Unlock criteria (JSON for flexibility)
+  criteria jsonb not null default '{}',
+  created_at timestamp with time zone default now()
+);
+
+-- 13. AGENT ACHIEVEMENTS (unlocked achievements)
+create table agent_achievements (
+  id uuid primary key default uuid_generate_v4(),
+  agent_id text not null, -- Clerk user ID
+  achievement_id uuid references achievements(id) on delete cascade,
+  unlocked_at timestamp with time zone default now(),
+  -- Progress tracking for in-progress achievements
+  progress integer default 0,
+  max_progress integer default 1,
+  unique(agent_id, achievement_id)
+);
+
+-- 14. LEADERBOARD POINTS
+create table leaderboard_points (
+  id uuid primary key default uuid_generate_v4(),
+  agent_id text not null, -- Clerk user ID
+  points integer default 0,
+  streak_days integer default 0,
+  last_activity_date date,
+  -- Weekly/Monthly/Yearly totals
+  weekly_points integer default 0,
+  monthly_points integer default 0,
+  yearly_points integer default 0,
+  -- Timestamps
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  unique(agent_id)
+);
+
 -- =============================================
 -- INDEXES
 -- =============================================
@@ -179,6 +279,21 @@ create index idx_performance_agent on agent_performance(agent_id);
 
 create index idx_notifications_user on notifications(user_id);
 create index idx_notifications_read on notifications(user_id, read);
+
+create index idx_kpi_history_agent on monthly_kpi_history(agent_id);
+create index idx_kpi_history_period on monthly_kpi_history(year, month);
+create index idx_kpi_history_agent_period on monthly_kpi_history(agent_id, year, month);
+
+create index idx_agent_targets_agent on agent_targets(agent_id);
+
+create index idx_achievements_category on achievements(category);
+create index idx_achievements_rarity on achievements(rarity);
+
+create index idx_agent_achievements_agent on agent_achievements(agent_id);
+create index idx_agent_achievements_achievement on agent_achievements(achievement_id);
+
+create index idx_leaderboard_points on leaderboard_points(points desc);
+create index idx_leaderboard_agent on leaderboard_points(agent_id);
 
 -- =============================================
 -- ROW LEVEL SECURITY (RLS)
@@ -241,6 +356,60 @@ create policy "System can insert notifications" on notifications
   for insert with check (true);
 
 create policy "Users can update own notifications" on notifications
+  for update using (true);
+
+-- Monthly KPI History RLS
+alter table monthly_kpi_history enable row level security;
+
+create policy "KPI history is viewable by authenticated users" on monthly_kpi_history
+  for select using (true);
+
+create policy "Users can insert their own KPI history" on monthly_kpi_history
+  for insert with check (true);
+
+create policy "Users can update their own KPI history" on monthly_kpi_history
+  for update using (true);
+
+-- Agent Targets RLS
+alter table agent_targets enable row level security;
+
+create policy "Agent targets are viewable by authenticated users" on agent_targets
+  for select using (true);
+
+create policy "Users can manage their own targets" on agent_targets
+  for insert with check (true);
+
+create policy "Users can update their own targets" on agent_targets
+  for update using (true);
+
+-- Achievements RLS
+alter table achievements enable row level security;
+
+create policy "Achievements are viewable by everyone" on achievements
+  for select using (true);
+
+-- Agent Achievements RLS
+alter table agent_achievements enable row level security;
+
+create policy "Agent achievements are viewable by everyone" on agent_achievements
+  for select using (true);
+
+create policy "System can insert agent achievements" on agent_achievements
+  for insert with check (true);
+
+create policy "System can update agent achievements" on agent_achievements
+  for update using (true);
+
+-- Leaderboard Points RLS
+alter table leaderboard_points enable row level security;
+
+create policy "Leaderboard is viewable by everyone" on leaderboard_points
+  for select using (true);
+
+create policy "System can manage leaderboard points" on leaderboard_points
+  for insert with check (true);
+
+create policy "System can update leaderboard points" on leaderboard_points
   for update using (true);
 
 -- =============================================
@@ -440,3 +609,135 @@ insert into notifications (user_id, type, title, message, link, read) values
   ('demo-agent-1', 'listing', 'Listing Update', 'Your listing "Luxury Beachfront Villa" received 5 new views today', '/inventory', true),
   ('demo-agent-2', 'system', 'Training Available', 'New training module "Digital Marketing" is now available', '/training', false),
   ('demo-agent-3', 'request', 'New Request', 'New client looking for 4BR villa in Tilal Al Ghaf', '/requests', false);
+
+-- =============================================
+-- SEED DATA - Achievements
+-- =============================================
+
+insert into achievements (code, name, description, category, rarity, icon, points, criteria) values
+  ('first_deal', 'First Deal', 'Close your first real estate deal', 'milestone', 'common', 'trophy', 10, '{"deals_closed": 1}'),
+  ('million_maker', 'Million Maker', 'Close deals worth over 1M AED total', 'milestone', 'rare', 'gem', 25, '{"total_revenue": 1000000}'),
+  ('ten_million', 'Ten Million Club', 'Close deals worth over 10M AED total', 'milestone', 'epic', 'diamond', 50, '{"total_revenue": 10000000}'),
+  ('hundred_million', 'Hundred Million Legend', 'Close deals worth over 100M AED total', 'milestone', 'legendary', 'crown', 100, '{"total_revenue": 100000000}'),
+  ('hot_streak_5', 'Hot Streak', 'Close deals 5 days in a row', 'streak', 'rare', 'flame', 25, '{"streak_days": 5}'),
+  ('hot_streak_10', 'On Fire', 'Close deals 10 days in a row', 'streak', 'epic', 'fire', 50, '{"streak_days": 10}'),
+  ('speed_demon', 'Speed Demon', 'Respond to 50 inquiries within 10 minutes', 'special', 'epic', 'zap', 50, '{"fast_responses": 50}'),
+  ('top_performer', 'Top Performer', 'Be #1 on the leaderboard for a month', 'special', 'legendary', 'crown', 100, '{"top_rank_months": 1}'),
+  ('network_builder', 'Network Builder', 'Add 100 contacts to your CRM', 'milestone', 'common', 'users', 10, '{"contacts_added": 100}'),
+  ('consistent_3', 'Consistent Performer', 'Meet your monthly target 3 months in a row', 'streak', 'epic', 'target', 50, '{"targets_met_streak": 3}'),
+  ('growth_champion', 'Growth Champion', 'Increase your monthly revenue by 50%', 'special', 'rare', 'trending-up', 25, '{"revenue_growth_pct": 50}'),
+  ('early_bird', 'Early Bird', 'Schedule 20 viewings before 9 AM', 'special', 'common', 'clock', 10, '{"early_viewings": 20}'),
+  ('palm_specialist', 'Palm Jumeirah Specialist', 'Close 10 deals in Palm Jumeirah', 'milestone', 'epic', 'star', 50, '{"area_deals": {"palm-jumeirah": 10}}'),
+  ('rental_master', 'Rental Master', 'Complete 50 rental transactions', 'milestone', 'rare', 'key', 25, '{"rentals_closed": 50}'),
+  ('listing_king', 'Listing King', 'Create 100 listings', 'milestone', 'rare', 'layers', 25, '{"listings_created": 100}');
+
+-- =============================================
+-- SEED DATA - Agent Achievements (Unlocked)
+-- =============================================
+
+insert into agent_achievements (agent_id, achievement_id, unlocked_at, progress, max_progress)
+select 'demo-agent-1', id, now() - interval '30 days', 1, 1
+from achievements where code = 'first_deal';
+
+insert into agent_achievements (agent_id, achievement_id, unlocked_at, progress, max_progress)
+select 'demo-agent-1', id, now() - interval '15 days', 1, 1
+from achievements where code = 'million_maker';
+
+insert into agent_achievements (agent_id, achievement_id, unlocked_at, progress, max_progress)
+select 'demo-agent-1', id, now() - interval '5 days', 1, 1
+from achievements where code = 'hot_streak_5';
+
+-- In-progress achievements
+insert into agent_achievements (agent_id, achievement_id, progress, max_progress)
+select 'demo-agent-1', id, 38, 50
+from achievements where code = 'speed_demon';
+
+insert into agent_achievements (agent_id, achievement_id, progress, max_progress)
+select 'demo-agent-1', id, 67, 100
+from achievements where code = 'network_builder';
+
+insert into agent_achievements (agent_id, achievement_id, progress, max_progress)
+select 'demo-agent-1', id, 6, 10
+from achievements where code = 'palm_specialist';
+
+-- =============================================
+-- SEED DATA - Agent Targets
+-- =============================================
+
+insert into agent_targets (agent_id, deals_target, commission_target, listings_target, viewings_target) values
+  ('demo-agent-1', 5, 500000, 15, 30),
+  ('demo-agent-2', 12, 250000, 25, 50),
+  ('demo-agent-3', 4, 400000, 12, 25),
+  ('demo-agent-4', 6, 450000, 18, 35);
+
+-- =============================================
+-- SEED DATA - Leaderboard Points
+-- =============================================
+
+insert into leaderboard_points (agent_id, points, streak_days, last_activity_date, weekly_points, monthly_points, yearly_points) values
+  ('demo-agent-1', 2450, 12, current_date, 320, 890, 2450),
+  ('demo-agent-2', 1890, 5, current_date, 280, 720, 1890),
+  ('demo-agent-3', 1650, 8, current_date, 245, 650, 1650),
+  ('demo-agent-4', 1320, 3, current_date, 180, 520, 1320);
+
+-- =============================================
+-- SEED DATA - 12-Month KPI History
+-- =============================================
+
+-- Generate 12 months of KPI history for each demo agent
+insert into monthly_kpi_history (
+  agent_id, year, month, deals_closed, deals_target, revenue, revenue_target,
+  commission_earned, commission_target, listings_created, listings_target,
+  viewings_conducted, viewings_target, leads_generated, leads_converted,
+  avg_response_time_mins, client_satisfaction_score
+)
+select
+  agent_id,
+  extract(year from month_date)::integer as year,
+  extract(month from month_date)::integer as month,
+  -- Deals with some variance
+  greatest(0, base_deals + floor(random() * 3 - 1)::integer) as deals_closed,
+  deals_target,
+  -- Revenue based on deals
+  (greatest(0, base_deals + floor(random() * 3 - 1)::integer) * avg_deal_value * (0.8 + random() * 0.4))::numeric as revenue,
+  (deals_target * avg_deal_value)::numeric as revenue_target,
+  -- Commission (3% of revenue)
+  (greatest(0, base_deals + floor(random() * 3 - 1)::integer) * avg_deal_value * 0.03 * (0.8 + random() * 0.4))::numeric as commission_earned,
+  (deals_target * avg_deal_value * 0.03)::numeric as commission_target,
+  -- Listings
+  greatest(0, base_listings + floor(random() * 5 - 2)::integer) as listings_created,
+  listings_target,
+  -- Viewings
+  greatest(0, base_viewings + floor(random() * 10 - 5)::integer) as viewings_conducted,
+  viewings_target,
+  -- Leads
+  floor(random() * 20 + 10)::integer as leads_generated,
+  floor(random() * 8 + 2)::integer as leads_converted,
+  -- Response time and satisfaction
+  floor(random() * 30 + 5)::integer as avg_response_time_mins,
+  (3.5 + random() * 1.5)::numeric as client_satisfaction_score
+from (
+  -- Generate 12 months back from current date for each agent
+  select
+    a.agent_id,
+    a.base_deals,
+    a.deals_target,
+    a.avg_deal_value,
+    a.base_listings,
+    a.listings_target,
+    a.base_viewings,
+    a.viewings_target,
+    generate_series(
+      date_trunc('month', current_date - interval '11 months'),
+      date_trunc('month', current_date),
+      interval '1 month'
+    )::date as month_date
+  from (
+    values
+      ('demo-agent-1', 4, 5, 3800000, 12, 15, 28, 30),
+      ('demo-agent-2', 9, 12, 450000, 22, 25, 48, 50),
+      ('demo-agent-3', 3, 4, 2800000, 9, 12, 20, 25),
+      ('demo-agent-4', 5, 6, 1500000, 15, 18, 35, 35)
+  ) as a(agent_id, base_deals, deals_target, avg_deal_value, base_listings, listings_target, base_viewings, viewings_target)
+) as monthly_data
+on conflict (agent_id, year, month) do nothing;
