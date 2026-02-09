@@ -54,7 +54,7 @@ export function HeroSection() {
         >
           Discover Luxury
           <br />
-          <span className="text-amber-400">Living in Dubai</span>
+          <span className="text-blue-400">Living in Dubai</span>
         </motion.h1>
 
         <motion.p

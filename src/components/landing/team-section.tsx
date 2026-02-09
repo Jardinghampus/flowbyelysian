@@ -88,7 +88,7 @@ export function TeamSection() {
           transition={{ duration: 0.6 }}
           className="mb-16 text-center"
         >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-amber-600">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Our Experts
           </p>
           <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-4">
@@ -128,13 +128,13 @@ export function TeamSection() {
                   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
                     <a
                       href={`mailto:${member.email}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-amber-500 hover:text-white transition-colors"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-blue-500 hover:text-white transition-colors"
                     >
                       <Mail className="h-4 w-4" />
                     </a>
                     <a
                       href={`tel:${member.phone}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-amber-500 hover:text-white transition-colors"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-blue-500 hover:text-white transition-colors"
                     >
                       <Phone className="h-4 w-4" />
                     </a>
@@ -143,7 +143,7 @@ export function TeamSection() {
                         href={member.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-amber-500 hover:text-white transition-colors"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-900 hover:bg-blue-500 hover:text-white transition-colors"
                       >
                         <Linkedin className="h-4 w-4" />
                       </a>
@@ -156,7 +156,7 @@ export function TeamSection() {
                   <h3 className="text-xl font-bold text-neutral-900">
                     {member.name}
                   </h3>
-                  <p className="text-amber-600 font-medium text-sm mb-2">
+                  <p className="text-blue-600 font-medium text-sm mb-2">
                     {member.role}
                   </p>
                   <p className="text-neutral-500 text-sm">

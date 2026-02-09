@@ -70,7 +70,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-amber-500",
+                    "text-sm font-medium transition-colors hover:text-blue-500",
                     isScrolled ? "text-neutral-600" : "text-white/90"
                   )}
                 >
@@ -154,7 +154,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block text-lg font-medium text-neutral-900 py-2 hover:text-amber-600 transition-colors"
+                    className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
                   >
                     {link.label}
                   </a>
@@ -164,7 +164,7 @@ export function Navbar() {
               <div className="mt-8 pt-8 border-t border-neutral-200 space-y-4">
                 <a
                   href="tel:+971501234567"
-                  className="flex items-center gap-3 text-neutral-600 hover:text-amber-600 transition-colors"
+                  className="flex items-center gap-3 text-neutral-600 hover:text-blue-600 transition-colors"
                 >
                   <Phone className="h-5 w-5" />
                   +971 50 123 4567

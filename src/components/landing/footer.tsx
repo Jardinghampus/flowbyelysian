@@ -62,7 +62,7 @@ export function Footer() {
             </div>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-full bg-amber-500 px-8 py-4 text-neutral-900 font-semibold hover:bg-amber-400 transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-4 text-white font-semibold hover:bg-blue-500 transition-colors whitespace-nowrap"
             >
               Get in Touch
             </Link>
@@ -76,7 +76,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 font-bold text-xl text-neutral-900">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 font-bold text-xl text-white">
                 E
               </div>
               <span className="text-2xl font-bold">ELYSIAN</span>
@@ -89,14 +89,14 @@ export function Footer() {
             <div className="space-y-3">
               <a
                 href="tel:+971501234567"
-                className="flex items-center gap-3 text-white/80 hover:text-amber-400 transition-colors"
+                className="flex items-center gap-3 text-white/80 hover:text-blue-400 transition-colors"
               >
                 <Phone className="h-5 w-5" />
                 +971 50 123 4567
               </a>
               <a
                 href="mailto:hello@elysian.ae"
-                className="flex items-center gap-3 text-white/80 hover:text-amber-400 transition-colors"
+                className="flex items-center gap-3 text-white/80 hover:text-blue-400 transition-colors"
               >
                 <Mail className="h-5 w-5" />
                 hello@elysian.ae
@@ -118,7 +118,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-amber-500 hover:text-neutral-900 transition-colors"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-blue-500 hover:text-white transition-colors"
                   aria-label={social.label}
                 >
                   <social.icon className="h-5 w-5" />
@@ -135,7 +135,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-amber-400 transition-colors"
+                    className="text-white/60 hover:text-blue-400 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -151,7 +151,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-amber-400 transition-colors"
+                    className="text-white/60 hover:text-blue-400 transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -167,7 +167,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-amber-400 transition-colors"
+                    className="text-white/60 hover:text-blue-400 transition-colors"
                   >
                     {link.label}
                   </Link>

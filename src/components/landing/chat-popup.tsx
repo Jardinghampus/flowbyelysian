@@ -118,7 +118,7 @@ export function ChatPopup() {
             className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 text-white shadow-2xl hover:bg-neutral-800 transition-colors"
           >
             <MessageCircle className="h-7 w-7" />
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold">
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
               1
             </span>
           </motion.button>
@@ -143,7 +143,7 @@ export function ChatPopup() {
             {/* Header */}
             <div className="flex items-center justify-between bg-neutral-900 px-4 py-3 text-white">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500">
                   <Bot className="h-5 w-5" />
                 </div>
                 <div>
@@ -191,7 +191,7 @@ export function ChatPopup() {
                             "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
                             msg.role === "user"
                               ? "bg-neutral-900"
-                              : "bg-amber-500"
+                              : "bg-blue-500"
                           )}
                         >
                           {msg.role === "user" ? (
@@ -216,7 +216,7 @@ export function ChatPopup() {
                     ))}
                     {isLoading && (
                       <div className="flex gap-2">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-500">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-500">
                           <Bot className="h-4 w-4 text-white" />
                         </div>
                         <div className="rounded-2xl bg-white px-4 py-3 border border-neutral-200">

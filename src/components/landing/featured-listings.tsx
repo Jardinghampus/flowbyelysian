@@ -69,6 +69,30 @@ const featuredListings: Listing[] = [
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop",
     type: "Villa",
   },
+  {
+    id: "5",
+    title: "Emirates Hills Mansion",
+    location: "Emirates Hills",
+    price: 45000000,
+    priceLabel: "AED 45M",
+    bedrooms: 7,
+    bathrooms: 8,
+    size: 12000,
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2670&auto=format&fit=crop",
+    type: "Mansion",
+  },
+  {
+    id: "6",
+    title: "JBR Beachfront Apartment",
+    location: "JBR",
+    price: 3200000,
+    priceLabel: "AED 3.2M",
+    bedrooms: 2,
+    bathrooms: 2,
+    size: 1450,
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2670&auto=format&fit=crop",
+    type: "Apartment",
+  },
 ]
 
 const containerVariants = {
@@ -94,115 +118,199 @@ const itemVariants = {
 }
 
 export function FeaturedListings() {
+  const mainListing = featuredListings[0]
+  const topRow = featuredListings.slice(1, 3)
+  const bottomRow = featuredListings.slice(3, 6)
+
   return (
-    <section className="py-24 bg-white">
-      <div className="mx-auto max-w-7xl px-4">
+    <section className="py-20 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between"
+          className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4"
         >
           <div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-amber-600">
+            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
               Exclusive Properties
             </p>
-            <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl">
+            <h2 className="text-3xl font-bold text-neutral-900 md:text-4xl lg:text-5xl">
               Featured Listings
             </h2>
           </div>
           <Link
             href="/inventory"
-            className="mt-6 inline-flex items-center text-neutral-900 font-medium hover:text-amber-600 transition-colors md:mt-0"
+            className="inline-flex items-center text-neutral-900 font-medium hover:text-blue-600 transition-colors"
           >
             View All Properties
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </motion.div>
 
-        {/* Listings Grid */}
+        {/* Listings Grid - 1 big + 2 top + 3 bottom */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-5"
         >
-          {featuredListings.map((listing, index) => (
+          {/* Main Featured Listing - Left Column */}
+          <motion.div
+            variants={itemVariants}
+            className="lg:row-span-2 group cursor-pointer"
+          >
+            <Link href={`/inventory?id=${mainListing.id}`}>
+              <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
+                <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full min-h-[500px]">
+                  <Image
+                    src={mainListing.image}
+                    alt={mainListing.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                  {/* Featured Badge */}
+                  <div className="absolute top-4 left-4 rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white">
+                    Featured
+                  </div>
+
+                  {/* Type Badge */}
+                  <div className="absolute top-4 right-4 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
+                    {mainListing.type}
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {mainListing.location}
+                    </div>
+                    <h3 className="font-bold text-white text-2xl md:text-3xl mb-4">
+                      {mainListing.title}
+                    </h3>
+
+                    {/* Property Details */}
+                    <div className="flex items-center gap-4 text-white/90 text-sm mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <Bed className="h-4 w-4" />
+                        <span>{mainListing.bedrooms} Beds</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Bath className="h-4 w-4" />
+                        <span>{mainListing.bathrooms} Baths</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Maximize className="h-4 w-4" />
+                        <span>{mainListing.size.toLocaleString()} sqft</span>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <p className="font-bold text-white text-2xl">
+                      {mainListing.priceLabel}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Top Row - 2 Cards */}
+          {topRow.map((listing) => (
             <motion.div
               key={listing.id}
               variants={itemVariants}
-              className={`group cursor-pointer ${
-                index === 0 ? "md:col-span-2 md:row-span-2" : ""
-              }`}
+              className="group cursor-pointer"
             >
               <Link href={`/inventory?id=${listing.id}`}>
-                <div className="relative overflow-hidden rounded-2xl bg-neutral-100">
-                  <div
-                    className={`relative ${
-                      index === 0 ? "aspect-[4/3] md:aspect-[4/5]" : "aspect-[4/3]"
-                    }`}
-                  >
+                <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
+                  <div className="relative aspect-[4/3]">
                     <Image
                       src={listing.image}
                       alt={listing.title}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* Badge */}
-                    {listing.featured && (
-                      <div className="absolute top-4 left-4 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
-                        Featured
-                      </div>
-                    )}
-
                     {/* Type Badge */}
-                    <div className="absolute top-4 right-4 rounded-full bg-white/90 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
+                    <div className="absolute top-3 right-3 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
                       {listing.type}
                     </div>
 
                     {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
-                        <MapPin className="h-3.5 w-3.5" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="flex items-center gap-1.5 text-white/80 text-xs mb-1">
+                        <MapPin className="h-3 w-3" />
                         {listing.location}
                       </div>
-                      <h3
-                        className={`font-bold text-white mb-3 ${
-                          index === 0 ? "text-2xl md:text-3xl" : "text-lg"
-                        }`}
-                      >
+                      <h3 className="font-semibold text-white text-base mb-2 line-clamp-1">
                         {listing.title}
                       </h3>
 
-                      {/* Property Details */}
-                      <div className="flex items-center gap-4 text-white/90 text-sm mb-4">
-                        <div className="flex items-center gap-1">
-                          <Bed className="h-4 w-4" />
-                          <span>{listing.bedrooms}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-white/80 text-xs">
+                          <span>{listing.bedrooms} Beds</span>
+                          <span>{listing.bathrooms} Baths</span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Bath className="h-4 w-4" />
-                          <span>{listing.bathrooms}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Maximize className="h-4 w-4" />
-                          <span>{listing.size.toLocaleString()} sqft</span>
-                        </div>
+                        <p className="font-bold text-white text-lg">
+                          {listing.priceLabel}
+                        </p>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
 
-                      {/* Price */}
-                      <p
-                        className={`font-bold text-white ${
-                          index === 0 ? "text-2xl" : "text-xl"
-                        }`}
-                      >
-                        {listing.priceLabel}
-                      </p>
+          {/* Bottom Row - 3 Cards */}
+          {bottomRow.map((listing) => (
+            <motion.div
+              key={listing.id}
+              variants={itemVariants}
+              className="group cursor-pointer"
+            >
+              <Link href={`/inventory?id=${listing.id}`}>
+                <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
+                  <div className="relative aspect-[4/3]">
+                    <Image
+                      src={listing.image}
+                      alt={listing.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                    {/* Type Badge */}
+                    <div className="absolute top-3 right-3 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
+                      {listing.type}
+                    </div>
+
+                    {/* Content Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="flex items-center gap-1.5 text-white/80 text-xs mb-1">
+                        <MapPin className="h-3 w-3" />
+                        {listing.location}
+                      </div>
+                      <h3 className="font-semibold text-white text-base mb-2 line-clamp-1">
+                        {listing.title}
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-white/80 text-xs">
+                          <span>{listing.bedrooms} Beds</span>
+                          <span>{listing.bathrooms} Baths</span>
+                        </div>
+                        <p className="font-bold text-white text-lg">
+                          {listing.priceLabel}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

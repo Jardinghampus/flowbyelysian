@@ -58,7 +58,7 @@ export function AreasSection() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-amber-600">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Where We Work
           </p>
           <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-4">
@@ -206,7 +206,7 @@ export function AreaGallery() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-amber-600">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Also Serving
           </p>
           <h2 className="text-3xl font-bold text-neutral-900 md:text-4xl">
