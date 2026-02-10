@@ -215,46 +215,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* GSAP ScrollSmoother optimizations */
-#smooth-wrapper {
-  overflow: hidden;
-  position: fixed;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-#smooth-content {
-  overflow: visible;
-  width: 100%;
-  will-change: transform;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Hardware acceleration for parallax elements */
-[data-speed],
-[data-lag] {
-  will-change: transform;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Optimize images for parallax */
-[data-speed] img,
-[data-lag] img {
-  will-change: transform;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
 /* Logo carousel animation */
 @keyframes logo-scroll {
   0% {
