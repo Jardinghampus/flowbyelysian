@@ -92,7 +92,7 @@ export function Navbar() {
                 +971 50 123 4567
               </a>
               <Link
-                href="/sign-in"
+                href="/dashboard"
                 className={cn(
                   "rounded-full px-6 py-2.5 text-sm font-semibold transition-colors",
                   isScrolled
@@ -170,7 +170,7 @@ export function Navbar() {
                   +971 50 123 4567
                 </a>
                 <Link
-                  href="/sign-in"
+                  href="/dashboard"
                   className="block w-full rounded-full bg-neutral-900 px-6 py-3 text-center text-white font-semibold hover:bg-neutral-800 transition-colors"
                 >
                   Agent Login
