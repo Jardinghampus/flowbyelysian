@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { ChartAreaInteractive } from "./components/chart-area-interactive"
 import { SectionCards } from "./components/section-cards"
 import { AgentPerformanceTable } from "./components/agent-performance-table"
+import { MyMatchesWidget } from "./components/my-matches-widget"
 import ColourfulText from "@/components/ui/colourful-text"
 
 export default function Page() {
@@ -26,7 +27,17 @@ export default function Page() {
       {mounted && (
         <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full mt-6">
           <SectionCards />
-          <ChartAreaInteractive />
+
+          {/* My Matches Widget and Chart side by side on larger screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <MyMatchesWidget />
+            </div>
+            <div className="lg:col-span-2">
+              <ChartAreaInteractive />
+            </div>
+          </div>
+
           <AgentPerformanceTable />
         </div>
       )}

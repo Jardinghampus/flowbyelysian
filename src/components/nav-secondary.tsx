@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { type LucideIcon } from "lucide-react"
 import Link from "next/link"
@@ -8,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 export function NavSecondary({
@@ -20,6 +23,8 @@ export function NavSecondary({
     icon: LucideIcon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const { setOpenMobile } = useSidebar()
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -27,7 +32,7 @@ export function NavSecondary({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild size="sm" className="cursor-pointer">
-                <Link href={item.url}>
+                <Link href={item.url} onClick={() => setOpenMobile(false)}>
                   <item.icon />
                   <span>{item.title}</span>
                 </Link>
