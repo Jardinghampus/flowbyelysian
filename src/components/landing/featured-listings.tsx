@@ -1,9 +1,16 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { useEffect, useRef } from "react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Bed, Bath, Maximize, MapPin } from "lucide-react"
+
+// Register GSAP plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 interface Listing {
   id: string
@@ -83,42 +90,73 @@ const featuredListings: Listing[] = [
   },
 ]
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.1, 0.25, 1] as const,
-    },
-  },
-}
-
 export function FeaturedListings() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
+
   const mainListing = featuredListings[0]
   const topRow = featuredListings.slice(1, 3)
   const bottomRow = featuredListings.slice(3, 5)
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Header animation
+      gsap.fromTo(
+        headerRef.current,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: headerRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        }
+      )
+
+      // Cards staggered animation
+      const cards = cardsRef.current?.querySelectorAll(".listing-card")
+      if (cards) {
+        gsap.fromTo(
+          cards,
+          {
+            opacity: 0,
+            y: 80,
+            scale: 0.95,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: {
+              amount: 0.6,
+              from: "start",
+            },
+            scrollTrigger: {
+              trigger: cardsRef.current,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        )
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section className="py-20 bg-white">
+    <section ref={sectionRef} className="py-20 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <div
+          ref={headerRef}
           className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4"
         >
           <div>
@@ -130,28 +168,22 @@ export function FeaturedListings() {
             </h2>
           </div>
           <Link
-            href="/inventory"
+            href="/properties"
             className="inline-flex items-center text-neutral-900 font-medium hover:text-blue-600 transition-colors"
           >
             View All Properties
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
-        </motion.div>
+        </div>
 
-        {/* Listings Grid - 1 big + 2 top + 3 bottom */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+        {/* Listings Grid */}
+        <div
+          ref={cardsRef}
           className="grid grid-cols-1 lg:grid-cols-3 gap-5"
         >
-          {/* Main Featured Listing - Left Column */}
-          <motion.div
-            variants={itemVariants}
-            className="lg:row-span-2 group cursor-pointer"
-          >
-            <Link href={`/inventory?id=${mainListing.id}`}>
+          {/* Main Featured Listing */}
+          <div className="listing-card lg:row-span-2 group cursor-pointer">
+            <Link href={`/properties/${mainListing.id}`}>
               <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
                 <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full min-h-[500px]">
                   <Image
@@ -162,17 +194,14 @@ export function FeaturedListings() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                  {/* Featured Badge */}
                   <div className="absolute top-4 left-4 rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white">
                     Featured
                   </div>
 
-                  {/* Type Badge */}
                   <div className="absolute top-4 right-4 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
                     {mainListing.type}
                   </div>
 
-                  {/* Content Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
                       <MapPin className="h-3.5 w-3.5" />
@@ -182,7 +211,6 @@ export function FeaturedListings() {
                       {mainListing.title}
                     </h3>
 
-                    {/* Property Details */}
                     <div className="flex items-center gap-4 text-white/90 text-sm mb-4">
                       <div className="flex items-center gap-1.5">
                         <Bed className="h-4 w-4" />
@@ -198,7 +226,6 @@ export function FeaturedListings() {
                       </div>
                     </div>
 
-                    {/* Price */}
                     <p className="font-bold text-white text-2xl">
                       {mainListing.priceLabel}
                     </p>
@@ -206,16 +233,15 @@ export function FeaturedListings() {
                 </div>
               </div>
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Top Row - 2 Cards */}
+          {/* Top Row */}
           {topRow.map((listing) => (
-            <motion.div
+            <div
               key={listing.id}
-              variants={itemVariants}
-              className="group cursor-pointer"
+              className="listing-card group cursor-pointer"
             >
-              <Link href={`/inventory?id=${listing.id}`}>
+              <Link href={`/properties/${listing.id}`}>
                 <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
                   <div className="relative aspect-[4/3]">
                     <Image
@@ -226,12 +252,10 @@ export function FeaturedListings() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* Type Badge */}
                     <div className="absolute top-3 right-3 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
                       {listing.type}
                     </div>
 
-                    {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <div className="flex items-center gap-1.5 text-white/80 text-xs mb-1">
                         <MapPin className="h-3 w-3" />
@@ -254,17 +278,16 @@ export function FeaturedListings() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
 
-          {/* Bottom Row - 3 Cards */}
+          {/* Bottom Row */}
           {bottomRow.map((listing) => (
-            <motion.div
+            <div
               key={listing.id}
-              variants={itemVariants}
-              className="group cursor-pointer"
+              className="listing-card group cursor-pointer"
             >
-              <Link href={`/inventory?id=${listing.id}`}>
+              <Link href={`/properties/${listing.id}`}>
                 <div className="relative overflow-hidden rounded-2xl bg-neutral-100 h-full">
                   <div className="relative aspect-[4/3]">
                     <Image
@@ -275,12 +298,10 @@ export function FeaturedListings() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* Type Badge */}
                     <div className="absolute top-3 right-3 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-xs font-medium text-neutral-900">
                       {listing.type}
                     </div>
 
-                    {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <div className="flex items-center gap-1.5 text-white/80 text-xs mb-1">
                         <MapPin className="h-3 w-3" />
@@ -303,9 +324,9 @@ export function FeaturedListings() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
