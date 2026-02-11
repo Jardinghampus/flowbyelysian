@@ -10,6 +10,7 @@ import { AgentPerformanceTable } from "./components/agent-performance-table"
 import { MyMatchesWidget } from "./components/my-matches-widget"
 import { ActivityFeed } from "./components/activity-feed"
 import { QuickActions } from "./components/quick-actions"
+import { OnboardingProgress } from "./components/onboarding-progress"
 import { RippleButton } from "@/components/ui/ripple-button"
 import ColourfulText from "@/components/ui/colourful-text"
 
@@ -110,7 +111,8 @@ export default function Page() {
             </div>
 
             {/* Right Column - 20% */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
+              <OnboardingProgress />
               <QuickActions />
             </div>
           </div>
