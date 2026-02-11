@@ -108,20 +108,38 @@ export function ChatPopup() {
       {/* Chat Button */}
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 text-white shadow-2xl hover:bg-neutral-800 transition-colors"
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
           >
-            <MessageCircle className="h-7 w-7" />
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
-              1
-            </span>
-          </motion.button>
+            {/* CTA Label */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Try our AI Assistant
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsOpen(true)}
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 text-white shadow-2xl hover:bg-neutral-800 transition-colors"
+            >
+              <MessageCircle className="h-7 w-7" />
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
+                1
+              </span>
+            </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
 

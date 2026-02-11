@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import { ExternalLink, Search, BarChart3, Home, Users } from "lucide-react"
 import { ChartAreaInteractive } from "./components/chart-area-interactive"
 import { SectionCards } from "./components/section-cards"
 import { AgentPerformanceTable } from "./components/agent-performance-table"
 import { MyMatchesWidget } from "./components/my-matches-widget"
+import { ActivityFeed } from "./components/activity-feed"
+import { QuickActions } from "./components/quick-actions"
 import { RippleButton } from "@/components/ui/ripple-button"
 import ColourfulText from "@/components/ui/colourful-text"
 
@@ -47,44 +50,79 @@ export default function Page() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       {/* Hero Section */}
-      <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center px-4 py-6">
-        Welcome to <ColourfulText text="Eflow" />
-      </h1>
-      <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-normal text-center px-4">
-        Your real estate dashboard powered by Elysian
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center px-4 py-6">
+          Welcome to <ColourfulText text="Eflow" />
+        </h1>
+        <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-normal text-center px-4">
+          Your real estate dashboard powered by Elysian
+        </p>
+      </motion.div>
 
       {/* Quick Links */}
-      <div className="flex flex-wrap items-center justify-center gap-3 px-4 mt-6">
-        {quickLinks.map((link) => (
-          <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
-            <RippleButton
-              variant="outline"
-              className={`${link.color} border`}
-            >
-              <link.icon className="h-4 w-4 mr-2" />
-              {link.name}
-              <ExternalLink className="h-3 w-3 ml-2 opacity-50" />
-            </RippleButton>
-          </Link>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex flex-wrap items-center justify-center gap-3 px-4 mt-6"
+      >
+        {quickLinks.map((link, index) => (
+          <motion.div
+            key={link.name}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 + index * 0.05 }}
+          >
+            <Link href={link.url} target="_blank" rel="noopener noreferrer">
+              <RippleButton
+                variant="outline"
+                className={`${link.color} border`}
+              >
+                <link.icon className="h-4 w-4 mr-2" />
+                {link.name}
+                <ExternalLink className="h-3 w-3 ml-2 opacity-50" />
+              </RippleButton>
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {mounted && (
         <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full mt-6">
+          {/* Trend Cards */}
           <SectionCards />
 
-          {/* My Matches Widget and Chart side by side on larger screens */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
+          {/* Main Content Grid - 40/40/20 proportions */}
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+            {/* Left Column - 40% */}
+            <div className="lg:col-span-4 space-y-6">
               <MyMatchesWidget />
+              <ActivityFeed />
             </div>
-            <div className="lg:col-span-2">
+
+            {/* Middle Column - 40% */}
+            <div className="lg:col-span-4">
               <ChartAreaInteractive />
+            </div>
+
+            {/* Right Column - 20% */}
+            <div className="lg:col-span-2">
+              <QuickActions />
             </div>
           </div>
 
-          <AgentPerformanceTable />
+          {/* Agent Performance Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <AgentPerformanceTable />
+          </motion.div>
         </div>
       )}
     </div>
