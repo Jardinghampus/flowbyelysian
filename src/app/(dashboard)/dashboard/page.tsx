@@ -11,6 +11,7 @@ import { MyMatchesWidget } from "./components/my-matches-widget"
 import { ActivityFeed } from "./components/activity-feed"
 import { QuickActions } from "./components/quick-actions"
 import { OnboardingProgress } from "./components/onboarding-progress"
+import { TeamSidebar } from "./components/team-sidebar"
 import { RippleButton } from "@/components/ui/ripple-button"
 import ColourfulText from "@/components/ui/colourful-text"
 
@@ -93,38 +94,56 @@ export default function Page() {
       </motion.div>
 
       {mounted && (
-        <div className="@container/main px-4 sm:px-6 lg:px-6 space-y-6 w-full max-w-full mt-6">
-          {/* Trend Cards */}
-          <SectionCards />
+        <div className="@container/main px-4 sm:px-6 lg:px-6 w-full max-w-full mt-6">
+          {/* Main Layout with Team Sidebar */}
+          <div className="flex gap-6">
+            {/* Main Content Area */}
+            <div className="flex-1 space-y-6 min-w-0">
+              {/* Trend Cards */}
+              <SectionCards />
 
-          {/* Main Content Grid - 40/40/20 proportions */}
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-            {/* Left Column - 40% */}
-            <div className="lg:col-span-4 space-y-6">
-              <MyMatchesWidget />
-              <ActivityFeed />
+              {/* Content Grid - 50/30/20 proportions */}
+              <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+                {/* Left Column - 50% */}
+                <div className="lg:col-span-5 space-y-6">
+                  <MyMatchesWidget />
+                  <ActivityFeed />
+                </div>
+
+                {/* Middle Column - 30% */}
+                <div className="lg:col-span-3">
+                  <ChartAreaInteractive />
+                </div>
+
+                {/* Right Column - 20% */}
+                <div className="lg:col-span-2 space-y-6">
+                  <OnboardingProgress />
+                  <QuickActions />
+                </div>
+              </div>
+
+              {/* Agent Performance Table */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <AgentPerformanceTable />
+              </motion.div>
             </div>
 
-            {/* Middle Column - 40% */}
-            <div className="lg:col-span-4">
-              <ChartAreaInteractive />
-            </div>
-
-            {/* Right Column - 20% */}
-            <div className="lg:col-span-2 space-y-6">
-              <OnboardingProgress />
-              <QuickActions />
+            {/* Team Sidebar - Fixed width on large screens */}
+            <div className="hidden xl:block w-80 shrink-0">
+              <div className="sticky top-6">
+                <TeamSidebar />
+              </div>
             </div>
           </div>
 
-          {/* Agent Performance Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <AgentPerformanceTable />
-          </motion.div>
+          {/* Team Sidebar for smaller screens - shows below content */}
+          <div className="xl:hidden mt-6">
+            <TeamSidebar />
+          </div>
         </div>
       )}
     </div>
