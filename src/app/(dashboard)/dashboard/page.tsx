@@ -51,97 +51,75 @@ export default function Page() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
-      {/* Hero Section */}
+      {/* Hero Section - Compact */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="text-center px-4 py-4"
       >
-        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-center px-4 py-6">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
           Welcome to <ColourfulText text="Eflow" />
         </h1>
-        <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-normal text-center px-4">
+        <p className="text-sm text-muted-foreground mt-1">
           Your real estate dashboard powered by Elysian
         </p>
       </motion.div>
 
-      {/* Quick Links */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="flex flex-wrap items-center justify-center gap-3 px-4 mt-6"
-      >
-        {quickLinks.map((link, index) => (
-          <motion.div
-            key={link.name}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 + index * 0.05 }}
-          >
-            <Link href={link.url} target="_blank" rel="noopener noreferrer">
-              <RippleButton
-                variant="outline"
-                className={`${link.color} border`}
-              >
-                <link.icon className="h-4 w-4 mr-2" />
-                {link.name}
-                <ExternalLink className="h-3 w-3 ml-2 opacity-50" />
-              </RippleButton>
-            </Link>
-          </motion.div>
+      {/* Quick Links - Compact */}
+      <div className="flex flex-wrap items-center justify-center gap-2 px-4 mb-4">
+        {quickLinks.map((link) => (
+          <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
+            <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs`}>
+              <link.icon className="h-3 w-3 mr-1.5" />
+              {link.name}
+              <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-50" />
+            </RippleButton>
+          </Link>
         ))}
-      </motion.div>
+      </div>
 
       {mounted && (
-        <div className="@container/main px-4 sm:px-6 lg:px-6 w-full max-w-full mt-6">
-          {/* Main Layout with Team Sidebar */}
-          <div className="flex gap-6">
-            {/* Main Content Area */}
-            <div className="flex-1 space-y-6 min-w-0">
+        <div className="px-4 w-full max-w-full">
+          {/* Main Layout */}
+          <div className="flex gap-4">
+            {/* Main Content */}
+            <div className="flex-1 space-y-4 min-w-0">
               {/* Trend Cards */}
               <SectionCards />
 
-              {/* Content Grid - 50/30/20 proportions */}
-              <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                {/* Left Column - 50% */}
-                <div className="lg:col-span-5 space-y-6">
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Left: Matches + Activity stacked */}
+                <div className="space-y-4">
                   <MyMatchesWidget />
                   <ActivityFeed />
                 </div>
 
-                {/* Middle Column - 30% */}
-                <div className="lg:col-span-3">
+                {/* Right: Chart + Actions */}
+                <div className="space-y-4">
                   <ChartAreaInteractive />
-                </div>
-
-                {/* Right Column - 20% */}
-                <div className="lg:col-span-2 space-y-6">
-                  <OnboardingProgress />
-                  <QuickActions />
+                  <div className="grid grid-cols-2 gap-4">
+                    <OnboardingProgress />
+                    <QuickActions />
+                  </div>
                 </div>
               </div>
 
-              {/* Agent Performance Table */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <AgentPerformanceTable />
-              </motion.div>
+              {/* Performance Table */}
+              <AgentPerformanceTable />
             </div>
 
-            {/* Team Sidebar - Fixed width on large screens */}
-            <div className="hidden xl:block w-80 shrink-0">
-              <div className="sticky top-6">
+            {/* Team Sidebar - Desktop */}
+            <div className="hidden xl:block w-64 shrink-0">
+              <div className="sticky top-4">
                 <TeamSidebar />
               </div>
             </div>
           </div>
 
-          {/* Team Sidebar for smaller screens - shows below content */}
-          <div className="xl:hidden mt-6">
+          {/* Team Sidebar - Mobile */}
+          <div className="xl:hidden mt-4">
             <TeamSidebar />
           </div>
         </div>

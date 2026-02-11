@@ -112,27 +112,27 @@ function AgentRow({ agent, onClick }: { agent: Agent; onClick: () => void }) {
       animate={{ opacity: 1, x: 0 }}
       whileHover={{ backgroundColor: "rgba(0,0,0,0.03)" }}
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left"
+      className="w-full flex items-center gap-2 p-1.5 rounded-lg transition-colors text-left"
     >
       <div className="relative">
-        <Avatar className="h-10 w-10">
+        <Avatar className="h-8 w-8">
           <AvatarImage src={agent.avatar} />
-          <AvatarFallback className="bg-primary/10 text-sm font-medium">
+          <AvatarFallback className="bg-primary/10 text-xs font-medium">
             {agent.initials}
           </AvatarFallback>
         </Avatar>
         <span
           className={cn(
-            "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background",
+            "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background",
             agent.isOnline ? "bg-green-500" : "bg-gray-300"
           )}
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{agent.name}</p>
-        <p className="text-xs text-muted-foreground truncate">{agent.area}</p>
+        <p className="font-medium text-xs truncate">{agent.name}</p>
+        <p className="text-[10px] text-muted-foreground truncate">{agent.area}</p>
       </div>
-      <RippleButton variant="outline" size="sm" className="text-xs h-7 px-3">
+      <RippleButton variant="outline" size="sm" className="text-[10px] h-6 px-2">
         Contact
       </RippleButton>
     </motion.button>
@@ -220,22 +220,22 @@ export function TeamSidebar() {
   return (
     <>
       <Card className="h-fit">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 pt-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Team</CardTitle>
+            <CardTitle className="text-base">Team</CardTitle>
             <Link href="/users">
-              <RippleButton variant="outline" size="sm" className="text-xs">
+              <RippleButton variant="outline" size="sm" className="text-[10px] h-6 px-2">
                 See All
               </RippleButton>
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 pb-4">
           {/* New Team Members */}
           {newAgents.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2">New Members</p>
-              <div className="space-y-1">
+              <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">New Members</p>
+              <div className="space-y-0.5">
                 {newAgents.slice(0, 3).map((agent, index) => (
                   <motion.div
                     key={agent.id}
@@ -253,8 +253,8 @@ export function TeamSidebar() {
           {/* Online Now */}
           {onlineAgents.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2">Online Now</p>
-              <div className="space-y-1">
+              <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Online Now</p>
+              <div className="space-y-0.5">
                 {onlineAgents.slice(0, 4).map((agent, index) => (
                   <motion.div
                     key={agent.id}

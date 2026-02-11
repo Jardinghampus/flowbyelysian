@@ -68,14 +68,14 @@ const activityColors = {
 
 export function ActivityFeed() {
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Clock className="h-5 w-5 text-muted-foreground" />
+    <Card>
+      <CardHeader className="pb-2 pt-4">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
           Recent Activity
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 pb-4">
         {activities.map((activity, index) => {
           const Icon = activityIcons[activity.type]
           return (

@@ -379,7 +379,7 @@ export function MyMatchesWidget() {
         ) : (
           <>
             {/* Mini swipe card */}
-            <div className="relative h-[280px] mb-4">
+            <div className="relative h-[220px] mb-3">
               <AnimatePresence>
                 {pendingMatches.slice(0, 1).map((match) => (
                   <MiniSwipeCard
@@ -392,15 +392,15 @@ export function MyMatchesWidget() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3">
               <RippleButton
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-full border-2 border-red-200 hover:bg-red-50 hover:border-red-300"
+                className="h-10 w-10 rounded-full border-2 border-red-200 hover:bg-red-50 hover:border-red-300"
                 onClick={() => handleSwipe("left")}
                 rippleColor="rgba(239, 68, 68, 0.3)"
               >
-                <X className="h-6 w-6 text-red-500" />
+                <X className="h-5 w-5 text-red-500" />
               </RippleButton>
 
               <span className="text-xs text-muted-foreground">
@@ -410,17 +410,13 @@ export function MyMatchesWidget() {
               <RippleButton
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-full border-2 border-green-200 hover:bg-green-50 hover:border-green-300"
+                className="h-10 w-10 rounded-full border-2 border-green-200 hover:bg-green-50 hover:border-green-300"
                 onClick={() => handleSwipe("right")}
                 rippleColor="rgba(34, 197, 94, 0.3)"
               >
-                <Heart className="h-6 w-6 text-green-500" />
+                <Heart className="h-5 w-5 text-green-500" />
               </RippleButton>
             </div>
-
-            <p className="text-center text-xs text-muted-foreground mt-3">
-              Swipe or tap to review matches
-            </p>
           </>
         )}
       </CardContent>

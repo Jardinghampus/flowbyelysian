@@ -136,55 +136,50 @@ export function OnboardingProgress() {
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-base flex items-center gap-2">
               {allCompleted ? (
                 <>
-                  <Trophy className="h-5 w-5 text-green-500" />
-                  Onboarding Complete!
+                  <Trophy className="h-4 w-4 text-green-500" />
+                  Complete!
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-5 w-5 text-primary" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   Getting Started
                 </>
               )}
-            </CardTitle>
-            <div className="flex items-center gap-3 mt-2">
-              <Progress value={progress} className="flex-1 h-2" />
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-xs font-normal text-muted-foreground ml-auto">
                 {completedCount}/{steps.length}
               </span>
-            </div>
+            </CardTitle>
+            <Progress value={progress} className="h-1.5 mt-2" />
           </CardHeader>
 
-          <CardContent className="pt-2">
+          <CardContent className="pt-1 pb-3">
             {allCompleted ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-4"
+                className="text-center py-2"
               >
-                <p className="text-sm text-muted-foreground mb-3">
-                  You're all set! Start closing deals.
-                </p>
                 <Link href="/inventory">
-                  <RippleButton size="sm">
+                  <RippleButton size="sm" className="text-xs">
                     View Inventory
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="h-3 w-3 ml-1" />
                   </RippleButton>
                 </Link>
               </motion.div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {steps.map((step, index) => (
                   <motion.div
                     key={step.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.03 }}
                     className={cn(
-                      "flex items-center gap-3 p-2 rounded-lg transition-colors",
+                      "flex items-center gap-2 p-1.5 rounded transition-colors",
                       step.completed ? "bg-green-500/10" : "hover:bg-muted"
                     )}
                   >
@@ -193,27 +188,19 @@ export function OnboardingProgress() {
                       className="shrink-0"
                     >
                       {step.completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
                       ) : (
-                        <Circle className="h-5 w-5 text-muted-foreground" />
+                        <Circle className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                     <Link href={step.href} className="flex-1 min-w-0">
                       <p className={cn(
-                        "text-sm font-medium truncate",
+                        "text-xs font-medium truncate",
                         step.completed && "line-through text-muted-foreground"
                       )}>
                         {step.title}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {step.description}
-                      </p>
                     </Link>
-                    {!step.completed && (
-                      <Link href={step.href}>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </Link>
-                    )}
                   </motion.div>
                 ))}
               </div>
