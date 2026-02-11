@@ -15,6 +15,7 @@ interface TargetMetric {
   icon: React.ReactNode
   current: number
   target: number
+  min?: number
   max: number
   unit: string
   color: string
@@ -35,9 +36,10 @@ const defaultTargets: TargetMetric[] = [
     id: "commission",
     label: "Commission Target",
     icon: <DollarSign className="h-4 w-4" />,
-    current: 280000,
-    target: 500000,
-    max: 1000000,
+    current: 85000,
+    target: 125000,
+    min: 10000,
+    max: 150000,
     unit: "AED",
     color: "bg-blue-500",
   },
@@ -153,9 +155,9 @@ export function PersonalTargets() {
                 </span>
                 <Slider
                   value={[metric.target]}
-                  min={1}
+                  min={metric.min ?? 1}
                   max={metric.max}
-                  step={metric.unit === "AED" ? 50000 : 1}
+                  step={metric.unit === "AED" ? 5000 : 1}
                   onValueChange={([value]) => handleTargetChange(metric.id, value)}
                   className="flex-1"
                 />
