@@ -184,30 +184,35 @@ export function AppSidebar() {
           {/* Logout */}
           <SidebarLogoutButton open={open} />
 
-          {/* Dark Mode Toggle */}
-          <div className="flex items-center justify-between px-2 py-2">
-            <Label htmlFor="dark-mode-toggle" className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-[#00d4ff]" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-              <motion.span
-                animate={{
-                  display: open ? "inline-block" : "none",
-                  opacity: open ? 1 : 0,
-                }}
-                className="text-sm whitespace-pre"
-              >
-                {theme === "dark" ? "Light Mode" : "Dark Mode"}
-              </motion.span>
-            </Label>
-            <Switch
-              id="dark-mode-toggle"
-              checked={theme === "dark"}
-              onCheckedChange={(newChecked) => setTheme(newChecked ? "dark" : "light")}
-            />
-          </div>
+          {/* Dark Mode Toggle - Only visible when sidebar is open */}
+          <motion.div
+            initial={false}
+            animate={{
+              opacity: open ? 1 : 0,
+              height: open ? "auto" : 0,
+              marginTop: open ? 8 : 0,
+            }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-2 py-2">
+              <Label htmlFor="dark-mode-toggle" className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-[#00d4ff]" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+                <span className="text-sm whitespace-pre">
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </span>
+              </Label>
+              <Switch
+                id="dark-mode-toggle"
+                checked={theme === "dark"}
+                onCheckedChange={(newChecked) => setTheme(newChecked ? "dark" : "light")}
+              />
+            </div>
+          </motion.div>
         </div>
       </SidebarBody>
     </Sidebar>
