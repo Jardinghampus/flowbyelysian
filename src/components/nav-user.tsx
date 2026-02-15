@@ -8,7 +8,7 @@ import {
   CircleUser,
 } from "lucide-react"
 import Link from "next/link"
-import { SignOutButton, useUser } from "@clerk/nextjs"
+import { useDemoUser, useDemoClerk } from "@/contexts/demo-user-context"
 
 import { Logo } from "@/components/logo"
 import {
@@ -37,10 +37,15 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { user: clerkUser } = useUser()
+  const { user: demoUser } = useDemoUser()
+  const { signOut } = useDemoClerk()
 
-  const displayName = clerkUser?.fullName || clerkUser?.firstName || defaultUser.name
-  const displayEmail = clerkUser?.primaryEmailAddress?.emailAddress || defaultUser.email
+  const displayName = demoUser?.fullName || demoUser?.firstName || defaultUser.name
+  const displayEmail = demoUser?.primaryEmailAddress?.emailAddress || defaultUser.email
+
+  const handleSignOut = () => {
+    signOut({ redirectUrl: "/sign-in" })
+  }
 
   return (
     <SidebarMenu>
@@ -104,12 +109,10 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <SignOutButton>
-              <DropdownMenuItem className="cursor-pointer">
-                <LogOut />
-                Log out
-              </DropdownMenuItem>
-            </SignOutButton>
+            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

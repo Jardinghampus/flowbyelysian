@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 
 // Type definitions
 type AreaRow = { id: string; slug: string; name: string; description: string | null; image: string | null }

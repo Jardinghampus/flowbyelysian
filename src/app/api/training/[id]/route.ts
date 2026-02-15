@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 
 // GET /api/training/:id - Get single training module
 export async function GET(
@@ -43,15 +43,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check admin status
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
+    // Demo mode: allow admin access
     const { id } = await params
     const body = await request.json()
     const supabase = createServerClient()
@@ -90,15 +82,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check admin status
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
+    // Demo mode: allow admin access
     const { id } = await params
     const supabase = createServerClient()
 

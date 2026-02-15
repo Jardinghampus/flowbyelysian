@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useUser } from "@clerk/nextjs"
+import { useDemoUser } from "@/contexts/demo-user-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -37,7 +37,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>
 
 export default function AccountSettings() {
-  const { user, isLoaded } = useUser()
+  const { user, isLoaded } = useDemoUser()
   const [saving, setSaving] = useState(false)
 
   const form = useForm<AccountFormValues>({
@@ -65,25 +65,14 @@ export default function AccountSettings() {
   async function onSubmit(data: AccountFormValues) {
     setSaving(true)
     try {
-      // Update user profile via Clerk
+      // Demo mode: simulate update
       await user?.update({
         firstName: data.firstName,
         lastName: data.lastName,
       })
 
-      // Update metadata via API
-      const res = await fetch("/api/user/metadata", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: data.phone,
-          area: data.area,
-        }),
-      })
-
-      if (!res.ok) {
-        throw new Error("Failed to update profile")
-      }
+      // Demo mode: simulate API call
+      console.log("Demo mode: Profile update simulated", data)
 
       toast.success("Profile updated successfully")
     } catch (error) {
@@ -158,7 +147,7 @@ export default function AccountSettings() {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email changes are managed through Clerk security settings.
+                  Email changes are managed through account security settings.
                 </p>
               </div>
               <FormField
@@ -217,14 +206,14 @@ export default function AccountSettings() {
                 <div>
                   <h4 className="font-semibold">Password</h4>
                   <p className="text-sm text-muted-foreground">
-                    Change your password through Clerk security settings.
+                    Change your password through security settings.
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   type="button"
-                  onClick={() => window.open("https://accounts.clerk.dev/user/security", "_blank")}
                   className="cursor-pointer"
+                  onClick={() => toast.info("Demo mode: Security settings not available")}
                 >
                   Manage Security
                 </Button>

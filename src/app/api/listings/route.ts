@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@/lib/demo-auth"
 
 // GET /api/listings - List all listings with filters
 export async function GET(request: NextRequest) {

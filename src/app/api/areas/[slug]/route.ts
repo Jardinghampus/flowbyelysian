@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 import type { Database } from "@/lib/types/database.types"
 
 // Type definitions for query results

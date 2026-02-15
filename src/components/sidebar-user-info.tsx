@@ -1,13 +1,13 @@
 "use client"
 
-import { useClerk, useUser } from "@clerk/nextjs"
+import { useDemoUser, useDemoClerk } from "@/contexts/demo-user-context"
 import { cn } from "@/lib/utils"
 import { LogOut } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 
 export function SidebarUserInfo({ open }: { open: boolean }) {
-  const { user } = useUser()
+  const { user } = useDemoUser()
 
   return (
     <div className={cn(
@@ -62,7 +62,7 @@ export function SidebarUserInfo({ open }: { open: boolean }) {
 }
 
 export function SidebarLogoutButton({ open }: { open: boolean }) {
-  const { signOut } = useClerk()
+  const { signOut } = useDemoClerk()
 
   const handleSignOut = () => {
     signOut({ redirectUrl: "/sign-in" })

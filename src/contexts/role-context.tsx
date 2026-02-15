@@ -28,58 +28,17 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>("user")
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  // Demo mode: Default to admin role for full demo access
+  const [role, setRole] = useState<UserRole>("admin")
+  const [userEmail, setUserEmail] = useState<string | null>("jardinghampus@gmail.com")
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Dynamically import Clerk to avoid SSR issues
-    import("@clerk/nextjs").then(({ useUser }) => {
-      // We can't use hooks here, so we'll use Clerk's client-side API instead
-    }).catch(() => {})
+    // Demo mode: Set admin role immediately
+    setRole("admin")
+    setUserEmail("jardinghampus@gmail.com")
   }, [])
-
-  // Use a separate effect to fetch user data on the client
-  useEffect(() => {
-    if (!mounted) return
-
-    // Use Clerk's window object if available
-    const checkUser = async () => {
-      try {
-        // Access Clerk from window if available
-        const clerk = (window as unknown as { Clerk?: { user?: { primaryEmailAddress?: { emailAddress?: string } } } }).Clerk
-        if (clerk?.user) {
-          const email = clerk.user.primaryEmailAddress?.emailAddress || ""
-          setUserEmail(email)
-          const emailLower = email.toLowerCase()
-          if (ADMIN_EMAILS.includes(emailLower)) {
-            setRole("admin")
-          } else if (AGENT_EMAILS.includes(emailLower)) {
-            setRole("agent")
-          } else {
-            setRole("user")
-          }
-        }
-      } catch {
-        // Silently fail during SSR
-      }
-    }
-
-    // Poll for Clerk to be ready
-    const interval = setInterval(() => {
-      const clerk = (window as unknown as { Clerk?: { user?: { primaryEmailAddress?: { emailAddress?: string } } } }).Clerk
-      if (clerk?.user) {
-        checkUser()
-        clearInterval(interval)
-      }
-    }, 100)
-
-    // Also try immediately
-    checkUser()
-
-    return () => clearInterval(interval)
-  }, [mounted])
 
   // Permission helpers
   const canEditListing = (listingOwnerId: string, currentUserId: string): boolean => {

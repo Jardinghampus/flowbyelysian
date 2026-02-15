@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 import { pdf } from "@react-pdf/renderer"
 import { MonthlyReport, type MonthlyReportData } from "@/lib/pdf/monthly-report"
 import { createClient } from "@supabase/supabase-js"

@@ -1,17 +1,12 @@
 "use client"
 
-import { ClerkProvider } from "@clerk/nextjs"
+import { DemoUserProvider } from "@/contexts/demo-user-context"
 
+// Demo mode: Using mock user context instead of Clerk
 export function ClerkProviderWrapper({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-
-  if (!publishableKey) {
-    return <>{children}</>
-  }
-
-  return <ClerkProvider>{children}</ClerkProvider>
+  return <DemoUserProvider>{children}</DemoUserProvider>
 }

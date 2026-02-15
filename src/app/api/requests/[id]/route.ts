@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 
 // GET /api/requests/:id - Get single request
 export async function GET(
@@ -50,7 +50,7 @@ export async function PATCH(
     const body = await request.json()
     const supabase = createServerClient()
 
-    // Check ownership or admin status
+    // Check if request exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("client_requests")
@@ -62,14 +62,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Request not found" }, { status: 404 })
     }
 
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (existing.agent_id !== userId && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
+    // Demo mode: allow all updates (admin access)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: clientRequest, error } = await (supabase as any)
       .from("client_requests")
@@ -107,7 +100,7 @@ export async function DELETE(
     const { id } = await params
     const supabase = createServerClient()
 
-    // Check ownership or admin status
+    // Check if request exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("client_requests")
@@ -119,14 +112,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Request not found" }, { status: 404 })
     }
 
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (existing.agent_id !== userId && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
+    // Demo mode: allow all deletions (admin access)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from("client_requests")

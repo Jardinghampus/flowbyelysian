@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@/lib/demo-auth"
 
 // GET /api/admin/users - List all users (admin only)
 export async function GET() {
@@ -9,20 +9,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check admin status
+    // Demo mode: always admin access
     const clerk = await clerkClient()
-    const currentUser = await clerk.users.getUser(userId)
-    const isAdmin = currentUser.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
-    // Get all users from Clerk
-    const { data: users } = await clerk.users.getUserList({
-      limit: 100,
-      orderBy: "-created_at",
-    })
+    const { data: users } = await clerk.users.getUserList()
 
     const transformedUsers = users.map((user) => ({
       id: user.id,
@@ -53,15 +42,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check admin status
-    const clerk = await clerkClient()
-    const currentUser = await clerk.users.getUser(userId)
-    const isAdmin = currentUser.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
     const body = await request.json()
     const { email, firstName, lastName, role = "agent", area } = body
 
@@ -69,7 +49,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 })
     }
 
-    // Create invitation in Clerk
+    // Demo mode: simulate invitation creation
+    const clerk = await clerkClient()
     const invitation = await clerk.invitations.createInvitation({
       emailAddress: email,
       publicMetadata: {
@@ -91,16 +72,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
   } catch (error: unknown) {
     console.error("Error creating invitation:", error)
-
-    // Handle Clerk-specific errors
-    const clerkError = error as { errors?: Array<{ code?: string; message?: string }> }
-    if (clerkError.errors?.[0]?.code === "form_identifier_exists") {
-      return NextResponse.json(
-        { error: "A user with this email already exists or has a pending invitation" },
-        { status: 409 }
-      )
-    }
-
     return NextResponse.json(
       { error: "Failed to create invitation" },
       { status: 500 }

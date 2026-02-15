@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth, clerkClient, DEMO_USER } from "@/lib/demo-auth"
 
 // GET /api/admin/users/:id - Get single user
 export async function GET(
@@ -12,16 +12,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const clerk = await clerkClient()
-    const currentUser = await clerk.users.getUser(userId)
-    const isAdmin = currentUser.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
+    // Demo mode: return demo user
     const { id } = await params
-    const user = await clerk.users.getUser(id)
+    const user = DEMO_USER
 
     return NextResponse.json({
       user: {
@@ -57,47 +50,20 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const clerk = await clerkClient()
-    const currentUser = await clerk.users.getUser(userId)
-    const isAdmin = currentUser.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
     const { id } = await params
     const body = await request.json()
     const { role, area, firstName, lastName } = body
 
-    // Build update object
-    const updateData: {
-      firstName?: string
-      lastName?: string
-      publicMetadata?: Record<string, unknown>
-    } = {}
-
-    if (firstName !== undefined) updateData.firstName = firstName
-    if (lastName !== undefined) updateData.lastName = lastName
-
-    // Update publicMetadata
-    const targetUser = await clerk.users.getUser(id)
-    const currentMetadata = (targetUser.publicMetadata || {}) as Record<string, unknown>
-
-    updateData.publicMetadata = {
-      ...currentMetadata,
-      ...(role !== undefined && { role }),
-      ...(area !== undefined && { area }),
-    }
-
-    const updatedUser = await clerk.users.updateUser(id, updateData)
+    // Demo mode: simulate update
+    console.log("Demo mode: User update simulated", { id, role, area, firstName, lastName })
 
     return NextResponse.json({
       user: {
-        id: updatedUser.id,
-        name: `${updatedUser.firstName || ""} ${updatedUser.lastName || ""}`.trim() || "Unknown",
-        email: updatedUser.emailAddresses[0]?.emailAddress || "",
-        role: (updatedUser.publicMetadata?.role as string) || "agent",
-        area: (updatedUser.publicMetadata?.area as string) || null,
+        id,
+        name: `${firstName || DEMO_USER.firstName} ${lastName || DEMO_USER.lastName}`.trim(),
+        email: DEMO_USER.emailAddresses[0]?.emailAddress || "",
+        role: role || "agent",
+        area: area || null,
       },
     })
   } catch (error) {
@@ -120,14 +86,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const clerk = await clerkClient()
-    const currentUser = await clerk.users.getUser(userId)
-    const isAdmin = currentUser.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
     const { id } = await params
 
     // Prevent self-deletion
@@ -138,7 +96,8 @@ export async function DELETE(
       )
     }
 
-    await clerk.users.deleteUser(id)
+    // Demo mode: simulate deletion
+    console.log("Demo mode: User deletion simulated", id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

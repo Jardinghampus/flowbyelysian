@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 
 // GET /api/training - List all training modules
 export async function GET(request: NextRequest) {
@@ -42,15 +42,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check admin status
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 })
-    }
-
+    // Demo mode: allow admin access
     const body = await request.json()
     const supabase = createServerClient()
 

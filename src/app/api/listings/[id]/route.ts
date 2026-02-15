@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, clerkClient } from "@clerk/nextjs/server"
+import { auth } from "@/lib/demo-auth"
 
 // GET /api/listings/:id - Get single listing
 export async function GET(
@@ -47,7 +47,7 @@ export async function PATCH(
     const body = await request.json()
     const supabase = createServerClient()
 
-    // Check if user owns the listing or is admin
+    // Check if listing exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("listings")
@@ -59,15 +59,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    // Check admin status from Clerk metadata
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (existing.owner_id !== userId && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
+    // Demo mode: allow all updates (admin access)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: listing, error } = await (supabase as any)
       .from("listings")
@@ -105,7 +97,7 @@ export async function DELETE(
     const { id } = await params
     const supabase = createServerClient()
 
-    // Check ownership
+    // Check if listing exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("listings")
@@ -117,15 +109,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    // Check admin status
-    const clerk = await clerkClient()
-    const user = await clerk.users.getUser(userId)
-    const isAdmin = user.publicMetadata?.role === "admin"
-
-    if (existing.owner_id !== userId && !isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
+    // Demo mode: allow all deletions (admin access)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from("listings").delete().eq("id", id)
 
