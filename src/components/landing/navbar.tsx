@@ -7,6 +7,7 @@ import { Menu, X, Phone } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
+  { href: "/feature", label: "Features" },
   { href: "#properties", label: "Properties" },
   { href: "#areas", label: "Areas" },
   { href: "#team", label: "Our Team" },
@@ -66,16 +67,29 @@ export function Navbar() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-blue-500",
-                    isScrolled ? "text-neutral-600" : "text-white/90"
-                  )}
-                >
-                  {link.label}
-                </a>
+                link.href.startsWith("/") ? (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-blue-500",
+                      isScrolled ? "text-neutral-600" : "text-white/90"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-blue-500",
+                      isScrolled ? "text-neutral-600" : "text-white/90"
+                    )}
+                  >
+                    {link.label}
+                  </a>
+                )
               ))}
             </nav>
 
@@ -150,14 +164,25 @@ export function Navbar() {
 
               <nav className="space-y-4">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  link.href.startsWith("/") ? (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )
                 ))}
               </nav>
 

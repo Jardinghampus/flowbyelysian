@@ -3,9 +3,17 @@ import { createServerClient } from "@/lib/supabase/server"
 import { auth } from "@/lib/demo-auth"
 import OpenAI from "openai"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Lazy initialization to avoid build-time errors when OPENAI_API_KEY is not set
+let openai: OpenAI | null = null
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || "",
+    })
+  }
+  return openai
+}
 
 // POST /api/smart/chat - Send message and get AI response
 export async function POST(request: NextRequest) {
@@ -100,7 +108,7 @@ Guidelines:
 - Keep responses concise but comprehensive`
 
     // Call OpenAI
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: systemPrompt },

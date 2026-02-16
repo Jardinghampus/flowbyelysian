@@ -456,14 +456,14 @@ ${docs.map((d) => {
 }
 
 function generateFeatureResponse(docs: SmartDocument[]): string {
-  const allFeatures = new Map<string, number>()
+  const allFeatures: Record<string, number> = {}
   docs.forEach((d) => {
     d.analysis?.features?.forEach((f) => {
-      allFeatures.set(f, (allFeatures.get(f) || 0) + 1)
+      allFeatures[f] = (allFeatures[f] || 0) + 1
     })
   })
 
-  const sortedFeatures = [...allFeatures.entries()].sort((a, b) => b[1] - a[1])
+  const sortedFeatures = Object.entries(allFeatures).sort((a, b) => b[1] - a[1])
 
   return `**Feature Analysis:**
 
