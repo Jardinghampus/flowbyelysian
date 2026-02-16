@@ -741,3 +741,289 @@ from (
   ) as a(agent_id, base_deals, deals_target, avg_deal_value, base_listings, listings_target, base_viewings, viewings_target)
 ) as monthly_data
 on conflict (agent_id, year, month) do nothing;
+
+-- =============================================
+-- SMART APP - Document Intelligence Platform
+-- =============================================
+
+-- Enums for Smart
+create type smart_document_type as enum ('floor_plan', 'site_plan', 'plot_map', 'brochure', 'spec_sheet', 'contract', 'legal', 'other');
+create type smart_analysis_status as enum ('pending', 'processing', 'completed', 'failed');
+
+-- 15. SMART COLLECTIONS (Folders/Projects)
+create table smart_collections (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text not null, -- Owner
+  name text not null,
+  description text,
+  color text default '#6366f1', -- For UI display
+  icon text default 'folder', -- Icon name
+  is_default boolean default false, -- Default collection for uncategorized docs
+  document_count integer default 0, -- Denormalized for performance
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- 16. SMART DOCUMENTS
+create table smart_documents (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text not null, -- Owner
+  collection_id uuid references smart_collections(id) on delete set null,
+  name text not null,
+  description text,
+  document_type smart_document_type default 'other',
+  -- File info
+  file_url text not null, -- Supabase storage URL
+  file_name text not null,
+  file_size integer, -- in bytes
+  file_type text, -- MIME type
+  thumbnail_url text, -- Generated thumbnail
+  -- Location data (for map)
+  latitude numeric,
+  longitude numeric,
+  address text,
+  area_name text,
+  -- Property info (extracted or manual)
+  property_name text,
+  developer text,
+  project_name text,
+  -- Status
+  analysis_status smart_analysis_status default 'pending',
+  -- Timestamps
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- 17. SMART DOCUMENT ANALYSIS (Extracted data)
+create table smart_document_analysis (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references smart_documents(id) on delete cascade,
+  -- Extracted measurements
+  plot_size numeric, -- in sqft
+  built_up_area numeric, -- in sqft
+  bedroom_count integer,
+  bathroom_count integer,
+  floor_count integer,
+  parking_spaces integer,
+  -- Room dimensions (JSON for flexibility)
+  room_dimensions jsonb default '[]', -- [{name: "Master Bedroom", width: 15, length: 20, area: 300}]
+  -- Additional specs
+  balcony_area numeric,
+  terrace_area numeric,
+  garden_area numeric,
+  pool_size text, -- e.g., "10m x 5m"
+  -- Features detected
+  features jsonb default '[]', -- ["swimming_pool", "gym", "maid_room", "study"]
+  -- Raw extracted text (for AI context)
+  extracted_text text,
+  -- AI-generated summary
+  summary text,
+  -- Confidence scores
+  extraction_confidence numeric default 0,
+  -- Processing metadata
+  processed_at timestamp with time zone,
+  processing_time_ms integer,
+  model_used text
+);
+
+-- 18. SMART CHAT MESSAGES
+create table smart_chat_messages (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text not null,
+  collection_id uuid references smart_collections(id) on delete cascade, -- Chat per collection
+  -- Message content
+  role text not null check (role in ('user', 'assistant', 'system')),
+  content text not null,
+  -- Context references
+  document_ids uuid[] default '{}', -- Documents referenced in this message
+  -- AI metadata
+  model_used text,
+  tokens_used integer,
+  -- Timestamps
+  created_at timestamp with time zone default now()
+);
+
+-- 19. SMART DOCUMENT COMPARISONS (For comparison history)
+create table smart_document_comparisons (
+  id uuid primary key default uuid_generate_v4(),
+  user_id text not null,
+  name text, -- Optional name for saved comparison
+  document_ids uuid[] not null, -- Documents being compared (2+)
+  comparison_summary text, -- AI-generated comparison summary
+  comparison_data jsonb, -- Structured comparison data
+  created_at timestamp with time zone default now()
+);
+
+-- =============================================
+-- SMART APP - INDEXES
+-- =============================================
+
+create index idx_smart_collections_user on smart_collections(user_id);
+create index idx_smart_documents_user on smart_documents(user_id);
+create index idx_smart_documents_collection on smart_documents(collection_id);
+create index idx_smart_documents_type on smart_documents(document_type);
+create index idx_smart_documents_location on smart_documents(latitude, longitude) where latitude is not null;
+create index idx_smart_analysis_document on smart_document_analysis(document_id);
+create index idx_smart_chat_user on smart_chat_messages(user_id);
+create index idx_smart_chat_collection on smart_chat_messages(collection_id);
+create index idx_smart_comparisons_user on smart_document_comparisons(user_id);
+
+-- =============================================
+-- SMART APP - ROW LEVEL SECURITY
+-- =============================================
+
+alter table smart_collections enable row level security;
+alter table smart_documents enable row level security;
+alter table smart_document_analysis enable row level security;
+alter table smart_chat_messages enable row level security;
+alter table smart_document_comparisons enable row level security;
+
+-- Collections - users manage their own
+create policy "Users can view own collections" on smart_collections
+  for select using (true);
+
+create policy "Users can insert own collections" on smart_collections
+  for insert with check (true);
+
+create policy "Users can update own collections" on smart_collections
+  for update using (true);
+
+create policy "Users can delete own collections" on smart_collections
+  for delete using (true);
+
+-- Documents - users manage their own
+create policy "Users can view own documents" on smart_documents
+  for select using (true);
+
+create policy "Users can insert own documents" on smart_documents
+  for insert with check (true);
+
+create policy "Users can update own documents" on smart_documents
+  for update using (true);
+
+create policy "Users can delete own documents" on smart_documents
+  for delete using (true);
+
+-- Analysis - linked to documents
+create policy "Users can view document analysis" on smart_document_analysis
+  for select using (true);
+
+create policy "System can manage analysis" on smart_document_analysis
+  for insert with check (true);
+
+create policy "System can update analysis" on smart_document_analysis
+  for update using (true);
+
+-- Chat messages
+create policy "Users can view own chat" on smart_chat_messages
+  for select using (true);
+
+create policy "Users can insert chat messages" on smart_chat_messages
+  for insert with check (true);
+
+-- Comparisons
+create policy "Users can view own comparisons" on smart_document_comparisons
+  for select using (true);
+
+create policy "Users can manage comparisons" on smart_document_comparisons
+  for insert with check (true);
+
+create policy "Users can delete comparisons" on smart_document_comparisons
+  for delete using (true);
+
+-- =============================================
+-- SMART APP - SEED DATA
+-- =============================================
+
+-- Create a default collection for demo user
+insert into smart_collections (user_id, name, description, color, icon, is_default) values
+  ('demo-user-001', 'All Documents', 'Default collection for all documents', '#6366f1', 'folder', true),
+  ('demo-user-001', 'Palm Jumeirah Villas', 'Floor plans and specs for Palm Jumeirah properties', '#10b981', 'home', false),
+  ('demo-user-001', 'Downtown Apartments', 'Downtown Dubai property documents', '#f59e0b', 'building', false),
+  ('demo-user-001', 'Plot Comparisons', 'Land plots for comparison analysis', '#ef4444', 'map', false);
+
+-- Sample documents (URLs are placeholders - in production these would be Supabase storage URLs)
+insert into smart_documents (user_id, collection_id, name, description, document_type, file_url, file_name, file_size, file_type, property_name, developer, project_name, latitude, longitude, address, area_name, analysis_status) values
+  ('demo-user-001', (select id from smart_collections where name = 'Palm Jumeirah Villas' limit 1),
+   'Garden Villa Floor Plan', 'Ground floor and first floor layout', 'floor_plan',
+   '/demo/palm-villa-floor.pdf', 'palm-villa-floor.pdf', 2500000, 'application/pdf',
+   'Garden Villa Type A', 'Nakheel', 'Palm Jumeirah', 25.1124, 55.1390,
+   'Frond K, Palm Jumeirah', 'Palm Jumeirah', 'completed'),
+  ('demo-user-001', (select id from smart_collections where name = 'Palm Jumeirah Villas' limit 1),
+   'Signature Villa Specs', 'Technical specifications and measurements', 'spec_sheet',
+   '/demo/signature-specs.pdf', 'signature-specs.pdf', 1800000, 'application/pdf',
+   'Signature Villa', 'Nakheel', 'Palm Jumeirah', 25.1150, 55.1420,
+   'Frond M, Palm Jumeirah', 'Palm Jumeirah', 'completed'),
+  ('demo-user-001', (select id from smart_collections where name = 'Downtown Apartments' limit 1),
+   'Burj Vista 2BR Layout', 'Two bedroom apartment floor plan', 'floor_plan',
+   '/demo/burj-vista-2br.pdf', 'burj-vista-2br.pdf', 1500000, 'application/pdf',
+   'Burj Vista Tower 1', 'Emaar', 'Downtown Dubai', 25.1972, 55.2744,
+   'Downtown Dubai', 'Downtown Dubai', 'completed'),
+  ('demo-user-001', (select id from smart_collections where name = 'Plot Comparisons' limit 1),
+   'Tilal Al Ghaf Plot A12', 'Corner plot with lagoon view', 'plot_map',
+   '/demo/tag-plot-a12.pdf', 'tag-plot-a12.pdf', 3200000, 'application/pdf',
+   'Plot A12', 'Majid Al Futtaim', 'Tilal Al Ghaf', 25.0156, 55.2048,
+   'Harmony Phase 2', 'Tilal Al Ghaf', 'completed'),
+  ('demo-user-001', (select id from smart_collections where name = 'Plot Comparisons' limit 1),
+   'Tilal Al Ghaf Plot B7', 'Standard plot with park view', 'plot_map',
+   '/demo/tag-plot-b7.pdf', 'tag-plot-b7.pdf', 2800000, 'application/pdf',
+   'Plot B7', 'Majid Al Futtaim', 'Tilal Al Ghaf', 25.0162, 55.2055,
+   'Harmony Phase 2', 'Tilal Al Ghaf', 'completed');
+
+-- Sample analysis data
+insert into smart_document_analysis (document_id, plot_size, built_up_area, bedroom_count, bathroom_count, floor_count, parking_spaces, room_dimensions, balcony_area, garden_area, pool_size, features, summary, extraction_confidence) values
+  ((select id from smart_documents where name = 'Garden Villa Floor Plan' limit 1),
+   8500, 6200, 5, 6, 2, 3,
+   '[{"name": "Master Bedroom", "width": 18, "length": 22, "area": 396}, {"name": "Living Room", "width": 25, "length": 30, "area": 750}, {"name": "Kitchen", "width": 15, "length": 20, "area": 300}]',
+   450, 2200, '12m x 6m',
+   '["private_pool", "maid_room", "driver_room", "home_cinema", "gym", "sauna"]',
+   'Luxurious 5-bedroom Garden Villa on Palm Jumeirah featuring 6,200 sqft built-up area on 8,500 sqft plot. Includes private pool, separate maid and driver quarters, home cinema, and gym. Prime location on Frond K with beach access.',
+   0.92),
+  ((select id from smart_documents where name = 'Signature Villa Specs' limit 1),
+   15000, 12500, 7, 8, 3, 5,
+   '[{"name": "Master Suite", "width": 25, "length": 30, "area": 750}, {"name": "Grand Living", "width": 35, "length": 45, "area": 1575}, {"name": "Dining Hall", "width": 20, "length": 25, "area": 500}]',
+   800, 4500, '18m x 10m',
+   '["infinity_pool", "beach_access", "private_marina", "elevator", "wine_cellar", "spa", "staff_quarters"]',
+   'Ultra-luxury 7-bedroom Signature Villa spanning 12,500 sqft on a 15,000 sqft beachfront plot. Features private marina, infinity pool, beach access, elevator, wine cellar, and full spa. Includes separate staff quarters.',
+   0.95),
+  ((select id from smart_documents where name = 'Burj Vista 2BR Layout' limit 1),
+   null, 1450, 2, 3, 1, 1,
+   '[{"name": "Master Bedroom", "width": 14, "length": 16, "area": 224}, {"name": "Living/Dining", "width": 18, "length": 24, "area": 432}, {"name": "Second Bedroom", "width": 12, "length": 14, "area": 168}]',
+   180, null, null,
+   '["burj_khalifa_view", "balcony", "built_in_wardrobes", "premium_finishes"]',
+   'Premium 2-bedroom apartment in Burj Vista with stunning Burj Khalifa views. 1,450 sqft living space with spacious balcony. High-end finishes throughout with built-in wardrobes.',
+   0.89),
+  ((select id from smart_documents where name = 'Tilal Al Ghaf Plot A12' limit 1),
+   12000, null, null, null, null, null,
+   '[]',
+   null, 12000, null,
+   '["corner_plot", "lagoon_view", "premium_location", "g_plus_2_allowance"]',
+   'Premium corner plot (12,000 sqft) in Harmony Phase 2 with direct lagoon views. G+2 building allowance. One of the most sought-after locations in Tilal Al Ghaf.',
+   0.94),
+  ((select id from smart_documents where name = 'Tilal Al Ghaf Plot B7' limit 1),
+   9500, null, null, null, null, null,
+   '[]',
+   null, 9500, null,
+   '["park_view", "standard_plot", "g_plus_1_allowance", "near_amenities"]',
+   'Standard plot (9,500 sqft) in Harmony Phase 2 with park views. G+1 building allowance. Close to community amenities and retail.',
+   0.93);
+
+-- Update collection document counts
+update smart_collections set document_count = (
+  select count(*) from smart_documents where collection_id = smart_collections.id
+);
+
+-- Sample chat messages
+insert into smart_chat_messages (user_id, collection_id, role, content, document_ids) values
+  ('demo-user-001', (select id from smart_collections where name = 'Palm Jumeirah Villas' limit 1),
+   'user', 'What is the size difference between the Garden Villa and Signature Villa?',
+   (select array_agg(id) from smart_documents where name like '%Villa%')),
+  ('demo-user-001', (select id from smart_collections where name = 'Palm Jumeirah Villas' limit 1),
+   'assistant', 'Based on the floor plans and specifications:\n\n**Garden Villa:**\n- Plot Size: 8,500 sqft\n- Built-up Area: 6,200 sqft\n- Bedrooms: 5\n- Bathrooms: 6\n\n**Signature Villa:**\n- Plot Size: 15,000 sqft\n- Built-up Area: 12,500 sqft\n- Bedrooms: 7\n- Bathrooms: 8\n\n**Key Differences:**\n- The Signature Villa is almost **twice the size** (6,300 sqft more built-up area)\n- Plot is 6,500 sqft larger\n- 2 additional bedrooms\n- Premium features include private marina, infinity pool, and elevator\n- Price point would be significantly higher (typically 3-4x)',
+   (select array_agg(id) from smart_documents where name like '%Villa%')),
+  ('demo-user-001', (select id from smart_collections where name = 'Plot Comparisons' limit 1),
+   'user', 'Compare the two plots in Tilal Al Ghaf - which is better for investment?',
+   (select array_agg(id) from smart_documents where name like '%Plot%')),
+  ('demo-user-001', (select id from smart_collections where name = 'Plot Comparisons' limit 1),
+   'assistant', 'Here''s a comparison of the two Tilal Al Ghaf plots:\n\n**Plot A12 (Corner Plot)**\n- Size: 12,000 sqft\n- View: Lagoon view\n- Building: G+2 allowance\n- Premium: ✅ Corner location\n\n**Plot B7 (Standard Plot)**\n- Size: 9,500 sqft\n- View: Park view\n- Building: G+1 allowance\n- Proximity: Near amenities\n\n**Investment Analysis:**\n\n🏆 **Plot A12 is the better investment** for these reasons:\n1. **26% larger** plot (2,500 sqft more)\n2. **G+2 vs G+1** - Can build 50% more floors\n3. **Lagoon view** commands premium pricing\n4. **Corner plots** typically appreciate 15-20% faster\n5. **Scarcity** - Limited corner lagoon-view plots\n\nHowever, Plot B7 offers **lower entry price** and proximity to amenities, making it suitable for end-users who want convenience over maximum returns.',
+   (select array_agg(id) from smart_documents where name like '%Plot%'));

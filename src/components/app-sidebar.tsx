@@ -18,6 +18,7 @@ import {
   Newspaper,
   MapPin,
   FileText,
+  Brain,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -100,6 +101,11 @@ const navItems = [
     icon: <Mail className="h-5 w-5 flex-shrink-0" />,
   },
   // AI Tools
+  {
+    label: "Smart",
+    href: "/smart",
+    icon: <Brain className="h-5 w-5 flex-shrink-0" />,
+  },
   {
     label: "AI Bot",
     href: "/ai-assistant",
