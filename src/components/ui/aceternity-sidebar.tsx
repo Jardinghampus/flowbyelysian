@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import Link, { LinkProps } from "next/link"
-import React, { useState, createContext, useContext } from "react"
+import React, { useState, createContext, useContext, useCallback, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
@@ -16,6 +16,8 @@ interface SidebarContextProps {
   open: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   animate: boolean
+  closeSidebar: () => void
+  lockedRef: React.MutableRefObject<boolean>
 }
 
 const SidebarContext = createContext<SidebarContextProps | undefined>(undefined)
@@ -40,12 +42,18 @@ export const SidebarProvider = ({
   animate?: boolean
 }) => {
   const [openState, setOpenState] = useState(false)
+  const lockedRef = useRef(false)
 
   const open = openProp !== undefined ? openProp : openState
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState
 
+  const closeSidebar = useCallback(() => {
+    setOpen(false)
+    lockedRef.current = true
+  }, [setOpen])
+
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate, closeSidebar, lockedRef }}>
       {children}
     </SidebarContext.Provider>
   )
@@ -85,7 +93,7 @@ export const DesktopSidebar = ({
   children,
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
-  const { open, setOpen, animate } = useSidebar()
+  const { open, setOpen, animate, lockedRef } = useSidebar()
   return (
     <motion.div
       className={cn(
@@ -95,8 +103,14 @@ export const DesktopSidebar = ({
       animate={{
         width: animate ? (open ? "300px" : "70px") : "300px",
       }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+      onMouseEnter={() => {
+        lockedRef.current = false
+        setOpen(true)
+      }}
+      onMouseLeave={() => {
+        setOpen(false)
+      }}
       {...props}
     >
       {children}
@@ -114,7 +128,7 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 w-full"
+          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-neutral-800/60 w-full"
         )}
         {...props}
       >
@@ -124,12 +138,12 @@ export const MobileSidebar = ({
           </div>
           <span className="font-bold text-lg">FLOW</span>
         </div>
-        <div className="flex z-20">
-          <Menu
-            className="text-neutral-800 dark:text-neutral-200 cursor-pointer h-6 w-6"
-            onClick={() => setOpen(!open)}
-          />
-        </div>
+        <button
+          className="flex z-20 p-2 -mr-2 rounded-lg active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
+          onClick={() => setOpen(!open)}
+        >
+          <Menu className="text-neutral-800 dark:text-neutral-200 h-5 w-5" />
+        </button>
         <AnimatePresence>
           {open && (
             <motion.div
@@ -138,19 +152,19 @@ export const MobileSidebar = ({
               exit={{ x: "-100%", opacity: 0 }}
               transition={{
                 duration: 0.3,
-                ease: "easeInOut",
+                ease: [0.25, 0.1, 0.25, 1],
               }}
               className={cn(
                 "fixed h-full w-full inset-0 bg-white dark:bg-black p-6 z-[100] flex flex-col justify-between overflow-y-auto",
                 className
               )}
             >
-              <div
-                className="absolute right-6 top-6 z-50 text-neutral-800 dark:text-neutral-200 cursor-pointer p-2"
-                onClick={() => setOpen(!open)}
+              <button
+                className="absolute right-5 top-5 z-50 text-neutral-500 dark:text-neutral-400 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                onClick={() => setOpen(false)}
               >
-                <X className="h-6 w-6" />
-              </div>
+                <X className="h-5 w-5" />
+              </button>
               {children}
             </motion.div>
           )}
@@ -171,15 +185,16 @@ export const SidebarLink = ({
   isActive?: boolean
   props?: LinkProps
 }) => {
-  const { open, animate } = useSidebar()
+  const { open, animate, closeSidebar } = useSidebar()
   return (
     <Link
       href={link.href}
+      onClick={() => closeSidebar()}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md transition-colors",
+        "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-lg transition-all duration-200",
         isActive
           ? "bg-primary/10 text-primary"
-          : "hover:bg-neutral-200 dark:hover:bg-neutral-700",
+          : "hover:bg-neutral-100 dark:hover:bg-neutral-800/60",
         className
       )}
       {...props}

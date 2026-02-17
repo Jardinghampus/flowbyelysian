@@ -29,7 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
+import { CollapsibleCard } from "@/components/ui/collapsible-card"
 import { cn } from "@/lib/utils"
 
 import agentData from "../data/agent-performance.json"
@@ -157,12 +158,15 @@ export function AgentPerformanceTable() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg sm:text-xl">Agent Performance</CardTitle>
-
+    <CollapsibleCard
+      title="Agent Performance"
+      icon={<Trophy className="h-4 w-4 text-muted-foreground" />}
+      defaultOpen={false}
+      storageKey="agent-performance"
+    >
+      <CardContent className="pt-0">
         {/* Filters - Mobile Responsive */}
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="flex flex-col gap-3">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -224,9 +228,7 @@ export function AgentPerformanceTable() {
             </Select>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="p-0 sm:p-6 sm:pt-0">
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <Table>
@@ -387,6 +389,6 @@ export function AgentPerformanceTable() {
           )}
         </div>
       </CardContent>
-    </Card>
+    </CollapsibleCard>
   )
 }

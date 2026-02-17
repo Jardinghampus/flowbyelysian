@@ -150,7 +150,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
-      <SidebarBody className="justify-between gap-6 md:gap-10 border-r border-neutral-200 dark:border-neutral-800">
+      <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
           {open ? <LogoFull /> : <LogoIcon />}
@@ -174,7 +174,7 @@ export function AppSidebar() {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col gap-1 border-t border-neutral-200 dark:border-neutral-800 pt-4">
+        <div className="flex flex-col gap-1 border-t border-neutral-200/60 dark:border-white/[0.06] pt-4">
           {/* Settings */}
           {bottomLinks.map((item, idx) => {
             const isActive = pathname.startsWith(item.href)

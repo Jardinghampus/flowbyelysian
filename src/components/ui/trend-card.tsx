@@ -43,21 +43,21 @@ export function TrendCard({
 }: TrendCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: delay * 0.1 }}
+      transition={{ duration: 0.35, delay: delay * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <Card className={cn("relative border dark:border-white/10", className)}>
-        <div className="flex p-4">
-          <div className="flex flex-col gap-y-2">
-            <dt className="text-sm text-muted-foreground font-medium">{title}</dt>
-            <dd className="text-2xl font-semibold tracking-tight">{value}</dd>
+      <Card className={cn("relative py-0", className)}>
+        <div className="flex p-3.5">
+          <div className="flex flex-col gap-y-1">
+            <dt className="text-xs text-muted-foreground font-medium">{title}</dt>
+            <dd className="text-xl font-semibold tracking-tight">{value}</dd>
           </div>
           <div
             className={cn(
-              "absolute right-4 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
+              "absolute right-3.5 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium",
               trendColors[changeType],
-              chipPosition === "top" ? "top-4" : "bottom-4"
+              chipPosition === "top" ? "top-3.5" : "bottom-3.5"
             )}
           >
             <TrendIcon type={trendType} />
@@ -82,7 +82,7 @@ export function TrendCardGrid({ data, columns = 4 }: TrendCardGridProps) {
   }
 
   return (
-    <dl className={cn("grid gap-4", gridCols[columns])}>
+    <dl className={cn("grid gap-3", gridCols[columns])}>
       {data.map((props, index) => (
         <TrendCard key={props.title} {...props} delay={index} />
       ))}

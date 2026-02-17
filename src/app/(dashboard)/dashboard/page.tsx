@@ -53,34 +53,34 @@ export default function Page() {
     <div className="w-full max-w-full overflow-x-hidden">
       {/* Hero Section - Compact */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center px-4 py-4"
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="text-center py-2"
       >
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
           Welcome to <ColourfulText text="Eflow" />
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Your real estate dashboard powered by Elysian
         </p>
       </motion.div>
 
-      {/* Quick Links - Compact */}
-      <div className="flex flex-wrap items-center justify-center gap-2 px-4 mb-4">
+      {/* Quick Links */}
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mb-4">
         {quickLinks.map((link) => (
           <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
-            <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs`}>
+            <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs h-8`}>
               <link.icon className="h-3 w-3 mr-1.5" />
               {link.name}
-              <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-50" />
+              <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-40" />
             </RippleButton>
           </Link>
         ))}
       </div>
 
       {mounted && (
-        <div className="px-4 w-full max-w-full">
+        <div className="w-full max-w-full">
           {/* Main Layout */}
           <div className="flex gap-4">
             {/* Main Content */}
@@ -111,7 +111,7 @@ export default function Page() {
             </div>
 
             {/* Team Sidebar - Desktop */}
-            <div className="hidden xl:block w-64 shrink-0">
+            <div className="hidden xl:block w-60 shrink-0">
               <div className="sticky top-4">
                 <TeamSidebar />
               </div>
