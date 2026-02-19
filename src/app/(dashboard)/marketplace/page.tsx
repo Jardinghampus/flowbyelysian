@@ -13,6 +13,10 @@ import {
 import { FilterBar } from "@/components/marketplace/filter-bar"
 import { PropertyCard } from "@/components/marketplace/property-card"
 import { AIAdvisor, AIAdvisorTrigger } from "@/components/marketplace/ai-advisor"
+import { SavedSearchPanel, SavedSearchTrigger } from "@/components/marketplace/saved-search"
+import { MortgageCalculator } from "@/components/marketplace/mortgage-calculator"
+import { NeighborhoodScore } from "@/components/marketplace/neighborhood-score"
+import { PriceHistory } from "@/components/marketplace/price-history"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +33,9 @@ import {
   ChevronDown,
   ArrowUpRight,
   Waves,
+  Calculator,
+  Clock,
+  X,
 } from "lucide-react"
 import { motion, AnimatePresence, useInView } from "framer-motion"
 
@@ -108,6 +115,33 @@ function AnimatedStat({
   )
 }
 
+// Recently viewed hook (localStorage)
+function useRecentlyViewed() {
+  const [recentIds, setRecentIds] = useState<string[]>([])
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("marketplace-recently-viewed")
+      if (stored) setRecentIds(JSON.parse(stored))
+    } catch {}
+  }, [])
+
+  const addViewed = useCallback((id: string) => {
+    setRecentIds((prev) => {
+      const updated = [id, ...prev.filter((i) => i !== id)].slice(0, 8)
+      localStorage.setItem("marketplace-recently-viewed", JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  const clearRecent = useCallback(() => {
+    setRecentIds([])
+    localStorage.removeItem("marketplace-recently-viewed")
+  }, [])
+
+  return { recentIds, addViewed, clearRecent }
+}
+
 export default function MarketplacePage() {
   const [selectedCategories, setSelectedCategories] = useState<PropertyCategory[]>([
     "listing",
@@ -121,6 +155,19 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false)
   const [showFilters, setShowFilters] = useState(true)
+  const [isSavedSearchOpen, setIsSavedSearchOpen] = useState(false)
+  const [isMortgageOpen, setIsMortgageOpen] = useState(false)
+  const [savedSearchCount, setSavedSearchCount] = useState(0)
+
+  const { recentIds, addViewed, clearRecent } = useRecentlyViewed()
+
+  // Load saved search count
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("marketplace-saved-searches")
+      if (stored) setSavedSearchCount(JSON.parse(stored).length)
+    } catch {}
+  }, [isSavedSearchOpen])
 
   const filteredProperties = useMemo(() => {
     return marketplaceListings.filter((p) => {
@@ -139,6 +186,12 @@ export default function MarketplacePage() {
       return true
     })
   }, [selectedCategories, selectedArea, searchQuery])
+
+  const recentlyViewed = useMemo(() => {
+    return recentIds
+      .map((id) => marketplaceListings.find((p) => p.id === id))
+      .filter(Boolean) as MarketplaceProperty[]
+  }, [recentIds])
 
   const mapCenter = useMemo(() => {
     if (selectedArea) {
@@ -173,7 +226,8 @@ export default function MarketplacePage() {
 
   const handleSelectProperty = useCallback((property: MarketplaceProperty) => {
     setSelectedProperty(property)
-  }, [])
+    addViewed(property.id)
+  }, [addViewed])
 
   const stats = useMemo(() => {
     const listings = filteredProperties.filter((p) => p.category === "listing")
@@ -286,6 +340,21 @@ export default function MarketplacePage() {
                   showFilters && "rotate-180"
                 )}
               />
+            </Button>
+
+            <SavedSearchTrigger
+              onClick={() => setIsSavedSearchOpen(true)}
+              savedCount={savedSearchCount}
+            />
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1.5"
+              onClick={() => setIsMortgageOpen(true)}
+            >
+              <Calculator className="h-3.5 w-3.5" />
+              Mortgage
             </Button>
 
             {viewMode !== "list" && (
@@ -436,6 +505,86 @@ export default function MarketplacePage() {
                 )}
               </AnimatePresence>
 
+              {/* Neighborhood Score + Price History - when area is selected */}
+              <AnimatePresence>
+                {selectedArea && viewMode !== "map" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <PriceHistory areaSlug={selectedArea} />
+                      <NeighborhoodScore areaSlug={selectedArea} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Recently viewed */}
+              <AnimatePresence>
+                {recentlyViewed.length > 0 && viewMode !== "map" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
+                        <h2 className="font-semibold text-sm text-gray-900 dark:text-white">Recently Viewed</h2>
+                        <Badge variant="secondary" className="text-[10px] h-4 px-1.5 bg-gray-100 dark:bg-neutral-800 text-gray-500 dark:text-neutral-400">
+                          {recentlyViewed.length}
+                        </Badge>
+                      </div>
+                      <button
+                        onClick={clearRecent}
+                        className="text-[11px] text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors flex items-center gap-1"
+                      >
+                        <X className="h-3 w-3" />
+                        Clear
+                      </button>
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto pb-2">
+                      {recentlyViewed.slice(0, 4).map((property) => (
+                        <motion.button
+                          key={property.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          onClick={() => handleSelectProperty(property)}
+                          className="flex-shrink-0 w-64 flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-primary/20 transition-all text-left"
+                        >
+                          <div className="h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 relative">
+                            <img
+                              src={property.imageUrl}
+                              alt={property.title}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                              {property.title}
+                            </p>
+                            <p className="text-[10px] text-gray-500 dark:text-neutral-400 truncate">
+                              {property.area}
+                            </p>
+                            <p className="text-[11px] font-semibold text-primary">
+                              AED {property.price >= 1000000
+                                ? `${(property.price / 1000000).toFixed(1)}M`
+                                : `${(property.price / 1000).toFixed(0)}K`}
+                            </p>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Listings grid */}
               {viewMode !== "map" && (
                 <div>
@@ -505,6 +654,24 @@ export default function MarketplacePage() {
         isOpen={isAdvisorOpen}
         onClose={() => setIsAdvisorOpen(false)}
         listings={filteredProperties}
+      />
+
+      {/* Saved Search Panel */}
+      <SavedSearchPanel
+        isOpen={isSavedSearchOpen}
+        onClose={() => setIsSavedSearchOpen(false)}
+        currentFilters={{
+          categories: selectedCategories,
+          area: selectedArea,
+          searchQuery,
+        }}
+      />
+
+      {/* Mortgage Calculator */}
+      <MortgageCalculator
+        isOpen={isMortgageOpen}
+        onClose={() => setIsMortgageOpen(false)}
+        defaultPrice={selectedProperty?.price}
       />
     </>
   )

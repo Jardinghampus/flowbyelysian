@@ -15,9 +15,12 @@ import {
   MapPin,
   Sparkles,
   Eye,
+  Share2,
+  MessageCircle,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { toast } from "sonner"
 
 interface PropertyCardProps {
   property: MarketplaceProperty
@@ -53,6 +56,30 @@ export function PropertyCard({ property, isSelected, onClick, index }: PropertyC
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0 })
     setIsHovered(false)
+  }
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const url = `${window.location.origin}/marketplace?property=${property.id}`
+    const text = `${property.title} in ${property.area} - ${formatPrice(property.price, property.transactionType)}`
+
+    if (navigator.share) {
+      navigator.share({ title: property.title, text, url }).catch(() => {
+        navigator.clipboard.writeText(url)
+        toast.success("Link copied to clipboard!")
+      })
+    } else {
+      navigator.clipboard.writeText(url)
+      toast.success("Link copied to clipboard!")
+    }
+  }
+
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const message = encodeURIComponent(
+      `Hi! I'm interested in "${property.title}" in ${property.area} (${formatPrice(property.price, property.transactionType)}). Can I get more details?`
+    )
+    window.open(`https://wa.me/?text=${message}`, "_blank")
   }
 
   return (
@@ -208,6 +235,24 @@ export function PropertyCard({ property, isSelected, onClick, index }: PropertyC
                 +{property.features.length - 3}
               </span>
             )}
+          </div>
+
+          {/* Action buttons - Interested & Share */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={handleWhatsApp}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              Interested
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-neutral-300 text-[11px] font-semibold transition-colors border border-gray-200 dark:border-neutral-700"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Share
+            </button>
           </div>
         </div>
 
