@@ -4,7 +4,8 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { ChevronRight, Phone, Building2, FileText, X, MessageCircle } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
+import { CollapsibleCard } from "@/components/ui/collapsible-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { RippleButton } from "@/components/ui/ripple-button"
 import { Badge } from "@/components/ui/badge"
@@ -219,17 +220,19 @@ export function TeamSidebar() {
 
   return (
     <>
-      <Card className="h-fit">
-        <CardHeader className="pb-2 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Team</CardTitle>
-            <Link href="/users">
-              <RippleButton variant="outline" size="sm" className="text-[10px] h-6 px-2">
-                See All
-              </RippleButton>
-            </Link>
-          </div>
-        </CardHeader>
+      <CollapsibleCard
+        title="Team"
+        defaultOpen={true}
+        storageKey="team-sidebar"
+        headerAction={
+          <Link href="/users">
+            <RippleButton variant="outline" size="sm" className="text-[10px] h-6 px-2">
+              See All
+            </RippleButton>
+          </Link>
+        }
+        className="h-fit"
+      >
         <CardContent className="space-y-3 pb-4">
           {/* New Team Members */}
           {newAgents.length > 0 && (
@@ -269,7 +272,7 @@ export function TeamSidebar() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </CollapsibleCard>
 
       <AgentCard
         agent={selectedAgent}

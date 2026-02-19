@@ -1,6 +1,9 @@
 "use client"
 
 import { TrendCardGrid } from "@/components/ui/trend-card"
+import { CollapsibleCard } from "@/components/ui/collapsible-card"
+import { CardContent } from "@/components/ui/card"
+import { Target } from "lucide-react"
 import agentData from "../data/agent-performance.json"
 
 export function SectionCards() {
@@ -37,5 +40,16 @@ export function SectionCards() {
     },
   ]
 
-  return <TrendCardGrid data={trendData} columns={4} />
+  return (
+    <CollapsibleCard
+      title="Targets & KPIs"
+      icon={<Target className="h-4 w-4 text-muted-foreground" />}
+      defaultOpen={true}
+      storageKey="targets-kpis"
+    >
+      <CardContent className="pb-4">
+        <TrendCardGrid data={trendData} columns={4} />
+      </CardContent>
+    </CollapsibleCard>
+  )
 }

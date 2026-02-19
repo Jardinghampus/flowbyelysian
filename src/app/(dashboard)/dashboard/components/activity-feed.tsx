@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion"
 import { Clock, CheckCircle2, Phone, Mail, Calendar, TrendingUp } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
+import { CollapsibleCard } from "@/components/ui/collapsible-card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
@@ -68,13 +69,12 @@ const activityColors = {
 
 export function ActivityFeed() {
   return (
-    <Card>
-      <CardHeader className="pb-2 pt-4">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          Recent Activity
-        </CardTitle>
-      </CardHeader>
+    <CollapsibleCard
+      title="Recent Activity"
+      icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+      defaultOpen={true}
+      storageKey="activity-feed"
+    >
       <CardContent className="space-y-3 pb-4">
         {activities.map((activity, index) => {
           const Icon = activityIcons[activity.type]
@@ -83,7 +83,7 @@ export function ActivityFeed() {
               key={activity.id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
               className="flex items-start gap-3"
             >
               <div className={cn("p-2 rounded-lg", activityColors[activity.type])}>
@@ -103,6 +103,6 @@ export function ActivityFeed() {
           )
         })}
       </CardContent>
-    </Card>
+    </CollapsibleCard>
   )
 }

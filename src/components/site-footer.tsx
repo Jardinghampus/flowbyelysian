@@ -1,9 +1,9 @@
 export function SiteFooter() {
   return (
-    <footer className="border-t bg-background">
-      <div className="px-4 py-6 lg:px-6">
-        <div className="flex flex-col items-center justify-center space-y-2 text-center">
-          <p className="text-sm text-muted-foreground">
+    <footer className="border-t border-neutral-200/50 dark:border-white/[0.06]">
+      <div className="px-4 py-4 lg:px-6">
+        <div className="flex items-center justify-center">
+          <p className="text-xs text-muted-foreground/70">
             Flow by Elysian
           </p>
         </div>

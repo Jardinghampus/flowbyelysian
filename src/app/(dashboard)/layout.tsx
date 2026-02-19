@@ -16,7 +16,7 @@ export default function DashboardLayout({
 
   return (
     <RoleProvider>
-      <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-white dark:bg-black w-full max-w-full">
+      <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-neutral-50 dark:bg-black w-full max-w-full">
         {/* Aceternity Sidebar */}
         <AppSidebar />
 
@@ -24,8 +24,8 @@ export default function DashboardLayout({
         <main className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
           <SiteHeader />
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="@container/main flex flex-col gap-2 w-full max-w-full">
-              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 w-full max-w-full">
+            <div className="@container/main flex flex-col w-full max-w-full">
+              <div className="flex flex-col gap-4 px-4 py-4 md:gap-5 md:px-6 md:py-5 w-full max-w-[1400px] mx-auto">
                 {children}
               </div>
             </div>
