@@ -245,6 +245,78 @@ html {
   animation-play-state: paused;
 }
 
+/* ─── Marketplace Effects ─── */
+
+/* Shimmer sweep on hover */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Pulsing ring for map markers */
+@keyframes marker-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--pulse-color, 16, 185, 129), 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(var(--pulse-color, 16, 185, 129), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--pulse-color, 16, 185, 129), 0);
+  }
+}
+
+.marketplace-marker {
+  animation: marker-pulse 2.5s ease-out infinite;
+}
+
+/* Mapbox popup styling */
+.marketplace-popup .mapboxgl-popup-content {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.marketplace-popup .mapboxgl-popup-tip {
+  border-top-color: var(--card);
+}
+
+.marketplace-popup .mapboxgl-popup-close-button {
+  color: var(--muted-foreground);
+  font-size: 18px;
+  padding: 4px 8px;
+  right: 4px;
+  top: 4px;
+}
+
+.marketplace-popup .mapboxgl-popup-close-button:hover {
+  color: var(--foreground);
+  background: transparent;
+}
+
+/* Animated counter digits */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
+}
+
 /* Fluid Utilities */
 @layer utilities {
 
