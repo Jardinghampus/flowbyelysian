@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/exchange-data"
 import { areas } from "@/lib/data/marketplace-listings"
 import { RequestCard } from "@/components/exchange/request-card"
+import { RequestPopup } from "@/components/exchange/request-popup"
 import { RequestForm, type RequestFormData } from "@/components/exchange/request-form"
 import { InventoryBrowser } from "@/components/exchange/inventory-browser"
 import { AgencyInquiry } from "@/components/exchange/agency-inquiry"
@@ -112,6 +113,7 @@ export default function ExchangePage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isInventoryOpen, setIsInventoryOpen] = useState(false)
   const [isInquiryOpen, setIsInquiryOpen] = useState(false)
+  const [popupRequest, setPopupRequest] = useState<ExchangeRequest | null>(null)
 
   // Load user requests from localStorage
   useEffect(() => {
@@ -444,6 +446,7 @@ export default function ExchangePage() {
                   key={request.id}
                   request={request}
                   onDelete={request.id.startsWith("user-") ? handleDeleteRequest : undefined}
+                  onSeeMore={() => setPopupRequest(request)}
                   index={index}
                 />
               ))}
@@ -465,6 +468,12 @@ export default function ExchangePage() {
       <AgencyInquiry
         isOpen={isInquiryOpen}
         onClose={() => setIsInquiryOpen(false)}
+      />
+      <RequestPopup
+        request={popupRequest}
+        isOpen={!!popupRequest}
+        onClose={() => setPopupRequest(null)}
+        onDelete={handleDeleteRequest}
       />
     </>
   )

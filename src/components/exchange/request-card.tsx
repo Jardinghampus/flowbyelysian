@@ -23,6 +23,7 @@ import {
   Key,
   Building,
   AlertTriangle,
+  Eye,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
@@ -38,6 +39,7 @@ const typeIcons: Record<string, React.ElementType> = {
 interface RequestCardProps {
   request: ExchangeRequest
   onDelete?: (id: string) => void
+  onSeeMore?: () => void
   index: number
 }
 
@@ -62,7 +64,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 30)}mo ago`
 }
 
-export function RequestCard({ request, onDelete, index }: RequestCardProps) {
+export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCardProps) {
   const typeConf = requestTypeConfig[request.type]
   const urgConf = urgencyConfig[request.urgency]
   const cardRef = useRef<HTMLDivElement>(null)
@@ -258,11 +260,17 @@ export function RequestCard({ request, onDelete, index }: RequestCardProps) {
           {/* Actions */}
           <div className="flex gap-2 pt-1">
             <button
+              onClick={(e) => { e.stopPropagation(); onSeeMore?.() }}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors border border-primary/20"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              See more
+            </button>
+            <button
               onClick={handleWhatsApp}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
             >
               <MessageCircle className="h-3.5 w-3.5" />
-              Contact
             </button>
             <button
               onClick={handleShare}

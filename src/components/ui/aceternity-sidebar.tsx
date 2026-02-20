@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import Link, { LinkProps } from "next/link"
-import React, { useState, createContext, useContext, useCallback, useRef } from "react"
+import React, { useState, createContext, useContext, useCallback, useRef, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
@@ -51,6 +51,16 @@ export const SidebarProvider = ({
     setOpen(false)
     lockedRef.current = true
   }, [setOpen])
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const isMobile = window.innerWidth < 768
+    if (isMobile && open) {
+      document.body.style.overflow = "hidden"
+      return () => { document.body.style.overflow = "" }
+    }
+  }, [open])
 
   return (
     <SidebarContext.Provider value={{ open, setOpen, animate, closeSidebar, lockedRef }}>
@@ -126,9 +136,11 @@ export const MobileSidebar = ({
   const { open, setOpen } = useSidebar()
   return (
     <>
+      {/* Mobile top bar */}
       <div
         className={cn(
-          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-neutral-800/60 w-full"
+          "h-14 px-4 flex flex-row md:hidden items-center justify-between bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-neutral-800/60 w-full sticky top-0 z-30",
+          "pt-[env(safe-area-inset-top)]"
         )}
         {...props}
       >
@@ -136,40 +148,69 @@ export const MobileSidebar = ({
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-primary-foreground font-bold text-sm">F</span>
           </div>
-          <span className="font-bold text-lg">FLOW</span>
+          <span className="font-bold text-lg text-neutral-900 dark:text-white">FLOW</span>
         </div>
         <button
-          className="flex z-20 p-2 -mr-2 rounded-lg active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
+          className="flex p-2 -mr-2 rounded-lg active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
           onClick={() => setOpen(!open)}
+          aria-label={open ? "Close menu" : "Open menu"}
         >
           <Menu className="text-neutral-800 dark:text-neutral-200 h-5 w-5" />
         </button>
-        <AnimatePresence>
-          {open && (
+      </div>
+
+      {/* Mobile sidebar overlay + panel */}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm md:hidden"
+              onClick={() => setOpen(false)}
+            />
+            {/* Sidebar panel */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
               transition={{
                 duration: 0.3,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white dark:bg-black p-6 z-[100] flex flex-col justify-between overflow-y-auto",
-                className
+                "fixed top-0 left-0 bottom-0 w-[280px] max-w-[85vw] bg-white dark:bg-black z-[100] flex flex-col md:hidden",
+                "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
+                "shadow-2xl border-r border-neutral-200/60 dark:border-neutral-800/60"
               )}
             >
-              <button
-                className="absolute right-5 top-5 z-50 text-neutral-500 dark:text-neutral-400 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                onClick={() => setOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </button>
-              {children}
+              {/* Close button row */}
+              <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary-foreground font-bold text-sm">F</span>
+                  </div>
+                  <span className="font-bold text-lg text-neutral-900 dark:text-white">FLOW</span>
+                </div>
+                <button
+                  className="text-neutral-500 dark:text-neutral-400 p-2 -mr-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 transition-colors"
+                  onClick={() => setOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              {/* Scrollable nav content */}
+              <div className={cn("flex-1 overflow-y-auto overflow-x-hidden px-3 py-2 flex flex-col justify-between gap-6", className)}>
+                {children}
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   )
 }
@@ -191,10 +232,10 @@ export const SidebarLink = ({
       href={link.href}
       onClick={() => closeSidebar()}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-lg transition-all duration-200",
+        "flex items-center justify-start gap-2 group/sidebar py-2.5 px-2.5 rounded-lg transition-all duration-200",
         isActive
           ? "bg-primary/10 text-primary"
-          : "hover:bg-neutral-100 dark:hover:bg-neutral-800/60",
+          : "hover:bg-neutral-100 dark:hover:bg-neutral-800/60 active:bg-neutral-200 dark:active:bg-neutral-700/60",
         className
       )}
       {...props}
@@ -202,6 +243,16 @@ export const SidebarLink = ({
       <div className={cn("flex-shrink-0", isActive && "text-primary")}>
         {link.icon}
       </div>
+      {/* Desktop: animate label visibility on hover. Mobile: always visible */}
+      <span
+        className={cn(
+          "text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre",
+          "md:hidden inline-block",
+          isActive && "text-primary font-medium"
+        )}
+      >
+        {link.label}
+      </span>
       <motion.span
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
@@ -209,6 +260,7 @@ export const SidebarLink = ({
         }}
         className={cn(
           "text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre",
+          "hidden md:inline-block",
           isActive && "text-primary font-medium"
         )}
       >

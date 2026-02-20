@@ -17,6 +17,7 @@ import { SavedSearchPanel, SavedSearchTrigger } from "@/components/marketplace/s
 import { MortgageCalculator } from "@/components/marketplace/mortgage-calculator"
 import { NeighborhoodScore } from "@/components/marketplace/neighborhood-score"
 import { PriceHistory } from "@/components/marketplace/price-history"
+import { PropertyPopup } from "@/components/marketplace/property-popup"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -158,6 +159,7 @@ export default function MarketplacePage() {
   const [isSavedSearchOpen, setIsSavedSearchOpen] = useState(false)
   const [isMortgageOpen, setIsMortgageOpen] = useState(false)
   const [savedSearchCount, setSavedSearchCount] = useState(0)
+  const [popupProperty, setPopupProperty] = useState<MarketplaceProperty | null>(null)
 
   const { recentIds, addViewed, clearRecent } = useRecentlyViewed()
 
@@ -636,6 +638,7 @@ export default function MarketplacePage() {
                           property={property}
                           isSelected={selectedProperty?.id === property.id}
                           onClick={() => handleSelectProperty(property)}
+                          onSeeMore={() => { handleSelectProperty(property); setPopupProperty(property) }}
                           index={index}
                         />
                       ))}
@@ -672,6 +675,13 @@ export default function MarketplacePage() {
         isOpen={isMortgageOpen}
         onClose={() => setIsMortgageOpen(false)}
         defaultPrice={selectedProperty?.price}
+      />
+
+      {/* Property Detail Popup */}
+      <PropertyPopup
+        property={popupProperty}
+        isOpen={!!popupProperty}
+        onClose={() => setPopupProperty(null)}
       />
     </>
   )
