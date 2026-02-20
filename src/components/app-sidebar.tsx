@@ -20,6 +20,7 @@ import {
   FileText,
   Brain,
   Map,
+  ArrowLeftRight,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -83,6 +84,11 @@ const navItems = [
     label: "Market Place",
     href: "/marketplace",
     icon: <Map className="h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Exchange",
+    href: "/exchange",
+    icon: <ArrowLeftRight className="h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Areas",
