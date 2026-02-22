@@ -1,16 +1,19 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+const isDev = process.env.CAPACITOR_MODE === 'dev';
+
 const config: CapacitorConfig = {
   appId: 'com.elysian.flow',
   appName: 'Flow by Elysian',
-  webDir: 'out',
-  // During development, uncomment the server block below and run `pnpm dev`
-  // to use live reload instead of the static export:
-  //
-  // server: {
-  //   url: 'http://10.0.2.2:3000', // Android emulator localhost alias
-  //   cleartext: true,
-  // },
+  webDir: 'capacitor-www',
+  server: {
+    // Dev: points at local Next.js dev server via Android emulator alias
+    // Prod: points at deployed Vercel app
+    url: isDev
+      ? 'http://10.0.2.2:3000'
+      : 'https://flowbyelysian-kjbcdv06a-jardinghampus-projects.vercel.app',
+    cleartext: isDev,
+  },
   android: {
     buildOptions: {
       signingType: 'apksigner',

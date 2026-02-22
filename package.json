@@ -8,10 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "types:generate": "supabase gen types typescript --linked > src/lib/types/database.types.ts",
-    "cap:build": "CAPACITOR_BUILD=true next build && npx cap sync android",
-    "cap:open": "npx cap open android",
     "cap:sync": "npx cap sync android",
-    "cap:dev": "npx cap run android --livereload --external"
+    "cap:open": "npx cap open android",
+    "cap:dev": "npx cross-env CAPACITOR_MODE=dev npx cap run android --livereload --external"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.25",
@@ -89,6 +88,7 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.1",
     "supabase": "^2.74.0",
