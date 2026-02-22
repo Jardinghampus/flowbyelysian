@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === 'true';
+
 const nextConfig: NextConfig = {
+  // Static export for Capacitor mobile builds
+  ...(isCapacitorBuild && { output: 'export' }),
+
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
@@ -8,6 +13,8 @@ const nextConfig: NextConfig = {
 
   // Image optimization
   images: {
+    // Static export requires unoptimized images
+    ...(isCapacitorBuild && { unoptimized: true }),
     remotePatterns: [
       {
         protocol: 'https',
