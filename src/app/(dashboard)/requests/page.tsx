@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Search, Filter, MapPin, Bed, DollarSign, Bell, Trash2 } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Plus, Search, Filter, MapPin, Bed, DollarSign, Bell, Trash2, ArrowRight, ShieldCheck, Maximize2, Eye, X } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
+import { sampleRequests, type ExchangeRequest, requestTypeConfig } from "@/lib/data/exchange-data"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +34,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface PropertyRequest {
   id: string
@@ -94,11 +96,59 @@ const DEMO_REQUESTS: PropertyRequest[] = [
   },
 ]
 
+function computeMatchScore(request: PropertyRequest, listing: ExchangeRequest): number {
+  let score = 0
+  let maxScore = 0
+
+  // Area match (30 points)
+  maxScore += 30
+  if (listing.area.toLowerCase().includes(request.area.toLowerCase()) ||
+      request.area.toLowerCase().includes(listing.area.toLowerCase())) {
+    score += 30
+  }
+
+  // Transaction type match (20 points) - buy matches sell, rent matches lease
+  maxScore += 20
+  if ((request.transactionType === "buy" && listing.type === "sell") ||
+      (request.transactionType === "rent" && listing.type === "lease")) {
+    score += 20
+  }
+
+  // Property type match (15 points)
+  maxScore += 15
+  if (listing.propertyType === request.propertyType) {
+    score += 15
+  }
+
+  // Bedrooms match (15 points)
+  maxScore += 15
+  if (listing.bedrooms >= request.minBedrooms) {
+    score += 15
+  } else if (listing.bedrooms >= request.minBedrooms - 1) {
+    score += 8
+  }
+
+  // Budget match (20 points)
+  maxScore += 20
+  if (request.maxBudget > 0) {
+    if (listing.minBudget <= request.maxBudget) {
+      score += 20
+    } else if (listing.minBudget <= request.maxBudget * 1.1) {
+      score += 10
+    }
+  } else {
+    score += 10
+  }
+
+  return Math.round((score / maxScore) * 100)
+}
+
 export default function RequestsPage() {
   const { role, canCreateRequest, isInternal } = useRole()
   const [requests, setRequests] = useState<PropertyRequest[]>(DEMO_REQUESTS)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "matched" | "closed">("all")
+  const [matchingRequestId, setMatchingRequestId] = useState<string | null>(null)
   const [newRequest, setNewRequest] = useState({
     title: "",
     propertyType: "apartment",
@@ -113,6 +163,19 @@ export default function RequestsPage() {
   const filteredRequests = filterStatus === "all"
     ? requests
     : requests.filter((r) => r.status === filterStatus)
+
+  const matchingRequest = requests.find((r) => r.id === matchingRequestId)
+  const matchedListings = useMemo(() => {
+    if (!matchingRequest) return []
+    return sampleRequests
+      .filter((listing) => listing.type === "sell" || listing.type === "lease")
+      .map((listing) => ({
+        listing,
+        score: computeMatchScore(matchingRequest, listing),
+      }))
+      .filter((m) => m.score > 30)
+      .sort((a, b) => b.score - a.score)
+  }, [matchingRequest])
 
   const handleCreate = () => {
     if (!newRequest.title || !newRequest.area) {
@@ -380,11 +443,14 @@ export default function RequestsPage() {
 
                 <div className="flex items-center justify-between pt-2 border-t">
                   <div className="flex items-center gap-3">
-                    {request.matchCount > 0 && (
-                      <span className="text-sm font-medium text-green-600">
-                        {request.matchCount} matches
-                      </span>
-                    )}
+                    <button
+                      onClick={() => setMatchingRequestId(matchingRequestId === request.id ? null : request.id)}
+                      className="flex items-center gap-1 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View matches
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
                     <button
                       onClick={() => toggleWatchlist(request.id)}
                       className={`flex items-center gap-1 text-sm ${request.watchlist ? "text-blue-600" : "text-muted-foreground"}`}
@@ -425,6 +491,128 @@ export default function RequestsPage() {
             )}
           </div>
         )}
+
+        {/* Matching Panel */}
+        <AnimatePresence>
+          {matchingRequest && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="overflow-hidden mt-8"
+            >
+              <div className="rounded-xl border bg-gradient-to-b from-primary/5 to-transparent p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                      Matching Listings
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Off-market units matching &ldquo;{matchingRequest.title}&rdquo;
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMatchingRequestId(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {matchedListings.length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {matchedListings.map(({ listing, score }) => {
+                      const typeConf = requestTypeConfig[listing.type]
+                      return (
+                        <motion.div
+                          key={listing.id}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-xl border bg-white dark:bg-card p-4 space-y-3 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm truncate">{listing.title}</h3>
+                              <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                                <MapPin className="h-3 w-3" />
+                                {listing.area}
+                                {listing.subArea && (
+                                  <span className="text-primary">· {listing.subArea}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className={`rounded-full px-2 py-0.5 text-[10px] font-bold flex-shrink-0 ${
+                              score >= 80 ? "bg-green-500 text-white" :
+                              score >= 60 ? "bg-blue-500 text-white" :
+                              "bg-amber-500 text-white"
+                            }`}>
+                              {score}%
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            {listing.bedrooms > 0 && (
+                              <span className="flex items-center gap-1">
+                                <Bed className="h-3 w-3" /> {listing.bedrooms} BR
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1">
+                              <Maximize2 className="h-3 w-3" /> {listing.minSize.toLocaleString()} sqft
+                            </span>
+                            <Badge variant="outline" className="text-[10px] h-4 px-1.5 py-0 capitalize">
+                              {listing.propertyType}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-sm">
+                              AED {listing.minBudget >= 1000000
+                                ? `${(listing.minBudget / 1000000).toFixed(1)}M`
+                                : listing.minBudget.toLocaleString()}
+                              {listing.type === "lease" ? "/yr" : ""}
+                            </span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${typeConf.bg} ${typeConf.text}`}>
+                              {typeConf.label}
+                            </span>
+                          </div>
+
+                          {listing.isOffMarket && (
+                            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium">
+                              Off-Market
+                            </span>
+                          )}
+
+                          <Button
+                            size="sm"
+                            className="w-full text-xs"
+                            onClick={() => {
+                              toast.success("Agent notified!", {
+                                description: `A Zaylo agent will connect you regarding "${listing.title}".`,
+                                duration: 4000,
+                              })
+                            }}
+                          >
+                            <ShieldCheck className="h-3.5 w-3.5 mr-1.5" />
+                            Request Agent Contact
+                          </Button>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Search className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No matching listings found yet.</p>
+                    <p className="text-xs text-muted-foreground mt-1">New off-market units are added daily — you&apos;ll be notified when matches appear.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   )

@@ -37,6 +37,9 @@ export interface RequestFormData {
   title: string
   description: string
   area: string
+  subArea: string
+  unitNumber: string
+  floor: string
   propertyType: string
   bedrooms: number
   bathrooms: number
@@ -66,6 +69,9 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
     title: "",
     description: "",
     area: "",
+    subArea: "",
+    unitNumber: "",
+    floor: "",
     propertyType: "villa",
     bedrooms: 3,
     bathrooms: 3,
@@ -96,6 +102,8 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
     update("features", formData.features.filter((f) => f !== feat))
   }
 
+  const isListingType = formData.type === "sell" || formData.type === "lease"
+
   const handleSubmit = () => {
     if (!formData.title.trim()) {
       toast.error("Please enter a title")
@@ -109,8 +117,16 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
       toast.error("Please fill in contact details")
       return
     }
+    if (isListingType && !formData.contactPhone.trim()) {
+      toast.error("Phone number is required for listings")
+      return
+    }
+    if (isListingType && !formData.unitNumber.trim()) {
+      toast.error("Unit number is required for listings")
+      return
+    }
     onSubmit(formData)
-    toast.success("Request submitted successfully!")
+    toast.success(isListingType ? "Listing submitted! Our agents will review it." : "Request submitted successfully!")
     onClose()
   }
 
@@ -227,6 +243,45 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
                   </Select>
                 </div>
               </div>
+
+              {/* Unit Details (for sell/lease) */}
+              {isListingType && (
+                <div className="space-y-3 p-3 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200/50 dark:border-amber-500/10">
+                  <h3 className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building className="h-3.5 w-3.5" />
+                    Unit Details (Required)
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">Unit Number *</Label>
+                      <Input
+                        placeholder="e.g. V-M-12, APT-2305"
+                        value={formData.unitNumber}
+                        onChange={(e) => update("unitNumber", e.target.value)}
+                        className="h-9 text-sm bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">Sub-Area / Community</Label>
+                      <Input
+                        placeholder="e.g. Frond M, Harmony III"
+                        value={formData.subArea}
+                        onChange={(e) => update("subArea", e.target.value)}
+                        className="h-9 text-sm bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">Floor (if applicable)</Label>
+                    <Input
+                      placeholder="e.g. 23, Ground, Penthouse"
+                      value={formData.floor}
+                      onChange={(e) => update("floor", e.target.value)}
+                      className="h-9 text-sm bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Bedrooms & Bathrooms */}
               <div className="grid grid-cols-2 gap-3">
@@ -372,6 +427,11 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
               {/* Contact info */}
               <div className="space-y-3 border-t border-gray-200 dark:border-neutral-800 pt-4">
                 <h3 className="text-xs font-semibold text-gray-700 dark:text-neutral-300 uppercase tracking-wider">Contact Information</h3>
+                {isListingType && (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                    Your contact details are only visible to Zaylo agents — never shared directly with other users.
+                  </p>
+                )}
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">Full Name *</Label>
                   <Input
@@ -393,7 +453,9 @@ export function RequestForm({ isOpen, onClose, onSubmit }: RequestFormProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">Phone</Label>
+                    <Label className="text-xs font-medium text-gray-700 dark:text-neutral-300">
+                      Phone {isListingType ? "*" : ""}
+                    </Label>
                     <Input
                       type="tel"
                       placeholder="+971 5X XXX XXXX"

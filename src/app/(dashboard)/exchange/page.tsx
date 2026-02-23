@@ -17,6 +17,7 @@ import { AgencyInquiry } from "@/components/exchange/agency-inquiry"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useRole } from "@/contexts/role-context"
 import {
   Search,
   Plus,
@@ -35,6 +36,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { motion, AnimatePresence, useInView } from "framer-motion"
+import { toast } from "sonner"
 
 // Animated counter
 function useAnimatedCounter(end: number, duration = 1200) {
@@ -105,6 +107,7 @@ const typeFilters: { type: RequestType | "all"; icon: React.ElementType; label: 
 const STORAGE_KEY = "exchange-user-requests"
 
 export default function ExchangePage() {
+  const { isInternal } = useRole()
   const [requests, setRequests] = useState<ExchangeRequest[]>(sampleRequests)
   const [typeFilter, setTypeFilter] = useState<RequestType | "all">("all")
   const [areaFilter, setAreaFilter] = useState<string | null>(null)
@@ -150,8 +153,16 @@ export default function ExchangePage() {
     lease: requests.filter((r) => r.type === "lease").length,
   }), [requests])
 
+  const handleRequestAgent = useCallback((request: ExchangeRequest) => {
+    toast.success("Agent contact requested!", {
+      description: `A Zaylo agent will reach out to you shortly regarding "${request.title}".`,
+      duration: 5000,
+    })
+  }, [])
+
   const handleAddRequest = useCallback((data: RequestFormData) => {
     const areaInfo = areas.find((a) => a.slug === data.area)
+    const isListing = data.type === "sell" || data.type === "lease"
     const newRequest: ExchangeRequest = {
       id: `user-${Date.now()}`,
       type: data.type,
@@ -159,6 +170,9 @@ export default function ExchangePage() {
       description: data.description,
       area: areaInfo?.name || data.area,
       areaSlug: data.area,
+      subArea: data.subArea || undefined,
+      unitNumber: data.unitNumber || undefined,
+      floor: data.floor || undefined,
       propertyType: data.propertyType as ExchangeRequest["propertyType"],
       bedrooms: data.bedrooms,
       bathrooms: data.bathrooms,
@@ -175,6 +189,7 @@ export default function ExchangePage() {
       createdAt: new Date().toISOString().split("T")[0],
       matchCount: 0,
       imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+      isOffMarket: isListing,
     }
 
     setRequests((prev) => {
@@ -381,7 +396,9 @@ export default function ExchangePage() {
                 How the Exchange works
               </h3>
               <p className="text-xs text-gray-500 dark:text-neutral-400">
-                Post what you&apos;re looking for or offering. Browse inventory to find matches. Need full agency service? Click &quot;List with Us&quot;.
+                {isInternal
+                  ? "View all buy/sell/rent/lease requests. Contact details and unit numbers are visible to you. Connect matching parties."
+                  : "Browse off-market listings and post your requirements. A Zaylo agent will connect you with matching parties."}
               </p>
             </div>
           </div>
@@ -447,6 +464,7 @@ export default function ExchangePage() {
                   request={request}
                   onDelete={request.id.startsWith("user-") ? handleDeleteRequest : undefined}
                   onSeeMore={() => setPopupRequest(request)}
+                  onRequestAgent={handleRequestAgent}
                   index={index}
                 />
               ))}
@@ -474,6 +492,7 @@ export default function ExchangePage() {
         isOpen={!!popupRequest}
         onClose={() => setPopupRequest(null)}
         onDelete={handleDeleteRequest}
+        onRequestAgent={handleRequestAgent}
       />
     </>
   )

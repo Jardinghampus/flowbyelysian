@@ -1,12 +1,16 @@
 "use client"
 
 import * as React from "react"
+import { Moon, Sun } from "lucide-react"
 import { CommandSearch, SearchTrigger } from "@/components/command-search"
 import { NotificationBell } from "@/components/notification-bell"
 import { RoleSwitcher } from "@/components/role-switcher"
+import { useTheme } from "@/hooks/use-theme"
+import { motion } from "framer-motion"
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false)
+  const { theme, setTheme } = useTheme()
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -27,7 +31,20 @@ export function SiteHeader() {
           <div className="flex-1 max-w-sm">
             <SearchTrigger onClick={() => setSearchOpen(true)} />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileTap={{ scale: 0.85, rotate: 180 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4 text-[#00d4ff]" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </motion.button>
             <RoleSwitcher />
             <NotificationBell />
           </div>

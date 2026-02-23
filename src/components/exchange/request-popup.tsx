@@ -6,6 +6,7 @@ import {
   requestTypeConfig,
   urgencyConfig,
 } from "@/lib/data/exchange-data"
+import { useRole } from "@/contexts/role-context"
 import { Badge } from "@/components/ui/badge"
 import {
   Bed,
@@ -25,6 +26,9 @@ import {
   Mail,
   Phone,
   Trash2,
+  ShieldCheck,
+  Hash,
+  Layers,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
@@ -42,6 +46,7 @@ interface RequestPopupProps {
   isOpen: boolean
   onClose: () => void
   onDelete?: (id: string) => void
+  onRequestAgent?: (request: ExchangeRequest) => void
 }
 
 function formatBudget(min: number, max: number): string {
@@ -65,7 +70,8 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 30)} months ago`
 }
 
-export function RequestPopup({ request, isOpen, onClose, onDelete }: RequestPopupProps) {
+export function RequestPopup({ request, isOpen, onClose, onDelete, onRequestAgent }: RequestPopupProps) {
+  const { isInternal } = useRole()
   if (!request) return null
 
   const typeConf = requestTypeConfig[request.type]
@@ -229,6 +235,44 @@ export function RequestPopup({ request, isOpen, onClose, onDelete }: RequestPopu
                 </div>
               )}
 
+              {/* Unit details (internal only) */}
+              {isInternal && (request.unitNumber || request.subArea || request.floor) && (
+                <div className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200/30 dark:border-amber-500/10 space-y-2">
+                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building className="h-3.5 w-3.5" />
+                    Unit Details
+                  </span>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    {request.unitNumber && (
+                      <div className="flex items-center gap-1.5 text-gray-700 dark:text-neutral-300">
+                        <Hash className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="font-medium">{request.unitNumber}</span>
+                      </div>
+                    )}
+                    {request.subArea && (
+                      <div className="flex items-center gap-1.5 text-gray-700 dark:text-neutral-300">
+                        <Layers className="h-3.5 w-3.5 text-amber-500" />
+                        <span>{request.subArea}</span>
+                      </div>
+                    )}
+                    {request.floor && (
+                      <div className="flex items-center gap-1.5 text-gray-700 dark:text-neutral-300">
+                        <Building className="h-3.5 w-3.5 text-amber-500" />
+                        <span>Floor {request.floor}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-area for customers (no unit number) */}
+              {!isInternal && request.subArea && (
+                <div className="flex items-center gap-1.5 text-sm text-primary">
+                  <Layers className="h-3.5 w-3.5" />
+                  <span>Sub-community: {request.subArea}</span>
+                </div>
+              )}
+
               {/* Features */}
               <div>
                 <span className="text-xs font-medium text-gray-700 dark:text-neutral-300 mb-2 block">Requirements</span>
@@ -244,35 +288,57 @@ export function RequestPopup({ request, isOpen, onClose, onDelete }: RequestPopu
                 </div>
               </div>
 
-              {/* Contact info */}
-              <div className="p-4 rounded-xl bg-gray-50 dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 space-y-2.5">
-                <span className="text-xs font-semibold text-gray-700 dark:text-neutral-300 uppercase tracking-wider">Contact</span>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-neutral-300">
-                    <Users className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
-                    {request.contactName}
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm text-gray-500 dark:text-neutral-400">
-                    <Phone className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
-                    {request.contactPhone}
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm text-gray-500 dark:text-neutral-400">
-                    <Mail className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
-                    {request.contactEmail}
+              {/* Contact info - role based */}
+              {isInternal ? (
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-neutral-900 border border-gray-100 dark:border-neutral-800 space-y-2.5">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-neutral-300 uppercase tracking-wider">Contact</span>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2.5 text-sm text-gray-700 dark:text-neutral-300">
+                      <Users className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
+                      {request.contactName}
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-gray-500 dark:text-neutral-400">
+                      <Phone className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
+                      {request.contactPhone}
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-gray-500 dark:text-neutral-400">
+                      <Mail className="h-4 w-4 text-gray-400 dark:text-neutral-500" />
+                      {request.contactEmail}
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 space-y-2.5">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                    Managed by Zaylo
+                  </span>
+                  <p className="text-xs text-gray-500 dark:text-neutral-400">
+                    Contact details are managed by our agency. Request an agent to connect you with the {request.type === "sell" || request.type === "lease" ? "owner" : "buyer"}.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Footer actions */}
             <div className="p-4 border-t border-gray-200 dark:border-neutral-800 flex gap-2 flex-shrink-0">
-              <button
-                onClick={handleWhatsApp}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25d366] hover:bg-[#20bd5a] text-white text-sm font-semibold transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Contact
-              </button>
+              {isInternal ? (
+                <button
+                  onClick={handleWhatsApp}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#25d366] hover:bg-[#20bd5a] text-white text-sm font-semibold transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Contact Owner
+                </button>
+              ) : (
+                <button
+                  onClick={() => { onRequestAgent?.(request); onClose() }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-semibold transition-colors"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Request Agent Contact
+                </button>
+              )}
               <button
                 onClick={handleShare}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-neutral-300 text-sm font-semibold transition-colors border border-gray-200 dark:border-neutral-700"

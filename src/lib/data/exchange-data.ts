@@ -9,6 +9,9 @@ export interface ExchangeRequest {
   description: string
   area: string
   areaSlug: string
+  subArea?: string
+  unitNumber?: string
+  floor?: string
   propertyType: "villa" | "apartment" | "townhouse" | "penthouse" | "plot" | "office" | "retail"
   bedrooms: number
   bathrooms: number
@@ -25,6 +28,7 @@ export interface ExchangeRequest {
   createdAt: string
   matchCount: number
   imageUrl: string
+  isOffMarket?: boolean
 }
 
 export interface AgencyInquiry {
@@ -87,6 +91,8 @@ export const sampleRequests: ExchangeRequest[] = [
     description: "Fully upgraded signature villa with stunning Atlantis views. Italian marble, smart home system. Motivated seller, open to reasonable offers.",
     area: "Palm Jumeirah",
     areaSlug: "palm-jumeirah",
+    subArea: "Frond M",
+    unitNumber: "V-M-12",
     propertyType: "villa",
     bedrooms: 6,
     bathrooms: 7,
@@ -98,11 +104,12 @@ export const sampleRequests: ExchangeRequest[] = [
     status: "active",
     urgency: "medium",
     contactName: "Fatima A.",
-    contactPhone: "+971 55 XXX XXXX",
+    contactPhone: "+971 55 412 8834",
     contactEmail: "f.a***@outlook.com",
     createdAt: "2026-02-15",
     matchCount: 5,
     imageUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+    isOffMarket: true,
   },
   {
     id: "exr-003",
@@ -135,6 +142,8 @@ export const sampleRequests: ExchangeRequest[] = [
     description: "Well-maintained 4BR townhouse with garden and community pool. Owner looking for corporate tenant on 1-2 year lease. Currently vacant.",
     area: "Jumeirah Golf Estates",
     areaSlug: "jge",
+    subArea: "Lime Tree Valley",
+    unitNumber: "LTV-42",
     propertyType: "townhouse",
     bedrooms: 4,
     bathrooms: 5,
@@ -146,11 +155,12 @@ export const sampleRequests: ExchangeRequest[] = [
     status: "active",
     urgency: "low",
     contactName: "Ahmed R.",
-    contactPhone: "+971 56 XXX XXXX",
+    contactPhone: "+971 56 331 9920",
     contactEmail: "a.r***@hotmail.com",
     createdAt: "2026-02-10",
     matchCount: 2,
     imageUrl: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80",
+    isOffMarket: true,
   },
   {
     id: "exr-005",
@@ -183,6 +193,8 @@ export const sampleRequests: ExchangeRequest[] = [
     description: "Immaculate 5BR villa with direct lagoon access. Brand new, never lived in. Owner relocating overseas. Below market value for quick sale.",
     area: "Tilal Al Ghaf",
     areaSlug: "tilal-al-ghaf",
+    subArea: "Harmony III",
+    unitNumber: "H3-V-087",
     propertyType: "villa",
     bedrooms: 5,
     bathrooms: 6,
@@ -194,11 +206,12 @@ export const sampleRequests: ExchangeRequest[] = [
     status: "active",
     urgency: "high",
     contactName: "Sarah K.",
-    contactPhone: "+971 50 XXX XXXX",
+    contactPhone: "+971 50 887 2241",
     contactEmail: "s.k***@gmail.com",
     createdAt: "2026-02-17",
     matchCount: 7,
     imageUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+    isOffMarket: true,
   },
   {
     id: "exr-007",
@@ -231,6 +244,8 @@ export const sampleRequests: ExchangeRequest[] = [
     description: "Ground floor retail unit with high foot traffic. Suitable for café, salon, or convenience store. Long-term lease preferred, 3-5 years.",
     area: "Al Furjan",
     areaSlug: "al-furjan",
+    subArea: "Al Furjan South",
+    unitNumber: "AFS-R-003",
     propertyType: "retail",
     bedrooms: 0,
     bathrooms: 1,
@@ -242,10 +257,11 @@ export const sampleRequests: ExchangeRequest[] = [
     status: "active",
     urgency: "low",
     contactName: "Mike T.",
-    contactPhone: "+971 58 XXX XXXX",
+    contactPhone: "+971 58 220 4417",
     contactEmail: "m.t***@gmail.com",
     createdAt: "2026-02-08",
     matchCount: 1,
     imageUrl: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+    isOffMarket: true,
   },
 ]

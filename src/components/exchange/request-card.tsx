@@ -7,6 +7,7 @@ import {
   requestTypeConfig,
   urgencyConfig,
 } from "@/lib/data/exchange-data"
+import { useRole } from "@/contexts/role-context"
 import { Badge } from "@/components/ui/badge"
 import {
   Bed,
@@ -24,6 +25,8 @@ import {
   Building,
   AlertTriangle,
   Eye,
+  ShieldCheck,
+  Hash,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
@@ -40,6 +43,7 @@ interface RequestCardProps {
   request: ExchangeRequest
   onDelete?: (id: string) => void
   onSeeMore?: () => void
+  onRequestAgent?: (request: ExchangeRequest) => void
   index: number
 }
 
@@ -64,7 +68,8 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 30)}mo ago`
 }
 
-export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCardProps) {
+export function RequestCard({ request, onDelete, onSeeMore, onRequestAgent, index }: RequestCardProps) {
+  const { isInternal } = useRole()
   const typeConf = requestTypeConfig[request.type]
   const urgConf = urgencyConfig[request.urgency]
   const cardRef = useRef<HTMLDivElement>(null)
@@ -190,12 +195,25 @@ export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCard
         {/* Content */}
         <div className="p-4 space-y-2.5">
           <div>
-            <h3 className="font-semibold text-sm leading-tight line-clamp-1 text-gray-900 dark:text-white">
-              {request.title}
-            </h3>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-semibold text-sm leading-tight line-clamp-1 text-gray-900 dark:text-white">
+                {request.title}
+              </h3>
+              {request.isOffMarket && (
+                <span className="flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-semibold">
+                  Off-Market
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-1 mt-1 text-gray-500 dark:text-neutral-400">
               <MapPin className="h-3 w-3" />
               <span className="text-xs">{request.area}</span>
+              {request.subArea && (
+                <>
+                  <span className="text-gray-300 dark:text-neutral-600 mx-0.5">·</span>
+                  <span className="text-xs text-primary/80">{request.subArea}</span>
+                </>
+              )}
               <span className="text-gray-300 dark:text-neutral-600 mx-1">|</span>
               <Badge variant="secondary" className="text-[10px] h-4 px-1.5 py-0 bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300">
                 {request.propertyType}
@@ -231,6 +249,15 @@ export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCard
             </div>
           )}
 
+          {/* Unit number (internal only) */}
+          {isInternal && request.unitNumber && (
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-500/5 px-2 py-1 rounded-md border border-amber-200/30 dark:border-amber-500/10">
+              <Hash className="h-3 w-3" />
+              <span className="font-medium">Unit: {request.unitNumber}</span>
+              {request.floor && <span className="text-gray-400 dark:text-neutral-500">· Floor {request.floor}</span>}
+            </div>
+          )}
+
           {/* Features */}
           <div className="flex flex-wrap gap-1">
             {request.features.slice(0, 3).map((feat) => (
@@ -254,7 +281,7 @@ export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCard
               <Clock className="h-3 w-3" />
               {timeAgo(request.createdAt)}
             </div>
-            <span>{request.contactName}</span>
+            <span>{isInternal ? request.contactName : "Via Zaylo"}</span>
           </div>
 
           {/* Actions */}
@@ -266,12 +293,21 @@ export function RequestCard({ request, onDelete, onSeeMore, index }: RequestCard
               <Eye className="h-3.5 w-3.5" />
               See more
             </button>
-            <button
-              onClick={handleWhatsApp}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-            </button>
+            {isInternal ? (
+              <button
+                onClick={handleWhatsApp}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+              </button>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onRequestAgent?.(request) }}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold transition-colors"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+              </button>
+            )}
             <button
               onClick={handleShare}
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-neutral-300 text-[11px] font-semibold transition-colors border border-gray-200 dark:border-neutral-700"

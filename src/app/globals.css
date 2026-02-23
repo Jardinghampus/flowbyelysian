@@ -376,3 +376,47 @@ html {
     height: calc(var(--vh, 1vh) * 100 - var(--sat) - var(--sab));
   }
 }
+
+/* iOS-native feel enhancements */
+@layer base {
+  /* Prevent overscroll bounce on the body */
+  html, body {
+    overscroll-behavior-y: none;
+  }
+
+  /* Enable rubber-band scrolling on scroll containers */
+  .overflow-y-auto,
+  .overflow-y-scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tap highlight removal for iOS */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Active state for touch feedback */
+  @media (hover: none) and (pointer: coarse) {
+    button:active, a:active, [role="button"]:active {
+      opacity: 0.7;
+      transition: opacity 0.1s ease;
+    }
+  }
+}
+
+/* Page transition animation */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-in {
+  animation: page-fade-in 0.3s ease-out;
+}
