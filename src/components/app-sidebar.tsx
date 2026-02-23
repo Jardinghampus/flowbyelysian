@@ -27,6 +27,8 @@ import {
   Home,
   Bell,
   MessageSquare,
+  BarChart3,
+  SlidersHorizontal,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -156,6 +158,12 @@ const allNavItems: NavItem[] = [
     roles: ["admin", "agent"],
   },
   {
+    label: "Market Stats",
+    href: "/market-statistics",
+    icon: <BarChart3 className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
+  },
+  {
     label: "Admin",
     href: "/admin",
     icon: <UserCog className="h-5 w-5 flex-shrink-0" />,
@@ -176,6 +184,12 @@ const allNavItems: NavItem[] = [
     roles: "all",
   },
   {
+    label: "My Search",
+    href: "/my-search",
+    icon: <SlidersHorizontal className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "tenant", "relocation_agent"],
+  },
+  {
     label: "Search",
     href: "/properties",
     icon: <Search className="h-5 w-5 flex-shrink-0" />,
@@ -192,6 +206,12 @@ const allNavItems: NavItem[] = [
     href: "/requests",
     icon: <ClipboardList className="h-5 w-5 flex-shrink-0" />,
     roles: ["buyer", "tenant", "relocation_agent"],
+  },
+  {
+    label: "Market Stats",
+    href: "/market-statistics",
+    icon: <BarChart3 className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
   {
     label: "Saved",

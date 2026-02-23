@@ -13,11 +13,12 @@ const footerLinks = {
     { label: "Off-Plan", href: "/inventory?status=off-plan" },
   ],
   areas: [
-    { label: "Palm Jumeirah", href: "/areas/palm-jumeirah" },
-    { label: "Dubai Marina", href: "/areas/dubai-marina" },
-    { label: "Downtown Dubai", href: "/areas/downtown-dubai" },
-    { label: "Emirates Hills", href: "/areas/emirates-hills" },
-    { label: "Arabian Ranches", href: "/areas/arabian-ranches" },
+    { label: "DAMAC Hills", href: "/communities/damac-hills" },
+    { label: "Tilal Al Ghaf", href: "/communities/tilal-al-ghaf" },
+    { label: "Al Furjan", href: "/communities/al-furjan" },
+    { label: "Jumeirah Golf Estates", href: "/communities/jumeirah-golf-estates" },
+    { label: "Palm Jumeirah", href: "/communities/palm-jumeirah" },
+    { label: "Other Communities", href: "/communities/other-villa-communities" },
   ],
   company: [
     { label: "About Us", href: "/about" },

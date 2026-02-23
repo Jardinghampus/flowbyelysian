@@ -34,35 +34,35 @@ export default function LandingPage() {
             description="Palm Jumeirah represents the ultimate in Dubai living. Our exclusive portfolio includes signature villas with private beaches, panoramic penthouses, and world-class amenities that define luxury waterfront living."
             secondaryText="From sunrise over the Arabian Gulf to sunset views of the Dubai skyline, every moment on the Palm is extraordinary."
             ctaText="Explore Palm Properties"
-            ctaLink="/areas/palm-jumeirah"
+            ctaLink="/communities/palm-jumeirah"
           />
         </TextParallaxContent>
 
         <TextParallaxContent
-          imgUrl="https://images.unsplash.com/photo-1518684079-3c830dcef090?q=80&w=2574&auto=format&fit=crop"
-          subheading="Dubai Marina"
-          heading="Urban Sophistication"
+          imgUrl="https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=2670&auto=format&fit=crop"
+          subheading="Tilal Al Ghaf"
+          heading="Lagoon Living Perfected"
         >
           <ContentBlock
-            title="Where city life meets waterfront elegance"
-            description="Dubai Marina offers a vibrant lifestyle with stunning high-rise residences overlooking the marina and Arabian Gulf. World-class dining, entertainment, and the famous Marina Walk are at your doorstep."
-            secondaryText="Whether you seek a sleek apartment or a spacious penthouse, Marina living offers the perfect blend of convenience and luxury."
-            ctaText="Discover Marina Living"
-            ctaLink="/areas/dubai-marina"
+            title="Crystal lagoons and sustainable luxury"
+            description="Tilal Al Ghaf by Majid Al Futtaim is Dubai's most anticipated master-planned community. Centered around a pristine lagoon with white sand beaches, it offers luxury villas with world-class amenities and sustainable design."
+            secondaryText="From Harmony villas to the ultra-exclusive Serenity mansions, discover lagoon-front living at its finest."
+            ctaText="Discover Tilal Al Ghaf"
+            ctaLink="/communities/tilal-al-ghaf"
           />
         </TextParallaxContent>
 
         <TextParallaxContent
           imgUrl="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop"
           subheading="Villa Communities"
-          heading="Family Estates & Gardens"
+          heading="Golf Courses & Family Estates"
         >
           <ContentBlock
-            title="Spacious living in Dubai's finest communities"
-            description="From the championship golf courses of Emirates Hills to the lagoon lifestyle of Tilal Al Ghaf, Dubai's premium villa communities offer families the space, privacy, and amenities they deserve."
+            title="DAMAC Hills, JGE, Al Furjan & more"
+            description="From the Trump International Golf Club at DAMAC Hills to the Greg Norman courses of Jumeirah Golf Estates, Dubai's premium villa communities offer families the space, privacy, and amenities they deserve."
             secondaryText="Discover gated communities with world-class schools, parks, and recreational facilities that make Dubai the perfect place to call home."
-            ctaText="Browse Villa Communities"
-            ctaLink="/areas/villa-communities"
+            ctaText="Browse All Communities"
+            ctaLink="/communities"
           />
         </TextParallaxContent>
       </div>
