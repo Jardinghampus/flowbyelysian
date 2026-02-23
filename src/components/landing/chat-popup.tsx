@@ -37,7 +37,7 @@ export function ChatPopup() {
         {
           role: "bot",
           content:
-            "Hello! Welcome to Elysian Real Estate.\n\nI can help you find your perfect property in Dubai. Tell me what you're looking for:\n\n• Location (Palm Jumeirah, Dubai Marina, etc.)\n• Number of bedrooms\n• Property type (villa, apartment)\n\nExample: '3 bedroom villa in Palm Jumeirah'",
+            "Hello! Welcome to Zaylo Marketplace.\n\nI can help you find your perfect property in Dubai. Tell me what you're looking for:\n\n• Location (Palm Jumeirah, Dubai Marina, etc.)\n• Number of bedrooms\n• Property type (villa, apartment)\n\nExample: '3 bedroom villa in Palm Jumeirah'",
           timestamp: new Date(),
         },
       ])
@@ -165,7 +165,7 @@ export function ChatPopup() {
                   <Bot className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Elysian Assistant</h3>
+                  <h3 className="font-semibold">Zaylo Assistant</h3>
                   <p className="text-xs text-neutral-400">Online • Ready to help</p>
                 </div>
               </div>

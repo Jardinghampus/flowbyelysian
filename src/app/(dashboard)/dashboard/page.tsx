@@ -36,7 +36,7 @@ const quickLinks = [
   },
   {
     name: "CRM",
-    url: "https://elysian.lightning.force.com/lightning/page/home",
+    url: "https://zaylo.lightning.force.com/lightning/page/home",
     icon: Users,
     color: "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-500/20",
   },
@@ -59,10 +59,10 @@ export default function Page() {
         className="text-center py-2"
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-          Welcome to <ColourfulText text="Eflow" />
+          Welcome to <ColourfulText text="ZFlow" />
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Your real estate dashboard powered by Elysian
+          Your real estate dashboard powered by Zaylo
         </p>
       </motion.div>
 

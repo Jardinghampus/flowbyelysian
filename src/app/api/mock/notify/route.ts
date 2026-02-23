@@ -61,7 +61,7 @@ export async function POST(request: Request): Promise<NextResponse<NotifyRespons
     /*
     // Send email notification
     await sendEmail({
-      to: "agent@elysian.ae",
+      to: "agent@zaylo.ae",
       subject: `New Lead: ${body.data.name}`,
       body: `
         New lead from WhatsApp Bot

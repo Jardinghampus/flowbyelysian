@@ -50,8 +50,8 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-6 max-w-5xl"
         >
-          <span className="block text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl lg:text-8xl">Elysian</span>
-          <span className="block text-3xl font-bold leading-[1.1] tracking-tight text-blue-400 md:text-4xl lg:text-5xl mt-2">Secondary Real Estate</span>
+          <span className="block text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl lg:text-8xl">Zaylo</span>
+          <span className="block text-3xl font-bold leading-[1.1] tracking-tight text-blue-400 md:text-4xl lg:text-5xl mt-2">Marketplace</span>
         </motion.h1>
 
         <motion.p

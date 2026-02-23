@@ -3,8 +3,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const isDev = process.env.CAPACITOR_MODE === 'dev';
 
 const config: CapacitorConfig = {
-  appId: 'com.elysian.flow',
-  appName: 'Flow by Elysian',
+  appId: 'com.zaylo.zflow',
+  appName: 'ZFlow by Zaylo',
   webDir: 'capacitor-www',
   server: {
     // Dev: points at local Next.js dev server via Android emulator alias

@@ -673,7 +673,7 @@ function AgentProductivitySection() {
               </blockquote>
               <div>
                 <p className="font-semibold text-white">Ahmed Al Khouri</p>
-                <p className="text-sm text-white/60">Sales Director, Elysian Real Estate</p>
+                <p className="text-sm text-white/60">Sales Director, Zaylo</p>
               </div>
             </div>
           </div>
@@ -730,7 +730,7 @@ function ROISection() {
               Measurable ROI From Day One
             </h2>
             <p className="text-lg text-neutral-600 mb-8">
-              Flow delivers quantifiable returns across every metric that matters.
+              ZFlow delivers quantifiable returns across every metric that matters.
               See the impact on your bottom line with clear, trackable KPIs.
             </p>
 

@@ -52,7 +52,7 @@ export function Navbar() {
                     : "bg-white text-neutral-900"
                 )}
               >
-                E
+                Z
               </div>
               <span
                 className={cn(
@@ -60,7 +60,7 @@ export function Navbar() {
                   isScrolled ? "text-neutral-900" : "text-white"
                 )}
               >
-                ELYSIAN
+                ZAYLO
               </span>
             </Link>
 

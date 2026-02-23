@@ -24,7 +24,7 @@ export function Preloader() {
         }}
       />
       <div className="absolute z-10 text-white text-center">
-        <h1 className="text-4xl font-bold mb-2">Flow by Elysian</h1>
+        <h1 className="text-4xl font-bold mb-2">ZFlow by Zaylo</h1>
         <p className="text-white/60 text-sm">Loading...</p>
       </div>
     </div>

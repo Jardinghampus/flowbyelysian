@@ -314,7 +314,7 @@ export default function AdminPage() {
                             onChange={(e) =>
                               setNewUser({ ...newUser, email: e.target.value })
                             }
-                            placeholder="agent@elysian.ae"
+                            placeholder="agent@zaylo.ae"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">

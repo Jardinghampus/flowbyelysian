@@ -3,7 +3,7 @@ import { streamText } from "ai"
 import { auth } from "@clerk/nextjs/server"
 
 const MARKETPLACE_SYSTEM_PROMPT = `
-You are an AI real estate advisor for Flow by Elysian, specializing in Dubai's premium residential market. You help buyers and investors find the perfect property based on their budget, preferences, and goals.
+You are an AI real estate advisor for ZFlow by Zaylo, specializing in Dubai's premium residential market. You help buyers and investors find the perfect property based on their budget, preferences, and goals.
 
 ## Your Expertise Areas:
 - **The Palm Jumeirah**: Iconic waterfront living, signature villas (AED 20-80M), apartments (AED 2-8M), branded residences

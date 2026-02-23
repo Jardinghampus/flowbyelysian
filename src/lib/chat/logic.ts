@@ -114,7 +114,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
       } else {
         // Greeting or unclear intent
         response =
-          "Hello! Welcome to Flow by Elysian Real Estate. I can help you find properties in Dubai.\n\n" +
+          "Hello! Welcome to ZFlow by Zaylo. I can help you find properties in Dubai.\n\n" +
           "Tell me what you're looking for - for example:\n" +
           "• '3 bedroom villa in Palm Jumeirah'\n" +
           "• 'Apartment in Dubai Marina under 3M'\n" +
@@ -162,7 +162,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
 
       if (contactInfo.name && contactInfo.phone) {
         response =
-          `Thank you, ${contactInfo.name}! An agent from Elysian Real Estate will contact you at ${contactInfo.phone} shortly.\n\n` +
+          `Thank you, ${contactInfo.name}! An agent from Zaylo will contact you at ${contactInfo.phone} shortly.\n\n` +
           "In the meantime, feel free to browse our website for more properties."
 
         nextState = "DONE"
@@ -241,7 +241,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
  */
 export function getWelcomeMessage(): string {
   return (
-    "Hello! Welcome to Flow by Elysian Real Estate.\n\n" +
+    "Hello! Welcome to ZFlow by Zaylo.\n\n" +
     "I can help you find your perfect property in Dubai. Just tell me what you're looking for:\n\n" +
     "• Location (Palm Jumeirah, Dubai Marina, Downtown, etc.)\n" +
     "• Number of bedrooms\n" +

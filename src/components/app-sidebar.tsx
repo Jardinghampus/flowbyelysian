@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import dynamic from "next/dynamic"
 import {
   LayoutDashboard,
@@ -21,10 +21,17 @@ import {
   Brain,
   Map,
   ArrowLeftRight,
+  Search,
+  ClipboardList,
+  Heart,
+  Home,
+  Bell,
+  MessageSquare,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTheme } from "@/hooks/use-theme"
+import { useRole, type UserRole } from "@/contexts/role-context"
 import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
@@ -67,83 +74,142 @@ const SidebarLogoutButton = dynamic(
   }
 )
 
-const navItems = [
-  // Core
+interface NavItem {
+  label: string
+  href: string
+  icon: React.ReactNode
+  roles: UserRole[] | "all"  // which roles can see this item
+}
+
+const allNavItems: NavItem[] = [
+  // === INTERNAL STAFF (admin + agent) ===
   {
     label: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // Properties
   {
     label: "Inventory",
     href: "/inventory",
     icon: <Building2 className="h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Market Place",
-    href: "/marketplace",
-    icon: <Map className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "Exchange",
     href: "/exchange",
     icon: <ArrowLeftRight className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "Areas",
     href: "/areas",
     icon: <MapPin className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // Analytics
   {
     label: "Performance",
     href: "/performance",
     icon: <TrendingUp className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // CRM
   {
     label: "Contacts",
     href: "/users",
     icon: <Users className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "Gmail",
     href: "/mail",
     icon: <Mail className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // AI Tools
   {
     label: "Smart",
     href: "/smart",
     icon: <Brain className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "AI Bot",
     href: "/ai-assistant",
     icon: <Sparkles className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "SEO Generator",
     href: "/seo-generator",
     icon: <FileText className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // Resources
   {
     label: "News",
     href: "/news",
     icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
   {
     label: "Training",
     href: "/training",
     icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin", "agent"],
   },
-  // Admin
   {
     label: "Admin",
     href: "/admin",
     icon: <UserCog className="h-5 w-5 flex-shrink-0" />,
+    roles: ["admin"],
+  },
+
+  // === CUSTOMER-FACING (all customers + shared) ===
+  {
+    label: "Home",
+    href: "/dashboard",
+    icon: <Home className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
+  },
+  {
+    label: "Marketplace",
+    href: "/marketplace",
+    icon: <Map className="h-5 w-5 flex-shrink-0" />,
+    roles: "all",
+  },
+  {
+    label: "Search",
+    href: "/properties",
+    icon: <Search className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "tenant", "relocation_agent"],
+  },
+  {
+    label: "My Listings",
+    href: "/inventory",
+    icon: <Building2 className="h-5 w-5 flex-shrink-0" />,
+    roles: ["seller", "landlord"],
+  },
+  {
+    label: "Requests",
+    href: "/requests",
+    icon: <ClipboardList className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "tenant", "relocation_agent"],
+  },
+  {
+    label: "Saved",
+    href: "/saved",
+    icon: <Heart className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
+  },
+  {
+    label: "Messages",
+    href: "/chat",
+    icon: <MessageSquare className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
+  },
+  {
+    label: "Notifications",
+    href: "/notifications",
+    icon: <Bell className="h-5 w-5 flex-shrink-0" />,
+    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
 ]
 
@@ -158,7 +224,16 @@ const bottomLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
+  const { role } = useRole()
   const [open, setOpen] = useState(false)
+
+  // Filter navigation items based on current role
+  const visibleNavItems = useMemo(() => {
+    return allNavItems.filter((item) => {
+      if (item.roles === "all") return true
+      return item.roles.includes(role)
+    })
+  }, [role])
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
@@ -172,7 +247,7 @@ export function AppSidebar() {
 
           {/* Main Navigation */}
           <div className="flex flex-col gap-1">
-            {navItems.map((item, idx) => {
+            {visibleNavItems.map((item, idx) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
               return (
                 <SidebarLink
@@ -251,7 +326,7 @@ const LogoFull = () => {
         animate={{ opacity: 1 }}
         className="font-bold text-lg whitespace-pre"
       >
-        FLOW
+        ZFLOW
       </motion.span>
     </Link>
   )
