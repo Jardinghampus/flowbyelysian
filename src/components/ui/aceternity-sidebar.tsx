@@ -5,6 +5,7 @@ import Link, { LinkProps } from "next/link"
 import React, { useState, createContext, useContext, useCallback, useRef, useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
+import { Logo } from "@/components/logo"
 
 interface Links {
   label: string
@@ -107,7 +108,7 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-black w-[300px] flex-shrink-0",
+        "h-full px-3 py-4 hidden md:flex md:flex-col bg-white dark:bg-black w-[300px] flex-shrink-0",
         className
       )}
       animate={{
@@ -144,12 +145,12 @@ export const MobileSidebar = ({
         )}
         {...props}
       >
-        <div className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">F</span>
+            <Logo size={20} className="text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg text-neutral-900 dark:text-white">FLOW</span>
-        </div>
+          <span className="font-bold text-lg text-neutral-900 dark:text-white tracking-tight">ZFLOW</span>
+        </Link>
         <button
           className="flex p-2 -mr-2 rounded-lg active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
           onClick={() => setOpen(!open)}
@@ -189,12 +190,12 @@ export const MobileSidebar = ({
             >
               {/* Close button row */}
               <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
-                <div className="flex items-center gap-3">
+                <Link href="/dashboard" className="flex items-center gap-3">
                   <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary-foreground font-bold text-sm">F</span>
+                    <Logo size={20} className="text-primary-foreground" />
                   </div>
-                  <span className="font-bold text-lg text-neutral-900 dark:text-white">FLOW</span>
-                </div>
+                  <span className="font-bold text-lg text-neutral-900 dark:text-white tracking-tight">ZFLOW</span>
+                </Link>
                 <button
                   className="text-neutral-500 dark:text-neutral-400 p-2 -mr-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 transition-colors"
                   onClick={() => setOpen(false)}
@@ -232,7 +233,7 @@ export const SidebarLink = ({
       href={link.href}
       onClick={() => closeSidebar()}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar py-2.5 px-2.5 rounded-lg transition-all duration-200",
+        "flex items-center justify-start gap-3 group/sidebar py-2.5 px-3 rounded-xl transition-all duration-200",
         isActive
           ? "bg-primary/10 text-primary"
           : "hover:bg-neutral-100 dark:hover:bg-neutral-800/60 active:bg-neutral-200 dark:active:bg-neutral-700/60",
@@ -243,25 +244,14 @@ export const SidebarLink = ({
       <div className={cn("flex-shrink-0", isActive && "text-primary")}>
         {link.icon}
       </div>
-      {/* Desktop: animate label visibility on hover. Mobile: always visible */}
-      <span
-        className={cn(
-          "text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre",
-          "md:hidden inline-block",
-          isActive && "text-primary font-medium"
-        )}
-      >
-        {link.label}
-      </span>
       <motion.span
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
         className={cn(
-          "text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre",
-          "hidden md:inline-block",
-          isActive && "text-primary font-medium"
+          "text-neutral-700 dark:text-neutral-200 text-[15px] leading-tight group-hover/sidebar:translate-x-0.5 transition duration-150 whitespace-pre",
+          isActive && "text-primary font-semibold"
         )}
       >
         {link.label}

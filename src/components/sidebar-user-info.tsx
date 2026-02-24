@@ -15,7 +15,7 @@ export function SidebarUserInfo({ open }: { open: boolean }) {
       !open && "flex justify-center"
     )}>
       {open ? (
-        <div className="flex items-center gap-3 px-2">
+        <div className="flex items-center gap-3 px-3">
           {user?.imageUrl ? (
             <Image
               src={user.imageUrl}
@@ -26,16 +26,16 @@ export function SidebarUserInfo({ open }: { open: boolean }) {
             />
           ) : (
             <div className="h-10 w-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-medium text-sm">
+              <span className="text-primary font-semibold text-[15px]">
                 {user?.firstName?.[0] || "U"}
               </span>
             </div>
           )}
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 truncate">
-              {user?.fullName || "Flow User"}
+            <span className="text-[15px] font-semibold text-neutral-700 dark:text-neutral-200 truncate">
+              {user?.fullName || "Zaylo User"}
             </span>
-            <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+            <span className="text-[13px] text-neutral-500 dark:text-neutral-400 truncate">
               Real Estate Agent
             </span>
           </div>
@@ -72,17 +72,17 @@ export function SidebarLogoutButton({ open }: { open: boolean }) {
     <button
       onClick={handleSignOut}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-md transition-colors",
+        "flex items-center justify-start gap-3 group/sidebar py-2.5 px-3 rounded-xl transition-colors",
         "text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-200"
       )}
     >
-      <LogOut className="h-5 w-5 flex-shrink-0" />
+      <LogOut className="h-[22px] w-[22px] flex-shrink-0" />
       <motion.span
         animate={{
           display: open ? "inline-block" : "none",
           opacity: open ? 1 : 0,
         }}
-        className="text-sm whitespace-pre"
+        className="text-[15px] whitespace-pre"
       >
         Logout
       </motion.span>

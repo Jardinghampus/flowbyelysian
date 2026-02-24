@@ -70,7 +70,7 @@ const SidebarLogoutButton = dynamic(
         )}
         disabled
       >
-        <LogOut className="h-5 w-5 flex-shrink-0" />
+        <LogOut className="h-[22px] w-[22px] flex-shrink-0" />
       </button>
     )
   }
@@ -83,90 +83,92 @@ interface NavItem {
   roles: UserRole[] | "all"  // which roles can see this item
 }
 
+const iconClass = "h-[22px] w-[22px] flex-shrink-0"
+
 const allNavItems: NavItem[] = [
   // === INTERNAL STAFF (admin + agent) ===
   {
     label: "Dashboard",
     href: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0" />,
+    icon: <LayoutDashboard className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Inventory",
     href: "/inventory",
-    icon: <Building2 className="h-5 w-5 flex-shrink-0" />,
+    icon: <Building2 className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Exchange",
     href: "/exchange",
-    icon: <ArrowLeftRight className="h-5 w-5 flex-shrink-0" />,
+    icon: <ArrowLeftRight className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Areas",
     href: "/areas",
-    icon: <MapPin className="h-5 w-5 flex-shrink-0" />,
+    icon: <MapPin className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Performance",
     href: "/performance",
-    icon: <TrendingUp className="h-5 w-5 flex-shrink-0" />,
+    icon: <TrendingUp className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Contacts",
     href: "/users",
-    icon: <Users className="h-5 w-5 flex-shrink-0" />,
+    icon: <Users className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Gmail",
     href: "/mail",
-    icon: <Mail className="h-5 w-5 flex-shrink-0" />,
+    icon: <Mail className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Smart",
     href: "/smart",
-    icon: <Brain className="h-5 w-5 flex-shrink-0" />,
+    icon: <Brain className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "AI Bot",
     href: "/ai-assistant",
-    icon: <Sparkles className="h-5 w-5 flex-shrink-0" />,
+    icon: <Sparkles className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "SEO Generator",
     href: "/seo-generator",
-    icon: <FileText className="h-5 w-5 flex-shrink-0" />,
+    icon: <FileText className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "News",
     href: "/news",
-    icon: <Newspaper className="h-5 w-5 flex-shrink-0" />,
+    icon: <Newspaper className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Training",
     href: "/training",
-    icon: <GraduationCap className="h-5 w-5 flex-shrink-0" />,
+    icon: <GraduationCap className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Market Stats",
     href: "/market-statistics",
-    icon: <BarChart3 className="h-5 w-5 flex-shrink-0" />,
+    icon: <BarChart3 className={iconClass} />,
     roles: ["admin", "agent"],
   },
   {
     label: "Admin",
     href: "/admin",
-    icon: <UserCog className="h-5 w-5 flex-shrink-0" />,
+    icon: <UserCog className={iconClass} />,
     roles: ["admin"],
   },
 
@@ -174,61 +176,61 @@ const allNavItems: NavItem[] = [
   {
     label: "Home",
     href: "/dashboard",
-    icon: <Home className="h-5 w-5 flex-shrink-0" />,
+    icon: <Home className={iconClass} />,
     roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
   {
     label: "Marketplace",
     href: "/marketplace",
-    icon: <Map className="h-5 w-5 flex-shrink-0" />,
+    icon: <Map className={iconClass} />,
     roles: "all",
   },
   {
     label: "My Search",
     href: "/my-search",
-    icon: <SlidersHorizontal className="h-5 w-5 flex-shrink-0" />,
+    icon: <SlidersHorizontal className={iconClass} />,
     roles: ["buyer", "tenant", "relocation_agent"],
   },
   {
     label: "Search",
     href: "/properties",
-    icon: <Search className="h-5 w-5 flex-shrink-0" />,
+    icon: <Search className={iconClass} />,
     roles: ["buyer", "tenant", "relocation_agent"],
   },
   {
     label: "My Listings",
     href: "/inventory",
-    icon: <Building2 className="h-5 w-5 flex-shrink-0" />,
+    icon: <Building2 className={iconClass} />,
     roles: ["seller", "landlord"],
   },
   {
     label: "Requests",
     href: "/requests",
-    icon: <ClipboardList className="h-5 w-5 flex-shrink-0" />,
+    icon: <ClipboardList className={iconClass} />,
     roles: ["buyer", "tenant", "relocation_agent"],
   },
   {
     label: "Market Stats",
     href: "/market-statistics",
-    icon: <BarChart3 className="h-5 w-5 flex-shrink-0" />,
+    icon: <BarChart3 className={iconClass} />,
     roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
   {
     label: "Saved",
     href: "/saved",
-    icon: <Heart className="h-5 w-5 flex-shrink-0" />,
+    icon: <Heart className={iconClass} />,
     roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
   {
     label: "Messages",
     href: "/chat",
-    icon: <MessageSquare className="h-5 w-5 flex-shrink-0" />,
+    icon: <MessageSquare className={iconClass} />,
     roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
   {
     label: "Notifications",
     href: "/notifications",
-    icon: <Bell className="h-5 w-5 flex-shrink-0" />,
+    icon: <Bell className={iconClass} />,
     roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
   },
 ]
@@ -237,7 +239,7 @@ const bottomLinks = [
   {
     label: "Settings",
     href: "/settings/user",
-    icon: <Settings className="h-5 w-5 flex-shrink-0" />,
+    icon: <Settings className={iconClass} />,
   },
 ]
 
@@ -266,7 +268,7 @@ export function AppSidebar() {
           <SidebarUserInfo open={open} />
 
           {/* Main Navigation */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             {visibleNavItems.map((item, idx) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
               return (
@@ -308,14 +310,14 @@ export function AppSidebar() {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="flex items-center justify-between px-2 py-2">
-              <Label htmlFor="dark-mode-toggle" className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+            <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/50">
+              <Label htmlFor="dark-mode-toggle" className="flex items-center gap-2.5 text-neutral-600 dark:text-neutral-400 cursor-pointer">
                 {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-[#00d4ff]" />
+                  <Sun className="h-[22px] w-[22px] text-[#00d4ff]" />
                 ) : (
-                  <Moon className="h-5 w-5" />
+                  <Moon className="h-[22px] w-[22px]" />
                 )}
-                <span className="text-sm whitespace-pre">
+                <span className="text-[15px] whitespace-pre">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </span>
               </Label>
@@ -336,15 +338,15 @@ const LogoFull = () => {
   return (
     <Link
       href="/dashboard"
-      className="font-bold flex items-center gap-3 text-sm text-black dark:text-white py-1 px-2 relative z-20"
+      className="font-bold flex items-center gap-3 text-black dark:text-white py-1 px-3 relative z-20"
     >
-      <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-        <Logo size={20} className="text-primary-foreground" />
+      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+        <Logo size={22} className="text-primary-foreground" />
       </div>
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-bold text-lg whitespace-pre"
+        className="font-bold text-xl whitespace-pre tracking-tight"
       >
         ZFLOW
       </motion.span>
@@ -356,10 +358,10 @@ const LogoIcon = () => {
   return (
     <Link
       href="/dashboard"
-      className="font-bold flex items-center justify-center text-sm text-black py-1 relative z-20"
+      className="font-bold flex items-center justify-center py-1 relative z-20"
     >
-      <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-        <Logo size={20} className="text-primary-foreground" />
+      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+        <Logo size={22} className="text-primary-foreground" />
       </div>
     </Link>
   )

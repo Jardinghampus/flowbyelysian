@@ -27,25 +27,26 @@ export function MobileBottomTabs() {
   const pathname = usePathname()
   const { isInternal, role } = useRole()
 
+  const tabIcon = "h-[22px] w-[22px]"
   const tabs: TabItem[] = isInternal
     ? [
-        { href: "/dashboard", label: "Home", icon: <Home className="h-5 w-5" /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className="h-5 w-5" /> },
-        { href: "/requests", label: "Requests", icon: <ClipboardList className="h-5 w-5" /> },
-        { href: "/market-statistics", label: "Stats", icon: <BarChart3 className="h-5 w-5" /> },
+        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
+        { href: "/requests", label: "Requests", icon: <ClipboardList className={tabIcon} /> },
+        { href: "/market-statistics", label: "Stats", icon: <BarChart3 className={tabIcon} /> },
       ]
     : role === "seller" || role === "landlord"
     ? [
-        { href: "/dashboard", label: "Home", icon: <Home className="h-5 w-5" /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className="h-5 w-5" /> },
-        { href: "/inventory", label: "Listings", icon: <Building2 className="h-5 w-5" /> },
-        { href: "/saved", label: "Saved", icon: <Heart className="h-5 w-5" /> },
+        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
+        { href: "/inventory", label: "Listings", icon: <Building2 className={tabIcon} /> },
+        { href: "/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
       ]
     : [
-        { href: "/dashboard", label: "Home", icon: <Home className="h-5 w-5" /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className="h-5 w-5" /> },
-        { href: "/my-search", label: "Search", icon: <SlidersHorizontal className="h-5 w-5" /> },
-        { href: "/saved", label: "Saved", icon: <Heart className="h-5 w-5" /> },
+        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
+        { href: "/my-search", label: "Search", icon: <SlidersHorizontal className={tabIcon} /> },
+        { href: "/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
       ]
 
   return (
@@ -58,7 +59,7 @@ export function MobileBottomTabs() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 px-3 min-w-0 flex-1 transition-colors",
+                "relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 px-3 min-w-0 flex-1 transition-colors",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground"
@@ -77,7 +78,7 @@ export function MobileBottomTabs() {
               >
                 {tab.icon}
               </motion.div>
-              <span className="text-[10px] font-medium leading-tight truncate">
+              <span className="text-[11px] font-medium leading-tight truncate">
                 {tab.label}
               </span>
             </Link>
