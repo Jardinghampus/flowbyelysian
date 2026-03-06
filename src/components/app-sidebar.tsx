@@ -186,6 +186,12 @@ const allNavItems: NavItem[] = [
     roles: "all",
   },
   {
+    label: "Off-Plan",
+    href: "/off-plan",
+    icon: <Building2 className={iconClass} />,
+    roles: "all",
+  },
+  {
     label: "My Search",
     href: "/my-search",
     icon: <SlidersHorizontal className={iconClass} />,

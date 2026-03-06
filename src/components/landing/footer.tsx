@@ -10,7 +10,8 @@ const footerLinks = {
     { label: "Apartments", href: "/inventory?type=apartment" },
     { label: "Penthouses", href: "/inventory?type=penthouse" },
     { label: "Townhouses", href: "/inventory?type=townhouse" },
-    { label: "Off-Plan", href: "/inventory?status=off-plan" },
+    { label: "Off-Plan Projects", href: "/off-plan" },
+    { label: "Submit Opportunity", href: "/opportunity" },
   ],
   areas: [
     { label: "DAMAC Hills", href: "/communities/damac-hills" },
