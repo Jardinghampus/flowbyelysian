@@ -6,6 +6,8 @@ import { FeaturedListings } from "@/components/landing/featured-listings"
 import { TextParallaxContent, ContentBlock } from "@/components/landing/text-parallax"
 import { AreasSection, AreaGallery } from "@/components/landing/areas-section"
 import { TeamSection } from "@/components/landing/team-section"
+import { OpportunityCTA } from "@/components/landing/opportunity-cta"
+import { OffPlanCTA } from "@/components/landing/off-plan-cta"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
 
@@ -77,6 +79,12 @@ export default function LandingPage() {
       <section id="team">
         <TeamSection />
       </section>
+
+      {/* Opportunity AIDA CTA */}
+      <OpportunityCTA />
+
+      {/* Off-Plan AIDA CTA */}
+      <OffPlanCTA />
 
       {/* Contact CTA Section */}
       <section id="contact" className="py-24 bg-white">

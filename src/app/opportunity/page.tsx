@@ -27,6 +27,7 @@ import {
   Bath,
   FileText,
   ChevronDown,
+  ArrowRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Navbar } from "@/components/landing/navbar"
@@ -700,22 +701,31 @@ export default function OpportunityPage() {
                 <CheckCircle2 className="h-10 w-10 text-emerald-600" />
               </motion.div>
               <h2 className="text-3xl font-bold text-neutral-900 mb-3">Opportunity Submitted!</h2>
-              <p className="text-neutral-500 max-w-md mx-auto mb-8">
+              <p className="text-neutral-500 max-w-md mx-auto mb-4">
                 Thank you, {form.fullName.split(" ")[0]}. A Zaylo agent will review your opportunity and reach out via {form.preferredContact} within 24 hours.
               </p>
-              <div className="flex justify-center gap-3">
+              <p className="text-sm text-neutral-400 max-w-md mx-auto mb-8">
+                Log in to your dashboard to track your opportunity, edit details, or submit new ones.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link
-                  href="/"
-                  className="px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors"
+                  href="/my-opportunities"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors"
                 >
-                  Back to Home
+                  Go to My Dashboard <ArrowRight className="h-4 w-4" />
                 </Link>
                 <button
                   onClick={() => { setForm(initialFormData); setStep(0); setSubmitted(false) }}
-                  className="px-6 py-3 rounded-full bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors"
+                  className="px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors"
                 >
                   Submit Another
                 </button>
+                <Link
+                  href="/"
+                  className="px-6 py-3 rounded-full text-neutral-500 font-medium hover:text-neutral-700 transition-colors"
+                >
+                  Back to Home
+                </Link>
               </div>
             </motion.div>
           )}

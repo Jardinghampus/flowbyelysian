@@ -95,7 +95,7 @@ export function Navbar() {
             </nav>
 
             {/* CTA Buttons */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-3">
               <a
                 href="tel:+971501234567"
                 className={cn(
@@ -107,9 +107,20 @@ export function Navbar() {
                 +971 50 123 4567
               </a>
               <Link
+                href="/my-opportunities"
+                className={cn(
+                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors border",
+                  isScrolled
+                    ? "border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                    : "border-white/30 text-white hover:bg-white/10"
+                )}
+              >
+                Log In
+              </Link>
+              <Link
                 href="/dashboard"
                 className={cn(
-                  "rounded-full px-6 py-2.5 text-sm font-semibold transition-colors",
+                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
                   isScrolled
                     ? "bg-neutral-900 text-white hover:bg-neutral-800"
                     : "bg-white text-neutral-900 hover:bg-neutral-100"
@@ -187,7 +198,7 @@ export function Navbar() {
                 ))}
               </nav>
 
-              <div className="mt-8 pt-8 border-t border-neutral-200 space-y-4">
+              <div className="mt-8 pt-8 border-t border-neutral-200 space-y-3">
                 <a
                   href="tel:+971501234567"
                   className="flex items-center gap-3 text-neutral-600 hover:text-blue-600 transition-colors"
@@ -195,6 +206,12 @@ export function Navbar() {
                   <Phone className="h-5 w-5" />
                   +971 50 123 4567
                 </a>
+                <Link
+                  href="/my-opportunities"
+                  className="block w-full rounded-full border-2 border-neutral-900 px-6 py-3 text-center text-neutral-900 font-semibold hover:bg-neutral-50 transition-colors"
+                >
+                  Log In
+                </Link>
                 <Link
                   href="/dashboard"
                   className="block w-full rounded-full bg-neutral-900 px-6 py-3 text-center text-white font-semibold hover:bg-neutral-800 transition-colors"
