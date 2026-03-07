@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { SparklesText } from "@/components/ui/sparkles-text"
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
@@ -44,15 +45,20 @@ export function HeroSection() {
           Dubai&apos;s Premier Real Estate
         </motion.p>
 
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-6 max-w-5xl"
         >
-          <span className="block text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl lg:text-8xl">Zaylo</span>
+          <SparklesText
+            text="Zaylo"
+            className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl lg:text-8xl"
+            colors={{ first: "#60A5FA", second: "#A78BFA" }}
+            sparklesCount={12}
+          />
           <span className="block text-3xl font-bold leading-[1.1] tracking-tight text-blue-400 md:text-4xl lg:text-5xl mt-2">Marketplace</span>
-        </motion.h1>
+        </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}

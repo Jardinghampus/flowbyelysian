@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { Menu, X, Phone } from "lucide-react"
+import { Menu, X, Phone, Sun, Moon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/hooks/use-theme"
 
 const navLinks = [
   { href: "/communities", label: "Communities" },
@@ -18,6 +19,10 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const isDark = theme === "dark"
+
+  const toggleTheme = () => setTheme(isDark ? "light" : "dark")
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,7 +42,7 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           isScrolled
-            ? "bg-white/95 backdrop-blur-md shadow-sm"
+            ? "bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md shadow-sm dark:shadow-neutral-900/20"
             : "bg-transparent"
         )}
       >
@@ -58,7 +63,7 @@ export function Navbar() {
               <span
                 className={cn(
                   "text-xl font-bold transition-colors",
-                  isScrolled ? "text-neutral-900" : "text-white"
+                  isScrolled ? "text-neutral-900 dark:text-white" : "text-white"
                 )}
               >
                 ZAYLO
@@ -74,7 +79,7 @@ export function Navbar() {
                     href={link.href}
                     className={cn(
                       "text-sm font-medium transition-colors hover:text-blue-500",
-                      isScrolled ? "text-neutral-600" : "text-white/90"
+                      isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
                     )}
                   >
                     {link.label}
@@ -85,7 +90,7 @@ export function Navbar() {
                     href={link.href}
                     className={cn(
                       "text-sm font-medium transition-colors hover:text-blue-500",
-                      isScrolled ? "text-neutral-600" : "text-white/90"
+                      isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
                     )}
                   >
                     {link.label}
@@ -100,18 +105,40 @@ export function Navbar() {
                 href="tel:+971501234567"
                 className={cn(
                   "flex items-center gap-2 text-sm font-medium transition-colors",
-                  isScrolled ? "text-neutral-600" : "text-white/90"
+                  isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
                 )}
               >
                 <Phone className="h-4 w-4" />
                 +971 50 123 4567
               </a>
+              <button
+                onClick={toggleTheme}
+                className={cn(
+                  "h-9 w-9 rounded-full flex items-center justify-center transition-colors",
+                  isScrolled
+                    ? "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    : "text-white/80 hover:bg-white/10"
+                )}
+                aria-label="Toggle theme"
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {isDark ? (
+                    <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      <Sun className="h-[18px] w-[18px]" />
+                    </motion.div>
+                  ) : (
+                    <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      <Moon className="h-[18px] w-[18px]" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
               <Link
                 href="/my-opportunities"
                 className={cn(
                   "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors border",
                   isScrolled
-                    ? "border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                    ? "border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800"
                     : "border-white/30 text-white hover:bg-white/10"
                 )}
               >
@@ -122,7 +149,7 @@ export function Navbar() {
                 className={cn(
                   "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
                   isScrolled
-                    ? "bg-neutral-900 text-white hover:bg-neutral-800"
+                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100"
                     : "bg-white text-neutral-900 hover:bg-neutral-100"
                 )}
               >
@@ -162,10 +189,10 @@ export function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white p-6 shadow-2xl md:hidden"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white dark:bg-neutral-900 p-6 shadow-2xl md:hidden"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="text-xl font-bold text-neutral-900">Menu</span>
+                <span className="text-xl font-bold text-neutral-900 dark:text-white">Menu</span>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600"
@@ -181,7 +208,7 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
+                      className="block text-lg font-medium text-neutral-900 dark:text-white py-2 hover:text-blue-600 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -190,7 +217,7 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-lg font-medium text-neutral-900 py-2 hover:text-blue-600 transition-colors"
+                      className="block text-lg font-medium text-neutral-900 dark:text-white py-2 hover:text-blue-600 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -198,23 +225,30 @@ export function Navbar() {
                 ))}
               </nav>
 
-              <div className="mt-8 pt-8 border-t border-neutral-200 space-y-3">
+              <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-700 space-y-3">
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-3 w-full text-neutral-600 dark:text-neutral-400 hover:text-blue-600 transition-colors py-2"
+                >
+                  {isDark ? <Sun className="h-5 w-5 text-amber-500" /> : <Moon className="h-5 w-5" />}
+                  {isDark ? "Light Mode" : "Dark Mode"}
+                </button>
                 <a
                   href="tel:+971501234567"
-                  className="flex items-center gap-3 text-neutral-600 hover:text-blue-600 transition-colors"
+                  className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400 hover:text-blue-600 transition-colors"
                 >
                   <Phone className="h-5 w-5" />
                   +971 50 123 4567
                 </a>
                 <Link
                   href="/my-opportunities"
-                  className="block w-full rounded-full border-2 border-neutral-900 px-6 py-3 text-center text-neutral-900 font-semibold hover:bg-neutral-50 transition-colors"
+                  className="block w-full rounded-full border-2 border-neutral-900 dark:border-white px-6 py-3 text-center text-neutral-900 dark:text-white font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/dashboard"
-                  className="block w-full rounded-full bg-neutral-900 px-6 py-3 text-center text-white font-semibold hover:bg-neutral-800 transition-colors"
+                  className="block w-full rounded-full bg-neutral-900 dark:bg-white px-6 py-3 text-center text-white dark:text-neutral-900 font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
                 >
                   Agent Login
                 </Link>
