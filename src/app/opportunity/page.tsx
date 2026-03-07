@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
+import { ToastSave } from "@/components/ui/toast-save"
 
 type OpportunityType = "buy" | "sell" | "rent" | "lease" | "relocation"
 
@@ -122,6 +123,7 @@ export default function OpportunityPage() {
   const [form, setForm] = useState<OpportunityFormData>(initialFormData)
   const [step, setStep] = useState(0) // 0 = type, 1 = details, 2 = contact, 3 = done
   const [submitted, setSubmitted] = useState(false)
+  const [saveState, setSaveState] = useState<"initial" | "loading" | "success">("initial")
 
   const update = <K extends keyof OpportunityFormData>(key: K, value: OpportunityFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -139,8 +141,14 @@ export default function OpportunityPage() {
   const isBuyer = form.type === "buy" || form.type === "rent" || form.type === "relocation"
 
   const handleSubmit = () => {
-    setSubmitted(true)
-    setStep(3)
+    setSaveState("loading")
+    setTimeout(() => {
+      setSaveState("success")
+      setTimeout(() => {
+        setSubmitted(true)
+        setStep(3)
+      }, 800)
+    }, 1200)
   }
 
   const conf = typeConfig[form.type]
@@ -667,20 +675,32 @@ export default function OpportunityPage() {
                 By submitting, you agree to Zaylo&apos;s Terms of Service. Your information is secure and will only be shared with assigned Zaylo agents.
               </p>
 
-              <div className="pt-2 flex justify-between">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <button
                   onClick={() => setStep(1)}
                   className="flex items-center gap-2 px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!form.fullName.trim() || !form.email.trim() || !form.phone.trim()}
-                  className="flex items-center gap-2 px-8 py-3 rounded-full bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send className="h-4 w-4" /> Submit Opportunity
-                </button>
+                {(!form.fullName.trim() || !form.email.trim() || !form.phone.trim()) ? (
+                  <button
+                    disabled
+                    className="flex items-center gap-2 px-8 py-3 rounded-full bg-neutral-900 text-white font-semibold opacity-50 cursor-not-allowed"
+                  >
+                    <Send className="h-4 w-4" /> Submit Opportunity
+                  </button>
+                ) : (
+                  <ToastSave
+                    state={saveState}
+                    initialText="Ready to submit"
+                    loadingText="Submitting..."
+                    successText="Opportunity Sent!"
+                    saveText="Submit Opportunity"
+                    resetText="Reset"
+                    onSave={handleSubmit}
+                    onReset={() => { setForm(initialFormData); setStep(0); setSaveState("initial") }}
+                  />
+                )}
               </div>
             </motion.div>
           )}
