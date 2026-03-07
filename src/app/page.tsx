@@ -19,6 +19,12 @@ export default function LandingPage() {
       {/* Hero Section */}
       <HeroSection />
 
+      {/* Opportunity AIDA CTA */}
+      <OpportunityCTA />
+
+      {/* Off-Plan AIDA CTA */}
+      <OffPlanCTA />
+
       {/* Featured Listings */}
       <section id="properties">
         <FeaturedListings />
@@ -79,12 +85,6 @@ export default function LandingPage() {
       <section id="team">
         <TeamSection />
       </section>
-
-      {/* Opportunity AIDA CTA */}
-      <OpportunityCTA />
-
-      {/* Off-Plan AIDA CTA */}
-      <OffPlanCTA />
 
       {/* Contact CTA Section */}
       <section id="contact" className="py-24 bg-white">
