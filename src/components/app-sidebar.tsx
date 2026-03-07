@@ -94,6 +94,12 @@ const allNavItems: NavItem[] = [
     roles: ["admin", "agent"],
   },
   {
+    label: "Leads",
+    href: "/leads",
+    icon: <ClipboardList className={iconClass} />,
+    roles: ["admin", "agent"],
+  },
+  {
     label: "Inventory",
     href: "/inventory",
     icon: <Building2 className={iconClass} />,

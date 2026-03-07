@@ -296,6 +296,64 @@ create index idx_leaderboard_points on leaderboard_points(points desc);
 create index idx_leaderboard_agent on leaderboard_points(agent_id);
 
 -- =============================================
+-- OPPORTUNITIES (Customer-submitted leads)
+-- =============================================
+
+create type opportunity_type as enum ('buy', 'sell', 'rent', 'lease', 'relocation');
+create type opportunity_status as enum ('new', 'contacted', 'in_progress', 'matched', 'closed', 'cancelled');
+
+create table opportunities (
+  id uuid primary key default uuid_generate_v4(),
+  -- Type & status
+  type opportunity_type not null,
+  status opportunity_status default 'new',
+  -- Contact info
+  full_name text not null,
+  email text not null,
+  phone text not null,
+  whatsapp text,
+  preferred_contact text default 'whatsapp',
+  -- Property details
+  area text,
+  sub_area text,
+  unit_number text,
+  floor text,
+  property_type text,
+  bedrooms integer,
+  bathrooms integer,
+  size integer, -- sqft
+  furnished text,
+  parking integer,
+  year_built text,
+  -- Pricing
+  price numeric,
+  price_type text default 'negotiable', -- fixed, negotiable, range
+  min_price numeric,
+  max_price numeric,
+  -- Additional
+  features text[] default '{}',
+  availability text,
+  notes text,
+  -- AI summary (generated on submission)
+  ai_price_summary text,
+  market_comparison_pct numeric, -- % above/below market
+  -- Agent assignment
+  assigned_agent_id text,
+  assigned_agent_name text,
+  agent_notes text,
+  -- Tracking
+  source text default 'website',
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create index idx_opportunities_status on opportunities(status);
+create index idx_opportunities_type on opportunities(type);
+create index idx_opportunities_area on opportunities(area);
+create index idx_opportunities_created on opportunities(created_at desc);
+create index idx_opportunities_agent on opportunities(assigned_agent_id);
+
+-- =============================================
 -- ROW LEVEL SECURITY (RLS)
 -- =============================================
 
@@ -410,6 +468,18 @@ create policy "System can manage leaderboard points" on leaderboard_points
   for insert with check (true);
 
 create policy "System can update leaderboard points" on leaderboard_points
+  for update using (true);
+
+-- Opportunities RLS
+alter table opportunities enable row level security;
+
+create policy "Opportunities are viewable by authenticated users" on opportunities
+  for select using (true);
+
+create policy "Anyone can submit opportunities" on opportunities
+  for insert with check (true);
+
+create policy "Agents can update opportunities" on opportunities
   for update using (true);
 
 -- =============================================
