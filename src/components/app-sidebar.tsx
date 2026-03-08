@@ -29,6 +29,10 @@ import {
   MessageSquare,
   BarChart3,
   SlidersHorizontal,
+  Kanban,
+  CalendarDays,
+  ImagePlus,
+  CheckSquare,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -102,9 +106,20 @@ const navSections: NavSection[] = [
     roles: ["admin", "agent"],
     items: [
       { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Pipeline", href: "/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Leads", href: "/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Inventory", href: "/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "My Listings", href: "/my-listings", icon: <ImagePlus className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Exchange", href: "/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
+    ],
+  },
+  // ── INTERNAL: Organize ──
+  {
+    title: "Organize",
+    roles: ["admin", "agent"],
+    items: [
+      { label: "Tasks", href: "/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Calendar", href: "/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Analytics ──
@@ -179,7 +194,7 @@ const navSections: NavSection[] = [
     title: "My Properties",
     roles: LISTERS,
     items: [
-      { label: "My Listings", href: "/my-listings", icon: <Building2 className={iconClass} />, roles: LISTERS },
+      { label: "My Listings", href: "/my-listings", icon: <ImagePlus className={iconClass} />, roles: LISTERS },
     ],
   },
   // ── CUSTOMER: Insights ──

@@ -13,6 +13,8 @@ import {
   BarChart3,
   Map,
   ClipboardList,
+  Kanban,
+  ImagePlus,
 } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
 import { cn } from "@/lib/utils"
@@ -31,15 +33,15 @@ export function MobileBottomTabs() {
   const tabs: TabItem[] = isInternal
     ? [
         { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/pipeline", label: "Pipeline", icon: <Kanban className={tabIcon} /> },
         { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/requests", label: "Requests", icon: <ClipboardList className={tabIcon} /> },
-        { href: "/market-statistics", label: "Stats", icon: <BarChart3 className={tabIcon} /> },
+        { href: "/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
       ]
     : role === "seller" || role === "landlord"
     ? [
         { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
         { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/inventory", label: "Listings", icon: <Building2 className={tabIcon} /> },
         { href: "/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
       ]
     : [
