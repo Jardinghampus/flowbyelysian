@@ -85,165 +85,120 @@ interface NavItem {
 
 const iconClass = "h-[22px] w-[22px] flex-shrink-0"
 
-const allNavItems: NavItem[] = [
-  // === INTERNAL STAFF (admin + agent) ===
+interface NavSection {
+  title: string
+  roles: UserRole[] | "all"
+  items: NavItem[]
+}
+
+const ALL_CUSTOMERS: UserRole[] = ["buyer", "seller", "tenant", "landlord", "relocation_agent"]
+const SEEKERS: UserRole[] = ["buyer", "tenant", "relocation_agent"]
+const LISTERS: UserRole[] = ["seller", "landlord"]
+
+const navSections: NavSection[] = [
+  // ── INTERNAL: Core ──
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard className={iconClass} />,
+    title: "Core",
     roles: ["admin", "agent"],
+    items: [
+      { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Leads", href: "/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Inventory", href: "/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Exchange", href: "/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
+    ],
   },
+  // ── INTERNAL: Analytics ──
   {
-    label: "Leads",
-    href: "/leads",
-    icon: <ClipboardList className={iconClass} />,
+    title: "Analytics",
     roles: ["admin", "agent"],
+    items: [
+      { label: "Areas", href: "/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Performance", href: "/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"] },
+    ],
   },
+  // ── INTERNAL: CRM & Comms ──
   {
-    label: "Inventory",
-    href: "/inventory",
-    icon: <Building2 className={iconClass} />,
+    title: "CRM & Comms",
     roles: ["admin", "agent"],
+    items: [
+      { label: "Contacts", href: "/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
+    ],
   },
+  // ── INTERNAL: AI & Tools ──
   {
-    label: "Exchange",
-    href: "/exchange",
-    icon: <ArrowLeftRight className={iconClass} />,
+    title: "AI & Tools",
     roles: ["admin", "agent"],
+    items: [
+      { label: "Smart", href: "/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "AI Bot", href: "/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "SEO Generator", href: "/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+    ],
   },
+  // ── INTERNAL: Resources ──
   {
-    label: "Areas",
-    href: "/areas",
-    icon: <MapPin className={iconClass} />,
+    title: "Resources",
     roles: ["admin", "agent"],
+    items: [
+      { label: "News", href: "/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Training", href: "/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"] },
+    ],
   },
+  // ── INTERNAL: Admin ──
   {
-    label: "Performance",
-    href: "/performance",
-    icon: <TrendingUp className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Contacts",
-    href: "/users",
-    icon: <Users className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Gmail",
-    href: "/mail",
-    icon: <Mail className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Smart",
-    href: "/smart",
-    icon: <Brain className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "AI Bot",
-    href: "/ai-assistant",
-    icon: <Sparkles className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "SEO Generator",
-    href: "/seo-generator",
-    icon: <FileText className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "News",
-    href: "/news",
-    icon: <Newspaper className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Training",
-    href: "/training",
-    icon: <GraduationCap className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Market Stats",
-    href: "/market-statistics",
-    icon: <BarChart3 className={iconClass} />,
-    roles: ["admin", "agent"],
-  },
-  {
-    label: "Admin",
-    href: "/admin",
-    icon: <UserCog className={iconClass} />,
+    title: "System",
     roles: ["admin"],
+    items: [
+      { label: "Admin", href: "/admin", icon: <UserCog className={iconClass} />, roles: ["admin"] },
+    ],
   },
 
-  // === CUSTOMER-FACING (all customers + shared) ===
+  // ── CUSTOMER: Home & Browse ──
   {
-    label: "Home",
-    href: "/dashboard",
-    icon: <Home className={iconClass} />,
-    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
+    title: "Home",
+    roles: ALL_CUSTOMERS,
+    items: [
+      { label: "Home", href: "/dashboard", icon: <Home className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Marketplace", href: "/marketplace", icon: <Map className={iconClass} />, roles: "all" },
+      { label: "Off-Plan", href: "/off-plan", icon: <Building2 className={iconClass} />, roles: "all" },
+    ],
   },
+  // ── CUSTOMER: Search & Requests ──
   {
-    label: "Marketplace",
-    href: "/marketplace",
-    icon: <Map className={iconClass} />,
-    roles: "all",
+    title: "Search",
+    roles: SEEKERS,
+    items: [
+      { label: "My Search", href: "/my-search", icon: <SlidersHorizontal className={iconClass} />, roles: SEEKERS },
+      { label: "Search", href: "/properties", icon: <Search className={iconClass} />, roles: SEEKERS },
+      { label: "Requests", href: "/requests", icon: <ClipboardList className={iconClass} />, roles: SEEKERS },
+    ],
   },
+  // ── CUSTOMER: My Properties ──
   {
-    label: "Off-Plan",
-    href: "/off-plan",
-    icon: <Building2 className={iconClass} />,
-    roles: "all",
+    title: "My Properties",
+    roles: LISTERS,
+    items: [
+      { label: "My Listings", href: "/inventory", icon: <Building2 className={iconClass} />, roles: LISTERS },
+    ],
   },
+  // ── CUSTOMER: Insights ──
   {
-    label: "My Search",
-    href: "/my-search",
-    icon: <SlidersHorizontal className={iconClass} />,
-    roles: ["buyer", "tenant", "relocation_agent"],
+    title: "Insights",
+    roles: ALL_CUSTOMERS,
+    items: [
+      { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
+    ],
   },
+  // ── CUSTOMER: Activity ──
   {
-    label: "Search",
-    href: "/properties",
-    icon: <Search className={iconClass} />,
-    roles: ["buyer", "tenant", "relocation_agent"],
-  },
-  {
-    label: "My Listings",
-    href: "/inventory",
-    icon: <Building2 className={iconClass} />,
-    roles: ["seller", "landlord"],
-  },
-  {
-    label: "Requests",
-    href: "/requests",
-    icon: <ClipboardList className={iconClass} />,
-    roles: ["buyer", "tenant", "relocation_agent"],
-  },
-  {
-    label: "Market Stats",
-    href: "/market-statistics",
-    icon: <BarChart3 className={iconClass} />,
-    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
-  },
-  {
-    label: "Saved",
-    href: "/saved",
-    icon: <Heart className={iconClass} />,
-    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
-  },
-  {
-    label: "Messages",
-    href: "/chat",
-    icon: <MessageSquare className={iconClass} />,
-    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
-  },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: <Bell className={iconClass} />,
-    roles: ["buyer", "seller", "tenant", "landlord", "relocation_agent"],
+    title: "Activity",
+    roles: ALL_CUSTOMERS,
+    items: [
+      { label: "Saved", href: "/saved", icon: <Heart className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Messages", href: "/chat", icon: <MessageSquare className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Notifications", href: "/notifications", icon: <Bell className={iconClass} />, roles: ALL_CUSTOMERS },
+    ],
   },
 ]
 
@@ -261,12 +216,21 @@ export function AppSidebar() {
   const { role } = useRole()
   const [open, setOpen] = useState(false)
 
-  // Filter navigation items based on current role
-  const visibleNavItems = useMemo(() => {
-    return allNavItems.filter((item) => {
-      if (item.roles === "all") return true
-      return item.roles.includes(role)
-    })
+  // Filter sections and items based on current role
+  const visibleSections = useMemo(() => {
+    return navSections
+      .filter((section) => {
+        if (section.roles === "all") return true
+        return section.roles.includes(role)
+      })
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => {
+          if (item.roles === "all") return true
+          return item.roles.includes(role)
+        }),
+      }))
+      .filter((section) => section.items.length > 0)
   }, [role])
 
   return (
@@ -279,18 +243,34 @@ export function AppSidebar() {
           {/* User Profile */}
           <SidebarUserInfo open={open} />
 
-          {/* Main Navigation */}
+          {/* Main Navigation — grouped by section */}
           <div className="flex flex-col gap-0.5">
-            {visibleNavItems.map((item, idx) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-              return (
-                <SidebarLink
-                  key={idx}
-                  link={item}
-                  isActive={isActive}
-                />
-              )
-            })}
+            {visibleSections.map((section, sIdx) => (
+              <div key={section.title}>
+                {sIdx > 0 && (
+                  <div className="my-2 mx-3 border-t border-neutral-200/60 dark:border-white/[0.06]" />
+                )}
+                {open && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 select-none"
+                  >
+                    {section.title}
+                  </motion.span>
+                )}
+                {section.items.map((item, idx) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+                  return (
+                    <SidebarLink
+                      key={`${sIdx}-${idx}`}
+                      link={item}
+                      isActive={isActive}
+                    />
+                  )
+                })}
+              </div>
+            ))}
           </div>
         </div>
 

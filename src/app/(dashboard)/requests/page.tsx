@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import { Plus, Search, Filter, MapPin, Bed, DollarSign, Bell, Trash2, ArrowRight, ShieldCheck, Maximize2, Eye, X } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
 import { sampleRequests, type ExchangeRequest, requestTypeConfig } from "@/lib/data/exchange-data"
+import { findMatches, type MatchResult, type MatchCriteria } from "@/lib/matching-engine"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -96,51 +97,15 @@ const DEMO_REQUESTS: PropertyRequest[] = [
   },
 ]
 
-function computeMatchScore(request: PropertyRequest, listing: ExchangeRequest): number {
-  let score = 0
-  let maxScore = 0
-
-  // Area match (30 points)
-  maxScore += 30
-  if (listing.area.toLowerCase().includes(request.area.toLowerCase()) ||
-      request.area.toLowerCase().includes(listing.area.toLowerCase())) {
-    score += 30
+function requestToCriteria(request: PropertyRequest): MatchCriteria {
+  return {
+    area: request.area,
+    propertyType: request.propertyType,
+    transactionType: request.transactionType,
+    minBedrooms: request.minBedrooms,
+    maxBudget: request.maxBudget,
+    features: [],
   }
-
-  // Transaction type match (20 points) - buy matches sell, rent matches lease
-  maxScore += 20
-  if ((request.transactionType === "buy" && listing.type === "sell") ||
-      (request.transactionType === "rent" && listing.type === "lease")) {
-    score += 20
-  }
-
-  // Property type match (15 points)
-  maxScore += 15
-  if (listing.propertyType === request.propertyType) {
-    score += 15
-  }
-
-  // Bedrooms match (15 points)
-  maxScore += 15
-  if (listing.bedrooms >= request.minBedrooms) {
-    score += 15
-  } else if (listing.bedrooms >= request.minBedrooms - 1) {
-    score += 8
-  }
-
-  // Budget match (20 points)
-  maxScore += 20
-  if (request.maxBudget > 0) {
-    if (listing.minBudget <= request.maxBudget) {
-      score += 20
-    } else if (listing.minBudget <= request.maxBudget * 1.1) {
-      score += 10
-    }
-  } else {
-    score += 10
-  }
-
-  return Math.round((score / maxScore) * 100)
 }
 
 export default function RequestsPage() {
@@ -165,16 +130,11 @@ export default function RequestsPage() {
     : requests.filter((r) => r.status === filterStatus)
 
   const matchingRequest = requests.find((r) => r.id === matchingRequestId)
-  const matchedListings = useMemo(() => {
+  const matchedListings = useMemo((): MatchResult[] => {
     if (!matchingRequest) return []
-    return sampleRequests
-      .filter((listing) => listing.type === "sell" || listing.type === "lease")
-      .map((listing) => ({
-        listing,
-        score: computeMatchScore(matchingRequest, listing),
-      }))
-      .filter((m) => m.score > 30)
-      .sort((a, b) => b.score - a.score)
+    const criteria = requestToCriteria(matchingRequest)
+    const sellOrLease = sampleRequests.filter((l) => l.type === "sell" || l.type === "lease")
+    return findMatches(criteria, sellOrLease, 25)
   }, [matchingRequest])
 
   const handleCreate = () => {
@@ -524,7 +484,7 @@ export default function RequestsPage() {
 
                 {matchedListings.length > 0 ? (
                   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    {matchedListings.map(({ listing, score }) => {
+                    {matchedListings.map(({ listing, totalScore, breakdown }) => {
                       const typeConf = requestTypeConfig[listing.type]
                       return (
                         <motion.div
@@ -540,17 +500,41 @@ export default function RequestsPage() {
                                 <MapPin className="h-3 w-3" />
                                 {listing.area}
                                 {listing.subArea && (
-                                  <span className="text-primary">· {listing.subArea}</span>
+                                  <span className="text-primary">&middot; {listing.subArea}</span>
                                 )}
                               </div>
                             </div>
                             <div className={`rounded-full px-2 py-0.5 text-[10px] font-bold flex-shrink-0 ${
-                              score >= 80 ? "bg-green-500 text-white" :
-                              score >= 60 ? "bg-blue-500 text-white" :
+                              totalScore >= 70 ? "bg-green-500 text-white" :
+                              totalScore >= 45 ? "bg-blue-500 text-white" :
                               "bg-amber-500 text-white"
                             }`}>
-                              {score}%
+                              {totalScore}%
                             </div>
+                          </div>
+
+                          {/* Score breakdown bars */}
+                          <div className="grid grid-cols-4 gap-1">
+                            {([
+                              { key: "area" as const, label: "Area" },
+                              { key: "type" as const, label: "Type" },
+                              { key: "price" as const, label: "Price" },
+                              { key: "features" as const, label: "Feat." },
+                            ]).map(({ key, label }) => (
+                              <div key={key} className="text-center">
+                                <div className="h-1 rounded-full bg-muted overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all ${
+                                      breakdown[key] >= 70 ? "bg-green-500" :
+                                      breakdown[key] >= 40 ? "bg-blue-500" :
+                                      "bg-amber-500"
+                                    }`}
+                                    style={{ width: `${breakdown[key]}%` }}
+                                  />
+                                </div>
+                                <span className="text-[9px] text-muted-foreground">{label}</span>
+                              </div>
+                            ))}
                           </div>
 
                           <div className="flex items-center gap-3 text-xs text-muted-foreground">
