@@ -26,8 +26,13 @@ import {
   XCircle,
   AlertCircle,
   Loader2,
+  EyeOff,
+  Lock,
+  HandMetal,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useRole } from "@/contexts/role-context"
+import { toast } from "sonner"
 
 type OpportunityType = "buy" | "sell" | "rent" | "lease" | "relocation"
 type OpportunityStatus = "new" | "contacted" | "in_progress" | "matched" | "closed" | "cancelled"
@@ -59,6 +64,8 @@ interface Opportunity {
   assigned_agent_id: string | null
   assigned_agent_name: string | null
   agent_notes: string | null
+  claimed_by: string | null
+  claimed_by_name: string | null
   created_at: string
   updated_at: string
 }
@@ -80,6 +87,10 @@ const statusConfig: Record<OpportunityStatus, { label: string; color: string; bg
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-100 dark:bg-red-500/20", icon: XCircle },
 }
 
+// Current agent ID — in production from Clerk/auth
+const CURRENT_AGENT_ID = "demo-agent-self"
+const CURRENT_AGENT_NAME = "Ahmed Hassan"
+
 export default function LeadsPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
@@ -88,6 +99,51 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("")
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const { isInternal, isAdmin } = useRole()
+
+  // Mask contact info — non-internal users only see phone
+  const maskEmail = (email: string) => {
+    const [user, domain] = email.split("@")
+    return `${user.charAt(0)}***@${domain}`
+  }
+  const maskWhatsApp = (wa: string) => {
+    return wa.replace(/(\d{3})\d{4,}(\d{3})/, "$1****$2")
+  }
+  const canSeeFullContact = isInternal
+
+  // Claim a lead
+  const claimLead = (id: string) => {
+    setOpportunities((prev) =>
+      prev.map((opp) =>
+        opp.id === id
+          ? {
+              ...opp,
+              claimed_by: CURRENT_AGENT_ID,
+              claimed_by_name: CURRENT_AGENT_NAME,
+              status: opp.status === "new" ? "contacted" : opp.status,
+            }
+          : opp
+      )
+    )
+    if (selectedOpp?.id === id) {
+      setSelectedOpp((prev) =>
+        prev ? { ...prev, claimed_by: CURRENT_AGENT_ID, claimed_by_name: CURRENT_AGENT_NAME, status: prev.status === "new" ? "contacted" : prev.status } : null
+      )
+    }
+    toast.success("Lead claimed!", { description: "You are now the assigned agent for this lead." })
+  }
+
+  const unclaimLead = (id: string) => {
+    setOpportunities((prev) =>
+      prev.map((opp) =>
+        opp.id === id ? { ...opp, claimed_by: null, claimed_by_name: null } : opp
+      )
+    )
+    if (selectedOpp?.id === id) {
+      setSelectedOpp((prev) => prev ? { ...prev, claimed_by: null, claimed_by_name: null } : null)
+    }
+    toast.info("Lead released.")
+  }
 
   const fetchOpportunities = useCallback(async () => {
     try {
@@ -245,6 +301,7 @@ export default function LeadsPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Property</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Price</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Agent</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                 </tr>
@@ -267,7 +324,14 @@ export default function LeadsPage() {
                           </div>
                           <div>
                             <p className="font-medium">{opp.full_name}</p>
-                            <p className="text-xs text-muted-foreground">{opp.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {canSeeFullContact ? opp.email : maskEmail(opp.email)}
+                            </p>
+                            {!canSeeFullContact && (
+                              <p className="text-[10px] text-amber-600 flex items-center gap-1 mt-0.5">
+                                <EyeOff className="h-2.5 w-2.5" /> Contact locked
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -319,6 +383,35 @@ export default function LeadsPage() {
                           {statusConf.label}
                         </div>
                       </td>
+                      {/* Agent / Claim */}
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        {opp.claimed_by ? (
+                          <div className="flex items-center gap-1.5">
+                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="h-3 w-3 text-primary" />
+                            </div>
+                            <span className="text-xs font-medium">{opp.claimed_by_name}</span>
+                            {(opp.claimed_by === CURRENT_AGENT_ID || isAdmin) && (
+                              <button
+                                onClick={() => unclaimLead(opp.id)}
+                                className="ml-1 text-[10px] text-muted-foreground hover:text-destructive underline"
+                              >
+                                release
+                              </button>
+                            )}
+                          </div>
+                        ) : isInternal ? (
+                          <button
+                            onClick={() => claimLead(opp.id)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                          >
+                            <HandMetal className="h-3 w-3" />
+                            Claim
+                          </button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Unclaimed</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {new Date(opp.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                       </td>
@@ -329,14 +422,21 @@ export default function LeadsPage() {
                               <Phone className="h-3.5 w-3.5 text-muted-foreground" />
                             </a>
                           )}
-                          {opp.whatsapp && (
+                          {canSeeFullContact && opp.whatsapp && (
                             <a href={`https://wa.me/${opp.whatsapp.replace(/\s+/g, "")}`} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="WhatsApp">
                               <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />
                             </a>
                           )}
-                          <a href={`mailto:${opp.email}`} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="Email">
-                            <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                          </a>
+                          {canSeeFullContact && (
+                            <a href={`mailto:${opp.email}`} className="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center" title="Email">
+                              <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                            </a>
+                          )}
+                          {!canSeeFullContact && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                              <Lock className="h-3 w-3" /> Phone only
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -392,9 +492,52 @@ export default function LeadsPage() {
                 </div>
               </div>
 
+              {/* Claim section */}
+              {isInternal && (
+                <div className="rounded-xl border p-4 space-y-2">
+                  <h3 className="text-sm font-bold">Assigned Agent</h3>
+                  {selectedOpp.claimed_by ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{selectedOpp.claimed_by_name}</p>
+                          <p className="text-xs text-muted-foreground">Claimed agent</p>
+                        </div>
+                      </div>
+                      {(selectedOpp.claimed_by === CURRENT_AGENT_ID || isAdmin) && (
+                        <button
+                          onClick={() => unclaimLead(selectedOpp.id)}
+                          className="text-xs text-muted-foreground hover:text-destructive underline"
+                        >
+                          Release
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => claimLead(selectedOpp.id)}
+                      className="w-full h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center gap-2 text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <HandMetal className="h-4 w-4" />
+                      Claim This Lead
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Contact info */}
               <div className="rounded-xl border p-4 space-y-3">
-                <h3 className="text-sm font-bold">Contact Information</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold">Contact Information</h3>
+                  {!canSeeFullContact && (
+                    <span className="text-[10px] text-amber-600 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10">
+                      <Lock className="h-2.5 w-2.5" /> Restricted
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
@@ -403,12 +546,20 @@ export default function LeadsPage() {
                   {selectedOpp.whatsapp && (
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4 text-emerald-600" />
-                      <a href={`https://wa.me/${selectedOpp.whatsapp.replace(/\s+/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{selectedOpp.whatsapp}</a>
+                      {canSeeFullContact ? (
+                        <a href={`https://wa.me/${selectedOpp.whatsapp.replace(/\s+/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{selectedOpp.whatsapp}</a>
+                      ) : (
+                        <span className="text-muted-foreground">{maskWhatsApp(selectedOpp.whatsapp)}</span>
+                      )}
                     </div>
                   )}
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    <a href={`mailto:${selectedOpp.email}`} className="hover:underline">{selectedOpp.email}</a>
+                    {canSeeFullContact ? (
+                      <a href={`mailto:${selectedOpp.email}`} className="hover:underline">{selectedOpp.email}</a>
+                    ) : (
+                      <span className="text-muted-foreground">{maskEmail(selectedOpp.email)}</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-4 w-4" />
@@ -503,7 +654,7 @@ export default function LeadsPage() {
                 >
                   <Phone className="h-4 w-4" /> Call
                 </a>
-                {selectedOpp.whatsapp && (
+                {canSeeFullContact && selectedOpp.whatsapp && (
                   <a
                     href={`https://wa.me/${selectedOpp.whatsapp.replace(/\s+/g, "")}`}
                     target="_blank"
@@ -513,12 +664,14 @@ export default function LeadsPage() {
                     <MessageCircle className="h-4 w-4" /> WhatsApp
                   </a>
                 )}
-                <a
-                  href={`mailto:${selectedOpp.email}`}
-                  className="flex-1 h-10 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium hover:bg-muted transition-colors"
-                >
-                  <Mail className="h-4 w-4" /> Email
-                </a>
+                {canSeeFullContact && (
+                  <a
+                    href={`mailto:${selectedOpp.email}`}
+                    className="flex-1 h-10 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium hover:bg-muted transition-colors"
+                  >
+                    <Mail className="h-4 w-4" /> Email
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -557,6 +710,8 @@ const demoOpportunities: Opportunity[] = [
     assigned_agent_id: null,
     assigned_agent_name: null,
     agent_notes: null,
+    claimed_by: null,
+    claimed_by_name: null,
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
@@ -587,6 +742,8 @@ const demoOpportunities: Opportunity[] = [
     assigned_agent_id: "demo-agent-1",
     assigned_agent_name: "Ahmed Hassan",
     agent_notes: null,
+    claimed_by: "demo-agent-1",
+    claimed_by_name: "Ahmed Hassan",
     created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
   },
@@ -617,6 +774,8 @@ const demoOpportunities: Opportunity[] = [
     assigned_agent_id: null,
     assigned_agent_name: null,
     agent_notes: null,
+    claimed_by: null,
+    claimed_by_name: null,
     created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
   },
@@ -647,6 +806,8 @@ const demoOpportunities: Opportunity[] = [
     assigned_agent_id: "demo-agent-4",
     assigned_agent_name: "Maria Santos",
     agent_notes: null,
+    claimed_by: "demo-agent-4",
+    claimed_by_name: "Maria Santos",
     created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
   },

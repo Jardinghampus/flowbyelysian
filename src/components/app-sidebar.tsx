@@ -179,7 +179,7 @@ const navSections: NavSection[] = [
     title: "My Properties",
     roles: LISTERS,
     items: [
-      { label: "My Listings", href: "/inventory", icon: <Building2 className={iconClass} />, roles: LISTERS },
+      { label: "My Listings", href: "/my-listings", icon: <Building2 className={iconClass} />, roles: LISTERS },
     ],
   },
   // ── CUSTOMER: Insights ──
