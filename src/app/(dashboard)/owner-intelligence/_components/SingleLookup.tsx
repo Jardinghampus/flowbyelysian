@@ -117,6 +117,36 @@ export function SingleLookup() {
         </Button>
       </div>
 
+      {/* Loading Spinner Overlay */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="flex flex-col items-center justify-center py-12 gap-4"
+          >
+            <div className="relative">
+              <motion.div
+                className="h-16 w-16 rounded-full border-[3px] border-muted"
+                style={{ borderTopColor: "hsl(var(--primary))" }}
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              />
+              <Search className="absolute inset-0 m-auto h-5 w-5 text-primary/60" />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                {step === "parsing" && "Parsing URL..."}
+                {step === "finding_unit" && "Finding unit details..."}
+                {step === "resolving_owner" && "Resolving owner info..."}
+              </p>
+              <p className="text-xs text-muted-foreground">This may take up to a minute</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Pipeline Visualizer */}
       <AnimatePresence>
         {step !== "idle" && (
