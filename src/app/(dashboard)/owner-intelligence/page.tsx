@@ -7,6 +7,7 @@ import { SingleLookup } from "./_components/SingleLookup"
 import { BulkURLUpload } from "./_components/BulkURLUpload"
 import { OwnersListUpload } from "./_components/OwnersListUpload"
 import { ContactsTable } from "./_components/ContactsTable"
+import { UsageCounter } from "./_components/UsageCounter"
 import { cn } from "@/lib/utils"
 
 const tabs = [
@@ -24,11 +25,14 @@ export default function OwnerIntelligencePage() {
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Owner Intelligence</h1>
-        <p className="text-sm text-muted-foreground">
-          Find property owners directly. Paste a URL, upload a list, or search your contacts.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Owner Intelligence</h1>
+          <p className="text-sm text-muted-foreground">
+            Find property owners directly. Paste a URL, upload a list, or search your contacts.
+          </p>
+        </div>
+        <UsageCounter />
       </div>
 
       {/* Tab navigation */}
