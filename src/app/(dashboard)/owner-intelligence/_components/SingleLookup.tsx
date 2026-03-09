@@ -1,0 +1,209 @@
+"use client"
+
+import { useState, useCallback } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Search, Loader2, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import type { OwnerContact } from "@/types/owner-intelligence"
+import { detectPortal } from "../_lib/detectPortal"
+import { PortalBadge } from "./PortalBadge"
+import { LookupResult } from "./LookupResult"
+import { cn } from "@/lib/utils"
+
+type PipelineStep = "idle" | "parsing" | "finding_unit" | "resolving_owner" | "complete" | "error"
+
+const steps: { key: PipelineStep; label: string }[] = [
+  { key: "parsing", label: "Parsing URL" },
+  { key: "finding_unit", label: "Finding Unit" },
+  { key: "resolving_owner", label: "Resolving Owner" },
+  { key: "complete", label: "Complete" },
+]
+
+export function SingleLookup() {
+  const [url, setUrl] = useState("")
+  const [step, setStep] = useState<PipelineStep>("idle")
+  const [result, setResult] = useState<{ contact: OwnerContact; cached: boolean } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const detectedPortal = url.trim() ? detectPortal(url.trim()) : null
+
+  const handleLookup = useCallback(async () => {
+    const trimmed = url.trim()
+    if (!trimmed) return
+
+    if (!detectPortal(trimmed)) {
+      setError("This URL is from an unsupported portal. We support Bayut, PropertyFinder, and Dubizzle.")
+      return
+    }
+
+    setError(null)
+    setResult(null)
+    setStep("parsing")
+
+    // Simulate pipeline steps while the API runs
+    const stepTimer1 = setTimeout(() => setStep("finding_unit"), 1500)
+    const stepTimer2 = setTimeout(() => setStep("resolving_owner"), 5000)
+
+    try {
+      const res = await fetch("/api/owner-intelligence/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyUrl: trimmed }),
+      })
+
+      clearTimeout(stepTimer1)
+      clearTimeout(stepTimer2)
+
+      const json = await res.json()
+
+      if (!json.success || !json.data) {
+        setStep("error")
+        setError(json.error || "Lookup failed — please retry")
+        return
+      }
+
+      setStep("complete")
+      setResult({ contact: json.data, cached: json.cached })
+      toast.success(json.cached ? "Loaded from cache" : "Owner found")
+    } catch {
+      clearTimeout(stepTimer1)
+      clearTimeout(stepTimer2)
+      setStep("error")
+      setError("Lookup failed — please retry")
+    }
+  }, [url])
+
+  const isLoading = step !== "idle" && step !== "complete" && step !== "error"
+
+  return (
+    <div className="space-y-6">
+      {/* URL Input */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
+          <Input
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value)
+              setError(null)
+              if (step === "complete" || step === "error") setStep("idle")
+            }}
+            onKeyDown={(e) => e.key === "Enter" && !isLoading && handleLookup()}
+            placeholder="Paste Bayut, PropertyFinder, or Dubizzle URL..."
+            className="pl-11 pr-4 h-14 bg-[#111111] border-white/[0.07] text-white placeholder:text-white/20 font-mono text-sm focus-visible:ring-[#C8922A]/30 focus-visible:border-[#C8922A]/50"
+            disabled={isLoading}
+          />
+          {detectedPortal && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <PortalBadge portal={detectedPortal} />
+            </div>
+          )}
+        </div>
+
+        <Button
+          onClick={handleLookup}
+          disabled={isLoading || !url.trim()}
+          className="w-full h-11 bg-[#C8922A] hover:bg-[#B8821A] text-black font-semibold text-sm tracking-wide disabled:opacity-30"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Looking up owner...
+            </>
+          ) : (
+            "Find Owner"
+          )}
+        </Button>
+      </div>
+
+      {/* Pipeline Visualizer */}
+      <AnimatePresence>
+        {step !== "idle" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-1 py-3">
+              {steps.map((s, i) => {
+                const stepIndex = steps.findIndex((x) => x.key === step)
+                const thisIndex = i
+                const isActive = s.key === step
+                const isDone = thisIndex < stepIndex || step === "complete"
+                const isError = step === "error" && thisIndex === stepIndex
+
+                return (
+                  <div key={s.key} className="flex items-center gap-1 flex-1">
+                    <div className="flex items-center gap-2 flex-1">
+                      <div
+                        className={cn(
+                          "h-7 w-7 rounded flex items-center justify-center text-xs font-mono flex-shrink-0 transition-colors",
+                          isDone
+                            ? "bg-green-500/20 text-green-400"
+                            : isActive
+                            ? "bg-[#C8922A]/20 text-[#C8922A]"
+                            : isError
+                            ? "bg-red-500/20 text-red-400"
+                            : "bg-white/[0.03] text-white/15"
+                        )}
+                      >
+                        {isDone ? (
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        ) : isActive && !isError ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : isError ? (
+                          <AlertCircle className="h-3.5 w-3.5" />
+                        ) : (
+                          i + 1
+                        )}
+                      </div>
+                      <span
+                        className={cn(
+                          "text-[10px] font-mono uppercase tracking-wider hidden sm:inline",
+                          isDone ? "text-green-400/60" : isActive ? "text-white/60" : "text-white/15"
+                        )}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                    {i < steps.length - 1 && (
+                      <ArrowRight className={cn("h-3 w-3 flex-shrink-0 mx-1", isDone ? "text-green-500/30" : "text-white/10")} />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Error */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400"
+        >
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          {error}
+          {(step === "error") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLookup}
+              className="ml-auto text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs"
+            >
+              Retry
+            </Button>
+          )}
+        </motion.div>
+      )}
+
+      {/* Result */}
+      {result && <LookupResult contact={result.contact} cached={result.cached} />}
+    </div>
+  )
+}
