@@ -364,6 +364,118 @@ export type Database = {
           created_at?: string
         }
       }
+      owner_contacts: {
+        Row: {
+          id: string
+          user_id: string
+          source_url: string | null
+          portal: string | null
+          property_name: string | null
+          building_name: string | null
+          unit_number: string | null
+          zone: string | null
+          property_size: number | null
+          property_value: number | null
+          rooms: string | null
+          permit_number: string | null
+          owner_name: string | null
+          owner_phone: string | null
+          owner_phone2: string | null
+          owner_email: string | null
+          owner_date: string | null
+          lookup_status: string
+          dedup_hash: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          source_url?: string | null
+          portal?: string | null
+          property_name?: string | null
+          building_name?: string | null
+          unit_number?: string | null
+          zone?: string | null
+          property_size?: number | null
+          property_value?: number | null
+          rooms?: string | null
+          permit_number?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          owner_phone2?: string | null
+          owner_email?: string | null
+          owner_date?: string | null
+          lookup_status?: string
+          dedup_hash?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          source_url?: string | null
+          portal?: string | null
+          property_name?: string | null
+          building_name?: string | null
+          unit_number?: string | null
+          zone?: string | null
+          property_size?: number | null
+          property_value?: number | null
+          rooms?: string | null
+          permit_number?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          owner_phone2?: string | null
+          owner_email?: string | null
+          owner_date?: string | null
+          lookup_status?: string
+          dedup_hash?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      bulk_jobs: {
+        Row: {
+          id: string
+          user_id: string
+          job_name: string | null
+          total_rows: number
+          processed_rows: number
+          success_rows: number
+          failed_rows: number
+          status: string
+          source_type: string | null
+          created_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          job_name?: string | null
+          total_rows: number
+          processed_rows?: number
+          success_rows?: number
+          failed_rows?: number
+          status?: string
+          source_type?: string | null
+          created_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          job_name?: string | null
+          total_rows?: number
+          processed_rows?: number
+          success_rows?: number
+          failed_rows?: number
+          status?: string
+          source_type?: string | null
+          created_at?: string
+          completed_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

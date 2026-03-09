@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
+import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
 import { runPropertyFinder } from "@/app/(dashboard)/owner-intelligence/_lib/apify"
 import { computeDedupHash } from "@/app/(dashboard)/owner-intelligence/_lib/dedup"
 import { detectPortal } from "@/app/(dashboard)/owner-intelligence/_lib/detectPortal"

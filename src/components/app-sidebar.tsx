@@ -141,6 +141,14 @@ const navSections: NavSection[] = [
       { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
+  // ── INTERNAL: Intelligence ──
+  {
+    title: "Intelligence",
+    roles: ["admin", "agent"],
+    items: [
+      { label: "Owner Lookup", href: "/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+    ],
+  },
   // ── INTERNAL: AI & Tools ──
   {
     title: "AI & Tools",

@@ -3,9 +3,20 @@
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { CheckCircle2, Loader2, AlertCircle, Clock } from "lucide-react"
-import { supabase } from "@/lib/supabase/client"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import type { BulkJobStatus as JobStatus } from "@/types/owner-intelligence"
 import { cn } from "@/lib/utils"
+
+let _sb: SupabaseClient | null = null
+function getSb() {
+  if (!_sb) {
+    _sb = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  }
+  return _sb
+}
 
 interface BulkJobData {
   id: string
@@ -14,6 +25,17 @@ interface BulkJobData {
   successRows: number
   failedRows: number
   status: JobStatus
+}
+
+function toJob(d: Record<string, unknown>): BulkJobData {
+  return {
+    id: d.id as string,
+    totalRows: d.total_rows as number,
+    processedRows: d.processed_rows as number,
+    successRows: d.success_rows as number,
+    failedRows: d.failed_rows as number,
+    status: d.status as JobStatus,
+  }
 }
 
 export function BulkJobStatusPanel({
@@ -29,27 +51,15 @@ export function BulkJobStatusPanel({
   onCompleteRef.current = onComplete
 
   useEffect(() => {
-    // Initial fetch
-    supabase
-      .from("bulk_jobs")
+    getSb().from("bulk_jobs")
       .select("*")
       .eq("id", jobId)
       .single()
       .then(({ data }) => {
-        if (data) {
-          setJob({
-            id: data.id,
-            totalRows: data.total_rows,
-            processedRows: data.processed_rows,
-            successRows: data.success_rows,
-            failedRows: data.failed_rows,
-            status: data.status as JobStatus,
-          })
-        }
+        if (data) setJob(toJob(data as Record<string, unknown>))
       })
 
-    // Subscribe to realtime updates
-    const channel = supabase
+    const channel = getSb()
       .channel(`bulk-job-${jobId}`)
       .on(
         "postgres_changes",
@@ -60,15 +70,7 @@ export function BulkJobStatusPanel({
           filter: `id=eq.${jobId}`,
         },
         (payload) => {
-          const d = payload.new as Record<string, unknown>
-          const updated: BulkJobData = {
-            id: d.id as string,
-            totalRows: d.total_rows as number,
-            processedRows: d.processed_rows as number,
-            successRows: d.success_rows as number,
-            failedRows: d.failed_rows as number,
-            status: d.status as JobStatus,
-          }
+          const updated = toJob(payload.new as Record<string, unknown>)
           setJob(updated)
           if (updated.status === "complete" || updated.status === "failed") {
             onCompleteRef.current?.()
@@ -78,30 +80,23 @@ export function BulkJobStatusPanel({
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      getSb().removeChannel(channel)
     }
   }, [jobId])
 
-  // Polling fallback (if realtime isn't available)
+  // Polling fallback
   useEffect(() => {
     if (!job || job.status === "complete" || job.status === "failed") return
 
     const interval = setInterval(async () => {
-      const { data } = await supabase
+      const { data } = await getSb()
         .from("bulk_jobs")
         .select("*")
         .eq("id", jobId)
         .single()
 
       if (data) {
-        const updated: BulkJobData = {
-          id: data.id,
-          totalRows: data.total_rows,
-          processedRows: data.processed_rows,
-          successRows: data.success_rows,
-          failedRows: data.failed_rows,
-          status: data.status as JobStatus,
-        }
+        const updated = toJob(data as Record<string, unknown>)
         setJob(updated)
         if (updated.status === "complete" || updated.status === "failed") {
           onCompleteRef.current?.()
@@ -123,7 +118,6 @@ export function BulkJobStatusPanel({
   const progress = job.totalRows > 0 ? (job.processedRows / job.totalRows) * 100 : 0
   const partialRows = job.processedRows - job.successRows - job.failedRows
 
-  // ETA calculation
   const elapsed = (Date.now() - startTime.current) / 1000
   const rate = job.processedRows > 0 ? elapsed / job.processedRows : 0
   const remaining = (job.totalRows - job.processedRows) * rate
@@ -138,7 +132,6 @@ export function BulkJobStatusPanel({
       animate={{ opacity: 1, y: 0 }}
       className="rounded-lg border border-white/[0.07] bg-[#111111] p-5 space-y-4"
     >
-      {/* Status header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isComplete ? (
@@ -160,7 +153,6 @@ export function BulkJobStatusPanel({
         )}
       </div>
 
-      {/* Progress bar */}
       <div className="relative h-2 rounded-full bg-white/[0.04] overflow-hidden">
         <motion.div
           className={cn(
@@ -173,7 +165,6 @@ export function BulkJobStatusPanel({
         />
       </div>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 text-xs font-mono">
         <span className="text-white/50">
           Processing {job.processedRows}/{job.totalRows}
