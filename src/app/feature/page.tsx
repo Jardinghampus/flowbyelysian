@@ -31,6 +31,7 @@ import {
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
+import { MobileMenuProvider } from "@/contexts/mobile-menu-context"
 
 // WhatsApp Icon Component
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -948,6 +949,7 @@ function CTASection() {
 // Main Page
 export default function FeaturePage() {
   return (
+    <MobileMenuProvider>
     <main className="bg-white">
       <Navbar />
       <HeroSection />
@@ -961,5 +963,6 @@ export default function FeaturePage() {
       <Footer />
       <ChatPopup />
     </main>
+    </MobileMenuProvider>
   )
 }

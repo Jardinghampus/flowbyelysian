@@ -10,9 +10,11 @@ import { OpportunityCTA } from "@/components/landing/opportunity-cta"
 import { OffPlanCTA } from "@/components/landing/off-plan-cta"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
+import { MobileMenuProvider } from "@/contexts/mobile-menu-context"
 
 export default function LandingPage() {
   return (
+    <MobileMenuProvider>
     <main className="bg-white">
       <Navbar />
 
@@ -121,5 +123,6 @@ export default function LandingPage() {
       {/* Chat Popup */}
       <ChatPopup />
     </main>
+    </MobileMenuProvider>
   )
 }

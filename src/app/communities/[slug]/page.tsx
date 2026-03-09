@@ -35,6 +35,7 @@ import {
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
+import { MobileMenuProvider } from "@/contexts/mobile-menu-context"
 import {
   getCommunityBySlug,
   formatPrice,
@@ -97,6 +98,7 @@ export default function AreaLandingPage() {
 
   if (!community) {
     return (
+      <MobileMenuProvider>
       <main className="bg-white min-h-screen">
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 pt-24">
@@ -108,6 +110,7 @@ export default function AreaLandingPage() {
         </div>
         <Footer />
       </main>
+      </MobileMenuProvider>
     )
   }
 
@@ -118,6 +121,7 @@ export default function AreaLandingPage() {
   const otherCommunities = villaCommunities.filter((c) => c.slug !== slug).slice(0, 3)
 
   return (
+    <MobileMenuProvider>
     <main className="bg-white">
       <Navbar />
 
@@ -592,6 +596,7 @@ export default function AreaLandingPage() {
       <Footer />
       <ChatPopup />
     </main>
+    </MobileMenuProvider>
   )
 }
 

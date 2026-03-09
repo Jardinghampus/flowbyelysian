@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Menu, X, Phone, Sun, Moon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/hooks/use-theme"
+import { useMobileMenu } from "@/contexts/mobile-menu-context"
 
 const navLinks = [
   { href: "/communities", label: "Communities" },
@@ -18,7 +19,7 @@ const navLinks = [
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { isMenuOpen: isMobileMenuOpen, setMenuOpen: setIsMobileMenuOpen } = useMobileMenu()
   const { theme, setTheme } = useTheme()
   const isDark = theme === "dark"
 

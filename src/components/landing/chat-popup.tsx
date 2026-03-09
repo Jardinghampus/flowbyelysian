@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MessageCircle, X, Send, Bot, User, Minimize2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useMobileMenu } from "@/contexts/mobile-menu-context"
 
 interface Message {
   role: "user" | "bot"
@@ -14,6 +15,7 @@ interface Message {
 }
 
 export function ChatPopup() {
+  const { isMenuOpen } = useMobileMenu()
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -102,6 +104,9 @@ export function ChatPopup() {
       sendMessage()
     }
   }
+
+  // Hide chat when mobile menu is open
+  if (isMenuOpen) return null
 
   return (
     <>

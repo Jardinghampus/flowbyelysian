@@ -7,10 +7,12 @@ import { ArrowRight, TrendingUp, MapPin, Building2, Calendar } from "lucide-reac
 import { Navbar } from "@/components/landing/navbar"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
+import { MobileMenuProvider } from "@/contexts/mobile-menu-context"
 import { villaCommunities, formatPrice } from "@/lib/data/villa-communities"
 
 export default function AreasIndexPage() {
   return (
+    <MobileMenuProvider>
     <main className="bg-white">
       <Navbar />
 
@@ -190,5 +192,6 @@ export default function AreasIndexPage() {
       <Footer />
       <ChatPopup />
     </main>
+    </MobileMenuProvider>
   )
 }
