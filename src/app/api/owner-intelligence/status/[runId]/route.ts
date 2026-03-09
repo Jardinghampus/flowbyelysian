@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/demo-auth"
 import { checkRunStatus } from "@/app/(dashboard)/owner-intelligence/_lib/apify"
 
 export async function GET(
@@ -6,6 +7,11 @@ export async function GET(
   { params }: { params: Promise<{ runId: string }> }
 ) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ status: "UNAUTHORIZED" }, { status: 401 })
+    }
+
     const { runId } = await params
     const status = await checkRunStatus(runId)
     return NextResponse.json({ status })

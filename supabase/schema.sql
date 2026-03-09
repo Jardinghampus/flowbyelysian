@@ -1097,3 +1097,83 @@ insert into smart_chat_messages (user_id, collection_id, role, content, document
   ('demo-user-001', (select id from smart_collections where name = 'Plot Comparisons' limit 1),
    'assistant', 'Here''s a comparison of the two Tilal Al Ghaf plots:\n\n**Plot A12 (Corner Plot)**\n- Size: 12,000 sqft\n- View: Lagoon view\n- Building: G+2 allowance\n- Premium: ✅ Corner location\n\n**Plot B7 (Standard Plot)**\n- Size: 9,500 sqft\n- View: Park view\n- Building: G+1 allowance\n- Proximity: Near amenities\n\n**Investment Analysis:**\n\n🏆 **Plot A12 is the better investment** for these reasons:\n1. **26% larger** plot (2,500 sqft more)\n2. **G+2 vs G+1** - Can build 50% more floors\n3. **Lagoon view** commands premium pricing\n4. **Corner plots** typically appreciate 15-20% faster\n5. **Scarcity** - Limited corner lagoon-view plots\n\nHowever, Plot B7 offers **lower entry price** and proximity to amenities, making it suitable for end-users who want convenience over maximum returns.',
    (select array_agg(id) from smart_documents where name like '%Plot%'));
+
+-- ============================================================================
+-- Owner Intelligence Tables
+-- ============================================================================
+
+create table if not exists owner_contacts (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null,
+  source_url text,
+  portal text not null check (portal in ('bayut', 'propertyfinder', 'dubizzle', 'manual')),
+  property_name text,
+  building_name text,
+  unit_number text,
+  zone text,
+  property_size numeric,
+  property_value numeric,
+  rooms text,
+  permit_number text,
+  owner_name text,
+  owner_phone text,
+  owner_phone2 text,
+  owner_email text,
+  owner_date text,
+  lookup_status text not null default 'pending' check (lookup_status in ('pending', 'resolved', 'partial', 'failed')),
+  dedup_hash text unique,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_owner_contacts_user_id on owner_contacts(user_id);
+create index if not exists idx_owner_contacts_dedup_hash on owner_contacts(dedup_hash);
+create index if not exists idx_owner_contacts_lookup_status on owner_contacts(lookup_status);
+create index if not exists idx_owner_contacts_portal on owner_contacts(portal);
+create index if not exists idx_owner_contacts_created_at on owner_contacts(created_at desc);
+
+create table if not exists bulk_jobs (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null,
+  job_name text,
+  total_rows integer not null default 0,
+  processed_rows integer not null default 0,
+  success_rows integer not null default 0,
+  failed_rows integer not null default 0,
+  status text not null default 'queued' check (status in ('queued', 'processing', 'complete', 'failed')),
+  source_type text not null check (source_type in ('url_list', 'owners_list')),
+  created_at timestamptz default now(),
+  completed_at timestamptz
+);
+
+create index if not exists idx_bulk_jobs_user_id on bulk_jobs(user_id);
+create index if not exists idx_bulk_jobs_status on bulk_jobs(status);
+
+-- Enable RLS
+alter table owner_contacts enable row level security;
+alter table bulk_jobs enable row level security;
+
+-- RLS policies: users can only access their own data
+create policy "Users can view own contacts" on owner_contacts
+  for select using (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can insert own contacts" on owner_contacts
+  for insert with check (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can update own contacts" on owner_contacts
+  for update using (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can delete own contacts" on owner_contacts
+  for delete using (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can view own bulk jobs" on bulk_jobs
+  for select using (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can insert own bulk jobs" on bulk_jobs
+  for insert with check (user_id = current_setting('app.current_user_id', true));
+
+create policy "Users can update own bulk jobs" on bulk_jobs
+  for update using (user_id = current_setting('app.current_user_id', true));
+
+-- Enable realtime for bulk_jobs progress tracking
+alter publication supabase_realtime add table bulk_jobs;

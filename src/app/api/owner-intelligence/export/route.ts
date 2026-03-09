@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/demo-auth"
 import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
 
 export async function GET(req: NextRequest) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { searchParams } = new URL(req.url)
     const search = searchParams.get("search") || ""
     const status = searchParams.get("status") || ""
@@ -10,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const supabase = createServerClient()
 
-    let query = supabase.from("owner_contacts").select("*")
+    let query = supabase.from("owner_contacts").select("*").eq("user_id", userId)
 
     if (search) {
       query = query.or(

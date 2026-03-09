@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/demo-auth"
 import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
 import { runPropertyFinder, runOwnerFinder } from "@/app/(dashboard)/owner-intelligence/_lib/apify"
 import { computeDedupHash } from "@/app/(dashboard)/owner-intelligence/_lib/dedup"
 import { detectPortal } from "@/app/(dashboard)/owner-intelligence/_lib/detectPortal"
+import { bulkSchema } from "@/app/(dashboard)/owner-intelligence/_lib/validation"
+import { checkRateLimit } from "@/app/(dashboard)/owner-intelligence/_lib/rate-limit"
 import type { LookupStatus, SourceType } from "@/types/owner-intelligence"
 
 interface BulkItem {
@@ -15,15 +18,29 @@ interface BulkItem {
 
 export async function POST(req: NextRequest) {
   try {
-    const { items, jobName, sourceType, userId } = (await req.json()) as {
-      items: BulkItem[]
-      jobName?: string
-      sourceType: SourceType
-      userId?: string
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ success: false, error: "No items provided" }, { status: 400 })
+    const body = await req.json()
+    const parsed = bulkSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      )
+    }
+
+    const { items, jobName, sourceType } = parsed.data
+
+    // Check rate limit for the whole batch
+    const { allowed } = checkRateLimit(userId)
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: "Daily lookup limit reached (100/day). Try again tomorrow." },
+        { status: 429 }
+      )
     }
 
     const supabase = createServerClient()
@@ -32,7 +49,7 @@ export async function POST(req: NextRequest) {
     const { data: job, error: jobError } = await supabase
       .from("bulk_jobs")
       .insert({
-        user_id: userId || "anonymous",
+        user_id: userId,
         job_name: jobName || `Bulk ${sourceType} — ${items.length} items`,
         total_rows: items.length,
         processed_rows: 0,
@@ -52,7 +69,7 @@ export async function POST(req: NextRequest) {
     const jobId = job.id
 
     // Process in background (fire and forget)
-    processItems(supabase, jobId, items, sourceType, userId || "anonymous").catch(
+    processItems(supabase, jobId, items as BulkItem[], sourceType, userId).catch(
       (err) => console.error("Bulk processing error:", err)
     )
 

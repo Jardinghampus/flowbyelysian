@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/demo-auth"
 import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
+import { deleteContactsSchema } from "@/app/(dashboard)/owner-intelligence/_lib/validation"
 
 export async function GET(req: NextRequest) {
   try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ contacts: [], total: 0, page: 1 }, { status: 401 })
+    }
+
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "25")
@@ -15,7 +22,7 @@ export async function GET(req: NextRequest) {
     const supabase = createServerClient()
     const offset = (page - 1) * limit
 
-    let query = supabase.from("owner_contacts").select("*", { count: "exact" })
+    let query = supabase.from("owner_contacts").select("*", { count: "exact" }).eq("user_id", userId)
 
     if (search) {
       query = query.or(
@@ -78,13 +85,26 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { ids } = await req.json()
-    if (!ids || !Array.isArray(ids)) {
-      return NextResponse.json({ success: false, error: "Missing ids" }, { status: 400 })
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const parsed = deleteContactsSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      )
     }
 
     const supabase = createServerClient()
-    const { error } = await supabase.from("owner_contacts").delete().in("id", ids)
+    const { error } = await supabase
+      .from("owner_contacts")
+      .delete()
+      .eq("user_id", userId)
+      .in("id", parsed.data.ids)
 
     if (error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
