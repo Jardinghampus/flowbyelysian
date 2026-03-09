@@ -113,6 +113,14 @@ const navSections: NavSection[] = [
       { label: "Exchange", href: "/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
+  // ── INTERNAL: Intelligence ──
+  {
+    title: "Intelligence",
+    roles: ["admin", "agent"],
+    items: [
+      { label: "Owner Lookup", href: "/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+    ],
+  },
   // ── INTERNAL: Organize ──
   {
     title: "Organize",
@@ -139,14 +147,6 @@ const navSections: NavSection[] = [
     items: [
       { label: "Contacts", href: "/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Intelligence ──
-  {
-    title: "Intelligence",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "Owner Lookup", href: "/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: AI & Tools ──

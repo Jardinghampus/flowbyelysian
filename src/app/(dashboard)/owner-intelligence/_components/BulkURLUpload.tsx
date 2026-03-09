@@ -6,7 +6,7 @@ import { Upload, Download, FileText, X, AlertCircle, Loader2 } from "lucide-reac
 import Papa from "papaparse"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { detectPortal, isValidPortalUrl } from "../_lib/detectPortal"
+import { detectPortal } from "../_lib/detectPortal"
 import { generateUrlTemplate, downloadCsv } from "../_lib/csvTemplates"
 import { PortalBadge } from "./PortalBadge"
 import { BulkJobStatusPanel } from "./BulkJobStatus"
@@ -120,14 +120,14 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
     <div className="space-y-6">
       {/* Template download */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-white/40">
+        <p className="text-sm text-muted-foreground">
           Upload a CSV with property URLs from Bayut, PropertyFinder, or Dubizzle.
         </p>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => downloadCsv(generateUrlTemplate(), "url-template.csv")}
-          className="text-[#C8922A] hover:text-[#C8922A] hover:bg-[#C8922A]/10 font-mono text-xs"
+          className="text-primary text-xs"
         >
           <Download className="h-3.5 w-3.5 mr-1.5" />
           Template
@@ -145,17 +145,17 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={cn(
-            "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors",
+            "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors",
             isDragOver
-              ? "border-[#C8922A]/50 bg-[#C8922A]/5"
-              : "border-white/[0.07] hover:border-white/[0.15] bg-[#111111]"
+              ? "border-primary/50 bg-primary/5"
+              : "border-border hover:border-muted-foreground/30 bg-card"
           )}
         >
-          <Upload className="h-8 w-8 mx-auto mb-3 text-white/15" />
-          <p className="text-sm text-white/40 mb-1">
+          <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground mb-1">
             Drop CSV file here or click to browse
           </p>
-          <p className="text-[10px] font-mono text-white/20 uppercase tracking-wider">
+          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">
             Required column: property_url
           </p>
           <input
@@ -173,7 +173,7 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {error}
         </div>
@@ -191,48 +191,48 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
             {/* File info */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-white/30" />
-                <span className="text-sm text-white/60 font-mono">{fileName}</span>
-                <button onClick={reset} className="p-0.5 rounded hover:bg-white/[0.06]">
-                  <X className="h-3.5 w-3.5 text-white/30" />
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{fileName}</span>
+                <button onClick={reset} className="p-0.5 rounded hover:bg-muted">
+                  <X className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-3 text-xs font-mono">
-              <span className="text-white/50">{validCount} valid URLs</span>
+            <div className="flex flex-wrap gap-3 text-xs">
+              <span className="text-muted-foreground">{validCount} valid URLs</span>
               {invalidCount > 0 && (
-                <span className="text-red-400/70">{invalidCount} invalid</span>
+                <span className="text-red-600 dark:text-red-400">{invalidCount} invalid</span>
               )}
               {Object.entries(portalBreakdown).map(([p, count]) => (
                 <span key={p} className="flex items-center gap-1">
                   <PortalBadge portal={p as PortalType} />
-                  <span className="text-white/40">{count}</span>
+                  <span className="text-muted-foreground">{count}</span>
                 </span>
               ))}
             </div>
 
             {/* Preview table */}
-            <div className="rounded-lg border border-white/[0.07] bg-[#111111] overflow-hidden">
-              <table className="w-full text-xs font-mono">
+            <div className="rounded-xl border bg-card overflow-hidden">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-white/[0.05]">
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">#</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">URL</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">Portal</th>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">#</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">URL</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Portal</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.slice(0, 5).map((row, i) => (
-                    <tr key={i} className="border-b border-white/[0.03]">
-                      <td className="px-4 py-2 text-white/25">{i + 1}</td>
-                      <td className="px-4 py-2 text-white/60 truncate max-w-[400px]">{row.url}</td>
+                    <tr key={i} className="border-b last:border-0">
+                      <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
+                      <td className="px-4 py-2 text-foreground/70 truncate max-w-[400px]">{row.url}</td>
                       <td className="px-4 py-2">
                         {row.portal ? (
                           <PortalBadge portal={row.portal} />
                         ) : (
-                          <span className="text-red-400/60">Invalid</span>
+                          <span className="text-red-600 dark:text-red-400 text-[10px]">Invalid</span>
                         )}
                       </td>
                     </tr>
@@ -240,7 +240,7 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
                 </tbody>
               </table>
               {rows.length > 5 && (
-                <div className="px-4 py-2 text-[10px] font-mono text-white/20 border-t border-white/[0.03]">
+                <div className="px-4 py-2 text-[10px] text-muted-foreground border-t">
                   + {rows.length - 5} more rows
                 </div>
               )}
@@ -250,7 +250,7 @@ export function BulkURLUpload({ onComplete }: { onComplete?: () => void }) {
             <Button
               onClick={handleSubmit}
               disabled={submitting || validCount === 0}
-              className="w-full h-11 bg-[#C8922A] hover:bg-[#B8821A] text-black font-semibold text-sm tracking-wide disabled:opacity-30"
+              className="w-full h-11"
             >
               {submitting ? (
                 <>

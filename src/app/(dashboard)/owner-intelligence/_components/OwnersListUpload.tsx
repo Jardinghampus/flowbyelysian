@@ -136,14 +136,14 @@ export function OwnersListUpload({ onComplete }: { onComplete?: () => void }) {
     <div className="space-y-6">
       {/* Template download */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-white/40">
+        <p className="text-sm text-muted-foreground">
           Upload a CSV with unit numbers and building names to find owner contacts.
         </p>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => downloadCsv(generateOwnersTemplate(), "owners-template.csv")}
-          className="text-[#C8922A] hover:text-[#C8922A] hover:bg-[#C8922A]/10 font-mono text-xs"
+          className="text-primary text-xs"
         >
           <Download className="h-3.5 w-3.5 mr-1.5" />
           Template
@@ -161,17 +161,17 @@ export function OwnersListUpload({ onComplete }: { onComplete?: () => void }) {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={cn(
-            "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors",
+            "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors",
             isDragOver
-              ? "border-[#C8922A]/50 bg-[#C8922A]/5"
-              : "border-white/[0.07] hover:border-white/[0.15] bg-[#111111]"
+              ? "border-primary/50 bg-primary/5"
+              : "border-border hover:border-muted-foreground/30 bg-card"
           )}
         >
-          <Upload className="h-8 w-8 mx-auto mb-3 text-white/15" />
-          <p className="text-sm text-white/40 mb-1">
+          <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground mb-1">
             Drop CSV file here or click to browse
           </p>
-          <p className="text-[10px] font-mono text-white/20 uppercase tracking-wider">
+          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">
             Required: unit_number, building_name · Optional: property_size, zone
           </p>
           <input
@@ -189,7 +189,7 @@ export function OwnersListUpload({ onComplete }: { onComplete?: () => void }) {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {error}
         </div>
@@ -204,52 +204,50 @@ export function OwnersListUpload({ onComplete }: { onComplete?: () => void }) {
             exit={{ opacity: 0 }}
             className="space-y-4"
           >
-            {/* File info */}
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-white/30" />
-              <span className="text-sm text-white/60 font-mono">{fileName}</span>
-              <span className="text-xs font-mono text-white/30">{rows.length} units</span>
-              <button onClick={reset} className="p-0.5 rounded hover:bg-white/[0.06]">
-                <X className="h-3.5 w-3.5 text-white/30" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{fileName}</span>
+              <span className="text-xs text-muted-foreground">{rows.length} units</span>
+              <button onClick={reset} className="p-0.5 rounded hover:bg-muted">
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
             </div>
 
             {/* Preview table */}
-            <div className="rounded-lg border border-white/[0.07] bg-[#111111] overflow-hidden">
-              <table className="w-full text-xs font-mono">
+            <div className="rounded-xl border bg-card overflow-hidden">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-white/[0.05]">
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">#</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">Unit</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">Building</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">Size</th>
-                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-white/25">Zone</th>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">#</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Unit</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Building</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Size</th>
+                    <th className="px-4 py-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Zone</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.slice(0, 5).map((row, i) => (
-                    <tr key={i} className="border-b border-white/[0.03]">
-                      <td className="px-4 py-2 text-white/25">{i + 1}</td>
-                      <td className="px-4 py-2 text-[#C8922A]">{row.unitNumber}</td>
-                      <td className="px-4 py-2 text-white/60">{row.buildingName}</td>
-                      <td className="px-4 py-2 text-white/40">{row.propertySize || "—"}</td>
-                      <td className="px-4 py-2 text-white/40">{row.zone || "—"}</td>
+                    <tr key={i} className="border-b last:border-0">
+                      <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
+                      <td className="px-4 py-2 font-medium text-primary">{row.unitNumber}</td>
+                      <td className="px-4 py-2 text-foreground/70">{row.buildingName}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{row.propertySize || "—"}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{row.zone || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {rows.length > 5 && (
-                <div className="px-4 py-2 text-[10px] font-mono text-white/20 border-t border-white/[0.03]">
+                <div className="px-4 py-2 text-[10px] text-muted-foreground border-t">
                   + {rows.length - 5} more rows
                 </div>
               )}
             </div>
 
-            {/* Submit */}
             <Button
               onClick={handleSubmit}
               disabled={submitting || rows.length === 0}
-              className="w-full h-11 bg-[#C8922A] hover:bg-[#B8821A] text-black font-semibold text-sm tracking-wide disabled:opacity-30"
+              className="w-full h-11"
             >
               {submitting ? (
                 <>
@@ -264,7 +262,6 @@ export function OwnersListUpload({ onComplete }: { onComplete?: () => void }) {
         )}
       </AnimatePresence>
 
-      {/* Job progress */}
       {jobId && <BulkJobStatusPanel jobId={jobId} onComplete={onComplete} />}
     </div>
   )

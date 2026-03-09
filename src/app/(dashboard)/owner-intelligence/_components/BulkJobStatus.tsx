@@ -109,7 +109,7 @@ export function BulkJobStatusPanel({
 
   if (!job) {
     return (
-      <div className="flex items-center gap-2 py-4 text-sm text-white/40">
+      <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" /> Initializing...
       </div>
     )
@@ -130,34 +130,34 @@ export function BulkJobStatusPanel({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border border-white/[0.07] bg-[#111111] p-5 space-y-4"
+      className="rounded-xl border bg-card p-5 space-y-4"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isComplete ? (
-            <CheckCircle2 className="h-4 w-4 text-green-400" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           ) : isFailed ? (
-            <AlertCircle className="h-4 w-4 text-red-400" />
+            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           ) : (
-            <Loader2 className="h-4 w-4 text-[#C8922A] animate-spin" />
+            <Loader2 className="h-4 w-4 text-primary animate-spin" />
           )}
-          <span className="text-sm font-medium text-white">
+          <span className="text-sm font-medium">
             {isComplete ? "Processing complete" : isFailed ? "Processing failed" : "Processing..."}
           </span>
         </div>
         {!isComplete && !isFailed && job.processedRows > 0 && (
-          <span className="flex items-center gap-1 text-xs font-mono text-white/30">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             ~{etaMinutes}m remaining
           </span>
         )}
       </div>
 
-      <div className="relative h-2 rounded-full bg-white/[0.04] overflow-hidden">
+      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
         <motion.div
           className={cn(
             "absolute inset-y-0 left-0 rounded-full",
-            isComplete ? "bg-green-500" : isFailed ? "bg-red-500" : "bg-[#C8922A]"
+            isComplete ? "bg-emerald-500" : isFailed ? "bg-red-500" : "bg-primary"
           )}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
@@ -165,20 +165,20 @@ export function BulkJobStatusPanel({
         />
       </div>
 
-      <div className="flex items-center gap-4 text-xs font-mono">
-        <span className="text-white/50">
+      <div className="flex items-center gap-4 text-xs">
+        <span className="text-muted-foreground">
           Processing {job.processedRows}/{job.totalRows}
         </span>
-        <span className="text-green-400/70">
+        <span className="text-emerald-600 dark:text-emerald-400">
           {job.successRows} resolved
         </span>
         {partialRows > 0 && (
-          <span className="text-amber-400/70">
+          <span className="text-amber-600 dark:text-amber-400">
             {partialRows} partial
           </span>
         )}
         {job.failedRows > 0 && (
-          <span className="text-red-400/70">
+          <span className="text-red-600 dark:text-red-400">
             {job.failedRows} failed
           </span>
         )}

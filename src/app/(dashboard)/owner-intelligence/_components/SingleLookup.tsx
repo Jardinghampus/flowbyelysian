@@ -42,7 +42,6 @@ export function SingleLookup() {
     setResult(null)
     setStep("parsing")
 
-    // Simulate pipeline steps while the API runs
     const stepTimer1 = setTimeout(() => setStep("finding_unit"), 1500)
     const stepTimer2 = setTimeout(() => setStep("resolving_owner"), 5000)
 
@@ -82,7 +81,7 @@ export function SingleLookup() {
       {/* URL Input */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={url}
             onChange={(e) => {
@@ -92,11 +91,11 @@ export function SingleLookup() {
             }}
             onKeyDown={(e) => e.key === "Enter" && !isLoading && handleLookup()}
             placeholder="Paste Bayut, PropertyFinder, or Dubizzle URL..."
-            className="pl-11 pr-4 h-14 bg-[#111111] border-white/[0.07] text-white placeholder:text-white/20 font-mono text-sm focus-visible:ring-[#C8922A]/30 focus-visible:border-[#C8922A]/50"
+            className="pl-10 pr-4 h-12 text-sm"
             disabled={isLoading}
           />
           {detectedPortal && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
               <PortalBadge portal={detectedPortal} />
             </div>
           )}
@@ -105,7 +104,7 @@ export function SingleLookup() {
         <Button
           onClick={handleLookup}
           disabled={isLoading || !url.trim()}
-          className="w-full h-11 bg-[#C8922A] hover:bg-[#B8821A] text-black font-semibold text-sm tracking-wide disabled:opacity-30"
+          className="w-full h-11"
         >
           {isLoading ? (
             <>
@@ -140,14 +139,14 @@ export function SingleLookup() {
                     <div className="flex items-center gap-2 flex-1">
                       <div
                         className={cn(
-                          "h-7 w-7 rounded flex items-center justify-center text-xs font-mono flex-shrink-0 transition-colors",
+                          "h-7 w-7 rounded flex items-center justify-center text-xs flex-shrink-0 transition-colors",
                           isDone
-                            ? "bg-green-500/20 text-green-400"
+                            ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
                             : isActive
-                            ? "bg-[#C8922A]/20 text-[#C8922A]"
+                            ? "bg-primary/10 text-primary"
                             : isError
-                            ? "bg-red-500/20 text-red-400"
-                            : "bg-white/[0.03] text-white/15"
+                            ? "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400"
+                            : "bg-muted text-muted-foreground"
                         )}
                       >
                         {isDone ? (
@@ -162,15 +161,15 @@ export function SingleLookup() {
                       </div>
                       <span
                         className={cn(
-                          "text-[10px] font-mono uppercase tracking-wider hidden sm:inline",
-                          isDone ? "text-green-400/60" : isActive ? "text-white/60" : "text-white/15"
+                          "text-[10px] uppercase tracking-wider hidden sm:inline",
+                          isDone ? "text-emerald-600 dark:text-emerald-400" : isActive ? "text-foreground" : "text-muted-foreground/50"
                         )}
                       >
                         {s.label}
                       </span>
                     </div>
                     {i < steps.length - 1 && (
-                      <ArrowRight className={cn("h-3 w-3 flex-shrink-0 mx-1", isDone ? "text-green-500/30" : "text-white/10")} />
+                      <ArrowRight className={cn("h-3 w-3 flex-shrink-0 mx-1", isDone ? "text-emerald-400" : "text-muted-foreground/20")} />
                     )}
                   </div>
                 )
@@ -185,16 +184,16 @@ export function SingleLookup() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400"
+          className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-sm text-red-700 dark:text-red-400"
         >
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {error}
-          {(step === "error") && (
+          {step === "error" && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLookup}
-              className="ml-auto text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs"
+              className="ml-auto text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/10 text-xs"
             >
               Retry
             </Button>

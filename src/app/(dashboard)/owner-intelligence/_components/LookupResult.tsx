@@ -12,10 +12,10 @@ import { PortalBadge } from "./PortalBadge"
 import { cn } from "@/lib/utils"
 
 const statusConfig: Record<LookupStatus, { label: string; color: string; border: string }> = {
-  resolved: { label: "Resolved", color: "text-green-400 bg-green-400/10", border: "border-l-[#C8922A]" },
-  partial: { label: "Partial", color: "text-amber-400 bg-amber-400/10", border: "border-l-amber-500/30" },
-  failed: { label: "Failed", color: "text-red-400 bg-red-400/10", border: "border-l-red-500/30" },
-  pending: { label: "Pending", color: "text-blue-400 bg-blue-400/10", border: "border-l-blue-500/30" },
+  resolved: { label: "Resolved", color: "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/15", border: "border-l-emerald-500" },
+  partial: { label: "Partial", color: "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/15", border: "border-l-amber-500" },
+  failed: { label: "Failed", color: "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-500/15", border: "border-l-red-500" },
+  pending: { label: "Pending", color: "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/15", border: "border-l-blue-500" },
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -31,13 +31,13 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-1 rounded hover:bg-white/[0.06] transition-colors"
+      className="p-1 rounded hover:bg-muted transition-colors"
       title={`Copy ${label}`}
     >
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-green-400" />
+        <Check className="h-3.5 w-3.5 text-emerald-500" />
       ) : (
-        <Copy className="h-3.5 w-3.5 text-white/30 hover:text-white/60" />
+        <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
       )}
     </button>
   )
@@ -70,19 +70,19 @@ export function LookupResult({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        "rounded-lg border border-white/[0.07] bg-[#111111] border-l-[3px] overflow-hidden",
+        "rounded-xl border bg-card border-l-[3px] overflow-hidden",
         status.border
       )}
     >
       {/* Header */}
-      <div className="px-5 py-3 flex items-center justify-between border-b border-white/[0.05]">
+      <div className="px-5 py-3 flex items-center justify-between border-b">
         <div className="flex items-center gap-3">
           {contact.portal && <PortalBadge portal={contact.portal} />}
-          <span className={cn("px-2 py-0.5 text-[10px] font-mono font-semibold rounded uppercase tracking-wider", status.color)}>
+          <span className={cn("px-2 py-0.5 text-[10px] font-semibold rounded uppercase tracking-wider", status.color)}>
             {status.label}
           </span>
           {cached && (
-            <span className="px-2 py-0.5 text-[10px] font-mono text-white/30 bg-white/[0.04] rounded">
+            <span className="px-2 py-0.5 text-[10px] text-muted-foreground bg-muted rounded">
               Cached {contact.updatedAt ? new Date(contact.updatedAt).toLocaleDateString() : ""}
             </span>
           )}
@@ -92,38 +92,38 @@ export function LookupResult({
       <div className="p-5 grid md:grid-cols-2 gap-6">
         {/* Property Info */}
         <div className="space-y-3">
-          <h4 className="text-[10px] font-mono font-semibold uppercase tracking-[0.15em] text-white/30">
+          <h4 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             Property
           </h4>
           {contact.propertyName && (
-            <div className="flex items-center gap-2 text-sm text-white/80">
-              <Building2 className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
               {contact.propertyName}
             </div>
           )}
           {contact.buildingName && (
-            <div className="flex items-center gap-2 text-sm text-white/80">
-              <Building2 className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
               {contact.buildingName}
               {contact.unitNumber && (
-                <span className="font-mono text-[#C8922A]">#{contact.unitNumber}</span>
+                <span className="font-semibold text-primary">#{contact.unitNumber}</span>
               )}
             </div>
           )}
           {contact.zone && (
-            <div className="flex items-center gap-2 text-sm text-white/50">
-              <MapPin className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
               {contact.zone}
             </div>
           )}
           <div className="flex flex-wrap gap-3 pt-1">
             {contact.propertySize && (
-              <span className="flex items-center gap-1 text-xs text-white/40 font-mono">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Maximize2 className="h-3 w-3" /> {contact.propertySize.toLocaleString()} sqft
               </span>
             )}
             {contact.propertyValue && (
-              <span className="flex items-center gap-1 text-xs text-white/40 font-mono">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <DollarSign className="h-3 w-3" /> AED{" "}
                 {contact.propertyValue >= 1000000
                   ? `${(contact.propertyValue / 1000000).toFixed(1)}M`
@@ -131,7 +131,7 @@ export function LookupResult({
               </span>
             )}
             {contact.rooms && (
-              <span className="flex items-center gap-1 text-xs text-white/40 font-mono">
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Hash className="h-3 w-3" /> {contact.rooms} rooms
               </span>
             )}
@@ -140,66 +140,66 @@ export function LookupResult({
 
         {/* Owner Contact */}
         <div className="space-y-3">
-          <h4 className="text-[10px] font-mono font-semibold uppercase tracking-[0.15em] text-white/30">
+          <h4 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             Owner
           </h4>
 
           {contact.ownerName ? (
-            <div className="flex items-center gap-2 text-sm text-white font-medium">
-              <User className="h-3.5 w-3.5 text-[#C8922A] flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <User className="h-3.5 w-3.5 text-primary flex-shrink-0" />
               {contact.ownerName}
             </div>
           ) : (
-            <div className="text-sm text-white/20 italic">No owner data found</div>
+            <div className="text-sm text-muted-foreground italic">No owner data found</div>
           )}
 
           {contact.ownerPhone && (
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
-              <span className="font-mono text-white/80">{formatPhone(contact.ownerPhone)}</span>
-              <span className="text-[9px] font-mono text-white/20 uppercase">Primary</span>
+              <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="font-mono">{formatPhone(contact.ownerPhone)}</span>
+              <span className="text-[9px] text-muted-foreground uppercase">Primary</span>
               <CopyButton text={contact.ownerPhone} label="Phone" />
               <a
                 href={whatsAppUrl(contact.ownerPhone)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1 rounded hover:bg-green-500/10 transition-colors"
+                className="p-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-500/10 transition-colors"
                 title="Open in WhatsApp"
               >
-                <MessageSquare className="h-3.5 w-3.5 text-green-500/60 hover:text-green-400" />
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               </a>
             </div>
           )}
 
           {contact.ownerPhone2 && (
             <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
-              <span className="font-mono text-white/80">{formatPhone(contact.ownerPhone2)}</span>
-              <span className="text-[9px] font-mono text-white/20 uppercase">Secondary</span>
+              <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="font-mono">{formatPhone(contact.ownerPhone2)}</span>
+              <span className="text-[9px] text-muted-foreground uppercase">Secondary</span>
               <CopyButton text={contact.ownerPhone2} label="Phone 2" />
               <a
                 href={whatsAppUrl(contact.ownerPhone2)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1 rounded hover:bg-green-500/10 transition-colors"
+                className="p-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-500/10 transition-colors"
               >
-                <MessageSquare className="h-3.5 w-3.5 text-green-500/60 hover:text-green-400" />
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               </a>
             </div>
           )}
 
           {contact.ownerEmail && (
             <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-3.5 w-3.5 text-white/25 flex-shrink-0" />
-              <span className="font-mono text-white/80">{contact.ownerEmail}</span>
+              <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <span className="font-mono">{contact.ownerEmail}</span>
               <CopyButton text={contact.ownerEmail} label="Email" />
             </div>
           )}
 
           {contact.ownerDate && (
-            <div className="flex items-center gap-2 text-xs text-white/30">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-3 w-3 flex-shrink-0" />
-              <span className="font-mono">Owner since {new Date(contact.ownerDate).toLocaleDateString()}</span>
+              Owner since {new Date(contact.ownerDate).toLocaleDateString()}
             </div>
           )}
         </div>

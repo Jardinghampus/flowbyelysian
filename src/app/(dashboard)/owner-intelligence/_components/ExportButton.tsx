@@ -48,7 +48,7 @@ export function ExportButton({
       size="sm"
       onClick={handleExport}
       disabled={loading}
-      className="border-white/[0.07] bg-transparent text-white/60 hover:text-white hover:bg-white/[0.04] font-mono text-xs"
+      className="text-xs"
     >
       {loading ? (
         <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />

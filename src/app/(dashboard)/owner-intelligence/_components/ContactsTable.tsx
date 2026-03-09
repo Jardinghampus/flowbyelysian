@@ -14,17 +14,17 @@ import { ExportButton } from "./ExportButton"
 import { cn } from "@/lib/utils"
 
 const statusColors: Record<LookupStatus, string> = {
-  resolved: "text-green-400 bg-green-400/10",
-  partial: "text-amber-400 bg-amber-400/10",
-  failed: "text-red-400 bg-red-400/10",
-  pending: "text-blue-400 bg-blue-400/10",
+  resolved: "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/15",
+  partial: "text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/15",
+  failed: "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-500/15",
+  pending: "text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/15",
 }
 
-const filterChips: { label: string; key: string; type: "status" | "portal" }[] = [
-  { label: "All", key: "", type: "status" },
-  { label: "Resolved", key: "resolved", type: "status" },
-  { label: "Partial", key: "partial", type: "status" },
-  { label: "Failed", key: "failed", type: "status" },
+const filterChips: { label: string; key: string }[] = [
+  { label: "All", key: "" },
+  { label: "Resolved", key: "resolved" },
+  { label: "Partial", key: "partial" },
+  { label: "Failed", key: "failed" },
 ]
 
 const portalChips: { label: string; key: string }[] = [
@@ -42,8 +42,8 @@ function CopyCell({ text }: { text: string }) {
     setTimeout(() => setCopied(false), 1500)
   }
   return (
-    <button onClick={handleCopy} className="p-1 rounded hover:bg-white/[0.06] transition-colors">
-      {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3 text-white/20 hover:text-white/50" />}
+    <button onClick={handleCopy} className="p-1 rounded hover:bg-muted transition-colors">
+      {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground" />}
     </button>
   )
 }
@@ -134,7 +134,6 @@ export function ContactsTable() {
     setDeleting(true)
     const ids = Array.from(selected)
 
-    // Optimistic delete
     setContacts((prev) => prev.filter((c) => !selected.has(c.id!)))
     setSelected(new Set())
 
@@ -160,12 +159,12 @@ export function ContactsTable() {
       {/* Search + filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/20" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search owner, building, unit, zone..."
-            className="pl-9 h-9 bg-[#111111] border-white/[0.07] text-white text-xs font-mono placeholder:text-white/20 focus-visible:ring-[#C8922A]/30"
+            className="pl-9 h-9 text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -175,7 +174,7 @@ export function ContactsTable() {
               size="sm"
               onClick={handleBulkDelete}
               disabled={deleting}
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs font-mono"
+              className="text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/10 text-xs"
             >
               <Trash2 className="h-3.5 w-3.5 mr-1" />
               Delete {selected.size}
@@ -195,16 +194,16 @@ export function ContactsTable() {
               setPage(1)
             }}
             className={cn(
-              "px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider rounded transition-colors",
+              "px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider rounded transition-colors",
               statusFilter === chip.key
-                ? "bg-[#C8922A]/20 text-[#C8922A]"
-                : "bg-white/[0.03] text-white/30 hover:text-white/50"
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground hover:text-foreground"
             )}
           >
             {chip.label}
           </button>
         ))}
-        <div className="w-px h-5 bg-white/[0.07] self-center mx-1" />
+        <div className="w-px h-5 bg-border self-center mx-1" />
         {portalChips.map((chip) => (
           <button
             key={chip.key}
@@ -213,10 +212,10 @@ export function ContactsTable() {
               setPage(1)
             }}
             className={cn(
-              "px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider rounded transition-colors",
+              "px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider rounded transition-colors",
               portalFilter === chip.key
-                ? "bg-[#C8922A]/20 text-[#C8922A]"
-                : "bg-white/[0.03] text-white/30 hover:text-white/50"
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground hover:text-foreground"
             )}
           >
             {chip.label}
@@ -225,20 +224,20 @@ export function ContactsTable() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-white/[0.07] bg-[#111111] overflow-x-auto">
-        <table className="w-full text-xs font-mono min-w-[900px]">
+      <div className="rounded-xl border bg-card overflow-x-auto">
+        <table className="w-full text-xs min-w-[900px]">
           <thead>
-            <tr className="border-b border-white/[0.05]">
+            <tr className="border-b bg-muted/50">
               <th className="px-3 py-2.5 w-8">
                 <input
                   type="checkbox"
                   checked={contacts.length > 0 && selected.size === contacts.length}
                   onChange={toggleSelectAll}
-                  className="accent-[#C8922A]"
+                  className="accent-primary"
                 />
               </th>
               <th
-                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25 cursor-pointer hover:text-white/40"
+                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground"
                 onClick={() => toggleSort("owner_name")}
               >
                 <span className="flex items-center gap-1">
@@ -246,11 +245,11 @@ export function ContactsTable() {
                   <ArrowUpDown className="h-3 w-3" />
                 </span>
               </th>
-              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25">Phone</th>
-              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25">Email</th>
-              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25">Building / Unit</th>
+              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Phone</th>
+              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Email</th>
+              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Building / Unit</th>
               <th
-                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25 cursor-pointer hover:text-white/40"
+                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground"
                 onClick={() => toggleSort("zone")}
               >
                 <span className="flex items-center gap-1">
@@ -259,7 +258,7 @@ export function ContactsTable() {
                 </span>
               </th>
               <th
-                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25 cursor-pointer hover:text-white/40"
+                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground"
                 onClick={() => toggleSort("property_value")}
               >
                 <span className="flex items-center gap-1">
@@ -267,9 +266,9 @@ export function ContactsTable() {
                   <ArrowUpDown className="h-3 w-3" />
                 </span>
               </th>
-              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25">Source</th>
+              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Source</th>
               <th
-                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25 cursor-pointer hover:text-white/40"
+                className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground"
                 onClick={() => toggleSort("created_at")}
               >
                 <span className="flex items-center gap-1">
@@ -277,20 +276,20 @@ export function ContactsTable() {
                   <ArrowUpDown className="h-3 w-3" />
                 </span>
               </th>
-              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-white/25">Actions</th>
+              <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && contacts.length === 0 ? (
               <tr>
-                <td colSpan={10} className="px-4 py-12 text-center text-white/25">
+                <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
                   Loading contacts...
                 </td>
               </tr>
             ) : contacts.length === 0 ? (
               <tr>
-                <td colSpan={10} className="px-4 py-12 text-center text-white/20">
+                <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground">
                   No contacts found
                 </td>
               </tr>
@@ -299,8 +298,8 @@ export function ContactsTable() {
                 <tr
                   key={c.id}
                   className={cn(
-                    "border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors",
-                    selected.has(c.id!) && "bg-[#C8922A]/5"
+                    "border-b last:border-0 hover:bg-muted/30 transition-colors",
+                    selected.has(c.id!) && "bg-primary/5"
                   )}
                 >
                   <td className="px-3 py-2.5">
@@ -308,12 +307,12 @@ export function ContactsTable() {
                       type="checkbox"
                       checked={selected.has(c.id!)}
                       onChange={() => toggleSelect(c.id!)}
-                      className="accent-[#C8922A]"
+                      className="accent-primary"
                     />
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-white/80 font-medium">{c.ownerName || "—"}</span>
+                      <span className="font-medium">{c.ownerName || "—"}</span>
                       <span className={cn("px-1.5 py-0.5 text-[8px] uppercase rounded", statusColors[c.lookupStatus])}>
                         {c.lookupStatus}
                       </span>
@@ -321,32 +320,32 @@ export function ContactsTable() {
                   </td>
                   <td className="px-3 py-2.5">
                     {c.ownerPhone ? (
-                      <span className="flex items-center gap-1 text-white/60">
+                      <span className="flex items-center gap-1 text-foreground/70">
                         {c.ownerPhone}
                         <CopyCell text={c.ownerPhone} />
                       </span>
                     ) : (
-                      <span className="text-white/15">—</span>
+                      <span className="text-muted-foreground/40">—</span>
                     )}
                   </td>
                   <td className="px-3 py-2.5">
                     {c.ownerEmail ? (
-                      <span className="flex items-center gap-1 text-white/60">
+                      <span className="flex items-center gap-1 text-foreground/70">
                         <span className="truncate max-w-[140px]">{c.ownerEmail}</span>
                         <CopyCell text={c.ownerEmail} />
                       </span>
                     ) : (
-                      <span className="text-white/15">—</span>
+                      <span className="text-muted-foreground/40">—</span>
                     )}
                   </td>
                   <td className="px-3 py-2.5">
-                    <div className="text-white/50">
+                    <div className="text-muted-foreground">
                       {c.buildingName || "—"}
-                      {c.unitNumber && <span className="text-[#C8922A] ml-1">#{c.unitNumber}</span>}
+                      {c.unitNumber && <span className="text-primary font-medium ml-1">#{c.unitNumber}</span>}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 text-white/40">{c.zone || "—"}</td>
-                  <td className="px-3 py-2.5 text-white/40">
+                  <td className="px-3 py-2.5 text-muted-foreground">{c.zone || "—"}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground">
                     {c.propertyValue
                       ? `AED ${c.propertyValue >= 1000000 ? `${(c.propertyValue / 1000000).toFixed(1)}M` : c.propertyValue.toLocaleString()}`
                       : "—"}
@@ -354,7 +353,7 @@ export function ContactsTable() {
                   <td className="px-3 py-2.5">
                     {c.portal ? <PortalBadge portal={c.portal} /> : "—"}
                   </td>
-                  <td className="px-3 py-2.5 text-white/30">
+                  <td className="px-3 py-2.5 text-muted-foreground">
                     {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—"}
                   </td>
                   <td className="px-3 py-2.5">
@@ -364,15 +363,14 @@ export function ContactsTable() {
                           href={`https://wa.me/${c.ownerPhone.replace(/\D/g, "")}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1 rounded hover:bg-green-500/10 transition-colors"
+                          className="p-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-500/10 transition-colors"
                           title="WhatsApp"
                         >
-                          <MessageSquare className="h-3.5 w-3.5 text-green-500/50 hover:text-green-400" />
+                          <MessageSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                         </a>
                       )}
                       <button
                         onClick={async () => {
-                          // Optimistic delete
                           setContacts((prev) => prev.filter((x) => x.id !== c.id))
                           try {
                             await fetch("/api/owner-intelligence/contacts", {
@@ -386,10 +384,10 @@ export function ContactsTable() {
                             fetchContacts()
                           }
                         }}
-                        className="p-1 rounded hover:bg-red-500/10 transition-colors"
+                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-500/10 transition-colors"
                         title="Delete"
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-red-500/30 hover:text-red-400" />
+                        <Trash2 className="h-3.5 w-3.5 text-red-500/50 hover:text-red-500" />
                       </button>
                     </div>
                   </td>
@@ -402,8 +400,8 @@ export function ContactsTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-white/30">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
             {total} contacts · Page {page} of {totalPages}
           </span>
           <div className="flex items-center gap-1">
@@ -412,7 +410,7 @@ export function ContactsTable() {
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="h-7 w-7 p-0 text-white/30 hover:text-white/60 disabled:opacity-20"
+              className="h-7 w-7 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -421,7 +419,7 @@ export function ContactsTable() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="h-7 w-7 p-0 text-white/30 hover:text-white/60 disabled:opacity-20"
+              className="h-7 w-7 p-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
