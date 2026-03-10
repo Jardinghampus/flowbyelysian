@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/card"
 import { AgentPerformanceEditor } from "./components/agent-performance-editor"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
 
 interface AgencyListing {
   id: string
