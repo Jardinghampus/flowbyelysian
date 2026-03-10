@@ -12,7 +12,7 @@ import {
   Shield,
   ArrowRight,
 } from "lucide-react"
-import Logo from "@/components/logo"
+import { Logo } from "@/components/logo"
 
 const dealPrice = 500000 // AED — full rights
 const upfrontPercent = 50
