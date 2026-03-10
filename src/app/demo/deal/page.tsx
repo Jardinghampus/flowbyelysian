@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import Logo from "@/components/logo"
 
-const dealPrice = 120000 // AED — adjust as needed
+const dealPrice = 500000 // AED — full rights
 const upfrontPercent = 50
 const installmentMonths = 6
 const upfront = dealPrice * (upfrontPercent / 100)
@@ -123,8 +123,8 @@ export default function DealPage() {
           </div>
 
           <div className="mt-6 p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/10 text-sm text-zinc-400">
-            <strong className="text-cyan-400">Compared to building from scratch:</strong> 365,000+ AED and 6–12 months of development time.
-            You save <span className="text-white font-semibold">{(365000 - dealPrice).toLocaleString()} AED</span> and start operating immediately.
+            <strong className="text-cyan-400">Compared to building from scratch:</strong> 655,000+ AED and 6–12 months of development time.
+            You save <span className="text-white font-semibold">{(655000 - dealPrice).toLocaleString()} AED</span> and start operating immediately.
           </div>
         </div>
       </section>

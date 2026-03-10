@@ -96,17 +96,19 @@ const features = [
 ]
 
 const buildCosts = [
-  { item: "CRM & Pipeline System", cost: "80,000" },
-  { item: "AI Integration (GPT + Embeddings)", cost: "60,000" },
-  { item: "Owner Intelligence Module", cost: "45,000" },
-  { item: "Marketplace & Exchange", cost: "35,000" },
-  { item: "Market Analytics Dashboard", cost: "40,000" },
-  { item: "Mobile App (Android)", cost: "50,000" },
-  { item: "Admin Panel & Role System", cost: "30,000" },
-  { item: "UI/UX Design & Components", cost: "25,000" },
+  { item: "CRM & Pipeline System", cost: "120,000" },
+  { item: "AI Integration (GPT + Embeddings)", cost: "90,000" },
+  { item: "Owner Intelligence Module", cost: "70,000" },
+  { item: "Marketplace & Exchange", cost: "55,000" },
+  { item: "Market Analytics Dashboard", cost: "60,000" },
+  { item: "Mobile App (Android)", cost: "80,000" },
+  { item: "Admin Panel & Role System", cost: "45,000" },
+  { item: "UI/UX Design & Components", cost: "40,000" },
+  { item: "Testing, DevOps & Deployment", cost: "35,000" },
+  { item: "Ongoing Maintenance (12 months)", cost: "60,000" },
 ]
 
-const totalBuildCost = 365000
+const totalBuildCost = 655000
 
 export default function DemoPage() {
   const router = useRouter()
@@ -165,7 +167,7 @@ export default function DemoPage() {
             </div>
             <div className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800">
               <DollarSign className="w-8 h-8 text-cyan-400 mb-4" />
-              <h3 className="text-2xl font-bold mb-2">365,000+ AED</h3>
+              <h3 className="text-2xl font-bold mb-2">655,000+ AED</h3>
               <p className="text-zinc-400">estimated build cost if developed from scratch with a dev team.</p>
             </div>
             <div className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800">
@@ -256,7 +258,7 @@ export default function DemoPage() {
               },
               {
                 title: "Fraction of the cost",
-                desc: "You get 365K+ AED worth of software at a fraction of the price, with the developer included.",
+                desc: "You get 655K+ AED worth of software for a fraction of the price, with the developer included.",
               },
               {
                 title: "Competitive advantage from day one",
