@@ -128,6 +128,8 @@ const navSections: NavSection[] = [
     items: [
       { label: "Tasks", href: "/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Contacts", href: "/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Analytics ──
@@ -138,15 +140,6 @@ const navSections: NavSection[] = [
       { label: "Areas", href: "/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Performance", href: "/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: CRM & Comms ──
-  {
-    title: "CRM & Comms",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "Contacts", href: "/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: AI & Tools ──

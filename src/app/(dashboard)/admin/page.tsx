@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
-import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail } from "lucide-react"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -53,6 +53,40 @@ import {
 } from "@/components/ui/card"
 import { AgentPerformanceEditor } from "./components/agent-performance-editor"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+
+interface AgencyListing {
+  id: string
+  title: string
+  area: string
+  propertyType: string
+  transactionType: "sale" | "rent"
+  status: "live" | "pocket" | "draft"
+  price: number
+  bedrooms: number
+  bathrooms: number
+  size: number
+  agent: string
+  views: number
+  inquiries: number
+  createdAt: string
+}
+
+const demoAgencyListings: AgencyListing[] = [
+  { id: "al-1", title: "5BR Villa — Emirates Hills", area: "Emirates Hills", propertyType: "Villa", transactionType: "sale", status: "live", price: 15000000, bedrooms: 5, bathrooms: 6, size: 8500, agent: "Ahmed Hassan", views: 342, inquiries: 8, createdAt: "2026-01-15" },
+  { id: "al-2", title: "4BR Townhouse — Arabian Ranches III", area: "Arabian Ranches", propertyType: "Townhouse", transactionType: "sale", status: "live", price: 5200000, bedrooms: 4, bathrooms: 4, size: 3800, agent: "Sara Al-Mahmoud", views: 187, inquiries: 4, createdAt: "2026-02-10" },
+  { id: "al-3", title: "2BR Apartment — Marina View", area: "Dubai Marina", propertyType: "Apartment", transactionType: "rent", status: "pocket", price: 130000, bedrooms: 2, bathrooms: 2, size: 1400, agent: "Ahmed Hassan", views: 56, inquiries: 1, createdAt: "2026-02-20" },
+  { id: "al-4", title: "3BR Penthouse — DIFC", area: "DIFC", propertyType: "Penthouse", transactionType: "sale", status: "live", price: 8500000, bedrooms: 3, bathrooms: 4, size: 4200, agent: "Omar Khalil", views: 220, inquiries: 6, createdAt: "2026-01-28" },
+  { id: "al-5", title: "Studio — Business Bay", area: "Business Bay", propertyType: "Apartment", transactionType: "rent", status: "draft", price: 55000, bedrooms: 0, bathrooms: 1, size: 450, agent: "Sara Al-Mahmoud", views: 0, inquiries: 0, createdAt: "2026-03-01" },
+  { id: "al-6", title: "6BR Mansion — Palm Jumeirah", area: "Palm Jumeirah", propertyType: "Villa", transactionType: "sale", status: "live", price: 45000000, bedrooms: 6, bathrooms: 8, size: 15000, agent: "Omar Khalil", views: 510, inquiries: 12, createdAt: "2026-01-05" },
+  { id: "al-7", title: "1BR Apartment — Downtown", area: "Downtown Dubai", propertyType: "Apartment", transactionType: "rent", status: "live", price: 95000, bedrooms: 1, bathrooms: 1, size: 850, agent: "Ahmed Hassan", views: 130, inquiries: 3, createdAt: "2026-02-15" },
+]
+
+const listingStatusColors: Record<string, { bg: string; text: string }> = {
+  live: { bg: "bg-green-100 dark:bg-green-500/20", text: "text-green-700 dark:text-green-400" },
+  pocket: { bg: "bg-amber-100 dark:bg-amber-500/20", text: "text-amber-700 dark:text-amber-400" },
+  draft: { bg: "bg-neutral-100 dark:bg-neutral-500/20", text: "text-neutral-600 dark:text-neutral-400" },
+}
 
 type UserRole = "admin" | "agent"
 
@@ -241,6 +275,10 @@ export default function AdminPage() {
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               User Management
+            </TabsTrigger>
+            <TabsTrigger value="listings" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Agency Listings
             </TabsTrigger>
             <TabsTrigger value="performance" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -533,6 +571,113 @@ export default function AdminPage() {
                           </TableRow>
                         ))
                       )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="listings" className="space-y-6">
+            {/* Listing Stats */}
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Listings</CardTitle>
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{demoAgencyListings.length}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Live</CardTitle>
+                  <Eye className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{demoAgencyListings.filter(l => l.status === "live").length}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pocket</CardTitle>
+                  <Tag className="h-4 w-4 text-amber-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-amber-600">{demoAgencyListings.filter(l => l.status === "pocket").length}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{demoAgencyListings.reduce((sum, l) => sum + l.views, 0).toLocaleString()}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Listings Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>All Agency Listings</CardTitle>
+                <CardDescription>Overview of all property listings across the team</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Property</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Agent</TableHead>
+                        <TableHead>Views</TableHead>
+                        <TableHead>Inquiries</TableHead>
+                        <TableHead>Listed</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {demoAgencyListings.map((listing) => {
+                        const sc = listingStatusColors[listing.status]
+                        return (
+                          <TableRow key={listing.id}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium text-sm">{listing.title}</p>
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" /> {listing.area}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-xs">
+                                <p>{listing.propertyType}</p>
+                                <p className="text-muted-foreground flex items-center gap-2">
+                                  {listing.bedrooms > 0 && <span className="flex items-center gap-0.5"><Bed className="h-3 w-3" />{listing.bedrooms}</span>}
+                                  <span className="flex items-center gap-0.5"><Maximize2 className="h-3 w-3" />{listing.size.toLocaleString()}</span>
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={`text-[10px] ${sc.bg} ${sc.text} border-0`}>
+                                {listing.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              AED {listing.price >= 1000000 ? `${(listing.price / 1000000).toFixed(1)}M` : listing.price.toLocaleString()}
+                              {listing.transactionType === "rent" ? "/yr" : ""}
+                            </TableCell>
+                            <TableCell className="text-sm">{listing.agent}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{listing.views}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{listing.inquiries}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{listing.createdAt}</TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </div>

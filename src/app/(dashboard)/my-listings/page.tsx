@@ -7,7 +7,7 @@ import {
   Plus, Trash2, Pencil, MapPin, Bed, Bath, Maximize2,
   Building2, Tag, Eye, ExternalLink, X, ImagePlus,
   Upload, ChevronLeft, ChevronRight, Camera, GripVertical,
-  Calendar, Layers, Hash,
+  Calendar, Layers, Hash, LayoutGrid, List,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -428,6 +428,7 @@ export default function MyListingsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [form, setForm] = useState<FormData>(emptyForm)
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [compactView, setCompactView] = useState(false)
   const [formStep, setFormStep] = useState<0 | 1 | 2>(0)
 
   const openCreate = () => {
@@ -565,10 +566,28 @@ export default function MyListingsPage() {
             Add, edit, and manage your property listings
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Listing
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border p-0.5">
+            <button
+              onClick={() => setCompactView(false)}
+              className={`h-8 w-8 rounded-md flex items-center justify-center transition-colors ${!compactView ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+              title="Card view"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setCompactView(true)}
+              className={`h-8 w-8 rounded-md flex items-center justify-center transition-colors ${compactView ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+              title="Compact view"
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+          <Button onClick={openCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Listing
+          </Button>
+        </div>
       </div>
 
       {/* Status filter tabs */}
@@ -590,10 +609,69 @@ export default function MyListingsPage() {
       </div>
 
       {/* Listing cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={compactView ? "space-y-2" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
         <AnimatePresence mode="popLayout">
           {filtered.map((listing) => {
             const sc = statusColors[listing.status]
+
+            if (compactView) {
+              return (
+                <motion.div
+                  key={listing.id}
+                  layout
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                >
+                  <Card className="group hover:shadow-sm transition-shadow">
+                    <CardContent className="p-3 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm truncate">{listing.title}</h3>
+                          <Badge className={`text-[10px] ${sc.bg} ${sc.text} border-0 shrink-0`}>
+                            {listing.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {listing.area}
+                          </span>
+                          <span className="capitalize">{listing.propertyType}</span>
+                          {listing.bedrooms > 0 && <span>{listing.bedrooms} BR</span>}
+                          <span>{listing.size.toLocaleString()} sqft</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-bold text-sm">
+                          AED {listing.price >= 1000000
+                            ? `${(listing.price / 1000000).toFixed(1)}M`
+                            : listing.price.toLocaleString()}
+                          {listing.transactionType === "rent" ? "/yr" : ""}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground">
+                          <span>{listing.views} views</span>
+                          <span>{listing.inquiries} inq</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => openEdit(listing)}>
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(listing.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            }
+
             return (
               <motion.div
                 key={listing.id}

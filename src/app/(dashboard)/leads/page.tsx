@@ -29,6 +29,8 @@ import {
   EyeOff,
   Lock,
   HandMetal,
+  Plus,
+  X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRole } from "@/contexts/role-context"
@@ -99,6 +101,19 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("")
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [addLeadOpen, setAddLeadOpen] = useState(false)
+  const [newLead, setNewLead] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    type: "buy" as OpportunityType,
+    area: "",
+    property_type: "",
+    bedrooms: "",
+    notes: "",
+    price: "",
+  })
   const { isInternal, isAdmin } = useRole()
 
   // Mask contact info — non-internal users only see phone
@@ -186,6 +201,49 @@ export default function LeadsPage() {
     }
   }
 
+  const handleAddLead = () => {
+    if (!newLead.full_name || !newLead.phone) {
+      toast.error("Name and phone are required")
+      return
+    }
+    const lead: Opportunity = {
+      id: `manual-${Date.now()}`,
+      type: newLead.type,
+      status: "new",
+      full_name: newLead.full_name,
+      email: newLead.email,
+      phone: newLead.phone,
+      whatsapp: newLead.whatsapp || null,
+      preferred_contact: "phone",
+      area: newLead.area || null,
+      sub_area: null,
+      unit_number: null,
+      property_type: newLead.property_type || null,
+      bedrooms: newLead.bedrooms ? Number(newLead.bedrooms) : null,
+      bathrooms: null,
+      size: null,
+      price: newLead.price ? Number(newLead.price) : null,
+      price_type: null,
+      min_price: null,
+      max_price: null,
+      features: [],
+      notes: newLead.notes || null,
+      ai_price_summary: null,
+      market_comparison_pct: null,
+      assigned_agent_id: CURRENT_AGENT_ID,
+      assigned_agent_name: CURRENT_AGENT_NAME,
+      agent_notes: null,
+      claimed_by: CURRENT_AGENT_ID,
+      claimed_by_name: CURRENT_AGENT_NAME,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    setOpportunities((prev) => [lead, ...prev])
+    setNewLead({ full_name: "", email: "", phone: "", whatsapp: "", type: "buy", area: "", property_type: "", bedrooms: "", notes: "", price: "" })
+    setAddLeadOpen(false)
+    toast.success("Lead added", { description: `${lead.full_name} added to your pipeline.` })
+  }
+
   const filtered = opportunities.filter((opp) => {
     if (search) {
       const q = search.toLowerCase()
@@ -211,11 +269,22 @@ export default function LeadsPage() {
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Leads Pipeline</h1>
-        <p className="text-muted-foreground">
-          Manage incoming opportunities from customers. Contact, match, and close deals.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Leads Pipeline</h1>
+          <p className="text-muted-foreground">
+            Manage incoming opportunities from customers. Contact, match, and close deals.
+          </p>
+        </div>
+        {isInternal && (
+          <button
+            onClick={() => setAddLeadOpen(true)}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add Lead
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -672,6 +741,162 @@ export default function LeadsPage() {
                     <Mail className="h-4 w-4" /> Email
                   </a>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Lead Dialog */}
+      {addLeadOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setAddLeadOpen(false)}>
+          <div
+            className="w-full max-w-lg bg-background rounded-xl shadow-xl overflow-y-auto max-h-[85vh] animate-in fade-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold">Add Manual Lead</h2>
+                <button onClick={() => setAddLeadOpen(false)} className="h-8 w-8 rounded-lg hover:bg-muted flex items-center justify-center">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Full Name *</label>
+                    <input
+                      value={newLead.full_name}
+                      onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })}
+                      placeholder="John Smith"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Phone *</label>
+                    <input
+                      value={newLead.phone}
+                      onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
+                      placeholder="+971 50 123 4567"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Email</label>
+                    <input
+                      type="email"
+                      value={newLead.email}
+                      onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
+                      placeholder="john@example.com"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">WhatsApp</label>
+                    <input
+                      value={newLead.whatsapp}
+                      onChange={(e) => setNewLead({ ...newLead, whatsapp: e.target.value })}
+                      placeholder="+971 50 123 4567"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium">Lead Type</label>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {(Object.entries(typeConfig) as [OpportunityType, typeof typeConfig.buy][]).map(([key, config]) => {
+                      const Icon = config.icon
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setNewLead({ ...newLead, type: key })}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5",
+                            newLead.type === key
+                              ? config.bg + " " + config.color + " border-current"
+                              : "border-border hover:bg-muted"
+                          )}
+                        >
+                          <Icon className="h-3 w-3" />
+                          {config.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Area</label>
+                    <input
+                      value={newLead.area}
+                      onChange={(e) => setNewLead({ ...newLead, area: e.target.value })}
+                      placeholder="Dubai Marina"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Property Type</label>
+                    <input
+                      value={newLead.property_type}
+                      onChange={(e) => setNewLead({ ...newLead, property_type: e.target.value })}
+                      placeholder="Villa"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium">Bedrooms</label>
+                    <input
+                      type="number"
+                      value={newLead.bedrooms}
+                      onChange={(e) => setNewLead({ ...newLead, bedrooms: e.target.value })}
+                      placeholder="3"
+                      className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium">Budget (AED)</label>
+                  <input
+                    type="number"
+                    value={newLead.price}
+                    onChange={(e) => setNewLead({ ...newLead, price: e.target.value })}
+                    placeholder="5000000"
+                    className="h-10 rounded-lg border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium">Notes</label>
+                  <textarea
+                    value={newLead.notes}
+                    onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })}
+                    placeholder="Additional details about this lead..."
+                    rows={3}
+                    className="rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  onClick={() => setAddLeadOpen(false)}
+                  className="h-10 px-4 rounded-lg border text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddLead}
+                  className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Add Lead
+                </button>
               </div>
             </div>
           </div>
