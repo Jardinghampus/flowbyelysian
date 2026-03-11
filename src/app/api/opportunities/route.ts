@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { villaCommunities } from "@/lib/data/villa-communities"
+import { scoreLeadConversion, type LeadScoreInput } from "@/lib/lead-scoring"
 
 // Helper: generate AI price summary by comparing to market data
 function generatePriceSummary(area: string, price: number, type: string, propertyType: string, bedrooms: number) {
@@ -178,11 +179,40 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error
 
+    // Score the new lead for conversion likelihood
+    const leadScoreInput: LeadScoreInput = {
+      type: body.type,
+      status: "new",
+      fullName: body.full_name || "",
+      email: body.email || null,
+      phone: body.phone || null,
+      whatsapp: body.whatsapp || null,
+      preferredContact: body.preferred_contact || null,
+      area: body.area || null,
+      propertyType: body.property_type || null,
+      bedrooms: body.bedrooms || null,
+      size: body.size || null,
+      price: effectivePrice || null,
+      minPrice: body.min_price || null,
+      maxPrice: body.max_price || null,
+      features: body.features || [],
+      notes: body.notes || null,
+      marketComparisonPct: priceSummary.comparisonPct ?? null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    const leadScore = scoreLeadConversion(leadScoreInput)
+
     return NextResponse.json(
       {
         opportunity,
         priceSummary: priceSummary.summary,
         comparisonPct: priceSummary.comparisonPct,
+        leadScore: {
+          score: leadScore.score,
+          tier: leadScore.tier,
+          insights: leadScore.insights,
+        },
       },
       { status: 201 }
     )

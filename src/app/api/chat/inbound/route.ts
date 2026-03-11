@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { processMessage, getWelcomeMessage } from "@/lib/chat/logic"
 import { parseInboundMessage } from "@/lib/adapters/whatsapp"
 import { getSession } from "@/lib/chat/state"
+import { quickSentiment } from "@/lib/sentiment-analysis"
 
 export interface InboundRequest {
   sessionId: string
@@ -82,12 +83,23 @@ export async function POST(request: Request): Promise<NextResponse<InboundRespon
       }).catch((err) => console.error("[Chat Inbound] Handoff error:", err))
     }
 
-    // Return response
+    // Real-time sentiment analysis on incoming message
+    const messageSentiment = quickSentiment(body.message)
+
+    console.log("[Chat Inbound] Sentiment:", {
+      sessionId: body.sessionId,
+      sentiment: messageSentiment.sentiment,
+      hasBuySignal: messageSentiment.hasBuySignal,
+      hasRiskSignal: messageSentiment.hasRiskSignal,
+    })
+
+    // Return response with sentiment data
     return NextResponse.json({
       success: true,
       response: result.response,
       sessionId: body.sessionId,
       state: result.session.state,
+      sentiment: messageSentiment,
       properties: result.searchResult?.properties.map((p) => ({
         id: p.id,
         title: p.title,
