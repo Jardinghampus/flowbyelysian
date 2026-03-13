@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { MessageCircle, X, Send, Bot, User, Minimize2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useMobileMenu } from "@/contexts/mobile-menu-context"
+import { SentimentIndicator } from "@/components/sentiment-indicator"
 
 interface Message {
   role: "user" | "bot"
@@ -197,6 +198,13 @@ export function ChatPopup() {
                   animate={{ height: "auto" }}
                   exit={{ height: 0 }}
                 >
+                  {/* Sentiment Bar */}
+                  {messages.length >= 4 && (
+                    <div className="px-4 py-2 border-b border-neutral-100 bg-white">
+                      <SentimentIndicator messages={messages} compact />
+                    </div>
+                  )}
+
                   {/* Messages */}
                   <div className="h-[400px] overflow-y-auto p-4 space-y-4 bg-neutral-50">
                     {messages.map((msg, idx) => (

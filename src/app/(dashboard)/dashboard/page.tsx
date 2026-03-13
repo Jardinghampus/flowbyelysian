@@ -7,6 +7,7 @@ import { ExternalLink, Search, BarChart3, Home, Users } from "lucide-react"
 import { ChartAreaInteractive } from "./components/chart-area-interactive"
 import { SectionCards } from "./components/section-cards"
 import { AgentPerformanceTable } from "./components/agent-performance-table"
+import { PipelineAlerts } from "./components/pipeline-alerts"
 import { MyMatchesWidget } from "./components/my-matches-widget"
 import { ActivityFeed } from "./components/activity-feed"
 import { QuickActions } from "./components/quick-actions"
@@ -92,6 +93,7 @@ export default function Page() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Left: Matches + Activity stacked */}
                 <div className="space-y-4">
+                  <PipelineAlerts />
                   <MyMatchesWidget />
                   <ActivityFeed />
                 </div>

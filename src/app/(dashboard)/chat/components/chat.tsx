@@ -9,6 +9,7 @@ import { ConversationList } from "./conversation-list"
 import { ChatHeader } from "./chat-header"
 import { MessageList } from "./message-list"
 import { MessageInput } from "./message-input"
+import { SentimentIndicator } from "@/components/sentiment-indicator"
 import { useChat, type Conversation, type Message, type User } from "../use-chat"
 
 interface ChatProps {
@@ -159,6 +160,19 @@ export function Chat({
               />
             </div>
           </div>
+
+          {/* Sentiment Bar */}
+          {currentMessages.length >= 2 && (
+            <div className="px-4 py-2 border-b bg-muted/30">
+              <SentimentIndicator
+                messages={currentMessages.map((m) => ({
+                  role: m.senderId === "current-user" ? "user" as const : "bot" as const,
+                  content: m.content,
+                  timestamp: m.timestamp,
+                }))}
+              />
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 flex flex-col min-h-0">

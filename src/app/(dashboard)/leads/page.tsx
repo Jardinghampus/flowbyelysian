@@ -35,6 +35,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useRole } from "@/contexts/role-context"
 import { toast } from "sonner"
+import { LeadScoreInline, LeadScoreBadge } from "@/components/lead-score-badge"
 
 type OpportunityType = "buy" | "sell" | "rent" | "lease" | "relocation"
 type OpportunityStatus = "new" | "contacted" | "in_progress" | "matched" | "closed" | "cancelled"
@@ -370,6 +371,7 @@ export default function LeadsPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Property</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Price</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Score</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Agent</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
@@ -451,6 +453,9 @@ export default function LeadsPage() {
                         <div className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", statusConf.bg, statusConf.color)}>
                           {statusConf.label}
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <LeadScoreInline opportunity={opp} />
                       </td>
                       {/* Agent / Claim */}
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -559,6 +564,12 @@ export default function LeadsPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Lead Score */}
+              <div className="rounded-xl border p-4 space-y-2">
+                <h3 className="text-sm font-bold">Lead Score</h3>
+                <LeadScoreBadge opportunity={selectedOpp} showInsights />
               </div>
 
               {/* Claim section */}
