@@ -7,12 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RippleButton } from "@/components/ui/ripple-button"
 
 const actions = [
-  { icon: Plus, label: "Add Listing", href: "/inventory", color: "bg-green-500 hover:bg-green-600" },
-  { icon: FileText, label: "Report", href: "/performance", color: "bg-blue-500 hover:bg-blue-600" },
-  { icon: Users, label: "Contact", href: "/users", color: "bg-purple-500 hover:bg-purple-600" },
-  { icon: Calendar, label: "Schedule", href: "/calendar", color: "bg-amber-500 hover:bg-amber-600" },
+  { icon: Plus, label: "Add Listing", href: "/app/inventory", color: "bg-green-500 hover:bg-green-600" },
+  { icon: FileText, label: "Report", href: "/app/performance", color: "bg-blue-500 hover:bg-blue-600" },
+  { icon: Users, label: "Contact", href: "/app/users", color: "bg-purple-500 hover:bg-purple-600" },
+  { icon: Calendar, label: "Schedule", href: "/app/calendar", color: "bg-amber-500 hover:bg-amber-600" },
   { icon: MessageSquare, label: "AI Chat", href: "/ai-assistant", color: "bg-cyan-500 hover:bg-cyan-600" },
-  { icon: Target, label: "Goals", href: "/performance", color: "bg-rose-500 hover:bg-rose-600" },
+  { icon: Target, label: "Goals", href: "/app/performance", color: "bg-rose-500 hover:bg-rose-600" },
 ]
 
 export function QuickActions() {

@@ -16,27 +16,27 @@ import { cn } from "@/lib/utils"
 const navItems = [
   {
     label: "Dashboard",
-    href: "/dashboard",
+    href: "/app/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     label: "Inventory",
-    href: "/inventory",
+    href: "/app/inventory",
     icon: <Building2 className="h-5 w-5" />,
   },
   {
     label: "Tasks",
-    href: "/tasks",
+    href: "/app/tasks",
     icon: <CheckSquare className="h-5 w-5" />,
   },
   {
     label: "Chat",
-    href: "/chat",
+    href: "/user/chat",
     icon: <MessageCircle className="h-5 w-5" />,
   },
   {
     label: "Calendar",
-    href: "/calendar",
+    href: "/app/calendar",
     icon: <Calendar className="h-5 w-5" />,
   },
 ]

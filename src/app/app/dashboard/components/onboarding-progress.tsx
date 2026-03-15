@@ -31,14 +31,14 @@ const defaultSteps: OnboardingStep[] = [
     id: "listing",
     title: "Add your first listing",
     description: "Create a stock or buyer request",
-    href: "/inventory",
+    href: "/app/inventory",
     completed: false,
   },
   {
     id: "training",
     title: "Complete RERA training",
     description: "Review compliance requirements",
-    href: "/training",
+    href: "/app/training",
     completed: false,
   },
   {
@@ -163,7 +163,7 @@ export function OnboardingProgress() {
                 animate={{ opacity: 1 }}
                 className="text-center py-2"
               >
-                <Link href="/inventory">
+                <Link href="/app/inventory">
                   <RippleButton size="sm" className="text-xs">
                     View Inventory
                     <ChevronRight className="h-3 w-3 ml-1" />

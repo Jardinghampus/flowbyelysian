@@ -25,7 +25,7 @@ export default function AreaDetailPage() {
         <MapPin className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
         <h2 className="text-xl font-semibold mb-2">Area not found</h2>
         <p className="text-muted-foreground mb-4">The area you&apos;re looking for doesn&apos;t exist.</p>
-        <Button onClick={() => router.push("/areas")}>
+        <Button onClick={() => router.push("/app/areas")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Areas
         </Button>
@@ -40,7 +40,7 @@ export default function AreaDetailPage() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push("/areas")}
+          onClick={() => router.push("/app/areas")}
           className="mt-1"
         >
           <ArrowLeft className="h-5 w-5" />

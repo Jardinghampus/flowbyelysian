@@ -352,7 +352,7 @@ export function MyMatchesWidget() {
             My Matches
             <Badge variant="secondary">{pendingMatches.length} new</Badge>
           </CardTitle>
-          <Link href="/inventory">
+          <Link href="/user/marketplace">
             <RippleButton variant="ghost" size="sm">
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -370,7 +370,7 @@ export function MyMatchesWidget() {
         {pendingMatches.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground mb-2">All caught up!</p>
-            <Link href="/inventory">
+            <Link href="/user/marketplace">
               <RippleButton variant="outline" size="sm">
                 View liked matches
               </RippleButton>

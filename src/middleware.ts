@@ -12,29 +12,12 @@ import type { NextRequest } from 'next/server'
 // Route architecture:
 //   /                    → Landing page (public)
 //   /sign-in             → Auth pages (public)
-//   /dashboard, etc.     → Authenticated app (all roles)
-//   /market-updates      → Customer-only news feed (customer + admin preview)
-//   /pipeline, /leads…   → ZFLOW agent platform (admin + agent only)
-//   /admin               → Admin CMS & management (admin only)
+//   /user/*              → Customer portal (all authenticated users)
+//   /app/*               → CRM / ZFLOW agent platform (admin + agent only)
+//   /app/admin           → Admin CMS & management (admin only)
 //
-// ZFLOW routes (agent-only internal tools):
-const ZFLOW_ROUTES = [
-  '/pipeline',
-  '/leads',
-  '/inventory',
-  '/exchange',
-  '/owner-intelligence',
-  '/follow-up',
-  '/mail',
-  '/performance',
-  '/smart',
-  '/ai-assistant',
-  '/seo-generator',
-  '/description-writer',
-  '/listing-video',
-  '/training',
-  '/news',
-]
+// The /app layout includes a CrmGuard component that blocks non-internal users.
+// In production, this middleware would enforce the same server-side.
 
 export function middleware(request: NextRequest) {
   // In demo mode, all requests pass through.

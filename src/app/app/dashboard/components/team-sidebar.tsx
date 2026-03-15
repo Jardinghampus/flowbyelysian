@@ -225,7 +225,7 @@ export function TeamSidebar() {
         defaultOpen={true}
         storageKey="team-sidebar"
         headerAction={
-          <Link href="/users">
+          <Link href="/app/users">
             <RippleButton variant="outline" size="sm" className="text-[10px] h-6 px-2">
               See All
             </RippleButton>

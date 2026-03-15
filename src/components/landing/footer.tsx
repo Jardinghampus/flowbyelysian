@@ -6,10 +6,10 @@ import { Instagram, Linkedin, Facebook, Twitter, Mail, Phone, MapPin } from "luc
 
 const footerLinks = {
   properties: [
-    { label: "Villas", href: "/inventory?type=villa" },
-    { label: "Apartments", href: "/inventory?type=apartment" },
-    { label: "Penthouses", href: "/inventory?type=penthouse" },
-    { label: "Townhouses", href: "/inventory?type=townhouse" },
+    { label: "Villas", href: "/user/marketplace?type=villa" },
+    { label: "Apartments", href: "/user/marketplace?type=apartment" },
+    { label: "Penthouses", href: "/user/marketplace?type=penthouse" },
+    { label: "Townhouses", href: "/user/marketplace?type=townhouse" },
     { label: "Off-Plan Projects", href: "/off-plan" },
     { label: "Submit Opportunity", href: "/opportunity" },
   ],
