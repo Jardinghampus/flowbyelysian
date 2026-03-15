@@ -33,6 +33,7 @@ import {
   CalendarDays,
   ImagePlus,
   CheckSquare,
+  Rss,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -203,6 +204,7 @@ const navSections: NavSection[] = [
     title: "Insights",
     roles: ALL_CUSTOMERS,
     items: [
+      { label: "News", href: "/news", icon: <Rss className={iconClass} />, roles: ALL_CUSTOMERS },
       { label: "Market Updates", href: "/market-updates", icon: <Newspaper className={iconClass} />, roles: ALL_CUSTOMERS },
       { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
