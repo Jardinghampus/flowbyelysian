@@ -170,7 +170,7 @@ export function NotificationBell() {
 
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="justify-center">
-          <Link href="/settings/notifications" className="text-sm text-muted-foreground">
+          <Link href="/user/settings/notifications" className="text-sm text-muted-foreground">
             Notification settings
           </Link>
         </DropdownMenuItem>

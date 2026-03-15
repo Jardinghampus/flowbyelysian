@@ -101,7 +101,7 @@ export default function NewsWidget({
             {title}
           </CardTitle>
           <Link
-            href="/news"
+            href="/app/news"
             className="text-sm text-primary hover:underline font-medium"
           >
             View all

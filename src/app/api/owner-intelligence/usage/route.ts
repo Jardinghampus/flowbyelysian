@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
-import { getRateLimitStatus } from "@/app/(dashboard)/owner-intelligence/_lib/rate-limit"
+import { getRateLimitStatus } from "@/app/app/owner-intelligence/_lib/rate-limit"
 
 export async function GET() {
   try {

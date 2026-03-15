@@ -32,23 +32,23 @@ export function MobileBottomTabs() {
   const tabIcon = "h-[22px] w-[22px]"
   const tabs: TabItem[] = isInternal
     ? [
-        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/pipeline", label: "Pipeline", icon: <Kanban className={tabIcon} /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
+        { href: "/app/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/app/pipeline", label: "Pipeline", icon: <Kanban className={tabIcon} /> },
+        { href: "/app/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
+        { href: "/app/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
       ]
     : role === "seller" || role === "landlord"
     ? [
-        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
+        { href: "/user/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/user/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
+        { href: "/user/marketplace", label: "Explore", icon: <Map className={tabIcon} /> },
+        { href: "/user/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
       ]
     : [
-        { href: "/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/my-search", label: "Search", icon: <SlidersHorizontal className={tabIcon} /> },
-        { href: "/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
+        { href: "/user/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/user/marketplace", label: "Explore", icon: <Map className={tabIcon} /> },
+        { href: "/user/my-search", label: "Search", icon: <SlidersHorizontal className={tabIcon} /> },
+        { href: "/user/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
       ]
 
   return (

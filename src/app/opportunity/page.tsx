@@ -806,7 +806,7 @@ export default function OpportunityPage() {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link
-                  href="/my-opportunities"
+                  href="/user/dashboard"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors"
                 >
                   Go to My Dashboard <ArrowRight className="h-4 w-4" />

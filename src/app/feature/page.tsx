@@ -135,7 +135,7 @@ function HeroSection() {
           className="flex flex-col sm:flex-row gap-4"
         >
           <Link
-            href="/dashboard"
+            href="/app/dashboard"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-white font-semibold hover:bg-blue-500 transition-all hover:scale-105"
           >
             Try Platform Demo
@@ -422,7 +422,7 @@ function DocumentIntelligenceSection() {
 
             <div className="pt-4">
               <Link
-                href="/smart"
+                href="/app/smart"
                 className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all"
               >
                 Try Document Intelligence
@@ -909,7 +909,7 @@ function CTASection() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/dashboard"
+              href="/app/dashboard"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-blue-600 font-semibold hover:bg-neutral-100 transition-colors"
             >
               Start Free Demo

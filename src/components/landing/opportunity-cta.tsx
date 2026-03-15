@@ -91,7 +91,7 @@ export function OpportunityCTA() {
                 Submit Your Opportunity <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/my-opportunities"
+                href="/user/dashboard"
                 className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-neutral-300 px-8 py-4 text-neutral-700 font-semibold hover:border-neutral-400 hover:bg-neutral-50 transition-colors"
               >
                 Log In to Dashboard

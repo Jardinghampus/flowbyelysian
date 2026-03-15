@@ -168,7 +168,7 @@ export function FeaturedListings() {
             </h2>
           </div>
           <Link
-            href="/properties"
+            href="/user/marketplace"
             className="inline-flex items-center text-neutral-900 font-medium hover:text-blue-600 transition-colors"
           >
             View All Properties

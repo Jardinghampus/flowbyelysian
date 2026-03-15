@@ -178,7 +178,7 @@ export default function SavedPage() {
               Browse the marketplace and save listings you are interested in.
             </p>
             <Button asChild>
-              <Link href="/marketplace">Browse Marketplace</Link>
+              <Link href="/user/marketplace">Browse Marketplace</Link>
             </Button>
           </div>
         )}

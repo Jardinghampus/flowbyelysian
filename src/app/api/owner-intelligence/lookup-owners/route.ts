@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
 import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
-import { runOwnerFinder } from "@/app/(dashboard)/owner-intelligence/_lib/apify"
-import { computeDedupHash } from "@/app/(dashboard)/owner-intelligence/_lib/dedup"
-import { lookupOwnersSchema } from "@/app/(dashboard)/owner-intelligence/_lib/validation"
-import { checkRateLimit } from "@/app/(dashboard)/owner-intelligence/_lib/rate-limit"
+import { runOwnerFinder } from "@/app/app/owner-intelligence/_lib/apify"
+import { computeDedupHash } from "@/app/app/owner-intelligence/_lib/dedup"
+import { lookupOwnersSchema } from "@/app/app/owner-intelligence/_lib/validation"
+import { checkRateLimit } from "@/app/app/owner-intelligence/_lib/rate-limit"
 import type { LookupStatus } from "@/types/owner-intelligence"
 
 export async function POST(req: NextRequest) {

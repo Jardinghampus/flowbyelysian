@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
 import { createUntypedServerClient as createServerClient } from "@/lib/supabase/server-untyped"
-import { deleteContactsSchema } from "@/app/(dashboard)/owner-intelligence/_lib/validation"
+import { deleteContactsSchema } from "@/app/app/owner-intelligence/_lib/validation"
 
 export async function GET(req: NextRequest) {
   try {

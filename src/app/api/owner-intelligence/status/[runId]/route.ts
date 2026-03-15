@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
-import { checkRunStatus } from "@/app/(dashboard)/owner-intelligence/_lib/apify"
+import { checkRunStatus } from "@/app/app/owner-intelligence/_lib/apify"
 
 export async function GET(
   _req: NextRequest,

@@ -33,7 +33,6 @@ import {
   CalendarDays,
   ImagePlus,
   CheckSquare,
-  Rss,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -101,17 +100,17 @@ const SEEKERS: UserRole[] = ["buyer", "tenant", "relocation_agent"]
 const LISTERS: UserRole[] = ["seller", "landlord"]
 
 const navSections: NavSection[] = [
-  // ── INTERNAL: Core ──
+  // ── INTERNAL: Core ── (/app/...)
   {
     title: "Core",
     roles: ["admin", "agent"],
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Pipeline", href: "/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Leads", href: "/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Inventory", href: "/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "My Listings", href: "/my-listings", icon: <ImagePlus className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Exchange", href: "/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Dashboard", href: "/app/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Pipeline", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Leads", href: "/app/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Inventory", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "My Listings", href: "/app/my-listings", icon: <ImagePlus className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Exchange", href: "/app/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Intelligence ──
@@ -119,7 +118,7 @@ const navSections: NavSection[] = [
     title: "Intelligence",
     roles: ["admin", "agent"],
     items: [
-      { label: "Owner Lookup", href: "/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Organize ──
@@ -127,10 +126,10 @@ const navSections: NavSection[] = [
     title: "Organize",
     roles: ["admin", "agent"],
     items: [
-      { label: "Tasks", href: "/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Calendar", href: "/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Contacts", href: "/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Gmail", href: "/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Contacts", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Analytics ──
@@ -138,9 +137,9 @@ const navSections: NavSection[] = [
     title: "Analytics",
     roles: ["admin", "agent"],
     items: [
-      { label: "Areas", href: "/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Performance", href: "/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: AI & Tools ──
@@ -148,9 +147,9 @@ const navSections: NavSection[] = [
     title: "AI & Tools",
     roles: ["admin", "agent"],
     items: [
-      { label: "Smart", href: "/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "AI Bot", href: "/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "SEO Generator", href: "/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Resources ──
@@ -158,8 +157,8 @@ const navSections: NavSection[] = [
     title: "Resources",
     roles: ["admin", "agent"],
     items: [
-      { label: "News", href: "/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Training", href: "/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Admin ──
@@ -167,18 +166,17 @@ const navSections: NavSection[] = [
     title: "System",
     roles: ["admin"],
     items: [
-      { label: "Admin", href: "/admin", icon: <UserCog className={iconClass} />, roles: ["admin"] },
+      { label: "Admin", href: "/app/admin", icon: <UserCog className={iconClass} />, roles: ["admin"] },
     ],
   },
 
-  // ── CUSTOMER: Home & Browse ──
+  // ── CUSTOMER: Home & Browse ── (/user/...)
   {
     title: "Home",
     roles: ALL_CUSTOMERS,
     items: [
-      { label: "Home", href: "/dashboard", icon: <Home className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Marketplace", href: "/marketplace", icon: <Map className={iconClass} />, roles: "all" },
-      { label: "Off-Plan", href: "/off-plan", icon: <Building2 className={iconClass} />, roles: "all" },
+      { label: "Home", href: "/user/dashboard", icon: <Home className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Marketplace", href: "/user/marketplace", icon: <Map className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
   },
   // ── CUSTOMER: Search & Requests ──
@@ -186,9 +184,8 @@ const navSections: NavSection[] = [
     title: "Search",
     roles: SEEKERS,
     items: [
-      { label: "My Search", href: "/my-search", icon: <SlidersHorizontal className={iconClass} />, roles: SEEKERS },
-      { label: "Search", href: "/properties", icon: <Search className={iconClass} />, roles: SEEKERS },
-      { label: "Requests", href: "/requests", icon: <ClipboardList className={iconClass} />, roles: SEEKERS },
+      { label: "My Search", href: "/user/my-search", icon: <SlidersHorizontal className={iconClass} />, roles: SEEKERS },
+      { label: "Requests", href: "/user/requests", icon: <ClipboardList className={iconClass} />, roles: SEEKERS },
     ],
   },
   // ── CUSTOMER: My Properties ──
@@ -196,7 +193,7 @@ const navSections: NavSection[] = [
     title: "My Properties",
     roles: LISTERS,
     items: [
-      { label: "My Listings", href: "/my-listings", icon: <ImagePlus className={iconClass} />, roles: LISTERS },
+      { label: "My Listings", href: "/user/my-listings", icon: <ImagePlus className={iconClass} />, roles: LISTERS },
     ],
   },
   // ── CUSTOMER: Insights ──
@@ -204,9 +201,8 @@ const navSections: NavSection[] = [
     title: "Insights",
     roles: ALL_CUSTOMERS,
     items: [
-      { label: "News", href: "/news", icon: <Rss className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Market Updates", href: "/market-updates", icon: <Newspaper className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Market Updates", href: "/user/market-updates", icon: <Newspaper className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Market Stats", href: "/user/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
   },
   // ── CUSTOMER: Activity ──
@@ -214,9 +210,8 @@ const navSections: NavSection[] = [
     title: "Activity",
     roles: ALL_CUSTOMERS,
     items: [
-      { label: "Saved", href: "/saved", icon: <Heart className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Messages", href: "/chat", icon: <MessageSquare className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Notifications", href: "/notifications", icon: <Bell className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Saved", href: "/user/saved", icon: <Heart className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "Messages", href: "/user/chat", icon: <MessageSquare className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
   },
 ]
@@ -224,7 +219,7 @@ const navSections: NavSection[] = [
 const bottomLinks = [
   {
     label: "Settings",
-    href: "/settings/user",
+    href: "/user/settings/user",
     icon: <Settings className={iconClass} />,
   },
 ]
@@ -232,7 +227,7 @@ const bottomLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const { role } = useRole()
+  const { role, isInternal } = useRole()
   const [open, setOpen] = useState(false)
 
   // Filter sections and items based on current role
@@ -257,7 +252,7 @@ export function AppSidebar() {
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {open ? <LogoFull /> : <LogoIcon />}
+          {open ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/dashboard"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/dashboard"} />}
 
           {/* User Profile */}
           <SidebarUserInfo open={open} />
@@ -297,11 +292,13 @@ export function AppSidebar() {
         <div className="flex flex-col gap-1 border-t border-neutral-200/60 dark:border-white/[0.06] pt-4">
           {/* Settings */}
           {bottomLinks.map((item, idx) => {
-            const isActive = pathname.startsWith(item.href)
+            const settingsHref = isInternal ? "/app/settings/user" : "/user/settings/user"
+            const link = item.label === "Settings" ? { ...item, href: settingsHref } : item
+            const isActive = pathname.startsWith(link.href)
             return (
               <SidebarLink
                 key={idx}
-                link={item}
+                link={link}
                 isActive={isActive}
               />
             )
@@ -345,10 +342,10 @@ export function AppSidebar() {
   )
 }
 
-const LogoFull = () => {
+const LogoFull = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
   return (
     <Link
-      href="/dashboard"
+      href={homeHref}
       className="font-bold flex items-center gap-3 text-black dark:text-white py-1 px-3 relative z-20"
     >
       <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
@@ -365,10 +362,10 @@ const LogoFull = () => {
   )
 }
 
-const LogoIcon = () => {
+const LogoIcon = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
   return (
     <Link
-      href="/dashboard"
+      href={homeHref}
       className="font-bold flex items-center justify-center py-1 relative z-20"
     >
       <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">

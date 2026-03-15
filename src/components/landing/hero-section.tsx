@@ -77,7 +77,7 @@ export function HeroSection() {
           className="flex flex-col sm:flex-row gap-4"
         >
           <Link
-            href="/properties"
+            href="/user/marketplace"
             className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-neutral-900 font-semibold hover:bg-neutral-100 transition-colors"
           >
             View Collection

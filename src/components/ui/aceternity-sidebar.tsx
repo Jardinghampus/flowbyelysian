@@ -145,7 +145,7 @@ export const MobileSidebar = ({
         )}
         {...props}
       >
-        <Link href="/dashboard" className="flex items-center gap-3">
+        <Link href="/user/dashboard" className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
             <Logo size={20} className="text-primary-foreground" />
           </div>
@@ -190,7 +190,7 @@ export const MobileSidebar = ({
             >
               {/* Close button row */}
               <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
-                <Link href="/dashboard" className="flex items-center gap-3">
+                <Link href="/user/dashboard" className="flex items-center gap-3">
                   <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                     <Logo size={20} className="text-primary-foreground" />
                   </div>

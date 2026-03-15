@@ -125,7 +125,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/users")
       if (!res.ok) {
         if (res.status === 403) {
-          router.push("/dashboard")
+          router.push("/app/dashboard")
           return
         }
         throw new Error("Failed to fetch users")
@@ -149,7 +149,7 @@ export default function AdminPage() {
   // Redirect non-admins
   useEffect(() => {
     if (!isAdmin && !loading) {
-      router.push("/dashboard")
+      router.push("/app/dashboard")
     }
   }, [isAdmin, router, loading])
 

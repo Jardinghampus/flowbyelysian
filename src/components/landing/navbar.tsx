@@ -135,7 +135,7 @@ export function Navbar() {
                 </AnimatePresence>
               </button>
               <Link
-                href="/my-opportunities"
+                href="/user/dashboard"
                 className={cn(
                   "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors border",
                   isScrolled
@@ -146,7 +146,7 @@ export function Navbar() {
                 Log In
               </Link>
               <Link
-                href="/dashboard"
+                href="/app/dashboard"
                 className={cn(
                   "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
                   isScrolled
@@ -242,13 +242,13 @@ export function Navbar() {
                   +971 50 123 4567
                 </a>
                 <Link
-                  href="/my-opportunities"
+                  href="/user/dashboard"
                   className="block w-full rounded-full border-2 border-neutral-900 dark:border-white px-6 py-3 text-center text-neutral-900 dark:text-white font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/app/dashboard"
                   className="block w-full rounded-full bg-neutral-900 dark:bg-white px-6 py-3 text-center text-white dark:text-neutral-900 font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
                 >
                   Agent Login

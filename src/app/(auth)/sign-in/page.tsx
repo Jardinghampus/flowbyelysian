@@ -10,7 +10,7 @@ export default function Page() {
   const router = useRouter()
 
   const handleSignIn = () => {
-    router.push("/dashboard")
+    router.push("/user/dashboard")
   }
 
   return (

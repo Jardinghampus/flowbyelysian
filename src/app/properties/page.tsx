@@ -252,7 +252,7 @@ export default function PropertiesPage() {
             <span className="text-xl font-bold text-neutral-900">ZAYLO</span>
           </Link>
           <Link
-            href="/dashboard"
+            href="/app/dashboard"
             className="rounded-full bg-neutral-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 transition-colors"
           >
             Agent Login

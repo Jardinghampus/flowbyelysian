@@ -75,7 +75,7 @@ export default function SignUpPage() {
 
   const next = () => {
     if (step < 3) setStep(step + 1)
-    else router.push("/dashboard")
+    else router.push("/user/dashboard")
   }
 
   const back = () => {

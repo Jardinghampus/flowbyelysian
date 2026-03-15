@@ -8,7 +8,7 @@ import { ThemeCustomizer, ThemeCustomizerTrigger } from "@/components/theme-cust
 import { RoleProvider } from "@/contexts/role-context"
 import { MobileBottomTabs } from "@/components/mobile-bottom-tabs"
 
-export default function DashboardLayout({
+export default function UserLayout({
   children,
 }: {
   children: React.ReactNode

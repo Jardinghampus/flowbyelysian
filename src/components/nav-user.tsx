@@ -90,19 +90,19 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/account">
+                <Link href="/user/settings/account">
                   <CircleUser />
                   Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/billing">
+                <Link href="/user/settings/billing">
                   <CreditCard />
                   Billing
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings/notifications">
+                <Link href="/user/settings/notifications">
                   <BellDot />
                   Notifications
                 </Link>
