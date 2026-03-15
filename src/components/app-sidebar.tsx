@@ -203,6 +203,7 @@ const navSections: NavSection[] = [
     title: "Insights",
     roles: ALL_CUSTOMERS,
     items: [
+      { label: "Market Updates", href: "/market-updates", icon: <Newspaper className={iconClass} />, roles: ALL_CUSTOMERS },
       { label: "Market Stats", href: "/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
   },

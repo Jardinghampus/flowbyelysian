@@ -63,6 +63,7 @@ interface RoleContextType {
   canViewPerformance: boolean
   canViewAdmin: boolean
   canCreateRequest: boolean
+  canViewMarketUpdates: boolean
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
@@ -112,6 +113,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   // Buyers, tenants, relocation agents, and internal staff can create requests/searches
   const canCreateRequest = ["admin", "agent", "buyer", "tenant", "relocation_agent"].includes(role)
 
+  // Market Updates: visible to customers + admin (for preview/management)
+  const canViewMarketUpdates = isCustomer || role === "admin"
+
   return (
     <RoleContext.Provider value={{
       role,
@@ -131,6 +135,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       canViewPerformance,
       canViewAdmin,
       canCreateRequest,
+      canViewMarketUpdates,
     }}>
       {children}
     </RoleContext.Provider>
