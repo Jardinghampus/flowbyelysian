@@ -82,7 +82,7 @@ export function OffPlanCTA() {
                 <f.icon className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold mb-2">{f.title}</h3>
-              <p className="text-sm text-white/50 leading-relaxed">{f.description}</p>
+              <p className="text-sm text-white/70 leading-relaxed">{f.description}</p>
             </motion.div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export function OffPlanCTA() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-12 text-sm text-white/40"
+          className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-12 text-sm text-white/70"
         >
           <span>Emaar</span>
           <span className="h-1 w-1 rounded-full bg-white/20" />

@@ -116,7 +116,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No tasks match your filters. Try broadening your search or create a new task.
                 </TableCell>
               </TableRow>
             )}

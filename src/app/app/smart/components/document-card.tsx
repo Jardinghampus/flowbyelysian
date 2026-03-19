@@ -33,6 +33,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { SmartDocument, DocumentType } from "../types"
 
@@ -83,6 +93,7 @@ export function DocumentCard({
   onChat,
 }: DocumentCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const Icon = documentTypeIcons[document.document_type]
   const status = statusConfig[document.analysis_status]
   const StatusIcon = status.icon
@@ -205,7 +216,7 @@ export function DocumentCard({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive"
-                  onClick={() => onDelete?.(document.id)}
+                  onClick={() => setDeleteOpen(true)}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
@@ -213,6 +224,26 @@ export function DocumentCard({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the document.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => onDelete?.(document.id)}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Metadata row */}
           <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">

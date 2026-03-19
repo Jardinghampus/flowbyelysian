@@ -184,7 +184,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/40 text-sm">
+            <p className="text-white/70 text-sm">
               © {new Date().getFullYear()} Zaylo Marketplace. All rights reserved.
             </p>
             <div className="flex gap-6">
@@ -192,7 +192,7 @@ export function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-white/40 text-sm hover:text-white/80 transition-colors"
+                  className="text-white/70 text-sm hover:text-white/80 transition-colors"
                 >
                   {link.label}
                 </Link>

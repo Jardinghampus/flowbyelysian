@@ -43,6 +43,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { SmartCollection, COLLECTION_ICONS, COLLECTION_COLORS } from "../types"
 
@@ -82,6 +92,7 @@ export function CollectionSidebar({
 }: CollectionSidebarProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingCollection, setEditingCollection] = useState<SmartCollection | null>(null)
+  const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -213,7 +224,7 @@ export function CollectionSidebar({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => onDeleteCollection?.(collection.id)}
+                          onClick={() => setDeleteCollectionId(collection.id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
@@ -383,6 +394,30 @@ export function CollectionSidebar({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Collection Confirmation */}
+      <AlertDialog open={!!deleteCollectionId} onOpenChange={() => setDeleteCollectionId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the collection.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteCollectionId) onDeleteCollection?.(deleteCollectionId)
+                setDeleteCollectionId(null)
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

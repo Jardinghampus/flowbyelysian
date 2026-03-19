@@ -190,7 +190,7 @@ export default function NewsFeed() {
                 </div>
               ) : (
                 <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Newspaper className="h-12 w-12 text-white/30" />
+                  <Newspaper className="h-12 w-12 text-white/70" />
                 </div>
               )}
 

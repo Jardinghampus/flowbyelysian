@@ -25,7 +25,7 @@ export function SignupForm3({
                   <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
                     <Logo size={24} />
                   </div>
-                  <span className="text-xl">ShadcnStore</span>
+                  <span className="text-xl">Elysian</span>
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
@@ -130,7 +130,7 @@ export function SignupForm3({
           <div className="bg-muted relative hidden md:block">
             <Image
               src="https://ui.shadcn.com/placeholder.svg"
-              alt="Image"
+              alt="Sign up illustration"
               fill
               className="object-cover dark:brightness-[0.95] dark:invert"
             />

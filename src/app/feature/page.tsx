@@ -175,7 +175,7 @@ function HeroSection() {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="flex flex-col items-center"
         >
-          <span className="text-xs uppercase tracking-widest text-white/50 mb-3">
+          <span className="text-xs uppercase tracking-widest text-white/70 mb-3">
             Discover More
           </span>
           <div className="w-[1px] h-12 bg-gradient-to-b from-white/50 to-transparent" />

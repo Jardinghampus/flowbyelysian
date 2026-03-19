@@ -30,19 +30,19 @@ export function SidebarNotification() {
             <div>
               Welcome to{" "}
               <a 
-                href="https://shadcnstore.com" 
-                target="_blank" 
+                href="#"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                ShadcnStore
+                Elysian
               </a>
             </div>
           </h3>
           <p className="text-sm text-muted-foreground dark:text-neutral-400 leading-relaxed">
             Explore our premium Shadcn UI{" "}
             <a 
-              href="https://shadcnstore.com/blocks" 
+              href="#" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary underline"

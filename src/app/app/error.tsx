@@ -24,9 +24,9 @@ export default function Error({
           <div className="mx-auto h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
-          <CardTitle>Something went wrong</CardTitle>
+          <CardTitle>Something went wrong in the CRM</CardTitle>
           <CardDescription>
-            An error occurred while loading this page. Please try again.
+            An error occurred while loading this page. Please try again, or contact your administrator.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">

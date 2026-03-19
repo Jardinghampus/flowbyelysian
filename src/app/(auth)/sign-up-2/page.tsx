@@ -12,7 +12,7 @@ export default function SignUp2Page() {
             <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
               <Logo size={24} />
             </div>
-            ShadcnStore
+            Elysian
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -24,7 +24,7 @@ export default function SignUp2Page() {
       <div className="bg-muted relative hidden lg:block">
         <Image
           src="https://ui.shadcn.com/placeholder.svg"
-          alt="Image"
+          alt="Sign up illustration"
           fill
           className="object-cover dark:brightness-[0.95] dark:invert"
         />

@@ -24,13 +24,13 @@ export function LoginForm3({
                   <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
                     <Logo size={24} />
                   </div>
-                  <span className="text-xl">ShadcnStore</span>
+                  <span className="text-xl">Elysian</span>
                 </Link>
               </div>
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your ShadcnStore account
+                  Login to your Elysian account
                 </p>
               </div>
               <div className="grid gap-3">
@@ -103,7 +103,7 @@ export function LoginForm3({
           <div className="bg-muted relative hidden md:block">
             <Image
               src="https://ui.shadcn.com/placeholder.svg"
-              alt="Image"
+              alt="Sign in illustration"
               fill
               className="object-cover dark:brightness-[0.95] dark:invert"
             />

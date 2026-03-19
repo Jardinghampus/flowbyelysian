@@ -199,7 +199,7 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
         >
           <CommandInput placeholder="What do you need?" autoFocus />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>No results found. Try a different search term.</CommandEmpty>
             {Object.entries(groupedItems).map(([group, items]) => (
               <CommandGroup key={group} heading={group}>
                 {items.map((item) => {

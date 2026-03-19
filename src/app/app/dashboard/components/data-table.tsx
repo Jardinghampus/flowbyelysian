@@ -579,7 +579,7 @@ export function DataTable({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    No results match your filters. Try adjusting your criteria.
                   </TableCell>
                 </TableRow>
               )}
@@ -788,7 +788,7 @@ export function DataTable({
                       colSpan={columns.length}
                       className="h-24 text-center"
                     >
-                      No results.
+                      No results match your filters. Try adjusting your criteria.
                     </TableCell>
                   </TableRow>
                 )}
