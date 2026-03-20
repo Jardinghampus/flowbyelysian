@@ -93,6 +93,7 @@ const DEMO_SAVED: SavedListing[] = [
 
 export default function SavedPage() {
   const [saved, setSaved] = useState<SavedListing[]>(DEMO_SAVED)
+  const [removeId, setRemoveId] = useState<string | null>(null)
 
   const handleRemove = (id: string) => {
     setSaved(saved.filter((s) => s.id !== id))
@@ -137,7 +138,7 @@ export default function SavedPage() {
                     </Badge>
                   </div>
                   <button
-                    onClick={() => handleRemove(listing.id)}
+                    onClick={() => setRemoveId(listing.id)}
                     className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/90 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
                   >
                     <Heart className="h-5 w-5 fill-current" />
@@ -193,6 +194,30 @@ export default function SavedPage() {
           </div>
         )}
       </div>
+
+      {/* Remove Saved Property Confirmation */}
+      <AlertDialog open={!!removeId} onOpenChange={() => setRemoveId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently remove the saved property.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (removeId) handleRemove(removeId)
+                setRemoveId(null)
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

@@ -281,7 +281,7 @@ export function EventForm({ event, open, onOpenChange, onSave, onDelete }: Event
                 onChange={(e) => setNewAttendee(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && addAttendee()}
               />
-              <Button onClick={addAttendee} variant="outline" className="cursor-pointer">Add</Button>
+              <Button onClick={addAttendee} variant="outline" className="cursor-pointer">Add Attendee</Button>
             </div>
             {formData.attendees.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
@@ -325,7 +325,7 @@ export function EventForm({ event, open, onOpenChange, onSave, onDelete }: Event
             </Button>
             {event && onDelete && (
               <Button onClick={handleDelete} variant="destructive" className="cursor-pointer">
-                Delete
+                Delete Event
               </Button>
             )}
             <Button onClick={() => onOpenChange(false)} variant="outline" className="cursor-pointer">

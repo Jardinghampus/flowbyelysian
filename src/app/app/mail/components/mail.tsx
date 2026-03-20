@@ -185,7 +185,7 @@ export function Mail({
               <form>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute top-2.5 left-2 size-4 cursor-pointer" />
-                  <Input placeholder="Search" className="pl-8 cursor-text" />
+                  <Input placeholder="Search emails" className="pl-8 cursor-text" />
                 </div>
               </form>
             </div>

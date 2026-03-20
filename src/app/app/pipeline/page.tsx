@@ -471,7 +471,7 @@ function TimelineDialog({
         {/* Property summary */}
         <div className="flex gap-3 items-start">
           {card.image && (
-            <img src={card.image} alt="" className="h-16 w-24 rounded-lg object-cover flex-shrink-0" />
+            <img src={card.image} alt="Property photo" className="h-16 w-24 rounded-lg object-cover flex-shrink-0" />
           )}
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2 text-muted-foreground">

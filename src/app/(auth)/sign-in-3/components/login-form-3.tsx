@@ -38,8 +38,7 @@ export function LoginForm3({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="test@example.com"
-                  defaultValue="test@example.com"
+                  placeholder="you@example.com"
                   required
                 />
               </div>

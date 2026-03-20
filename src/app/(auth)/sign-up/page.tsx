@@ -229,7 +229,7 @@ export default function SignUpPage() {
                     <div className="grid gap-2">
                       <Label className="text-xs">Transaction</Label>
                       <Select value={data.transactionType} onValueChange={(v) => update({ transactionType: v })}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Select transaction type" /></SelectTrigger>
                         <SelectContent>
                           {isBuyerSide ? (
                             <>
@@ -255,7 +255,7 @@ export default function SignUpPage() {
                     <div className="grid gap-2">
                       <Label className="text-xs">Property Type</Label>
                       <Select value={data.propertyType} onValueChange={(v) => update({ propertyType: v })}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Select property type" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="apartment">Apartment</SelectItem>
                           <SelectItem value="villa">Villa</SelectItem>
@@ -271,7 +271,7 @@ export default function SignUpPage() {
                     <div className="grid gap-2">
                       <Label className="text-xs">Area</Label>
                       <Select value={data.area} onValueChange={(v) => update({ area: v })}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Select area" /></SelectTrigger>
                         <SelectContent>
                           {AREAS.map((a) => (
                             <SelectItem key={a} value={a}>{a}</SelectItem>
@@ -282,7 +282,7 @@ export default function SignUpPage() {
                     <div className="grid gap-2">
                       <Label className="text-xs">Bedrooms</Label>
                       <Select value={data.bedrooms} onValueChange={(v) => update({ bedrooms: v })}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Select bedrooms" /></SelectTrigger>
                         <SelectContent>
                           {["Studio", "1", "2", "3", "4", "5", "6", "7+"].map((n) => (
                             <SelectItem key={n} value={n}>{n === "Studio" ? n : `${n} BR`}</SelectItem>
@@ -306,7 +306,7 @@ export default function SignUpPage() {
                     <div className="grid gap-2">
                       <Label className="text-xs">Timeline</Label>
                       <Select value={data.timeline} onValueChange={(v) => update({ timeline: v })}>
-                        <SelectTrigger className="h-9"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Select timeline" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="immediate">Immediate</SelectItem>
                           <SelectItem value="1-3months">1-3 Months</SelectItem>

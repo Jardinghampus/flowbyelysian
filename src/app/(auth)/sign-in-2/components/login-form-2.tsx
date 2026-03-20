@@ -20,7 +20,7 @@ export function LoginForm2({
       <div className="grid gap-6">
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="test@example.com" defaultValue="test@example.com" required />
+          <Input id="email" type="email" placeholder="you@example.com" required />
         </div>
         <div className="grid gap-3">
           <div className="flex items-center">
