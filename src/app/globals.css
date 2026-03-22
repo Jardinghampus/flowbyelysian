@@ -45,74 +45,72 @@
 :root {
   --radius: 0.625rem;
   --background: #ffffff;
-  --foreground: #000000;
+  --foreground: #0a0a0a;
   --card: #ffffff;
-  --card-foreground: #000000;
+  --card-foreground: #0a0a0a;
   --popover: #ffffff;
-  --popover-foreground: #000000;
-  --primary: #000000;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
   --secondary: #f5f5f5;
-  --secondary-foreground: #000000;
+  --secondary-foreground: #0a0a0a;
   --muted: #f5f5f5;
-  --muted-foreground: #666666;
+  --muted-foreground: #737373;
   --accent: #f5f5f5;
-  --accent-foreground: #000000;
+  --accent-foreground: #0a0a0a;
   --destructive: oklch(0.577 0.245 27.325);
   --border: #e5e5e5;
   --input: #e5e5e5;
-  --ring: #000000;
-  --chart-1: #000000;
+  --ring: #0a0a0a;
+  --chart-1: #0a0a0a;
   --chart-2: #333333;
   --chart-3: #666666;
   --chart-4: #999999;
   --chart-5: #cccccc;
   --sidebar: #ffffff;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #000000;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0a0a0a;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #000000;
+  --sidebar-accent-foreground: #0a0a0a;
   --sidebar-border: #e5e5e5;
-  --sidebar-ring: #000000;
+  --sidebar-ring: #0a0a0a;
 
   /* Mobile Fluid Sizing System */
-  /* Target range: 320px - 430px for strict mobile scaling, can extrapolate */
   --fluid-min-width: 320;
   --fluid-max-width: 430;
 
   --fluid-screen: 100vw;
   --fluid-bp: calc((var(--fluid-screen) - var(--fluid-min-width) * 1px) / (var(--fluid-max-width) - var(--fluid-min-width)));
 
-  /* Safe Area Insets (Defaults, updated by hook/env) */
+  /* Safe Area Insets */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
 
   /* Fluid Spacing Primitive */
-  /* Scaling factor that goes from 0 at 320px to 1 at 430px */
   --scale-factor: clamp(0, var(--fluid-bp), 1);
 }
 
 .dark {
   --background: #000000;
-  --foreground: #ffffff;
-  --card: #121212;
-  --card-foreground: #ffffff;
-  --popover: #121212;
-  --popover-foreground: #ffffff;
+  --foreground: #fafafa;
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+  --popover: #0a0a0a;
+  --popover-foreground: #fafafa;
   --primary: #00d4ff;
   --primary-foreground: #000000;
-  --secondary: #121212;
-  --secondary-foreground: #ffffff;
-  --muted: #121212;
-  --muted-foreground: #a0a0a0;
+  --secondary: #0a0a0a;
+  --secondary-foreground: #fafafa;
+  --muted: #0a0a0a;
+  --muted-foreground: #a3a3a3;
   --accent: #00d4ff;
   --accent-foreground: #000000;
   --destructive: #cf6679;
-  --border: rgba(255, 255, 255, 0.15);
-  --input: rgba(255, 255, 255, 0.15);
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
   --ring: #00d4ff;
   --chart-1: #00d4ff;
   --chart-2: #03dac6;
@@ -120,12 +118,12 @@
   --chart-4: #0088a8;
   --chart-5: #006688;
   --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
+  --sidebar-foreground: #fafafa;
   --sidebar-primary: #00d4ff;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #121212;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.15);
+  --sidebar-accent: #0a0a0a;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #00d4ff;
 }
 
@@ -136,12 +134,12 @@
 
   /* Hide scrollbars but keep scroll functionality */
   * {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   *::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
 
   /* Prevent horizontal scroll on mobile */
@@ -177,8 +175,8 @@
 /* Typography improvements for clarity and visibility */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 /* Improved text rendering for readability */
@@ -208,32 +206,29 @@ button, .badge, [role="button"] {
 
 /* Fix for right-side inset variant support */
 @media (min-width: 768px) {
-
-  /* Right sidebar inset variant - margin adjustments */
   [data-side="right"][data-variant="inset"]~[data-slot="sidebar-inset"] {
     margin-right: 0 !important;
   }
 
-  /* Right sidebar inset variant - collapsed state margin */
   [data-side="right"][data-variant="inset"][data-state="collapsed"]~[data-slot="sidebar-inset"] {
     margin-right: 0.5rem !important;
   }
 }
 
-/* Smooth scrolling for the entire page */
+/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
+
+/* ─── Animations ─── */
 
 /* Logo carousel animation */
 @keyframes logo-scroll {
   0% {
     transform: translateX(0);
   }
-
   100% {
     transform: translateX(-144rem);
-    /* 12 items * 12rem = 144rem */
   }
 }
 
@@ -244,8 +239,6 @@ html {
 .animate-logo-scroll:hover {
   animation-play-state: paused;
 }
-
-/* ─── Marketplace Effects ─── */
 
 /* Shimmer sweep on hover */
 @keyframes shimmer {
@@ -279,9 +272,9 @@ html {
   background: var(--card);
   color: var(--card-foreground);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .marketplace-popup .mapboxgl-popup-tip {
@@ -317,39 +310,78 @@ html {
   animation: count-up 0.6s ease-out forwards;
 }
 
-/* Fluid Utilities */
-@layer utilities {
+/* Subtle float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
 
-  /* Fluid Typography: Scales between min (at 320px) and max (at 430px) */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Premium card hover glow */
+.card-hover-glow {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card-hover-glow:hover {
+  box-shadow: 0 8px 40px -8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.dark .card-hover-glow:hover {
+  box-shadow: 0 8px 40px -8px rgba(0, 212, 255, 0.08);
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Fluid Utilities ─── */
+@layer utilities {
   .text-fluid-sm {
     font-size: calc(0.875rem + 0.125 * 1rem * var(--scale-factor));
-    /* 14px -> 16px */
   }
 
   .text-fluid-base {
     font-size: calc(1rem + 0.125 * 1rem * var(--scale-factor));
-    /* 16px -> 18px */
   }
 
   .text-fluid-lg {
     font-size: calc(1.125rem + 0.25 * 1rem * var(--scale-factor));
-    /* 18px -> 22px */
   }
 
   .text-fluid-xl {
     font-size: calc(1.25rem + 0.5 * 1rem * var(--scale-factor));
-    /* 20px -> 28px */
   }
 
-  /* Fluid Spacing */
   .p-fluid {
     padding: calc(1rem + 0.5 * 1rem * var(--scale-factor));
-    /* 16px -> 24px */
   }
 
   .gap-fluid {
     gap: calc(0.5rem + 0.5 * 1rem * var(--scale-factor));
-    /* 8px -> 16px */
   }
 
   /* Safe Area Spacing helpers */
@@ -369,34 +401,28 @@ html {
     padding-right: max(1rem, var(--sar));
   }
 
-  /* Full height fix */
   .h-screen-safe {
     height: calc(100vh - var(--sat) - var(--sab));
-    /* Fallback */
     height: calc(var(--vh, 1vh) * 100 - var(--sat) - var(--sab));
   }
 }
 
 /* iOS-native feel enhancements */
 @layer base {
-  /* Prevent overscroll bounce on the body */
   html, body {
     overscroll-behavior-y: none;
   }
 
-  /* Enable rubber-band scrolling on scroll containers */
   .overflow-y-auto,
   .overflow-y-scroll {
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Tap highlight removal for iOS */
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Active state for touch feedback */
   @media (hover: none) and (pointer: coarse) {
     button:active, a:active, [role="button"]:active {
       opacity: 0.7;
@@ -409,7 +435,7 @@ html {
 @keyframes page-fade-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -419,4 +445,14 @@ html {
 
 .animate-page-in {
   animation: page-fade-in 0.3s ease-out;
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(59, 130, 246, 0.15);
+  color: inherit;
+}
+
+.dark ::selection {
+  background: rgba(0, 212, 255, 0.2);
 }

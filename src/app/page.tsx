@@ -89,27 +89,29 @@ export default function LandingPage() {
       </section>
 
       {/* Contact CTA Section */}
-      <section id="contact" className="py-24 bg-white">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
+      <section id="contact" className="relative py-28 bg-white overflow-hidden">
+        {/* Subtle background accent */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-50 to-violet-50 rounded-full blur-3xl opacity-60" />
+        <div className="relative mx-auto max-w-4xl px-4 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Start Your Journey
           </p>
-          <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-6">
+          <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-6 tracking-tight">
             Let&apos;s Find Your Perfect Home
           </h2>
-          <p className="text-lg text-neutral-600 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg text-neutral-500 mb-10 max-w-2xl mx-auto leading-relaxed">
             Whether you&apos;re looking to buy, sell, or rent, our team of experts is ready to guide you through every step of your real estate journey in Dubai.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:+971501234567"
-              className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-white font-semibold hover:bg-neutral-800 transition-colors"
+              className="group inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-white font-semibold hover:bg-neutral-800 transition-all duration-200 hover:shadow-xl hover:shadow-neutral-900/20"
             >
               Call Us Now
             </a>
             <a
               href="mailto:hello@zaylo.ae"
-              className="inline-flex items-center justify-center rounded-full border-2 border-neutral-900 px-8 py-4 text-neutral-900 font-semibold hover:bg-neutral-900 hover:text-white transition-colors"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-8 py-4 text-neutral-900 font-semibold hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200"
             >
               Send an Email
             </a>

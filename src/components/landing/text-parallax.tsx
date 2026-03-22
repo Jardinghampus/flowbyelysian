@@ -60,7 +60,7 @@ function StickyImage({ imgUrl }: { imgUrl: string }) {
       className="sticky z-0 overflow-hidden rounded-3xl"
     >
       <motion.div
-        className="absolute inset-0 bg-neutral-900/40"
+        className="absolute inset-0 bg-gradient-to-b from-neutral-900/30 via-neutral-900/40 to-neutral-900/60"
         style={{
           opacity,
         }}
@@ -94,10 +94,10 @@ function OverlayCopy({
       ref={targetRef}
       className="absolute left-0 top-0 flex h-screen w-full flex-col items-center justify-center text-white"
     >
-      <p className="mb-2 text-center text-xl md:mb-4 md:text-3xl">
+      <p className="mb-2 text-center text-xl md:mb-4 md:text-3xl text-white/70 font-medium tracking-wide">
         {subheading}
       </p>
-      <p className="text-center text-4xl font-bold md:text-7xl">{heading}</p>
+      <p className="text-center text-4xl font-bold md:text-7xl tracking-tight">{heading}</p>
     </motion.div>
   )
 }
@@ -118,22 +118,23 @@ export function ContentBlock({
   ctaLink = "#",
 }: ContentBlockProps) {
   return (
-    <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 py-16 md:grid-cols-12">
-      <h2 className="col-span-1 text-3xl font-bold md:col-span-4">{title}</h2>
+    <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 py-20 md:grid-cols-12">
+      <h2 className="col-span-1 text-3xl font-bold tracking-tight md:col-span-4">{title}</h2>
       <div className="col-span-1 md:col-span-8">
-        <p className="mb-4 text-xl text-neutral-600 md:text-2xl">
+        <p className="mb-4 text-xl text-neutral-500 md:text-2xl leading-relaxed">
           {description}
         </p>
         {secondaryText && (
-          <p className="mb-8 text-xl text-neutral-600 md:text-2xl">
+          <p className="mb-8 text-xl text-neutral-500 md:text-2xl leading-relaxed">
             {secondaryText}
           </p>
         )}
         <Link
           href={ctaLink}
-          className="inline-flex w-full items-center justify-center rounded bg-neutral-900 px-9 py-4 text-xl text-white transition-colors hover:bg-neutral-700 md:w-fit"
+          className="group inline-flex w-full items-center justify-center rounded-full bg-neutral-900 px-9 py-4 text-lg text-white transition-all duration-200 hover:bg-neutral-800 hover:shadow-lg md:w-fit"
         >
-          {ctaText} <ArrowUpRight className="ml-2 inline h-5 w-5" />
+          {ctaText}
+          <ArrowUpRight className="ml-2 inline h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>
     </div>

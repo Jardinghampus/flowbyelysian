@@ -21,25 +21,25 @@ const quickLinks = [
     name: "Propertyfinder",
     url: "https://propertyfinder.ae",
     icon: Search,
-    color: "bg-red-500/10 text-red-600 hover:bg-red-500/20 border-red-500/20",
+    color: "bg-red-500/10 text-red-600 hover:bg-red-500/15 border-red-500/10",
   },
   {
     name: "Propertymonitor",
     url: "https://propertymonitor.ae/v2",
     icon: BarChart3,
-    color: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-500/20",
+    color: "bg-blue-500/10 text-blue-600 hover:bg-blue-500/15 border-blue-500/10",
   },
   {
     name: "Holo",
     url: "https://www.useholo.com/en",
     icon: Home,
-    color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border-purple-500/20",
+    color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500/15 border-purple-500/10",
   },
   {
     name: "CRM",
     url: "https://zaylo.lightning.force.com/lightning/page/home",
     icon: Users,
-    color: "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-500/20",
+    color: "bg-orange-500/10 text-orange-600 hover:bg-orange-500/15 border-orange-500/10",
   },
 ]
 
@@ -51,13 +51,13 @@ export default function Page() {
   }, [])
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden">
+    <div className="w-full max-w-full overflow-x-hidden animate-page-in">
       {/* Hero Section - Compact */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="text-center py-2"
+        className="text-center py-3"
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
           Welcome to <ColourfulText text="ZFlow" />
@@ -68,15 +68,22 @@ export default function Page() {
       </motion.div>
 
       {/* Quick Links */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 mb-4">
-        {quickLinks.map((link) => (
-          <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
-            <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs h-8`}>
-              <link.icon className="h-3 w-3 mr-1.5" />
-              {link.name}
-              <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-40" />
-            </RippleButton>
-          </Link>
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mb-5">
+        {quickLinks.map((link, i) => (
+          <motion.div
+            key={link.name}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 * i, duration: 0.3 }}
+          >
+            <Link href={link.url} target="_blank" rel="noopener noreferrer">
+              <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs h-8`}>
+                <link.icon className="h-3 w-3 mr-1.5" />
+                {link.name}
+                <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-40" />
+              </RippleButton>
+            </Link>
+          </motion.div>
         ))}
       </div>
 

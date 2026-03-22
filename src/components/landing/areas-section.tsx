@@ -48,7 +48,7 @@ const areas: Area[] = [
 
 export function AreasSection() {
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-28 bg-white overflow-hidden">
       <div className="mx-auto max-w-7xl px-4">
         {/* Header */}
         <motion.div
@@ -56,15 +56,15 @@ export function AreasSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-16"
+          className="mb-20"
         >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Where We Work
           </p>
-          <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-4">
+          <h2 className="text-4xl font-bold text-neutral-900 md:text-5xl mb-4 tracking-tight">
             Dubai&apos;s Most Prestigious Addresses
           </h2>
-          <p className="max-w-2xl text-lg text-neutral-600">
+          <p className="max-w-2xl text-lg text-neutral-500 leading-relaxed">
             We specialize in the most sought-after locations in Dubai, from iconic waterfront living to exclusive villa communities.
           </p>
         </motion.div>
@@ -106,24 +106,24 @@ function AreaCard({ area, index }: { area: Area; index: number }) {
         style={{ y, scale }}
         className={`relative ${isEven ? "" : "lg:col-start-2"}`}
       >
-        <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-3xl group">
           <Image
             src={area.image}
             alt={area.name}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
           {/* Stats Overlay */}
           <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
             <div className="text-white">
-              <p className="text-3xl font-bold">{area.propertyCount}+</p>
-              <p className="text-white/80 text-sm">Active Listings</p>
+              <p className="text-3xl font-bold tracking-tight">{area.propertyCount}+</p>
+              <p className="text-white/60 text-sm">Active Listings</p>
             </div>
             <div className="text-white text-right">
-              <p className="text-xl font-semibold">{area.avgPrice}</p>
-              <p className="text-white/80 text-sm">Avg. Price</p>
+              <p className="text-xl font-semibold tracking-tight">{area.avgPrice}</p>
+              <p className="text-white/60 text-sm">Avg. Price</p>
             </div>
           </div>
         </div>
@@ -137,24 +137,24 @@ function AreaCard({ area, index }: { area: Area; index: number }) {
         transition={{ duration: 0.6, delay: 0.2 }}
         className={isEven ? "" : "lg:col-start-1 lg:row-start-1"}
       >
-        <h3 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4">
+        <h3 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4 tracking-tight">
           {area.name}
         </h3>
-        <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
+        <p className="text-lg text-neutral-500 mb-8 leading-relaxed">
           {area.description}
         </p>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3">
           <Link
             href={`/areas/${area.slug}`}
-            className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-white font-medium hover:bg-neutral-800 transition-colors"
+            className="group inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-white font-medium hover:bg-neutral-800 transition-all duration-200 hover:shadow-lg"
           >
             Explore {area.name}
-            <ArrowUpRight className="ml-2 h-4 w-4" />
+            <ArrowUpRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
           <Link
             href={`/inventory?area=${area.slug}`}
-            className="inline-flex items-center justify-center rounded-full border-2 border-neutral-900 px-8 py-4 text-neutral-900 font-medium hover:bg-neutral-900 hover:text-white transition-colors"
+            className="inline-flex items-center justify-center rounded-full border border-neutral-200 px-8 py-4 text-neutral-900 font-medium hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200"
           >
             View Properties
           </Link>
@@ -206,16 +206,16 @@ export function AreaGallery() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-blue-600">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-600">
             Also Serving
           </p>
-          <h2 className="text-3xl font-bold text-neutral-900 md:text-4xl">
+          <h2 className="text-3xl font-bold text-neutral-900 md:text-4xl tracking-tight">
             More Premium Locations
           </h2>
         </motion.div>
       </div>
 
-      <motion.div style={{ x }} className="flex gap-6 pl-4">
+      <motion.div style={{ x }} className="flex gap-5 pl-4">
         {additionalAreas.map((area, index) => (
           <motion.div
             key={index}
@@ -223,17 +223,17 @@ export function AreaGallery() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="relative flex-shrink-0 w-[350px] aspect-[4/5] rounded-2xl overflow-hidden group cursor-pointer"
+            className="relative flex-shrink-0 w-[340px] aspect-[4/5] rounded-2xl overflow-hidden group cursor-pointer"
           >
             <Image
               src={area.image}
               alt={area.name}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
-              <h3 className="text-2xl font-bold text-white">{area.name}</h3>
+              <h3 className="text-2xl font-bold text-white tracking-tight">{area.name}</h3>
             </div>
           </motion.div>
         ))}

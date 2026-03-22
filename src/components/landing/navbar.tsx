@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { Menu, X, Phone, Sun, Moon } from "lucide-react"
+import { Menu, X, Phone, Sun, Moon, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/hooks/use-theme"
 import { useMobileMenu } from "@/contexts/mobile-menu-context"
@@ -39,23 +39,23 @@ export function Navbar() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           isScrolled
-            ? "bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md shadow-sm dark:shadow-neutral-900/20"
+            ? "bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl shadow-[0_1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)]"
             : "bg-transparent"
         )}
       >
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="group flex items-center gap-3">
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl font-bold text-lg transition-colors",
+                  "flex h-10 w-10 items-center justify-center rounded-xl font-bold text-lg transition-all duration-300 group-hover:scale-105",
                   isScrolled
-                    ? "bg-neutral-900 text-white"
+                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
                     : "bg-white text-neutral-900"
                 )}
               >
@@ -63,7 +63,7 @@ export function Navbar() {
               </div>
               <span
                 className={cn(
-                  "text-xl font-bold transition-colors",
+                  "text-xl font-bold transition-colors duration-300",
                   isScrolled ? "text-neutral-900 dark:text-white" : "text-white"
                 )}
               >
@@ -72,32 +72,24 @@ export function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                link.href.startsWith("/") ? (
-                  <Link
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Component = link.href.startsWith("/") ? Link : "a"
+                return (
+                  <Component
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "text-sm font-medium transition-colors hover:text-blue-500",
-                      isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
+                      "relative px-3.5 py-2 text-sm font-medium transition-colors duration-200 rounded-lg",
+                      isScrolled
+                        ? "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800/50"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
                     )}
                   >
                     {link.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "text-sm font-medium transition-colors hover:text-blue-500",
-                      isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
-                    )}
-                  >
-                    {link.label}
-                  </a>
+                  </Component>
                 )
-              ))}
+              })}
             </nav>
 
             {/* CTA Buttons */}
@@ -105,20 +97,20 @@ export function Navbar() {
               <a
                 href="tel:+971501234567"
                 className={cn(
-                  "flex items-center gap-2 text-sm font-medium transition-colors",
-                  isScrolled ? "text-neutral-600 dark:text-neutral-400" : "text-white/90"
+                  "flex items-center gap-2 text-sm font-medium transition-colors duration-200",
+                  isScrolled ? "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white" : "text-white/70 hover:text-white"
                 )}
               >
-                <Phone className="h-4 w-4" />
-                +971 50 123 4567
+                <Phone className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">+971 50 123 4567</span>
               </a>
               <button
                 onClick={toggleTheme}
                 className={cn(
-                  "h-9 w-9 rounded-full flex items-center justify-center transition-colors",
+                  "h-9 w-9 rounded-full flex items-center justify-center transition-all duration-200",
                   isScrolled
-                    ? "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                    : "text-white/80 hover:bg-white/10"
+                    ? "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    : "text-white/70 hover:bg-white/10"
                 )}
                 aria-label="Toggle theme"
               >
@@ -137,10 +129,10 @@ export function Navbar() {
               <Link
                 href="/user/dashboard"
                 className={cn(
-                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors border",
+                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 border",
                   isScrolled
-                    ? "border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-                    : "border-white/30 text-white hover:bg-white/10"
+                    ? "border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-600"
+                    : "border-white/20 text-white hover:bg-white/10 hover:border-white/30"
                 )}
               >
                 Log In
@@ -148,13 +140,14 @@ export function Navbar() {
               <Link
                 href="/app/dashboard"
                 className={cn(
-                  "rounded-full px-5 py-2.5 text-sm font-semibold transition-colors",
+                  "group rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
                   isScrolled
-                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100"
-                    : "bg-white text-neutral-900 hover:bg-neutral-100"
+                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 hover:shadow-lg"
+                    : "bg-white text-neutral-900 hover:bg-neutral-100 hover:shadow-lg"
                 )}
               >
                 Agent Login
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
 
@@ -164,7 +157,7 @@ export function Navbar() {
               className={cn(
                 "md:hidden p-2 rounded-lg transition-colors",
                 isScrolled
-                  ? "text-neutral-900 hover:bg-neutral-100"
+                  ? "text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   : "text-white hover:bg-white/10"
               )}
             >
@@ -183,76 +176,81 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden"
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[300px] bg-white dark:bg-neutral-900 p-6 shadow-2xl md:hidden"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[320px] bg-white dark:bg-neutral-900 p-6 shadow-2xl md:hidden"
             >
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-xl font-bold text-neutral-900 dark:text-white">Menu</span>
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900 dark:bg-white font-bold text-lg text-white dark:text-neutral-900">
+                    Z
+                  </div>
+                  <span className="text-xl font-bold text-neutral-900 dark:text-white">ZAYLO</span>
+                </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600"
+                  className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition-colors"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <nav className="space-y-4">
-                {navLinks.map((link) => (
-                  link.href.startsWith("/") ? (
-                    <Link
+              <nav className="space-y-1">
+                {navLinks.map((link, i) => {
+                  const Component = link.href.startsWith("/") ? Link : "a"
+                  return (
+                    <motion.div
                       key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-lg font-medium text-neutral-900 dark:text-white py-2 hover:text-blue-600 transition-colors"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * i }}
                     >
-                      {link.label}
-                    </Link>
-                  ) : (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-lg font-medium text-neutral-900 dark:text-white py-2 hover:text-blue-600 transition-colors"
-                    >
-                      {link.label}
-                    </a>
+                      <Component
+                        href={link.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block text-base font-medium text-neutral-900 dark:text-white py-3 px-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                      >
+                        {link.label}
+                      </Component>
+                    </motion.div>
                   )
-                ))}
+                })}
               </nav>
 
-              <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-700 space-y-3">
+              <div className="mt-8 pt-8 border-t border-neutral-100 dark:border-neutral-800 space-y-3">
                 <button
                   onClick={toggleTheme}
-                  className="flex items-center gap-3 w-full text-neutral-600 dark:text-neutral-400 hover:text-blue-600 transition-colors py-2"
+                  className="flex items-center gap-3 w-full text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors py-2.5 px-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 >
                   {isDark ? <Sun className="h-5 w-5 text-amber-500" /> : <Moon className="h-5 w-5" />}
                   {isDark ? "Light Mode" : "Dark Mode"}
                 </button>
                 <a
                   href="tel:+971501234567"
-                  className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400 hover:text-blue-600 transition-colors"
+                  className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors py-2.5 px-3 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800"
                 >
                   <Phone className="h-5 w-5" />
                   +971 50 123 4567
                 </a>
-                <Link
-                  href="/user/dashboard"
-                  className="block w-full rounded-full border-2 border-neutral-900 dark:border-white px-6 py-3 text-center text-neutral-900 dark:text-white font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/app/dashboard"
-                  className="block w-full rounded-full bg-neutral-900 dark:bg-white px-6 py-3 text-center text-white dark:text-neutral-900 font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
-                >
-                  Agent Login
-                </Link>
+                <div className="pt-4 space-y-3">
+                  <Link
+                    href="/user/dashboard"
+                    className="block w-full rounded-full border border-neutral-200 dark:border-neutral-700 px-6 py-3.5 text-center text-neutral-900 dark:text-white font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/app/dashboard"
+                    className="block w-full rounded-full bg-neutral-900 dark:bg-white px-6 py-3.5 text-center text-white dark:text-neutral-900 font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
+                  >
+                    Agent Login
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </>
