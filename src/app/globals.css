@@ -132,16 +132,6 @@
     @apply border-border outline-ring/50;
   }
 
-  /* Hide scrollbars but keep scroll functionality */
-  * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  *::-webkit-scrollbar {
-    display: none;
-  }
-
   /* Prevent horizontal scroll on mobile */
   html {
     overflow-x: hidden;
@@ -409,13 +399,8 @@ html {
 
 /* iOS-native feel enhancements */
 @layer base {
-  html, body {
-    overscroll-behavior-y: none;
-  }
-
   .overflow-y-auto,
   .overflow-y-scroll {
-    overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
 
