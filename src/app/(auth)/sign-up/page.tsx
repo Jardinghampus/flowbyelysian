@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, ArrowLeft, Check, User, Building2, Target, Sparkles } from "lucide-react"
+import { ArrowRight, ArrowLeft, Check, User, Building2, Target, Sparkles, Upload, FileText, X } from "lucide-react"
 
 type OnboardingRole = "buyer" | "seller" | "tenant" | "landlord" | "agent" | ""
 
@@ -29,9 +29,20 @@ interface OnboardingData {
   budget: string
   timeline: string
   notes: string
+  // Title Deed (owners only)
+  titleDeedFile: File | null
+  titleDeedUnitNumber: string
 }
 
-const STEPS = [
+const OWNER_STEPS = [
+  { label: "Account", icon: User, description: "Your details" },
+  { label: "Role", icon: Building2, description: "How you'll use ZFLOW" },
+  { label: "Title Deed", icon: FileText, description: "Verify ownership" },
+  { label: "Opportunity", icon: Target, description: "First opportunity" },
+  { label: "Ready", icon: Sparkles, description: "All set" },
+]
+
+const DEFAULT_STEPS = [
   { label: "Account", icon: User, description: "Your details" },
   { label: "Role", icon: Building2, description: "How you'll use ZFLOW" },
   { label: "Opportunity", icon: Target, description: "First opportunity" },
@@ -39,14 +50,16 @@ const STEPS = [
 ]
 
 const AREAS = [
-  "Palm Jumeirah", "Dubai Marina", "Downtown Dubai", "Emirates Hills",
-  "Arabian Ranches", "Tilal Al Ghaf", "Business Bay", "JBR",
-  "Jumeirah Golf Estates", "Al Furjan", "Damac Hills", "Dubai Hills",
+  "Tilal Al Ghaf", "Mudon", "Arabian Ranches", "Town Square",
+  "DAMAC Hills", "Dubai Hills", "Palm Jumeirah", "Emirates Hills",
+  "Dubai Marina", "Downtown Dubai", "Business Bay", "JBR",
+  "Jumeirah Golf Estates", "Al Furjan",
 ]
 
 export default function SignUpPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
+  const [uploading, setUploading] = useState(false)
   const [data, setData] = useState<OnboardingData>({
     fullName: "",
     email: "",
@@ -59,22 +72,64 @@ export default function SignUpPage() {
     budget: "",
     timeline: "",
     notes: "",
+    titleDeedFile: null,
+    titleDeedUnitNumber: "",
   })
 
   const update = (fields: Partial<OnboardingData>) => setData((prev) => ({ ...prev, ...fields }))
 
-  const canProceed = () => {
-    switch (step) {
-      case 0: return data.fullName.length > 1 && data.email.includes("@")
-      case 1: return data.role !== ""
-      case 2: return true // opportunity is optional
-      case 3: return true
-      default: return false
-    }
+  const isOwner = data.role === "seller" || data.role === "landlord"
+  const STEPS = isOwner ? OWNER_STEPS : DEFAULT_STEPS
+  const lastStep = STEPS.length - 1
+
+  // Map logical step to content step based on whether Title Deed step is shown
+  const getContentStep = () => {
+    if (!isOwner) return step
+    // Owner flow: 0=Account, 1=Role, 2=TitleDeed, 3=Opportunity, 4=Ready
+    return step
   }
 
-  const next = () => {
-    if (step < 3) setStep(step + 1)
+  const canProceed = () => {
+    const s = getContentStep()
+    if (s === 0) return data.fullName.length > 1 && data.email.includes("@")
+    if (s === 1) return data.role !== ""
+    if (isOwner && s === 2) return data.titleDeedFile !== null // Title deed required for owners
+    // Opportunity and Ready are always proceed-able
+    return true
+  }
+
+  const next = async () => {
+    // If we're on the title deed step and there's a file, submit it
+    if (isOwner && step === 2 && data.titleDeedFile) {
+      setUploading(true)
+      try {
+        // Convert file to base64 data URL for storage (in production, use Supabase Storage)
+        const fileUrl = URL.createObjectURL(data.titleDeedFile)
+        await fetch("/api/title-deeds", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clerk_user_id: data.email, // placeholder until Clerk gives us the real ID
+            owner_name: data.fullName,
+            owner_email: data.email,
+            owner_phone: data.phone,
+            area: data.area || null,
+            property_type: data.propertyType || null,
+            unit_number: data.titleDeedUnitNumber || null,
+            file_url: fileUrl,
+            file_name: data.titleDeedFile.name,
+            file_size: data.titleDeedFile.size,
+            file_type: data.titleDeedFile.type,
+          }),
+        })
+      } catch (err) {
+        console.error("Title deed upload failed:", err)
+      } finally {
+        setUploading(false)
+      }
+    }
+
+    if (step < lastStep) setStep(step + 1)
     else router.push("/user/dashboard")
   }
 
@@ -83,7 +138,7 @@ export default function SignUpPage() {
   }
 
   const isBuyerSide = data.role === "buyer" || data.role === "tenant"
-  const isSellerSide = data.role === "seller" || data.role === "landlord"
+  const isSellerSide = isOwner
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -210,8 +265,74 @@ export default function SignUpPage() {
                 </div>
               )}
 
-              {/* Step 2: Opportunity form */}
-              {step === 2 && (
+              {/* Title Deed step (owners only) */}
+              {isOwner && step === 2 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Upload your Title Deed to verify property ownership. This helps us match you with qualified buyers faster.
+                  </p>
+
+                  <div className="grid gap-2">
+                    <Label className="text-xs">Unit / Villa Number <span className="text-muted-foreground">(optional)</span></Label>
+                    <Input
+                      className="h-9"
+                      placeholder="e.g. Villa 42, Unit 1204"
+                      value={data.titleDeedUnitNumber}
+                      onChange={(e) => update({ titleDeedUnitNumber: e.target.value })}
+                    />
+                  </div>
+
+                  {/* File upload area */}
+                  {!data.titleDeedFile ? (
+                    <label className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-primary/30 rounded-xl cursor-pointer hover:border-primary/60 hover:bg-primary/5 transition-all">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Upload className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-medium text-sm">Click to upload Title Deed</p>
+                        <p className="text-xs text-muted-foreground mt-1">PDF, JPG, or PNG (max 10 MB)</p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file && file.size <= 10 * 1024 * 1024) {
+                            update({ titleDeedFile: file })
+                          }
+                        }}
+                      />
+                    </label>
+                  ) : (
+                    <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{data.titleDeedFile.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(data.titleDeedFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => update({ titleDeedFile: null })}
+                        className="h-8 w-8 rounded-full hover:bg-destructive/10 flex items-center justify-center transition-colors"
+                      >
+                        <X className="h-4 w-4 text-destructive" />
+                      </button>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Your Title Deed will be reviewed by our team for verification. This is required for all property owners.
+                  </p>
+                </div>
+              )}
+
+              {/* Opportunity form */}
+              {step === (isOwner ? 3 : 2) && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
@@ -330,8 +451,8 @@ export default function SignUpPage() {
                 </div>
               )}
 
-              {/* Step 3: Complete */}
-              {step === 3 && (
+              {/* Final step: Complete */}
+              {step === lastStep && (
                 <div className="text-center space-y-4 py-4">
                   <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                     <Sparkles className="h-8 w-8 text-primary" />
@@ -369,10 +490,10 @@ export default function SignUpPage() {
             )}
             <Button
               onClick={next}
-              disabled={!canProceed()}
+              disabled={!canProceed() || uploading}
               className="cursor-pointer"
             >
-              {step === 3 ? "Enter Dashboard" : step === 2 ? "Skip or Continue" : "Continue"}
+              {uploading ? "Uploading..." : step === lastStep ? "Enter Dashboard" : step === (isOwner ? 3 : 2) ? "Skip or Continue" : "Continue"}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>

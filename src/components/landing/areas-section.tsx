@@ -19,30 +19,30 @@ interface Area {
 const areas: Area[] = [
   {
     id: "1",
-    name: "Palm Jumeirah",
-    slug: "palm-jumeirah",
-    description: "The iconic man-made island featuring ultra-luxury villas and world-class beachfront living.",
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2670&auto=format&fit=crop",
-    propertyCount: 124,
-    avgPrice: "AED 3,500/sqft",
+    name: "Tilal Al Ghaf",
+    slug: "tilal-al-ghaf",
+    description: "Lagoon-front luxury villas by Majid Al Futtaim. Harmony, Serenity, and Aura — a masterplan built around crystal-clear water.",
+    image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=2670&auto=format&fit=crop",
+    propertyCount: 78,
+    avgPrice: "AED 1,900/sqft",
   },
   {
     id: "2",
-    name: "Dubai Marina",
-    slug: "dubai-marina",
-    description: "A stunning waterfront community with luxury high-rises and vibrant dining and entertainment.",
-    image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?q=80&w=2574&auto=format&fit=crop",
-    propertyCount: 256,
-    avgPrice: "AED 1,650/sqft",
+    name: "Arabian Ranches",
+    slug: "arabian-ranches",
+    description: "Dubai's most established villa community by Emaar. Golf courses, equestrian centres, and top-rated schools across three phases.",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop",
+    propertyCount: 192,
+    avgPrice: "AED 1,550/sqft",
   },
   {
     id: "3",
-    name: "Premium Villa Communities",
-    slug: "villa-communities",
-    description: "Exclusive gated communities including Emirates Hills, Arabian Ranches, and Tilal Al Ghaf.",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2675&auto=format&fit=crop",
-    propertyCount: 89,
-    avgPrice: "AED 1,850/sqft",
+    name: "Dubai Hills Estate",
+    slug: "dubai-hills",
+    description: "An 18-hole championship golf community by Emaar and Meraas with Dubai Hills Mall, skyline views, and premium family living.",
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2670&auto=format&fit=crop",
+    propertyCount: 214,
+    avgPrice: "AED 1,750/sqft",
   },
 ]
 
@@ -176,24 +176,28 @@ export function AreaGallery() {
 
   const additionalAreas = [
     {
-      name: "Downtown Dubai",
-      image: "https://images.unsplash.com/photo-1546412414-e1885259563a?q=80&w=2574&auto=format&fit=crop",
+      name: "Mudon",
+      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop",
+    },
+    {
+      name: "Town Square",
+      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2596&auto=format&fit=crop",
+    },
+    {
+      name: "DAMAC Hills",
+      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2675&auto=format&fit=crop",
+    },
+    {
+      name: "Palm Jumeirah",
+      image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2670&auto=format&fit=crop",
     },
     {
       name: "Emirates Hills",
       image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop",
     },
     {
-      name: "JBR",
-      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2596&auto=format&fit=crop",
-    },
-    {
-      name: "Business Bay",
-      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop",
-    },
-    {
-      name: "Arabian Ranches",
-      image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop",
+      name: "Downtown Dubai",
+      image: "https://images.unsplash.com/photo-1546412414-e1885259563a?q=80&w=2574&auto=format&fit=crop",
     },
   ]
 

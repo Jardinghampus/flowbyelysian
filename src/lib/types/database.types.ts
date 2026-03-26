@@ -476,6 +476,71 @@ export type Database = {
           completed_at?: string | null
         }
       }
+      title_deeds: {
+        Row: {
+          id: string
+          clerk_user_id: string
+          owner_name: string
+          owner_email: string
+          owner_phone: string | null
+          area: string | null
+          property_type: string | null
+          unit_number: string | null
+          file_url: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          status: 'pending' | 'verified' | 'rejected'
+          verified_by: string | null
+          verified_at: string | null
+          rejection_reason: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          clerk_user_id: string
+          owner_name: string
+          owner_email: string
+          owner_phone?: string | null
+          area?: string | null
+          property_type?: string | null
+          unit_number?: string | null
+          file_url: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          status?: 'pending' | 'verified' | 'rejected'
+          verified_by?: string | null
+          verified_at?: string | null
+          rejection_reason?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          clerk_user_id?: string
+          owner_name?: string
+          owner_email?: string
+          owner_phone?: string | null
+          area?: string | null
+          property_type?: string | null
+          unit_number?: string | null
+          file_url?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          status?: 'pending' | 'verified' | 'rejected'
+          verified_by?: string | null
+          verified_at?: string | null
+          rejection_reason?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -493,6 +558,7 @@ export type Database = {
       video_type: 'youtube' | 'loom'
       agent_role: 'Sales' | 'Leasing'
       notification_type: 'match' | 'listing' | 'request' | 'system'
+      title_deed_status: 'pending' | 'verified' | 'rejected'
     }
   }
 }

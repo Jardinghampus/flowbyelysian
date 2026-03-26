@@ -138,7 +138,7 @@ export function Navbar() {
                 Log In
               </Link>
               <Link
-                href="/app/dashboard"
+                href="/user/dashboard"
                 className={cn(
                   "group rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center gap-1.5",
                   isScrolled
@@ -146,7 +146,7 @@ export function Navbar() {
                     : "bg-white text-neutral-900 hover:bg-neutral-100 hover:shadow-lg"
                 )}
               >
-                Agent Login
+                Get Started
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
@@ -245,10 +245,10 @@ export function Navbar() {
                     Log In
                   </Link>
                   <Link
-                    href="/app/dashboard"
+                    href="/sign-up"
                     className="block w-full rounded-full bg-neutral-900 dark:bg-white px-6 py-3.5 text-center text-white dark:text-neutral-900 font-semibold hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
                   >
-                    Agent Login
+                    Get Started
                   </Link>
                 </div>
               </div>
