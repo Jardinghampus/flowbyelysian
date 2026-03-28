@@ -10,6 +10,7 @@ import { OpportunityCTA } from "@/components/landing/opportunity-cta"
 import { OffPlanCTA } from "@/components/landing/off-plan-cta"
 import { Footer } from "@/components/landing/footer"
 import { ChatPopup } from "@/components/landing/chat-popup"
+import { ExclusiveVideoSection } from "@/components/landing/exclusive-video-section"
 import { MobileMenuProvider } from "@/contexts/mobile-menu-context"
 
 export default function LandingPage() {
@@ -20,6 +21,9 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Go Exclusive — Video Marketing */}
+      <ExclusiveVideoSection />
 
       {/* Opportunity AIDA CTA */}
       <OpportunityCTA />
