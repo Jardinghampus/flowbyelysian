@@ -1,9 +1,10 @@
-# UI Review — Full Project Audit
+# Landing Page -- UI Review
 
-**Audited:** 2026-03-19
-**Baseline:** Abstract 6-pillar standards (no UI-SPEC)
-**Screenshots:** Not captured (no dev server)
-**Registry:** shadcn official only — 55 components, 0 flags
+**Audited:** 2026-03-28
+**Baseline:** Abstract 6-pillar standards (no UI-SPEC.md)
+**Screenshots:** Not captured (no dev server detected on ports 3000, 5173, or 8080)
+
+**Special Focus:** Clarity and marketing structure -- does a first-time visitor understand what Zaylo is within 5 seconds?
 
 ---
 
@@ -11,22 +12,24 @@
 
 | Pillar | Score | Key Finding |
 |--------|-------|-------------|
-| 1. Copywriting | 2/4 | Template "ShadcnStore" branding left in 11+ files, generic empty/error states, placeholder alt text |
-| 2. Visuals | 3/4 | Good hierarchy and card consistency, but ~50 icon-only buttons lack aria-labels/tooltips |
-| 3. Color | 2/4 | 193 hardcoded hex codes + 90 rgba/hsl values bypass design tokens; exchange components worst offenders |
-| 4. Typography | 2/4 | 12 Tailwind sizes + 260 arbitrary pixel values; heading hierarchy inverted in multiple places |
-| 5. Spacing | 3/4 | Strong base-4 rhythm; only 5 trivial arbitrary pixel values; 162 classes but consistent core |
-| 6. Experience Design | 2/4 | Half of delete actions skip confirmation; 5 of 35 routes have loading.tsx; zero Suspense boundaries |
+| 1. Copywriting | 2/4 | Hero fails the 5-second clarity test -- "Zaylo Marketplace" does not explain the business |
+| 2. Visuals | 3/4 | Strong visual hierarchy with parallax and card layouts, but page is excessively long |
+| 3. Color | 3/4 | Consistent blue-600/violet accent palette with minimal hardcoded values |
+| 4. Typography | 3/4 | Clean Work Sans system with good hierarchy, but too many size steps in use |
+| 5. Spacing | 3/4 | Consistent Tailwind scale with only decorative arbitrary values |
+| 6. Experience Design | 2/4 | No loading states for page content, no error boundaries, 7 parallax sections create fatigue |
 
-**Overall: 14/24**
+**Overall: 16/24**
 
 ---
 
 ## Top 3 Priority Fixes
 
-1. **Replace all "ShadcnStore" template branding** — Users see an unbranded/wrong-brand experience on auth pages — Find-and-replace "ShadcnStore" with the actual brand name across 11 auth files, sidebar-notification.tsx, and upgrade-to-pro-button.tsx
-2. **Add AlertDialog to unconfirmed destructive actions** — Users can accidentally delete tasks, documents, collections, saved properties, and search profiles with no undo — Add AlertDialog confirmation to 7 delete actions in tasks, smart, saved, requests, my-search, and contacts
-3. **Refactor exchange components off hardcoded colors** — ~180+ hardcoded gray/neutral classes in agency-inquiry, request-form, request-popup, inventory-browser break dark mode — Replace with semantic tokens (bg-background, text-foreground, border-border)
+1. **Hero section does not explain what Zaylo is** -- A first-time visitor sees "Zaylo Marketplace" with a Dubai skyline, which could be anything from a souq to a tech platform. The subtitle "From Palm Jumeirah to exclusive villa communities" assumes the visitor already knows these are Dubai neighbourhoods. -- **Fix:** Change the hero subtitle from "Dubai's Premier Real Estate" to something like "Dubai's Premier Real Estate Brokerage" and replace "Zaylo Marketplace" with a value proposition headline such as "Find Your Dream Home in Dubai" with "Zaylo" as the brand badge. Add a single sentence below: "We connect buyers, sellers, and investors with Dubai's finest properties."
+
+2. **Page section order buries the core offering under a seller-focused pitch** -- The second section after Hero is "Exclusive Video Section" which pitches a B2B service (cinematic listing videos for sellers who go exclusive). A first-time visitor looking to buy or rent will be confused -- is this a video production company? -- **Fix:** Reorder sections: Hero -> OpportunityCTA (explains the platform for all user types) -> FeaturedListings (shows real properties) -> OffPlanCTA -> ExclusiveVideoSection (seller pitch moved later). This puts the "what Zaylo does for you" message immediately after the hero.
+
+3. **Seven identical parallax community sections create scroll fatigue** -- The page has 7 full-height parallax TextParallaxContent blocks (Tilal Al Ghaf, Mudon, Arabian Ranches, Town Square, DAMAC Hills, Dubai Hills, Palm Jumeirah), each occupying 100vh + content. This adds approximately 10,000-14,000px of scroll depth, causing visitors to abandon before reaching the Team and Contact sections. -- **Fix:** Replace the 7 parallax sections with a single "Featured Communities" section containing a compact card grid (3 columns desktop, horizontal scroll mobile) showing 6-8 communities with image, name, and a "View Community" link. Reserve the full parallax treatment for individual community pages.
 
 ---
 
@@ -34,223 +37,185 @@
 
 ### Pillar 1: Copywriting (2/4)
 
-#### Template Branding Left In Place
-- `src/app/(auth)/sign-in-3/components/login-form-3.tsx:27` — "ShadcnStore" instead of actual brand
-- `src/app/(auth)/sign-up-3/components/signup-form-3.tsx:28` — "ShadcnStore"
-- `src/app/(auth)/forgot-password-2/page.tsx:15` — "ShadcnStore"
-- `src/app/(auth)/forgot-password-3/components/forgot-password-form-3.tsx:27` — "ShadcnStore"
-- `src/app/(auth)/layout.tsx:4` — Page title "Authentication - ShadcnStore"
-- `src/app/(auth)/sign-up-2/page.tsx:15` — "ShadcnStore"
-- `src/app/(auth)/sign-in-2/page.tsx:15` — "ShadcnStore"
-- `src/components/sidebar-notification.tsx:38` — Links to "ShadcnStore"
-- `src/components/upgrade-to-pro-button.tsx:10` — SHADCN_BLOCKS_URL
+**Critical: The 5-second test fails.**
 
-#### Placeholder Alt Text
-- `src/app/(auth)/errors/*/components/*.tsx:14` — 5 error pages use `alt="placeholder image"`
-- `src/app/(auth)/sign-in-3/components/login-form-3.tsx:106` — `alt="Image"`
-- `src/app/(auth)/sign-up-3/components/signup-form-3.tsx:133` — `alt="Image"`
-- `src/app/(auth)/sign-in-2/page.tsx:27` — `alt="Image"`
-- `src/app/app/pipeline/page.tsx:474` — `alt=""` (empty)
-- `src/app/app/tasks/components/user-nav.tsx:26` — `alt="@shadcn"` (template artifact)
+The hero section shows:
+- Eyebrow: "Dubai's Premier Real Estate" (line 51, hero-section.tsx)
+- Headline: "Zaylo" with SparklesText animation + "Marketplace" below it (lines 61-73)
+- Subtitle: "From Palm Jumeirah to exclusive villa communities to Marina penthouses, find your perfect home or investment." (lines 82-84)
 
-#### Generic Empty States
-- `src/app/user/dashboard/components/data-table.tsx:582,791` — "No results." (no guidance)
-- `src/app/app/tasks/components/data-table.tsx:119` — "No results."
-- `src/app/app/dashboard/components/data-table.tsx:791` — "No results."
-- `src/components/command-search.tsx:202` — "No results found."
+Problems:
+- "Marketplace" is vague -- it suggests a multi-vendor platform, not a brokerage. The product is called "ZFlow by Zaylo" in metadata (layout.tsx:10) but the landing page says "Zaylo Marketplace" in the footer (footer.tsx:189). Identity is unclear.
+- The eyebrow "Dubai's Premier Real Estate" is truncated -- premier real estate _what_? Agency? Platform? Developer?
+- The hero CTAs are "View Collection" and "Contact Us" -- "View Collection" sounds like fashion, not real estate. Should be "Browse Properties" or "Find Your Home".
 
-#### Generic Error Messages
-- `src/app/user/error.tsx:27` — "Something went wrong" (vague)
-- `src/app/app/error.tsx:27` — Identical copy, no differentiation between CRM and customer error
-- `src/components/landing/chat-popup.tsx:82,93` — No recovery guidance
+**Section-level copy issues:**
+- ExclusiveVideoSection (line 59-68): "Your Listing Deserves More Than Photos" -- this is seller-facing copy placed as the second section. First-time visitors (likely buyers) will not understand why a listing video pitch is front and center.
+- OpportunityCTA uses the word "Opportunity" which is internal jargon. For a visitor, "Submit Your Opportunity" (line 91) is confusing -- opportunity for whom? Should be "Tell Us What You're Looking For" or "Get Matched with an Agent".
+- The navbar link "Submit Opportunity" (navbar.tsx:15) is equally opaque to visitors.
+- Contact CTA section (page.tsx:163-186) uses placeholder phone number `+971 50 123 4567` -- this is obviously fake and damages trust.
 
-#### Generic CTAs & Placeholders
-- `src/app/app/calendar/components/event-form.tsx:284` — "Add" should be "Add Attendee"
-- `src/app/app/calendar/components/event-form.tsx:329` — "Delete" should be "Delete Event"
-- `src/app/(auth)/sign-up/page.tsx:232,258,274,285,309` — 5x `placeholder="Select"` (should specify what)
-- `src/app/(auth)/sign-in-2/components/login-form-2.tsx:23` — `defaultValue="test@example.com"` visible to users
-
-#### Dead Links
-- 5 error pages have `"Contact Us"` button linking to `"#"` — nonfunctional
-
----
+**Positive:**
+- OffPlanCTA copy is strong and clear (off-plan-cta.tsx:59-70)
+- Community parallax descriptions are well-written and informative
+- Footer has good information architecture with Properties/Areas/Company columns
+- Chat popup welcome message is helpful and specific (chat-popup.tsx:42-47)
 
 ### Pillar 2: Visuals (3/4)
 
-#### Icon-Only Buttons Without Accessible Labels (~50)
-- `src/app/app/smart/components/document-card.tsx:157-174` — Eye, MessageSquare icons
-- `src/app/user/settings/connections/page.tsx:121-171` — Four Globe buttons
-- `src/app/app/inventory/components/inventory-table.tsx:186` — MoreHorizontal
-- `src/app/app/users/components/contact-card.tsx:154-168` — Copy, Mail icons
-- `src/app/app/smart/components/collection-sidebar.tsx:123,198` — Multiple icon buttons
-- `src/app/app/training/components/create-module-dialog.tsx:257,276` — Icon buttons
-- `src/app/app/smart/components/chat-panel.tsx:117,128,307` — Three icon buttons
+**Strengths:**
+- Hero has clear focal point with layered overlays and stats bar
+- Consistent rounded-full pill buttons across all CTAs
+- Card layouts for listings use proper image overlays with gradient-to-t
+- Team carousel with Embla is a good pattern for the team section
+- Icon-only buttons in team cards (Mail, Phone) appear on hover -- good progressive disclosure
+- Navbar has proper scroll-aware transparency/blur transition
 
-#### Positive Patterns
-- `src/app/user/chat/components/chat-header.tsx:132-184` — Icon buttons correctly wrapped in Tooltip
-- `src/app/app/mail/components/mail-display.tsx:42-58` — Icon buttons use title= attributes
-- `src/components/notification-bell.tsx:114` — sr-only span for screen reader text
-- `src/components/marketplace/property-card.tsx:86-160` — Strong visual hierarchy
-- `src/app/globals.css:178-193` — Base typography system with heading weights
+**Issues:**
+- No favicon or logo image -- just a "Z" letter in a div (navbar.tsx:56-61). For brand recognition this is weak.
+- The ExclusiveVideoSection's step visuals (lines 167-248) are placeholder mockups (gradient boxes with icons, not actual video screenshots). This undercuts the "cinematic video" pitch.
+- AreaGallery horizontal scroll (areas-section.tsx:222-244) has no visible scroll affordance -- users may not discover it scrolls.
+- Mobile hamburger menu button (navbar.tsx:155-165) lacks an aria-label.
 
-#### Loading States Gap
-- Skeleton component exists but only used in 4 files
-- Only 5 of ~72 pages have loading.tsx files
+**Accessibility gaps:**
+- Mobile menu button has no `aria-label` (navbar.tsx:155)
+- Chat popup open button has no `aria-label` (chat-popup.tsx:137-148)
+- Team section carousel navigation buttons correctly have `aria-label="Previous"` and `aria-label="Next"` -- good
+- Theme toggle has `aria-label="Toggle theme"` -- good
+- Social icons in footer have `aria-label` -- good
 
----
+### Pillar 3: Color (3/4)
 
-### Pillar 3: Color (2/4)
+**Palette analysis:**
+- Primary accent: `blue-600` / `blue-500` / `blue-400` (consistent blue family)
+- Secondary accent: `violet-400` / `violet-500` / `violet-600` (used for gradients alongside blue)
+- Neutral base: `neutral-900`, `neutral-500`, `neutral-400`, `neutral-50` (well-structured grey scale)
+- Dark sections: `neutral-950` bg (ExclusiveVideoSection, OffPlanCTA, Footer)
+- Light sections: `white` bg (Hero, OpportunityCTA, FeaturedListings, AreasSection)
 
-#### Hardcoded Colors (bypass design tokens)
-- **193 hex codes** and **90+ rgba/hsl values** in TSX files
-- `src/components/loading-screen.tsx:32-33` — Hardcoded #0DC1FD, #D915EF, #FF3F2ECC
-- `src/components/ui/button.tsx:155-260` — 20+ hardcoded rgba() in shadow definitions
-- `src/components/ui/colourful-text.tsx:13-22` — 10 hardcoded rgb() values
+**Approximate 60/30/10 split:**
+- 60% neutral (white/neutral-950 backgrounds, neutral text) -- good
+- 30% blue accent (section labels, badges, CTAs, gradient text) -- slightly overused
+- 10% violet (gradient accents, decorative) -- appropriate
 
-#### Worst Offender Files (exchange components)
-- `src/components/exchange/agency-inquiry.tsx` — 39 hardcoded color references
-- `src/components/exchange/request-form.tsx` — 46+ hardcoded gray/neutral classes
-- `src/components/exchange/request-popup.tsx` — 43+ hardcoded references
-- `src/components/exchange/inventory-browser.tsx` — 35+ hardcoded references
+**Hardcoded color values (3 instances):**
+- hero-section.tsx:63 -- `#60A5FA` and `#A78BFA` for SparklesText (these are Tailwind blue-400 and violet-400 equivalents -- acceptable for a JS component prop)
+- team-section.tsx:234 -- `#0a0a0a` and `#e5e5e5` for carousel dots (should use Tailwind tokens)
+- exclusive-video-section.tsx:209 -- `#3b82f680`, `#8b5cf680`, `#10b98180`, `#f59e0b80` inline styles (should use Tailwind utilities)
 
-#### Contrast Failures (WCAG AA)
-- `src/components/landing/footer.tsx:187,195` — `text-white/40` (fails 4.5:1)
-- `src/app/app/news/components/news-feed.tsx:193` — `text-white/30` (extremely low)
-- `src/components/landing/off-plan-cta.tsx:117` — `text-white/40`
-- `src/components/landing/hero-section.tsx:105` — `text-white/50`
+**Issue:** The alternating dark/light section pattern (white -> dark -> white -> dark -> white -> white x7 -> white -> neutral-50 -> white) breaks rhythm after OffPlanCTA. The 7 parallax sections are all on white, then Areas is white, then AreaGallery is neutral-50. The visual monotony contributes to scroll fatigue.
 
-#### Dark Mode Inconsistency
-- 443 `dark:` prefixes across 50+ files — good foundation
-- Exchange components manually implement dark mode with `dark:bg-neutral-*` instead of semantic tokens
-- `src/components/marketplace/property-card.tsx:100` — `bg-white` instead of `bg-background`
+### Pillar 4: Typography (3/4)
 
-#### 60/30/10 Balance
-- Neutral tokens: ~213 uses (60% layer) — OK
-- Muted/secondary: ~338 uses (30% layer) — OK
-- Primary accent: ~338 uses — **overrepresented** vs 10% target
-- ~682 raw Tailwind color utilities (text-red-500, bg-green-100) outside token system
+**Font:** Work Sans loaded via Google Fonts (layout.tsx:30-31), applied as `.font-work-sans` on body.
 
----
+**Font sizes in use across landing components:**
+- `text-8xl` (hero heading desktop)
+- `text-7xl` (hero heading tablet, parallax heading desktop)
+- `text-6xl` (exclusive video heading desktop)
+- `text-5xl` (hero subtitle, section headings desktop)
+- `text-4xl` (section headings mobile, parallax heading mobile, stats)
+- `text-3xl` (subheadings, hero subtitle mobile, stats mobile)
+- `text-2xl` (card titles, team names, stats, footer brand)
+- `text-xl` (navbar brand, step titles, parallax subheading, area price)
+- `text-lg` (body text, descriptions, nav labels)
+- `text-base` (mobile nav, card titles, feature titles)
+- `text-sm` (eyebrows, labels, nav links, descriptions)
+- `text-xs` (badges, meta info, scroll indicator)
 
-### Pillar 4: Typography (2/4)
+That is 12 distinct size steps -- well above the recommended 4-5 for a single page. However, for a long-form marketing page with clear hierarchical needs (hero -> section headers -> card titles -> body -> meta), this is somewhat expected.
 
-#### Font Size Proliferation
-- **12 distinct Tailwind sizes** in use (threshold: >6 = flag)
-- **260 arbitrary pixel font sizes** bypassing the design system:
-  - `text-[10px]`: 162 occurrences
-  - `text-[11px]`: 72 occurrences
-  - `text-[9px]`: 11 occurrences
-  - `text-[13px]`: 7 occurrences
-  - Plus 4 more non-standard sizes
+**Font weights in use:**
+- `font-bold` (headings, prices, stats, brand) -- dominant
+- `font-semibold` (CTAs, badges, eyebrows, nav buttons)
+- `font-medium` (nav links, body emphasis, parallax subheading)
+- `font-mono` (exclusive-video timeline labels -- 1 instance)
 
-#### Font Weights — OK
-- 3 dominant weights: font-medium (598), font-semibold (330), font-bold (321)
-- font-normal only 26 occurrences in UI primitives
+Three weights (bold, semibold, medium) is within acceptable range.
 
-#### Heading Hierarchy — Broken
-- **h1 uses 7 different sizes** (text-2xl to text-7xl)
-- **h2 uses 8 different sizes** (text-sm to text-5xl)
-- **h3 uses 8 different sizes** (text-xs to text-4xl)
-- `src/components/landing/areas-section.tsx:140` — h3 uses text-3xl/text-4xl, **larger than many h1s**
-- `src/app/user/marketplace/page.tsx:541` — h2 uses text-sm, **smaller than most h3s**
-- `src/components/landing/hero-section.tsx` — h1 text-7xl vs `src/components/layouts/base-layout.tsx:32` h1 text-2xl (5-step gap)
-
-#### Recommended Fix
-- Standardize: h1 = text-2xl (app) / text-4xl+ (marketing), h2 = text-xl (app) / text-3xl (marketing), h3 = text-base/text-lg
-- Replace 260 arbitrary pixel values with Tailwind scale equivalents or a custom `text-2xs` utility
-- Consider shared heading component variants (PageTitle, SectionTitle, CardTitle)
-
----
+**Issue:** The globals.css sets heading `font-weight: 600` (line 167) but Tailwind `font-bold` is 700. These may conflict depending on specificity, creating inconsistent heading weights.
 
 ### Pillar 5: Spacing (3/4)
 
-#### Consistent Core Rhythm
-- Top values: gap-2 (663), px-4 (276), gap-4 (243), gap-3 (239), gap-1 (218)
-- Clear base-4 rhythm (1rem) with half-step (0.5rem) increments
+**Spacing system:** Primarily uses Tailwind's default scale consistently.
 
-#### Minimal Arbitrary Values
-- Only 5 arbitrary pixel spacings: p-[4px], p-[3px], p-[2px], m-[1px], gap-[3px]
-- All are sub-pixel adjustments, not structural violations
+**Section-level vertical rhythm:**
+- `py-24` (FeaturedListings, AreaGallery)
+- `py-28` (OpportunityCTA, AreasSection, TeamSection, Contact CTA)
+- `py-24 md:py-32` (ExclusiveVideoSection)
+- These are close enough to feel intentional (6rem and 7rem).
 
-#### Card Padding — Consistent
-- Card component defaults: py-6 with px-6 on CardHeader/CardContent/CardFooter
-- Consumer overrides mostly p-4, p-3 — acceptable variation
+**Internal spacing patterns:**
+- Section header to content: `mb-14` to `mb-20` (varies slightly)
+- Within cards: `p-4` to `p-8` range (consistent within card types)
+- Button padding: `px-8 py-4` for primary CTAs (consistent across all sections)
+- Gap utilities: `gap-3` to `gap-8` used appropriately
 
-#### Responsive Breakpoints
-- lg: 80 usages, md: 56 usages, sm: 19 usages
-- Mobile-first approach evident; sm: slightly underutilized for mobile-to-tablet transitions
+**Arbitrary values found (18 instances):**
+- Most are decorative: `w-[600px]`, `w-[800px]`, `w-[400px]` for background blur elements
+- Layout-specific: `w-[340px]` (area gallery cards), `w-[320px]` (mobile menu), `w-[400px]` (chat popup), `h-[400px]` (chat messages)
+- Small decorative: `w-[1px]` (scroll indicator line), `h-[18px]` (icon sizes in navbar)
+- `min-h-[500px]` (featured listing main card)
 
----
+These are acceptable for decorative and layout-specific elements. No arbitrary spacing on structural padding/margin.
 
 ### Pillar 6: Experience Design (2/4)
 
-#### Loading States (partial)
-- **5 of ~35 route segments** have loading.tsx files
-- **Zero Suspense boundaries** in entire codebase
-- Client-side loading exists for: leads, admin, tasks, news, ai-assistant, owner-intelligence
-- **Missing loading.tsx:** app/leads, app/mail, app/tasks, app/inventory, app/pipeline, app/calendar, app/news, app/training, app/performance, app/areas, user/marketplace, user/chat, user/requests, user/my-listings, user/saved, user/my-search, user/market-updates, user/market-statistics
-- Plain text "Loading..." in: `src/app/app/tasks/page.tsx:52`, `src/app/user/chat/page.tsx:39`
+**Page structure analysis (section order in page.tsx):**
+1. Navbar
+2. HeroSection -- good, establishes brand
+3. ExclusiveVideoSection -- problematic placement (seller pitch as 2nd section)
+4. OpportunityCTA -- should be higher (explains what Zaylo does for all users)
+5. OffPlanCTA -- good investment pitch
+6. FeaturedListings -- should be higher (shows actual product)
+7. 7x TextParallaxContent -- extreme length, causes scroll abandonment
+8. AreasSection + AreaGallery -- largely redundant with parallax sections above
+9. TeamSection -- buried deep in page
+10. Contact CTA -- buried deep in page
+11. Footer
+12. ChatPopup
 
-#### Error States (good foundation)
-- 2 route-level error.tsx files with retry buttons
-- 5 polished auth error pages (401, 403, 404, 500, maintenance)
-- Only 12 files use react-hook-form/zodResolver; rest rely on HTML `required`
-- Auth forms (sign-in-3, sign-up-3) have no client-side validation
+**Marketing funnel issues:**
+- The page does not follow a clear AIDA (Attention, Interest, Desire, Action) flow at the top level
+- After Hero (Attention), it jumps to a niche seller pitch (ExclusiveVideoSection) instead of building Interest for all visitors
+- The FeaturedListings section (the actual product) is the 6th section down
+- The redundancy between parallax community sections and AreasSection means communities are presented twice
 
-#### Empty States (good)
-- Most list/table views handle empty data with helpful messages
-- Minor gap: some lack actionable CTAs
+**State handling:**
+- Loading state: Only present in ChatPopup (bouncing dots animation) -- good for chat
+- Error state: Only in ChatPopup ("Sorry, I encountered an error. Please try again.") -- adequate but generic
+- Empty state: None found (no empty state for listings, search, etc.)
+- No ErrorBoundary wrapping any section
+- No skeleton/loading states for images (Next.js Image handles some of this, but no explicit placeholders)
+- Listings data is hardcoded (featured-listings.tsx:29-91) -- no fetch, no loading/error states needed currently, but this means the page shows stale data
 
-#### Destructive Actions — Mixed
-**WITH AlertDialog (good):**
-- `src/app/app/inventory/components/inventory-table.tsx:237` — Delete listing
-- `src/app/user/my-listings/page.tsx:1118` — Remove listing
-- `src/app/app/admin/page.tsx:545` — Delete user
-- `src/app/app/admin/components/market-updates-cms.tsx:314` — Delete post
-- `src/app/app/training/components/training-module-card.tsx:186` — Delete module
+**Interaction patterns:**
+- Chat popup has good progressive disclosure (collapsed -> expanded -> minimized)
+- Team carousel has auto-scroll with stop-on-hover -- good
+- Parallax scroll effects are smooth (framer-motion + useScroll)
+- No confirmation dialogs needed (no destructive actions on landing page)
 
-**WITHOUT confirmation (needs fix):**
-- `src/app/app/tasks/components/data-table-row-actions.tsx:45` — Delete task
-- `src/app/app/smart/components/document-card.tsx:208` — Delete document
-- `src/app/app/smart/components/collection-sidebar.tsx:216` — Delete collection
-- `src/app/user/saved/page.tsx:87` — Remove saved property
-- `src/app/user/requests/page.tsx:171` — Delete request
-- `src/app/user/my-search/page.tsx:326` — Delete search profile
-- `src/app/app/owner-intelligence/_components/ContactsTable.tsx:381` — Delete contact
-
-#### Navigation Gaps
-- Breadcrumb component exists at `src/components/ui/breadcrumb.tsx` but is **never used**
-- No back-navigation buttons on nested pages (areas/[slug], settings sub-pages)
-- Toast (Sonner) used consistently for action feedback — good
-
-#### Accessibility Gaps
-- `aria-label` used in only 10 files (14 occurrences) — sparse
-- Only 1 file uses `role="status"` or `aria-live`
-- No skip-to-content navigation link
-- No `role="alert"` for error messages
-- Only 9 `onKeyDown` handlers — limited keyboard navigation beyond shadcn defaults
-- `sr-only` used in 24 files (68 occurrences) — decent but not comprehensive
-
----
-
-## Registry Safety
-
-Registry audit: Official shadcn registry only. 55 components installed, 0 third-party blocks, 0 suspicious flags.
-
-**Modified components:**
-- `button.tsx` — Extended with custom "cool" variant, LiquidButton, MetalButton components
-- `card.tsx` — Border customized to `border-neutral-200/70 dark:border-white/[0.08]`, corner radius changed to `rounded-2xl`
+**Missing marketing elements:**
+- No social proof section (testimonials, reviews, client logos)
+- No "How it works" summary for the core brokerage service (only for the video feature)
+- No RERA license number or DLD registration visible (required for Dubai real estate)
+- Phone number appears to be placeholder: `+971 50 123 4567` (used in navbar.tsx:105, footer.tsx:98, team members)
 
 ---
 
 ## Files Audited
 
-Comprehensive audit across all directories:
-- `src/app/(auth)/*` — All auth pages and error pages
-- `src/app/app/*` — All CRM/ZFLOW pages (dashboard, pipeline, leads, inventory, tasks, mail, calendar, smart, training, news, performance, areas, admin, ai-assistant, seo-generator, description-writer, follow-up, listing-video, owner-intelligence, exchange)
-- `src/app/user/*` — All customer pages (dashboard, marketplace, chat, saved, requests, my-listings, my-search, market-updates, market-statistics, settings)
-- `src/app/(landing)/*` — Landing pages
-- `src/components/*` — All shared components (sidebar, navbar, command-search, exchange, landing, marketplace, ui)
-- `src/components/ui/*` — 55 shadcn components
-- `src/middleware.ts` — Route configuration
-- `src/app/globals.css` — Theme tokens and base styles
+- `/home/user/flowbyelysian/src/app/page.tsx`
+- `/home/user/flowbyelysian/src/app/layout.tsx`
+- `/home/user/flowbyelysian/src/app/globals.css`
+- `/home/user/flowbyelysian/src/components/landing/navbar.tsx`
+- `/home/user/flowbyelysian/src/components/landing/hero-section.tsx`
+- `/home/user/flowbyelysian/src/components/landing/exclusive-video-section.tsx`
+- `/home/user/flowbyelysian/src/components/landing/opportunity-cta.tsx`
+- `/home/user/flowbyelysian/src/components/landing/off-plan-cta.tsx`
+- `/home/user/flowbyelysian/src/components/landing/featured-listings.tsx`
+- `/home/user/flowbyelysian/src/components/landing/text-parallax.tsx`
+- `/home/user/flowbyelysian/src/components/landing/areas-section.tsx`
+- `/home/user/flowbyelysian/src/components/landing/team-section.tsx`
+- `/home/user/flowbyelysian/src/components/landing/footer.tsx`
+- `/home/user/flowbyelysian/src/components/landing/chat-popup.tsx`
