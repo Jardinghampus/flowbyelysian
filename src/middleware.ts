@@ -12,8 +12,12 @@ import type { NextRequest } from 'next/server'
 // Route architecture:
 //   /                    → Landing page (public)
 //   /sign-in             → Auth pages (public)
-//   /user/*              → Customer portal (all authenticated users)
-//   /app/*               → CRM / ZFLOW agent platform (admin + agent only)
+//   /my-opportunities    → Public opportunity portal (login-gated)
+//   /opportunity         → Public opportunity submission form
+//   /user/my-opportunities → Customer portal: manage opportunities (customer only)
+//   /user/settings/*     → Customer portal: profile & settings (customer only)
+//   /user/*              → Agent/admin portal features (blocked for customers via CustomerGuard)
+//   /app/*               → CRM / ZFLOW agent platform (admin + agent only via CrmGuard)
 //   /app/admin           → Admin CMS & management (admin only)
 //
 // The /app layout includes a CrmGuard component that blocks non-internal users.

@@ -5,16 +5,11 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   Home,
-  Search,
   ArrowLeftRight,
-  Heart,
-  SlidersHorizontal,
-  Building2,
-  BarChart3,
-  Map,
   ClipboardList,
   Kanban,
   ImagePlus,
+  Settings,
 } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
 import { cn } from "@/lib/utils"
@@ -27,9 +22,10 @@ interface TabItem {
 
 export function MobileBottomTabs() {
   const pathname = usePathname()
-  const { isInternal, role } = useRole()
+  const { isInternal } = useRole()
 
   const tabIcon = "h-[22px] w-[22px]"
+  // Customers only see Opportunities + Settings (no marketplace, no search, no saved)
   const tabs: TabItem[] = isInternal
     ? [
         { href: "/app/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
@@ -37,18 +33,9 @@ export function MobileBottomTabs() {
         { href: "/app/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
         { href: "/app/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
       ]
-    : role === "seller" || role === "landlord"
-    ? [
-        { href: "/user/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/user/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
-        { href: "/user/marketplace", label: "Explore", icon: <Map className={tabIcon} /> },
-        { href: "/user/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
-      ]
     : [
-        { href: "/user/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/user/marketplace", label: "Explore", icon: <Map className={tabIcon} /> },
-        { href: "/user/my-search", label: "Search", icon: <SlidersHorizontal className={tabIcon} /> },
-        { href: "/user/saved", label: "Saved", icon: <Heart className={tabIcon} /> },
+        { href: "/user/my-opportunities", label: "Opportunities", icon: <ClipboardList className={tabIcon} /> },
+        { href: "/user/settings/user", label: "Profile", icon: <Settings className={tabIcon} /> },
       ]
 
   return (

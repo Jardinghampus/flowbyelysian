@@ -25,10 +25,10 @@ function CrmGuard({ children }: { children: React.ReactNode }) {
           This area is only available to Zaylo staff. Please use the customer portal instead.
         </p>
         <button
-          onClick={() => router.push("/user/dashboard")}
+          onClick={() => router.push("/user/my-opportunities")}
           className="mt-4 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
         >
-          Go to Customer Portal
+          Go to My Opportunities
         </button>
       </div>
     )

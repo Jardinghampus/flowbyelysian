@@ -19,16 +19,10 @@ import {
   MapPin,
   FileText,
   Brain,
-  Map,
   ArrowLeftRight,
   Search,
   ClipboardList,
-  Heart,
-  Home,
-  Bell,
-  MessageSquare,
   BarChart3,
-  SlidersHorizontal,
   Kanban,
   CalendarDays,
   ImagePlus,
@@ -96,8 +90,6 @@ interface NavSection {
 }
 
 const ALL_CUSTOMERS: UserRole[] = ["buyer", "seller", "tenant", "landlord", "relocation_agent"]
-const SEEKERS: UserRole[] = ["buyer", "tenant", "relocation_agent"]
-const LISTERS: UserRole[] = ["seller", "landlord"]
 
 const navSections: NavSection[] = [
   // ── INTERNAL: Core ── (/app/...)
@@ -170,48 +162,14 @@ const navSections: NavSection[] = [
     ],
   },
 
-  // ── CUSTOMER: Home & Browse ── (/user/...)
+  // ── CUSTOMER: Portal ── (/user/...)
+  // Customers can ONLY see their opportunities and profile.
+  // They do NOT have access to the CRM app, marketplace browsing, or any other features.
   {
-    title: "Home",
+    title: "My Portal",
     roles: ALL_CUSTOMERS,
     items: [
-      { label: "Home", href: "/user/dashboard", icon: <Home className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Marketplace", href: "/user/marketplace", icon: <Map className={iconClass} />, roles: ALL_CUSTOMERS },
-    ],
-  },
-  // ── CUSTOMER: Search & Requests ──
-  {
-    title: "Search",
-    roles: SEEKERS,
-    items: [
-      { label: "My Search", href: "/user/my-search", icon: <SlidersHorizontal className={iconClass} />, roles: SEEKERS },
-      { label: "Requests", href: "/user/requests", icon: <ClipboardList className={iconClass} />, roles: SEEKERS },
-    ],
-  },
-  // ── CUSTOMER: My Properties ──
-  {
-    title: "My Properties",
-    roles: LISTERS,
-    items: [
-      { label: "My Listings", href: "/user/my-listings", icon: <ImagePlus className={iconClass} />, roles: LISTERS },
-    ],
-  },
-  // ── CUSTOMER: Insights ──
-  {
-    title: "Insights",
-    roles: ALL_CUSTOMERS,
-    items: [
-      { label: "Market Updates", href: "/user/market-updates", icon: <Newspaper className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Market Stats", href: "/user/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ALL_CUSTOMERS },
-    ],
-  },
-  // ── CUSTOMER: Activity ──
-  {
-    title: "Activity",
-    roles: ALL_CUSTOMERS,
-    items: [
-      { label: "Saved", href: "/user/saved", icon: <Heart className={iconClass} />, roles: ALL_CUSTOMERS },
-      { label: "Messages", href: "/user/chat", icon: <MessageSquare className={iconClass} />, roles: ALL_CUSTOMERS },
+      { label: "My Opportunities", href: "/user/my-opportunities", icon: <ClipboardList className={iconClass} />, roles: ALL_CUSTOMERS },
     ],
   },
 ]
@@ -252,7 +210,7 @@ export function AppSidebar() {
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {open ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/dashboard"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/dashboard"} />}
+          {open ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} />}
 
           {/* User Profile */}
           <SidebarUserInfo open={open} />

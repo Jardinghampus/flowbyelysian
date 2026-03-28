@@ -45,6 +45,18 @@ const AGENT_EMAILS = [
   "agent@agent.com",
 ]
 
+// Customer-accessible routes (everything else under /user/ is blocked for customers)
+export const CUSTOMER_ALLOWED_ROUTES = [
+  "/user/my-opportunities",
+  "/user/settings",
+]
+
+export function isCustomerAllowedRoute(pathname: string): boolean {
+  return CUSTOMER_ALLOWED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  )
+}
+
 interface RoleContextType {
   role: UserRole
   setRole: (role: UserRole) => void
@@ -64,6 +76,8 @@ interface RoleContextType {
   canViewAdmin: boolean
   canCreateRequest: boolean
   canViewMarketUpdates: boolean
+  canAccessCrm: boolean        // Only internal staff can access /app/*
+  canManageOpportunities: boolean  // All authenticated users can manage their own opportunities
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
@@ -116,6 +130,12 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   // Market Updates: visible to customers + admin (for preview/management)
   const canViewMarketUpdates = isCustomer || role === "admin"
 
+  // CRM access: only internal staff (admin + agent)
+  const canAccessCrm = isInternal
+
+  // All authenticated users can manage their own opportunities
+  const canManageOpportunities = true
+
   return (
     <RoleContext.Provider value={{
       role,
@@ -136,6 +156,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       canViewAdmin,
       canCreateRequest,
       canViewMarketUpdates,
+      canAccessCrm,
+      canManageOpportunities,
     }}>
       {children}
     </RoleContext.Provider>
