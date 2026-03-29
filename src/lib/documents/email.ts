@@ -1,7 +1,12 @@
 import { Resend } from 'resend'
 import type { SendSigningRequestParams } from './types'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY environment variable is not set')
+  }
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 const FROM_EMAIL = 'ZFlow <contracts@zflow.ae>'
 
@@ -14,7 +19,7 @@ export async function sendSigningRequest({
 }: SendSigningRequestParams) {
   const signUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sign/${signToken}`
 
-  await resend.emails.send({
+  await getResendClient().emails.send({
     from: FROM_EMAIL,
     to: signerEmail,
     subject: `Please sign: ${documentName}`,
@@ -63,7 +68,7 @@ export async function sendSignedConfirmation({
   documentName: string
   pdfUrl: string
 }) {
-  await resend.emails.send({
+  await getResendClient().emails.send({
     from: FROM_EMAIL,
     to: agentEmail,
     subject: `Document signed — ${signerName}`,
