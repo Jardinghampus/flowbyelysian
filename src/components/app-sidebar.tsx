@@ -120,6 +120,7 @@ const navSections: NavSection[] = [
     items: [
       { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Documents", href: "/app/documents", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Contacts", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],

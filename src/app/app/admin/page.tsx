@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
-import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper } from "lucide-react"
+import Link from "next/link"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -289,6 +290,22 @@ export default function AdminPage() {
               Market Updates
             </TabsTrigger>
           </TabsList>
+
+          {/* Document Management Quick Links */}
+          <div className="flex gap-3 mb-6">
+            <Link href="/app/admin/documents">
+              <Button variant="outline" size="sm" className="gap-2">
+                <FileText className="h-4 w-4" />
+                All Documents
+              </Button>
+            </Link>
+            <Link href="/app/admin/templates">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Layers className="h-4 w-4" />
+                Document Templates
+              </Button>
+            </Link>
+          </div>
 
           <TabsContent value="users" className="space-y-6">
             {/* Stats Cards */}
