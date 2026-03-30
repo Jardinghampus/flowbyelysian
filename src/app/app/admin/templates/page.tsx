@@ -29,6 +29,7 @@ export default function AdminTemplatesPage() {
     marketing_leasing: "Marketing & Leasing",
     socials_only: "Socials Only",
     general: "General",
+    property_marketing_auth: "Property Marketing Auth",
   }
 
   if (loading) {

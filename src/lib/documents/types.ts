@@ -1,4 +1,4 @@
-export type TemplateType = 'marketing_leasing' | 'socials_only' | 'general'
+export type TemplateType = 'marketing_leasing' | 'socials_only' | 'general' | 'property_marketing_auth'
 
 export type DocumentStatus = 'draft' | 'sent' | 'signed' | 'expired'
 
