@@ -23,7 +23,9 @@ export default function AdminDocumentsPage() {
   useEffect(() => {
     fetch("/api/documents")
       .then((res) => res.json())
-      .then(setDocuments)
+      .then((data) => {
+        if (Array.isArray(data)) setDocuments(data)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])

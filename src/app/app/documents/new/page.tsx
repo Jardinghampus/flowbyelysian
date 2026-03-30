@@ -33,7 +33,9 @@ export default function NewDocumentPage() {
   useEffect(() => {
     fetch("/api/templates")
       .then((res) => res.json())
-      .then(setTemplates)
+      .then((data) => {
+        if (Array.isArray(data)) setTemplates(data)
+      })
       .catch(console.error)
   }, [])
 
