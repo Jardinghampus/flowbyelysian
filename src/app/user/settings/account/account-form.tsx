@@ -31,6 +31,7 @@ const accountFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   phone: z.string().optional(),
+  brn: z.string().optional(),
   area: z.string().optional(),
 })
 
@@ -46,6 +47,7 @@ export default function AccountSettings() {
       firstName: "",
       lastName: "",
       phone: "",
+      brn: "",
       area: "",
     },
   })
@@ -57,6 +59,7 @@ export default function AccountSettings() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         phone: (user.publicMetadata?.phone as string) || "",
+        brn: (user.publicMetadata?.brn as string) || "",
         area: (user.publicMetadata?.area as string) || "",
       })
     }
@@ -158,6 +161,19 @@ export default function AccountSettings() {
                     <FormLabel>Phone / WhatsApp</FormLabel>
                     <FormControl>
                       <Input placeholder="+971 50 123 4567" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="brn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>BRN Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your BRN number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
