@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'workers.paper.design',
       },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },

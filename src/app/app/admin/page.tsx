@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers } from "lucide-react"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers, Settings2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -303,6 +303,12 @@ export default function AdminPage() {
               <Button variant="outline" size="sm" className="gap-2">
                 <Layers className="h-4 w-4" />
                 Document Templates
+              </Button>
+            </Link>
+            <Link href="/app/admin/document-settings">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings2 className="h-4 w-4" />
+                Document Header
               </Button>
             </Link>
           </div>

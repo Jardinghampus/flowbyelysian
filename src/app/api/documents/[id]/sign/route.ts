@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUntypedServerClient } from '@/lib/supabase/server-untyped'
 import { generateDocumentPdf } from '@/lib/documents/pdf'
+import type { DocumentHeaderSettings } from '@/lib/documents/pdf'
 
 export async function POST(
   req: NextRequest,
@@ -55,8 +56,19 @@ export async function POST(
     }
   }
 
-  // Generate PDF with signature
-  const pdfBytes = await generateDocumentPdf(cleanContent, fieldMap, signatureBase64)
+  // Fetch document header settings
+  let headerSettings: DocumentHeaderSettings | null = null
+  const { data: settingsData } = await supabase
+    .from('document_settings')
+    .select('*')
+    .limit(1)
+    .single()
+  if (settingsData) {
+    headerSettings = settingsData as DocumentHeaderSettings
+  }
+
+  // Generate PDF with signature and header
+  const pdfBytes = await generateDocumentPdf(cleanContent, fieldMap, signatureBase64, headerSettings)
 
   // Upload to Supabase Storage
   const fileName = `signed-${id}-${Date.now()}.pdf`
