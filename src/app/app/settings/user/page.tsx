@@ -32,6 +32,7 @@ const userFormSchema = z.object({
   role: z.string().optional(),
   bio: z.string().optional(),
   company: z.string().optional(),
+  brn: z.string().optional(),
   timezone: z.string().optional(),
   language: z.string().optional(),
 })
@@ -55,6 +56,7 @@ export default function UserSettingsPage() {
       role: "",
       bio: "",
       company: "",
+      brn: "",
       timezone: "",
       language: "",
     },
@@ -201,6 +203,21 @@ export default function UserSettingsPage() {
                     <FormLabel>Company</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter your company" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* BRN Number */}
+              <FormField
+                control={form.control}
+                name="brn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>BRN Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your BRN number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

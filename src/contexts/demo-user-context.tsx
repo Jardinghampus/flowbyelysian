@@ -16,6 +16,7 @@ const DEMO_USER = {
     phone: "+971 50 123 4567",
     area: "tilal-al-ghaf",
     role: "admin",
+    brn: "",
   },
   update: async (data: { firstName?: string; lastName?: string }) => {
     // Mock update - in real app this would update the user

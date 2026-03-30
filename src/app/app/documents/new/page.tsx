@@ -17,11 +17,18 @@ import { DocumentPreview } from "@/components/documents/DocumentPreview"
 import { ArrowLeft, Eye, Send, Save } from "lucide-react"
 import Link from "next/link"
 import type { Template, TemplateVariable } from "@/lib/documents/types"
+import { useDemoUser } from "@/contexts/demo-user-context"
 
 type Step = "select" | "fill" | "preview"
 
+function getTodayDate(): string {
+  const d = new Date()
+  return d.toISOString().split("T")[0]
+}
+
 export default function NewDocumentPage() {
   const router = useRouter()
+  const { user } = useDemoUser()
   const [step, setStep] = useState<Step>("select")
   const [templates, setTemplates] = useState<Template[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
@@ -43,12 +50,17 @@ export default function NewDocumentPage() {
     const template = templates.find((t) => t.id === templateId)
     if (template) {
       setSelectedTemplate(template)
-      // Pre-populate agent fields from demo context
+      // Pre-populate fields from agent profile
       const initial: Record<string, string> = {}
       const vars = Array.isArray(template.variables) ? template.variables : JSON.parse(template.variables as unknown as string)
+      const agentName = user?.fullName || "Demo Agent"
+      const agentEmail = user?.primaryEmailAddress?.emailAddress || "agent@zflow.ae"
+      const agentBrn = user?.publicMetadata?.brn || ""
       for (const v of vars) {
-        if (v.key === "agent_name") initial[v.key] = "Demo Agent"
-        else if (v.key === "agent_email") initial[v.key] = "agent@zflow.ae"
+        if (v.key === "agent_name" || v.key === "consultant_name") initial[v.key] = agentName
+        else if (v.key === "agent_email") initial[v.key] = agentEmail
+        else if (v.key === "consultant_brn" || v.key === "agent_brn") initial[v.key] = agentBrn
+        else if (v.type === "date") initial[v.key] = getTodayDate()
         else initial[v.key] = ""
       }
       setFieldValues(initial)
@@ -83,9 +95,9 @@ export default function NewDocumentPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           template_id: selectedTemplate.id,
-          agent_id: "demo-agent-id",
-          agent_email: "agent@zflow.ae",
-          agent_name: fieldValues.agent_name || "Demo Agent",
+          agent_id: user?.id || "demo-agent-id",
+          agent_email: user?.primaryEmailAddress?.emailAddress || "agent@zflow.ae",
+          agent_name: fieldValues.agent_name || fieldValues.consultant_name || user?.fullName || "Demo Agent",
           status: sendImmediately ? "sent" : "draft",
           signer_email: signerEmail,
           signer_name: signerName,
