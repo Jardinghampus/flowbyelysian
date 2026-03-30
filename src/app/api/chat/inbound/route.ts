@@ -100,7 +100,7 @@ export async function POST(request: Request): Promise<NextResponse<InboundRespon
       sessionId: body.sessionId,
       state: result.session.state,
       sentiment: messageSentiment,
-      properties: result.searchResult?.properties.map((p) => ({
+      properties: result.searchResult?.properties?.map((p) => ({
         id: p.id,
         title: p.title,
         price: p.price,
