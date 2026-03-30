@@ -39,10 +39,11 @@ export function SignatureCanvas({ onSignatureChange }: SignatureCanvasProps) {
           Clear
         </Button>
       </div>
-      <div className="rounded-lg border-2 border-dashed border-border bg-white dark:bg-neutral-950 overflow-hidden">
+      <div className="rounded-lg border-2 border-dashed border-neutral-300 bg-white overflow-hidden">
         <ReactSignatureCanvas
           ref={sigCanvasRef}
-          penColor="#1a1a1a"
+          penColor="#000000"
+          backgroundColor="rgb(255, 255, 255)"
           canvasProps={{
             className: "w-full",
             style: { width: "100%", height: "200px" },

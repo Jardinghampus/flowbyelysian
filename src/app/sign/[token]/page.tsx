@@ -89,8 +89,8 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00d4ff] border-t-transparent" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-800 border-t-transparent" />
       </div>
     )
   }
@@ -98,13 +98,13 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4">
-          <div className="h-16 w-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto">
-            <AlertCircle className="h-8 w-8 text-red-400" />
+          <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+            <AlertCircle className="h-8 w-8 text-red-500" />
           </div>
-          <h1 className="text-xl font-semibold text-white">{error}</h1>
-          <p className="text-sm text-neutral-400">
+          <h1 className="text-xl font-semibold text-neutral-900">{error}</h1>
+          <p className="text-sm text-neutral-500">
             If you believe this is an error, please contact the sender.
           </p>
         </div>
@@ -115,19 +115,19 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
   // Signed success state
   if (signed) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4">
-          <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
-            <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+          <div className="h-16 w-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
-          <h1 className="text-xl font-semibold text-white">Document Signed!</h1>
-          <p className="text-sm text-neutral-400">
+          <h1 className="text-xl font-semibold text-neutral-900">Document Signed!</h1>
+          <p className="text-sm text-neutral-500">
             Thank you for signing. A confirmation has been sent to both parties.
           </p>
           {pdfUrl && (
             <Button
               onClick={() => window.open(pdfUrl, "_blank")}
-              className="bg-[#00d4ff] text-black hover:bg-[#00d4ff]/90"
+              className="bg-neutral-900 text-white hover:bg-neutral-800"
             >
               Download Signed PDF
             </Button>
@@ -150,13 +150,13 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
     : ""
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-white/[0.08] bg-black/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-neutral-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-white">ZFlow</span>
-            <span className="text-xs text-neutral-500">Document Signing</span>
+            <span className="text-lg font-semibold text-neutral-900">ZFlow</span>
+            <span className="text-xs text-neutral-400">Document Signing</span>
           </div>
         </div>
       </header>
@@ -165,14 +165,14 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
         {/* Document info */}
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#00d4ff]/10 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-[#00d4ff]" />
+            <div className="h-10 w-10 rounded-lg bg-neutral-100 flex items-center justify-center">
+              <FileText className="h-5 w-5 text-neutral-700" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-white">
+              <h1 className="text-lg font-semibold text-neutral-900">
                 {doc?.templates?.name || "Document"}
               </h1>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-neutral-500">
                 From {doc?.agent_name} — Please review and sign below
               </p>
             </div>
@@ -183,18 +183,18 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
         <DocumentPreview content={templateContent} fields={fieldMap} />
 
         {/* Signature area */}
-        <div className="rounded-lg border border-white/[0.08] bg-[#0a0a0a] p-6 space-y-6">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 space-y-6">
           <div>
-            <h2 className="text-base font-medium text-white">Sign Document</h2>
-            <p className="text-sm text-neutral-400 mt-1">
+            <h2 className="text-base font-medium text-neutral-900">Sign Document</h2>
+            <p className="text-sm text-neutral-500 mt-1">
               By signing, you agree to the terms outlined in the document above.
             </p>
           </div>
 
           {doc?.signer_name && (
             <div>
-              <p className="text-xs text-neutral-500">Signing as</p>
-              <p className="text-sm text-white font-medium">{doc.signer_name}</p>
+              <p className="text-xs text-neutral-400">Signing as</p>
+              <p className="text-sm text-neutral-900 font-medium">{doc.signer_name}</p>
             </div>
           )}
 
@@ -203,11 +203,11 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
           <Button
             onClick={handleSubmitSignature}
             disabled={!signatureData || submitting}
-            className="w-full bg-[#00d4ff] text-black hover:bg-[#00d4ff]/90 h-12 text-base font-medium"
+            className="w-full bg-neutral-900 text-white hover:bg-neutral-800 h-12 text-base font-medium"
           >
             {submitting ? (
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Submitting...
               </div>
             ) : (
@@ -217,7 +217,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-neutral-600">
+        <p className="text-center text-xs text-neutral-400">
           Powered by ZFlow — Secure document signing
         </p>
       </main>
