@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Plus, FileText, Users, Calendar, MessageSquare, Target } from "lucide-react"
+import { Plus, FileText, Users, Calendar, MessageSquare, PenLine } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RippleButton } from "@/components/ui/ripple-button"
 
@@ -12,7 +12,7 @@ const actions = [
   { icon: Users, label: "Contact", href: "/app/users", color: "bg-purple-500 hover:bg-purple-600" },
   { icon: Calendar, label: "Schedule", href: "/app/calendar", color: "bg-amber-500 hover:bg-amber-600" },
   { icon: MessageSquare, label: "AI Chat", href: "/ai-assistant", color: "bg-cyan-500 hover:bg-cyan-600" },
-  { icon: Target, label: "Goals", href: "/app/performance", color: "bg-rose-500 hover:bg-rose-600" },
+  { icon: PenLine, label: "Sign", href: "/app/documents", color: "bg-rose-500 hover:bg-rose-600" },
 ]
 
 export function QuickActions() {

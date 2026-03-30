@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUntypedServerClient } from '@/lib/supabase/server-untyped'
 import { generateDocumentPdf } from '@/lib/documents/pdf'
-import { sendSignedConfirmation } from '@/lib/documents/email'
 
 export async function POST(
   req: NextRequest,
@@ -109,20 +108,6 @@ export async function POST(
       image_base64: signatureBase64,
       signer_ip: signerIp,
     })
-
-  // Send confirmation email to agent
-  try {
-    await sendSignedConfirmation({
-      agentEmail: doc.agent_email,
-      agentName: doc.agent_name,
-      signerName: signerName || doc.signer_name || 'Client',
-      documentName: template.name || 'Document',
-      pdfUrl,
-    })
-  } catch (emailError) {
-    console.error('Failed to send confirmation email:', emailError)
-    // Don't fail the signing flow for email errors
-  }
 
   return NextResponse.json({ success: true, pdfUrl })
 }

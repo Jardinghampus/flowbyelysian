@@ -18,6 +18,7 @@ import {
   Newspaper,
   MapPin,
   FileText,
+  PenLine,
   Brain,
   ArrowLeftRight,
   Search,
@@ -120,7 +121,7 @@ const navSections: NavSection[] = [
     items: [
       { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Documents", href: "/app/documents", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Sign", href: "/app/documents", icon: <PenLine className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Contacts", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
     ],

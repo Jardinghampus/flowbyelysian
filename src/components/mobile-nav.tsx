@@ -4,7 +4,7 @@ import React from "react"
 import {
   LayoutDashboard,
   Building2,
-  CheckSquare,
+  PenLine,
   MessageCircle,
   Calendar,
 } from "lucide-react"
@@ -25,9 +25,9 @@ const navItems = [
     icon: <Building2 className="h-5 w-5" />,
   },
   {
-    label: "Tasks",
-    href: "/app/tasks",
-    icon: <CheckSquare className="h-5 w-5" />,
+    label: "Sign",
+    href: "/app/documents",
+    icon: <PenLine className="h-5 w-5" />,
   },
   {
     label: "Chat",
