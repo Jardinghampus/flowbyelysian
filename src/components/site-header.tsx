@@ -1,16 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Sun, Maximize, Minimize } from "lucide-react"
 import { CommandSearch, SearchTrigger } from "@/components/command-search"
 import { NotificationBell } from "@/components/notification-bell"
 import { RoleSwitcher } from "@/components/role-switcher"
 import { useTheme } from "@/hooks/use-theme"
+import { useFullscreenContext } from "@/contexts/fullscreen-context"
 import { motion } from "framer-motion"
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false)
   const { theme, setTheme } = useTheme()
+  const { isFullscreen, toggleFullscreen } = useFullscreenContext()
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -32,6 +34,20 @@ export function SiteHeader() {
             <SearchTrigger onClick={() => setSearchOpen(true)} />
           </div>
           <div className="flex items-center gap-2">
+            {/* Fullscreen toggle - desktop only */}
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              onClick={toggleFullscreen}
+              className="hidden md:flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4 text-[#00d4ff]" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </motion.button>
             <motion.button
               whileTap={{ scale: 0.85, rotate: 180 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}

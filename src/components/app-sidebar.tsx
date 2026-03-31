@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import { useFullscreenContext } from "@/contexts/fullscreen-context"
 import dynamic from "next/dynamic"
 import {
   LayoutDashboard,
@@ -188,7 +189,11 @@ export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { role, isInternal } = useRole()
+  const { isFullscreen } = useFullscreenContext()
   const [open, setOpen] = useState(false)
+
+  // In fullscreen mode, sidebar is always expanded
+  const effectiveOpen = isFullscreen || open
 
   // Filter sections and items based on current role
   const visibleSections = useMemo(() => {
@@ -212,10 +217,10 @@ export function AppSidebar() {
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {open ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} />}
+          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} />}
 
           {/* User Profile */}
-          <SidebarUserInfo open={open} />
+          <SidebarUserInfo open={effectiveOpen} />
 
           {/* Main Navigation — grouped by section */}
           <div className="flex flex-col gap-0.5">
@@ -224,7 +229,7 @@ export function AppSidebar() {
                 {sIdx > 0 && (
                   <div className="my-2 mx-3 border-t border-neutral-200/60 dark:border-white/[0.06]" />
                 )}
-                {open && (
+                {effectiveOpen && (
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -265,15 +270,15 @@ export function AppSidebar() {
           })}
 
           {/* Logout */}
-          <SidebarLogoutButton open={open} />
+          <SidebarLogoutButton open={effectiveOpen} />
 
           {/* Dark Mode Toggle - Only visible when sidebar is open */}
           <motion.div
             initial={false}
             animate={{
-              opacity: open ? 1 : 0,
-              height: open ? "auto" : 0,
-              marginTop: open ? 8 : 0,
+              opacity: effectiveOpen ? 1 : 0,
+              height: effectiveOpen ? "auto" : 0,
+              marginTop: effectiveOpen ? 8 : 0,
             }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"

@@ -6,6 +6,7 @@ import React, { useState, createContext, useContext, useCallback, useRef, useEff
 import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { Logo } from "@/components/logo"
+import { useFullscreenContext } from "@/contexts/fullscreen-context"
 
 interface Links {
   label: string
@@ -105,6 +106,11 @@ export const DesktopSidebar = ({
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
   const { open, setOpen, animate, lockedRef } = useSidebar()
+  const { isFullscreen } = useFullscreenContext()
+
+  // In fullscreen mode, sidebar is always expanded
+  const effectiveOpen = isFullscreen || open
+
   return (
     <motion.div
       className={cn(
@@ -112,15 +118,19 @@ export const DesktopSidebar = ({
         className
       )}
       animate={{
-        width: animate ? (open ? "300px" : "70px") : "300px",
+        width: animate ? (effectiveOpen ? "300px" : "70px") : "300px",
       }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       onMouseEnter={() => {
-        lockedRef.current = false
-        setOpen(true)
+        if (!isFullscreen) {
+          lockedRef.current = false
+          setOpen(true)
+        }
       }}
       onMouseLeave={() => {
-        setOpen(false)
+        if (!isFullscreen) {
+          setOpen(false)
+        }
       }}
       {...props}
     >
@@ -228,10 +238,15 @@ export const SidebarLink = ({
   props?: LinkProps
 }) => {
   const { open, animate, closeSidebar } = useSidebar()
+  const { isFullscreen } = useFullscreenContext()
+
+  // In fullscreen mode, sidebar links are always shown expanded
+  const effectiveOpen = isFullscreen || open
+
   return (
     <Link
       href={link.href}
-      onClick={() => closeSidebar()}
+      onClick={() => { if (!isFullscreen) closeSidebar() }}
       className={cn(
         "flex items-center justify-start gap-3 group/sidebar py-2.5 px-3 rounded-xl transition-all duration-200",
         isActive
@@ -246,8 +261,8 @@ export const SidebarLink = ({
       </div>
       <motion.span
         animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
+          display: animate ? (effectiveOpen ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (effectiveOpen ? 1 : 0) : 1,
         }}
         className={cn(
           "text-neutral-700 dark:text-neutral-200 text-[15px] leading-tight group-hover/sidebar:translate-x-0.5 transition duration-150 whitespace-pre",
