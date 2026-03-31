@@ -76,7 +76,11 @@ export default function DocumentsPage() {
       </div>
 
       {/* Document list */}
-      <DocumentList documents={filteredDocs} loading={loading} />
+      <DocumentList
+        documents={filteredDocs}
+        loading={loading}
+        onDelete={(id) => setDocuments((prev) => prev.filter((d: any) => d.id !== id))}
+      />
     </div>
   )
 }
