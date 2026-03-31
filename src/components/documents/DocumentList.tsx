@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import {
   Table,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "./StatusBadge"
-import { Eye, Plus, Download } from "lucide-react"
+import { Eye, Plus, Download, Share2, Check } from "lucide-react"
 import type { DocumentStatus } from "@/lib/documents/types"
 
 interface DocumentRow {
@@ -20,6 +20,7 @@ interface DocumentRow {
   agent_name: string
   agent_email: string
   status: DocumentStatus
+  sign_token: string
   signer_name: string | null
   signer_email: string | null
   created_at: string
@@ -27,6 +28,7 @@ interface DocumentRow {
   signed_at: string | null
   pdf_url: string | null
   templates?: { name: string; type: string } | null
+  document_fields?: { field_key: string; field_value: string }[] | null
 }
 
 interface DocumentListProps {
@@ -36,6 +38,20 @@ interface DocumentListProps {
 }
 
 export function DocumentList({ documents, showAgent = false, loading = false }: DocumentListProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const copyShareLink = (doc: DocumentRow) => {
+    const signUrl = `${window.location.origin}/sign/${doc.sign_token}`
+    navigator.clipboard.writeText(signUrl)
+    setCopiedId(doc.id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const getAddress = (doc: DocumentRow): string | null => {
+    const field = doc.document_fields?.find((f) => f.field_key === "property_address")
+    return field?.field_value || null
+  }
+
   if (loading) {
     return (
       <div className="rounded-lg border border-border bg-card p-8">
@@ -67,7 +83,7 @@ export function DocumentList({ documents, showAgent = false, loading = false }: 
         <TableHeader>
           <TableRow className="border-border hover:bg-transparent">
             <TableHead>Document</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Address</TableHead>
             {showAgent && <TableHead>Agent</TableHead>}
             <TableHead>Client</TableHead>
             <TableHead>Status</TableHead>
@@ -81,8 +97,8 @@ export function DocumentList({ documents, showAgent = false, loading = false }: 
               <TableCell className="font-medium">
                 {doc.templates?.name || "Untitled"}
               </TableCell>
-              <TableCell className="text-muted-foreground text-xs">
-                {formatTemplateType(doc.templates?.type)}
+              <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">
+                {getAddress(doc) || <span className="text-muted-foreground">—</span>}
               </TableCell>
               {showAgent && (
                 <TableCell className="text-sm">{doc.agent_name}</TableCell>
@@ -103,6 +119,21 @@ export function DocumentList({ documents, showAgent = false, loading = false }: 
                       <Eye className="h-4 w-4" />
                     </Button>
                   </Link>
+                  {(doc.status === "sent" || doc.status === "signed") && doc.sign_token && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => copyShareLink(doc)}
+                      title="Copy signing link"
+                    >
+                      {copiedId === doc.id ? (
+                        <Check className="h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <Share2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                   {doc.status === "signed" && doc.pdf_url && (
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Download className="h-4 w-4" />
@@ -116,15 +147,6 @@ export function DocumentList({ documents, showAgent = false, loading = false }: 
       </Table>
     </div>
   )
-}
-
-function formatTemplateType(type?: string): string {
-  switch (type) {
-    case "marketing_leasing": return "Marketing & Leasing"
-    case "socials_only": return "Socials Only"
-    case "general": return "General"
-    default: return "—"
-  }
 }
 
 function formatDate(date: string): string {

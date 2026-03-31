@@ -180,7 +180,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
         </div>
 
         {/* Document content */}
-        <DocumentPreview content={templateContent} fields={fieldMap} />
+        <DocumentPreview content={templateContent} fields={fieldMap} forceLightMode />
 
         {/* Signature area */}
         <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 space-y-6">

@@ -3,6 +3,13 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { TemplateVariable } from "@/lib/documents/types"
 
 interface FieldFormProps {
@@ -20,7 +27,21 @@ export function FieldForm({ variables, values, onChange, disabled = false }: Fie
           <Label htmlFor={variable.key} className="text-sm font-medium">
             {variable.label}
           </Label>
-          {variable.type === 'text' && variable.key.includes('details') ? (
+          {variable.key === 'exclusivity_type' ? (
+            <Select
+              value={values[variable.key] || ''}
+              onValueChange={(value) => onChange(variable.key, value)}
+              disabled={disabled}
+            >
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="Select exclusivity type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Exclusive">Exclusive</SelectItem>
+                <SelectItem value="Non-Exclusive">Non-Exclusive</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : variable.type === 'text' && variable.key.includes('details') ? (
             <Textarea
               id={variable.key}
               value={values[variable.key] || ''}

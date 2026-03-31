@@ -7,6 +7,7 @@ import { useDocumentSettings, type DocumentSettings } from "@/hooks/use-document
 interface DocumentPreviewProps {
   content: string
   fields: Record<string, string>
+  forceLightMode?: boolean
 }
 
 function DocumentHeader({ settings }: { settings: DocumentSettings }) {
@@ -49,7 +50,7 @@ function DocumentHeader({ settings }: { settings: DocumentSettings }) {
   )
 }
 
-export function DocumentPreview({ content, fields }: DocumentPreviewProps) {
+export function DocumentPreview({ content, fields, forceLightMode = false }: DocumentPreviewProps) {
   const { settings: headerSettings } = useDocumentSettings()
 
   // Clean content — remove outer JSON quotes if present
@@ -66,7 +67,7 @@ export function DocumentPreview({ content, fields }: DocumentPreviewProps) {
   const paragraphs = rendered.split('\n')
 
   return (
-    <div className="rounded-lg border border-border bg-white dark:bg-neutral-950 p-8 max-h-[600px] overflow-y-auto">
+    <div className={`rounded-lg border border-border bg-white p-8 max-h-[600px] overflow-y-auto ${forceLightMode ? '' : 'dark:bg-neutral-950'}`}>
       <div className="max-w-[650px] mx-auto font-mono text-sm leading-relaxed">
         <DocumentHeader settings={headerSettings} />
         {paragraphs.map((paragraph, i) => {
@@ -80,7 +81,7 @@ export function DocumentPreview({ content, fields }: DocumentPreviewProps) {
           return (
             <p
               key={i}
-              className={`mb-1 text-neutral-800 dark:text-neutral-200 ${
+              className={`mb-1 text-neutral-800 ${forceLightMode ? '' : 'dark:text-neutral-200'} ${
                 isHeader ? 'font-bold mt-4' : ''
               }`}
             >

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('documents')
-    .select('*, templates(name, type)')
+    .select('*, templates(name, type), document_fields(field_key, field_value)')
     .order('created_at', { ascending: false })
 
   if (agentId) {
