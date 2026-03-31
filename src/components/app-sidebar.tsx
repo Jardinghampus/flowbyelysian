@@ -35,6 +35,8 @@ import { usePathname } from "next/navigation"
 import { useTheme } from "@/hooks/use-theme"
 import { useRole, type UserRole } from "@/contexts/role-context"
 import { Logo } from "@/components/logo"
+import { useDocumentSettings } from "@/hooks/use-document-settings"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
@@ -190,6 +192,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme()
   const { role, isInternal } = useRole()
   const { isFullscreen } = useFullscreenContext()
+  const { settings: docSettings } = useDocumentSettings()
   const [open, setOpen] = useState(false)
 
   // In fullscreen mode, sidebar is always expanded
@@ -217,7 +220,7 @@ export function AppSidebar() {
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} />}
+          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} displayName={docSettings.header_display_name} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} />}
 
           {/* User Profile */}
           <SidebarUserInfo open={effectiveOpen} />
@@ -307,34 +310,42 @@ export function AppSidebar() {
   )
 }
 
-const LogoFull = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
+const LogoFull = ({ homeHref = "/user/dashboard", logoUrl, displayName }: { homeHref?: string; logoUrl?: string | null; displayName?: string }) => {
   return (
     <Link
       href={homeHref}
       className="font-bold flex items-center gap-3 text-black dark:text-white py-1 px-3 relative z-20"
     >
-      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
-        <Logo size={22} className="text-primary-foreground" />
+      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {logoUrl ? (
+          <Image src={logoUrl} alt="Logo" width={36} height={36} className="object-contain w-full h-full" unoptimized />
+        ) : (
+          <Logo size={22} className="text-primary-foreground" />
+        )}
       </div>
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-bold text-xl whitespace-pre tracking-tight"
       >
-        ZFLOW
+        {displayName || "ZFLOW"}
       </motion.span>
     </Link>
   )
 }
 
-const LogoIcon = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
+const LogoIcon = ({ homeHref = "/user/dashboard", logoUrl }: { homeHref?: string; logoUrl?: string | null }) => {
   return (
     <Link
       href={homeHref}
       className="font-bold flex items-center justify-center py-1 relative z-20"
     >
-      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
-        <Logo size={22} className="text-primary-foreground" />
+      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {logoUrl ? (
+          <Image src={logoUrl} alt="Logo" width={36} height={36} className="object-contain w-full h-full" unoptimized />
+        ) : (
+          <Logo size={22} className="text-primary-foreground" />
+        )}
       </div>
     </Link>
   )

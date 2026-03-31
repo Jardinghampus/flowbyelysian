@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, Upload, X, Loader2, Save, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import Image from "next/image"
+import { invalidateDocumentSettings } from "@/hooks/use-document-settings"
 
 interface DocumentSettings {
   id?: string
   header_logo_url: string | null
+  header_display_name: string
   company_name: string
   company_phone: string
   company_email: string
@@ -22,11 +24,12 @@ interface DocumentSettings {
 export default function DocumentSettingsPage() {
   const [settings, setSettings] = useState<DocumentSettings>({
     header_logo_url: null,
-    company_name: "",
-    company_phone: "",
-    company_email: "",
-    company_website: "",
-    company_address: "",
+    header_display_name: "ZFLOW",
+    company_name: "DERRICK SIGNATURE PROPERTIES L.L.C",
+    company_phone: "+ 971 (0) 4 295 5397",
+    company_email: "info@derricksignatureproperties.ae",
+    company_website: "www.derricksignatureproperties.ae",
+    company_address: "Office 605, Al Barsha Business Square, Dubai, UAE",
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -92,6 +95,7 @@ export default function DocumentSettingsPage() {
       })
 
       if (!res.ok) throw new Error("Save failed")
+      invalidateDocumentSettings()
       toast.success("Document settings saved")
     } catch {
       toast.error("Failed to save settings")
@@ -231,6 +235,30 @@ export default function DocumentSettingsPage() {
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
               PNG or JPG, max 5MB. Recommended: transparent background, landscape orientation.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sidebar / App Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">App Header</CardTitle>
+          <CardDescription>The name shown in the sidebar header of the application</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="header_display_name">Header Text</Label>
+            <Input
+              id="header_display_name"
+              value={settings.header_display_name}
+              onChange={(e) =>
+                setSettings((prev) => ({ ...prev, header_display_name: e.target.value }))
+              }
+              placeholder="ZFLOW"
+            />
+            <p className="text-xs text-muted-foreground">
+              This text appears next to the logo in the app sidebar. The logo uploaded above is also used in the sidebar.
             </p>
           </div>
         </CardContent>
