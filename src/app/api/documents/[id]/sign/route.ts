@@ -56,15 +56,23 @@ export async function POST(
     }
   }
 
-  // Fetch document header settings
-  let headerSettings: DocumentHeaderSettings | null = null
+  // Fetch document header settings (always use defaults as fallback)
+  const defaultHeaderSettings: DocumentHeaderSettings = {
+    header_logo_url: null,
+    company_name: 'DERRICK SIGNATURE PROPERTIES L.L.C',
+    company_phone: '+ 971 (0) 4 295 5397',
+    company_email: 'info@derricksignatureproperties.ae',
+    company_website: 'www.derricksignatureproperties.ae',
+    company_address: 'Office 605, Al Barsha Business Square, Dubai, UAE',
+  }
+  let headerSettings: DocumentHeaderSettings = defaultHeaderSettings
   const { data: settingsData } = await supabase
     .from('document_settings')
     .select('*')
     .limit(1)
     .single()
   if (settingsData) {
-    headerSettings = settingsData as DocumentHeaderSettings
+    headerSettings = { ...defaultHeaderSettings, ...settingsData } as DocumentHeaderSettings
   }
 
   // Generate PDF with signature and header

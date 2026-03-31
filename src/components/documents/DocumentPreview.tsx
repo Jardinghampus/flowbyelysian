@@ -1,25 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { substituteVariables } from "@/lib/documents/pdf"
 import Image from "next/image"
-
-interface DocumentHeaderSettings {
-  header_logo_url: string | null
-  company_name: string
-  company_phone: string
-  company_email: string
-  company_website: string
-  company_address: string
-}
+import { useDocumentSettings, type DocumentSettings } from "@/hooks/use-document-settings"
 
 interface DocumentPreviewProps {
   content: string
   fields: Record<string, string>
 }
 
-function DocumentHeader({ settings }: { settings: DocumentHeaderSettings }) {
-  if (!settings.company_name) return null
+function DocumentHeader({ settings }: { settings: DocumentSettings }) {
 
   return (
     <div className="mb-6">
@@ -60,18 +50,7 @@ function DocumentHeader({ settings }: { settings: DocumentHeaderSettings }) {
 }
 
 export function DocumentPreview({ content, fields }: DocumentPreviewProps) {
-  const [headerSettings, setHeaderSettings] = useState<DocumentHeaderSettings | null>(null)
-
-  useEffect(() => {
-    fetch("/api/document-settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && !data.error && data.company_name) {
-          setHeaderSettings(data)
-        }
-      })
-      .catch(() => {})
-  }, [])
+  const { settings: headerSettings } = useDocumentSettings()
 
   // Clean content — remove outer JSON quotes if present
   let cleanContent = content
@@ -89,7 +68,7 @@ export function DocumentPreview({ content, fields }: DocumentPreviewProps) {
   return (
     <div className="rounded-lg border border-border bg-white dark:bg-neutral-950 p-8 max-h-[600px] overflow-y-auto">
       <div className="max-w-[650px] mx-auto font-mono text-sm leading-relaxed">
-        {headerSettings && <DocumentHeader settings={headerSettings} />}
+        <DocumentHeader settings={headerSettings} />
         {paragraphs.map((paragraph, i) => {
           if (paragraph.trim() === '') {
             return <div key={i} className="h-4" />

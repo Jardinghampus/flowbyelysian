@@ -225,7 +225,7 @@ export async function generateDocumentPdf(
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
   let y: number
 
-  if (headerSettings && headerSettings.company_name) {
+  if (headerSettings) {
     y = await drawHeader(page, pdfDoc, font, boldFont, headerSettings)
   } else {
     y = PAGE_HEIGHT - TOP_MARGIN
