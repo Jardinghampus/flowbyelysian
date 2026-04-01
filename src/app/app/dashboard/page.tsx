@@ -14,6 +14,7 @@ import { QuickActions } from "./components/quick-actions"
 import { OnboardingProgress } from "./components/onboarding-progress"
 import { TeamSidebar } from "./components/team-sidebar"
 import { DailyTrackerSummary } from "./components/daily-tracker-summary"
+import { MyActivityTracker } from "./components/my-activity-tracker"
 import { RippleButton } from "@/components/ui/ripple-button"
 import ColourfulText from "@/components/ui/colourful-text"
 
@@ -90,6 +91,9 @@ export default function Page() {
               {/* Trend Cards */}
               <SectionCards />
 
+              {/* My Activity Tracker - Personal daily tracking */}
+              <MyActivityTracker />
+
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Left: Matches + Activity stacked */}
@@ -102,7 +106,6 @@ export default function Page() {
                 {/* Right: Chart + Actions */}
                 <div className="space-y-4">
                   <ChartAreaInteractive />
-                  <DailyTrackerSummary />
                   <div className="grid grid-cols-2 gap-4">
                     <OnboardingProgress />
                     <QuickActions />
