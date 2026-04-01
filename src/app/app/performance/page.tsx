@@ -9,6 +9,7 @@ import { AICoach } from "./components/ai-coach"
 import { MonthlyReportDownload } from "./components/monthly-report"
 import { Leaderboard } from "./components/leaderboard"
 import { Achievements } from "./components/achievements"
+import { DailyTracker } from "./components/daily-tracker"
 
 export default function PerformancePage() {
   return (
@@ -22,6 +23,9 @@ export default function PerformancePage() {
       </div>
 
       <div className="@container/main px-4 lg:px-6 space-y-6">
+        {/* Daily Activity Tracker */}
+        <DailyTracker />
+
         {/* Personal Targets and AI Coach - Side by side */}
         <div className="grid gap-6 lg:grid-cols-2">
           <PersonalTargets />

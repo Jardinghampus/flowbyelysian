@@ -13,6 +13,7 @@ import { ActivityFeed } from "./components/activity-feed"
 import { QuickActions } from "./components/quick-actions"
 import { OnboardingProgress } from "./components/onboarding-progress"
 import { TeamSidebar } from "./components/team-sidebar"
+import { DailyTrackerSummary } from "./components/daily-tracker-summary"
 import { RippleButton } from "@/components/ui/ripple-button"
 import ColourfulText from "@/components/ui/colourful-text"
 
@@ -101,6 +102,7 @@ export default function Page() {
                 {/* Right: Chart + Actions */}
                 <div className="space-y-4">
                   <ChartAreaInteractive />
+                  <DailyTrackerSummary />
                   <div className="grid grid-cols-2 gap-4">
                     <OnboardingProgress />
                     <QuickActions />
