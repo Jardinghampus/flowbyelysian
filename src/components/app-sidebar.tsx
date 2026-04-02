@@ -106,6 +106,7 @@ const navSections: NavSection[] = [
       { label: "Leads", href: "/app/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Inventory", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
       { label: "My Listings", href: "/app/my-listings", icon: <ImagePlus className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Landlord Report", href: "/app/landlord-report", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Exchange", href: "/app/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers, Settings2 } from "lucide-react"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers, Settings2, ClipboardList, Calendar, Star, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/card"
 import { AgentPerformanceEditor } from "./components/agent-performance-editor"
 import { MarketUpdatesCms } from "./components/market-updates-cms"
+import { AgentOverviewPanel } from "./components/agent-overview-panel"
 import { toast } from "sonner"
 
 interface AgencyListing {
@@ -288,6 +289,10 @@ export default function AdminPage() {
             <TabsTrigger value="market-updates" className="flex items-center gap-2">
               <Newspaper className="h-4 w-4" />
               Market Updates
+            </TabsTrigger>
+            <TabsTrigger value="agent-overview" className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Agent Overview
             </TabsTrigger>
           </TabsList>
 
@@ -718,6 +723,10 @@ export default function AdminPage() {
 
           <TabsContent value="market-updates">
             <MarketUpdatesCms />
+          </TabsContent>
+
+          <TabsContent value="agent-overview" className="space-y-6">
+            <AgentOverviewPanel />
           </TabsContent>
         </Tabs>
       </div>
