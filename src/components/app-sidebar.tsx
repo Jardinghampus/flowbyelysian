@@ -29,6 +29,7 @@ import {
   CalendarDays,
   ImagePlus,
   CheckSquare,
+  MessageCircle,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -148,6 +149,14 @@ const navSections: NavSection[] = [
       { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
       { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
       { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+    ],
+  },
+  // ── INTERNAL: Apps ──
+  {
+    title: "Apps",
+    roles: ["admin", "agent"],
+    items: [
+      { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Resources ──
