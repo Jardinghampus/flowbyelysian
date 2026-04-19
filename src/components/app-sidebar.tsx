@@ -97,6 +97,14 @@ interface NavSection {
 const ALL_CUSTOMERS: UserRole[] = ["buyer", "seller", "tenant", "landlord", "relocation_agent"]
 
 const navSections: NavSection[] = [
+  // ── INTERNAL: Apps ──
+  {
+    title: "Apps",
+    roles: ["admin", "agent"],
+    items: [
+      { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
+    ],
+  },
   // ── INTERNAL: Core ── (/app/...)
   {
     title: "Core",
@@ -149,14 +157,6 @@ const navSections: NavSection[] = [
       { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
       { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
       { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Apps ──
-  {
-    title: "Apps",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
   // ── INTERNAL: Resources ──
