@@ -307,10 +307,10 @@ export function ClientInventoryReport({ data }: ClientInventoryReportProps) {
           </View>
           {(tablePages[0] || []).map((listing, i) => (
             <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
-              <Text style={[styles.tableCellBold, { width: "25%" }]} numberOfLines={1}>
+              <Text style={[styles.tableCellBold, { width: "25%" }]}>
                 {listing.title}
               </Text>
-              <Text style={[styles.tableCell, { width: "15%" }]} numberOfLines={1}>
+              <Text style={[styles.tableCell, { width: "15%" }]}>
                 {listing.area}
               </Text>
               <Text style={[styles.tableCell, { width: "10%", textTransform: "capitalize" }]}>
@@ -370,10 +370,10 @@ export function ClientInventoryReport({ data }: ClientInventoryReportProps) {
             </View>
             {pageListings.map((listing, i) => (
               <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
-                <Text style={[styles.tableCellBold, { width: "25%" }]} numberOfLines={1}>
+                <Text style={[styles.tableCellBold, { width: "25%" }]}>
                   {listing.title}
                 </Text>
-                <Text style={[styles.tableCell, { width: "15%" }]} numberOfLines={1}>
+                <Text style={[styles.tableCell, { width: "15%" }]}>
                   {listing.area}
                 </Text>
                 <Text style={[styles.tableCell, { width: "10%", textTransform: "capitalize" }]}>
