@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Plus, Sparkles, Filter, X } from "lucide-react"
+import { useState, useEffect, useMemo, useCallback } from "react"
+import { Plus, Sparkles, Filter, X, FileText, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,6 +29,8 @@ import { AIMatchingDialog } from "./components/ai-matching-dialog"
 import { MatchingTable, getUserMatches } from "./components/matching-table"
 import { MyMatchesView } from "./components/my-matches-view"
 import { useRole } from "@/contexts/role-context"
+import { useDemoUser } from "@/contexts/demo-user-context"
+import { toast } from "sonner"
 
 export type ListingStatus = "live" | "pocket" | "unofficial"
 export type ListingType = "villa" | "apartment" | "townhouse" | "penthouse" | "plot" | "office" | "retail"
@@ -47,6 +49,7 @@ export interface Listing {
   transactionType: TransactionType
   notes: string
   propertyFinderUrl?: string
+  googleMapsUrl?: string
   images: string[] // URLs, max 5
   bedrooms?: number
   bathrooms?: number
@@ -57,135 +60,50 @@ export interface Listing {
   updatedAt: string
 }
 
-// Current user - in production this would come from Clerk/auth
-const CURRENT_USER_ID = "user-1"
-const CURRENT_USER_NAME = "Ahmed Hassan"
+function mapApiListing(raw: Record<string, unknown>): Listing {
+  return {
+    id: raw.id as string,
+    title: raw.title as string,
+    area: (raw.area_name as string) || "",
+    size: (raw.size as number) || 0,
+    price: Number(raw.price) || 0,
+    type: raw.type as ListingType,
+    status: (raw.status as ListingStatus) || "live",
+    inquiryType: (raw.inquiry_type as InquiryType) || "stock",
+    transactionType: raw.transaction_type as TransactionType,
+    notes: (raw.notes as string) || "",
+    propertyFinderUrl: raw.property_finder_url as string | undefined,
+    googleMapsUrl: raw.google_maps_url as string | undefined,
+    images: (raw.images as string[]) || [],
+    bedrooms: raw.bedrooms as number | undefined,
+    bathrooms: raw.bathrooms as number | undefined,
+    availability: raw.availability as string | undefined,
+    ownerId: raw.owner_id as string,
+    ownerName: (raw.owner_name as string) || "Unknown",
+    createdAt: raw.created_at as string,
+    updatedAt: raw.updated_at as string,
+  }
+}
 
-// Demo data with multiple agents
-const initialListings: Listing[] = [
-  {
-    id: "1",
-    title: "Luxury Villa with Pool",
-    area: "Emirates Hills",
-    size: 8500,
-    price: 15000000,
-    type: "villa",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Corner plot, upgraded kitchen, private pool",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/123456",
-    images: [],
-    bedrooms: 5,
-    bathrooms: 6,
-    availability: "Immediate",
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "2",
-    title: "Modern Apartment Downtown",
-    area: "Downtown Dubai",
-    size: 1800,
-    price: 180000,
-    type: "apartment",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "rent",
-    notes: "Burj Khalifa view, high floor, yearly rent",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/234567",
-    images: [],
-    bedrooms: 2,
-    bathrooms: 3,
-    availability: "Q2 2024",
-    ownerId: "user-2",
-    ownerName: "Sarah Miller",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-18",
-  },
-  {
-    id: "3",
-    title: "Family Villa in Murooj",
-    area: "Al Murooj",
-    size: 5200,
-    price: 8500000,
-    type: "villa",
-    status: "pocket",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Quiet community, near school, motivated seller",
-    images: [],
-    bedrooms: 4,
-    bathrooms: 5,
-    availability: "Negotiable",
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-08",
-    updatedAt: "2024-01-15",
-  },
-  {
-    id: "4",
-    title: "Client Looking for Villa",
-    area: "Tilal Al Ghaf",
-    size: 6000,
-    price: 10000000,
-    type: "villa",
-    status: "unofficial",
-    inquiryType: "request",
-    transactionType: "sale",
-    notes: "Buyer prequalified, 10M budget, prefers new builds",
-    images: [],
-    bedrooms: 5,
-    bathrooms: 5,
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "5",
-    title: "Penthouse Marina",
-    area: "Dubai Marina",
-    size: 4200,
-    price: 450000,
-    type: "penthouse",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "rent",
-    notes: "Full sea view, private terrace, luxury finish",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/345678",
-    images: [],
-    bedrooms: 3,
-    bathrooms: 4,
-    availability: "March 2024",
-    ownerId: "user-3",
-    ownerName: "Omar Khan",
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-19",
-  },
-  {
-    id: "6",
-    title: "Townhouse Arabian Ranches",
-    area: "Arabian Ranches",
-    size: 3800,
-    price: 5200000,
-    type: "townhouse",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Community pool access, landscaped garden",
-    images: [],
-    bedrooms: 4,
-    bathrooms: 4,
-    availability: "Immediate",
-    ownerId: "user-2",
-    ownerName: "Sarah Miller",
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-14",
-  },
-]
+function toApiListing(listing: Partial<Listing>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {}
+  if (listing.title !== undefined) mapped.title = listing.title
+  if (listing.area !== undefined) mapped.area_name = listing.area
+  if (listing.size !== undefined) mapped.size = listing.size
+  if (listing.price !== undefined) mapped.price = listing.price
+  if (listing.type !== undefined) mapped.type = listing.type
+  if (listing.status !== undefined) mapped.status = listing.status
+  if (listing.inquiryType !== undefined) mapped.inquiry_type = listing.inquiryType
+  if (listing.transactionType !== undefined) mapped.transaction_type = listing.transactionType
+  if (listing.notes !== undefined) mapped.notes = listing.notes
+  if (listing.propertyFinderUrl !== undefined) mapped.property_finder_url = listing.propertyFinderUrl
+  if (listing.googleMapsUrl !== undefined) mapped.google_maps_url = listing.googleMapsUrl
+  if (listing.images !== undefined) mapped.images = listing.images
+  if (listing.bedrooms !== undefined) mapped.bedrooms = listing.bedrooms
+  if (listing.bathrooms !== undefined) mapped.bathrooms = listing.bathrooms
+  if (listing.availability !== undefined) mapped.availability = listing.availability
+  return mapped
+}
 
 // Get unique areas from listings
 const AREAS = [
@@ -232,16 +150,36 @@ const defaultFilters: Filters = {
 }
 
 export default function InventoryPage() {
-  const [listings, setListings] = useState<Listing[]>(initialListings)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
   const [activeTab, setActiveTab] = useState<"all" | "mine" | "mymatches" | ListingStatus | InquiryType | TransactionType>("all")
   const { isAdmin } = useRole()
+  const { user } = useDemoUser()
 
-  const currentUserId = CURRENT_USER_ID
-  const currentUserName = CURRENT_USER_NAME
+  const currentUserId = user?.id || ""
+  const currentUserName = user?.fullName || ""
+
+  const fetchListings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/listings?limit=500")
+      if (!res.ok) throw new Error("Failed to fetch")
+      const data = await res.json()
+      setListings((data.listings || []).map(mapApiListing))
+    } catch {
+      toast.error("Could not load listings")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchListings()
+  }, [fetchListings])
 
   // Get unique agents from listings
   const agents = useMemo(() => {
@@ -272,36 +210,82 @@ export default function InventoryPage() {
     setFilters(defaultFilters)
   }
 
-  const handleCreateListing = (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
-    const newListing: Listing = {
-      ...listing,
-      id: Date.now().toString(),
-      ownerId: currentUserId,
-      ownerName: currentUserName,
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: new Date().toISOString().split("T")[0],
+  const handleCreateListing = async (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
+    try {
+      const res = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toApiListing(listing)),
+      })
+      if (!res.ok) throw new Error("Failed to create listing")
+      const data = await res.json()
+      setListings([mapApiListing(data.listing), ...listings])
+      setIsCreateOpen(false)
+      toast.success("Listing created")
+    } catch {
+      toast.error("Failed to create listing")
     }
-    setListings([newListing, ...listings])
-    setIsCreateOpen(false)
   }
 
-  const handleDeleteListing = (id: string) => {
+  const handleDeleteListing = async (id: string) => {
     const listing = listings.find((l) => l.id === id)
-    // Only allow deletion if user owns the listing or is admin
-    if (listing && (listing.ownerId === currentUserId || isAdmin)) {
+    if (!listing || !(listing.ownerId === currentUserId || isAdmin)) return
+    try {
+      const res = await fetch(`/api/listings/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed to delete")
       setListings(listings.filter((l) => l.id !== id))
+      toast.success("Listing deleted")
+    } catch {
+      toast.error("Failed to delete listing")
     }
   }
 
-  const handleUpdateListing = (updatedListing: Listing) => {
-    // Only allow update if user owns the listing or is admin
+  const handleUpdateListing = async (updatedListing: Listing) => {
     const existingListing = listings.find((l) => l.id === updatedListing.id)
-    if (existingListing && (existingListing.ownerId === currentUserId || isAdmin)) {
-      setListings(listings.map((l) =>
-        l.id === updatedListing.id
-          ? { ...updatedListing, updatedAt: new Date().toISOString().split("T")[0] }
-          : l
-      ))
+    if (!existingListing || !(existingListing.ownerId === currentUserId || isAdmin)) return
+    try {
+      const res = await fetch(`/api/listings/${updatedListing.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toApiListing(updatedListing)),
+      })
+      if (!res.ok) throw new Error("Failed to update")
+      const data = await res.json()
+      setListings(listings.map((l) => l.id === updatedListing.id ? mapApiListing(data.listing) : l))
+      toast.success("Listing updated")
+    } catch {
+      toast.error("Failed to update listing")
+    }
+  }
+
+  const handleGenerateReport = async () => {
+    const filtered = getFilteredListings()
+    if (filtered.length === 0) {
+      toast.error("No listings to include in report")
+      return
+    }
+    setIsGeneratingReport(true)
+    try {
+      const res = await fetch("/api/reports/client-inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listings: filtered }),
+      })
+      if (!res.ok) throw new Error("Failed to generate report")
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] || "inventory-report.pdf"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success("Report downloaded")
+    } catch {
+      toast.error("Failed to generate report")
+    } finally {
+      setIsGeneratingReport(false)
     }
   }
 
@@ -630,6 +614,18 @@ export default function InventoryPage() {
                 </SheetFooter>
               </SheetContent>
             </Sheet>
+            <Button
+              variant="outline"
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+            >
+              {isGeneratingReport ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FileText className="mr-2 h-4 w-4" />
+              )}
+              Client Report
+            </Button>
             <Button variant="outline" onClick={() => setIsMatchingOpen(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
               AI Matching
@@ -659,7 +655,11 @@ export default function InventoryPage() {
             <TabsTrigger value="request">Requests ({requestCount})</TabsTrigger>
           </TabsList>
 
-          {activeTab === "mymatches" ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : activeTab === "mymatches" ? (
             <TabsContent value="mymatches" className="mt-4">
               <MyMatchesView matches={myMatches} />
             </TabsContent>

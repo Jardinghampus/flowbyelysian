@@ -65,6 +65,7 @@ export function EditListingDialog({
   const [transactionType, setTransactionType] = useState<TransactionType>(listing.transactionType)
   const [notes, setNotes] = useState(listing.notes)
   const [propertyFinderUrl, setPropertyFinderUrl] = useState(listing.propertyFinderUrl || "")
+  const [googleMapsUrl, setGoogleMapsUrl] = useState(listing.googleMapsUrl || "")
   const [images, setImages] = useState<string[]>(listing.images)
   const [newImageUrl, setNewImageUrl] = useState("")
   const [bedrooms, setBedrooms] = useState(listing.bedrooms?.toString() || "")
@@ -83,6 +84,7 @@ export function EditListingDialog({
     setTransactionType(listing.transactionType)
     setNotes(listing.notes)
     setPropertyFinderUrl(listing.propertyFinderUrl || "")
+    setGoogleMapsUrl(listing.googleMapsUrl || "")
     setImages(listing.images)
     setBedrooms(listing.bedrooms?.toString() || "")
     setBathrooms(listing.bathrooms?.toString() || "")
@@ -104,6 +106,7 @@ export function EditListingDialog({
       transactionType,
       notes,
       propertyFinderUrl: propertyFinderUrl || undefined,
+      googleMapsUrl: googleMapsUrl || undefined,
       images,
       bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
       bathrooms: bathrooms ? parseInt(bathrooms) : undefined,
@@ -308,6 +311,21 @@ export function EditListingDialog({
               value={propertyFinderUrl}
               onChange={(e) => setPropertyFinderUrl(e.target.value)}
             />
+          </div>
+
+          {/* Google Maps URL */}
+          <div className="space-y-2">
+            <Label htmlFor="googleMapsUrl">Google Maps Link</Label>
+            <Input
+              id="googleMapsUrl"
+              type="url"
+              value={googleMapsUrl}
+              onChange={(e) => setGoogleMapsUrl(e.target.value)}
+              placeholder="https://maps.google.com/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Share this link with clients for viewings
+            </p>
           </div>
 
           {/* Images */}

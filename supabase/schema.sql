@@ -59,6 +59,7 @@ create table listings (
   transaction_type transaction_type not null,
   notes text,
   property_finder_url text,
+  google_maps_url text,
   images text[] default '{}',
   bedrooms integer,
   bathrooms integer,

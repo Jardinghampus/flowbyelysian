@@ -63,6 +63,7 @@ export function CreateListingDialog({
   const [transactionType, setTransactionType] = useState<TransactionType>("sale")
   const [notes, setNotes] = useState("")
   const [propertyFinderUrl, setPropertyFinderUrl] = useState("")
+  const [googleMapsUrl, setGoogleMapsUrl] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [newImageUrl, setNewImageUrl] = useState("")
   const [bedrooms, setBedrooms] = useState("")
@@ -81,6 +82,7 @@ export function CreateListingDialog({
     setTransactionType("sale")
     setNotes("")
     setPropertyFinderUrl("")
+    setGoogleMapsUrl("")
     setImages([])
     setNewImageUrl("")
     setBedrooms("")
@@ -102,6 +104,7 @@ export function CreateListingDialog({
       transactionType,
       notes,
       propertyFinderUrl: propertyFinderUrl || undefined,
+      googleMapsUrl: googleMapsUrl || undefined,
       images,
       bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
       bathrooms: bathrooms ? parseInt(bathrooms) : undefined,
@@ -316,6 +319,21 @@ export function CreateListingDialog({
               onChange={(e) => setPropertyFinderUrl(e.target.value)}
               placeholder="https://www.propertyfinder.ae/property/..."
             />
+          </div>
+
+          {/* Google Maps URL */}
+          <div className="space-y-2">
+            <Label htmlFor="googleMapsUrl">Google Maps Link</Label>
+            <Input
+              id="googleMapsUrl"
+              type="url"
+              value={googleMapsUrl}
+              onChange={(e) => setGoogleMapsUrl(e.target.value)}
+              placeholder="https://maps.google.com/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Share this link with clients for viewings
+            </p>
           </div>
 
           {/* Images */}

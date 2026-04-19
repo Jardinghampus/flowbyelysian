@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, Pencil, MapPin, Ruler, DollarSign, Bed, Bath, Calendar, User } from "lucide-react"
+import { ExternalLink, Pencil, MapPin, Ruler, DollarSign, Bed, Bath, Calendar, User, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -170,19 +170,34 @@ export function ViewListingDialog({
           </div>
         )}
 
-        {/* PropertyFinder Link */}
-        {listing.propertyFinderUrl && (
+        {/* External Links */}
+        {(listing.propertyFinderUrl || listing.googleMapsUrl) && (
           <div>
             <h4 className="font-medium mb-2">External Links</h4>
-            <a
-              href={listing.propertyFinderUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-primary hover:underline"
-            >
-              <ExternalLink className="h-4 w-4" />
-              View on PropertyFinder
-            </a>
+            <div className="flex flex-col gap-2">
+              {listing.propertyFinderUrl && (
+                <a
+                  href={listing.propertyFinderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View on PropertyFinder
+                </a>
+              )}
+              {listing.googleMapsUrl && (
+                <a
+                  href={listing.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:underline"
+                >
+                  <Map className="h-4 w-4" />
+                  View on Google Maps
+                </a>
+              )}
+            </div>
           </div>
         )}
 

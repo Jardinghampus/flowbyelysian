@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   Eye,
   User,
+  Map,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -207,6 +208,18 @@ export function InventoryTable({
                               >
                                 <ExternalLink className="mr-2 h-4 w-4" />
                                 PropertyFinder
+                              </a>
+                            </DropdownMenuItem>
+                          )}
+                          {listing.googleMapsUrl && (
+                            <DropdownMenuItem asChild>
+                              <a
+                                href={listing.googleMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Map className="mr-2 h-4 w-4" />
+                                Google Maps
                               </a>
                             </DropdownMenuItem>
                           )}
