@@ -55,6 +55,7 @@ import {
 import { AgentPerformanceEditor } from "./components/agent-performance-editor"
 import { MarketUpdatesCms } from "./components/market-updates-cms"
 import { AgentOverviewPanel } from "./components/agent-overview-panel"
+import { AreaManagement } from "./components/area-management"
 import { toast } from "sonner"
 
 interface AgencyListing {
@@ -293,6 +294,10 @@ export default function AdminPage() {
             <TabsTrigger value="agent-overview" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
               Agent Overview
+            </TabsTrigger>
+            <TabsTrigger value="areas" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Areas & Access
             </TabsTrigger>
           </TabsList>
 
@@ -727,6 +732,10 @@ export default function AdminPage() {
 
           <TabsContent value="agent-overview" className="space-y-6">
             <AgentOverviewPanel />
+          </TabsContent>
+
+          <TabsContent value="areas" className="space-y-6">
+            <AreaManagement />
           </TabsContent>
         </Tabs>
       </div>

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select"
 import { Phone, MessageSquare, Mail, Users, Smartphone, ExternalLink, Loader2, Save } from "lucide-react"
 import type { Owner, OutreachLog, OutreachType, OwnerStatus, OwnerPriority } from "../_lib/types"
-import { STATUS_CONFIG, PRIORITY_CONFIG, OUTREACH_TYPE_CONFIG, DUBAI_AREAS } from "../_lib/types"
+import { STATUS_CONFIG, PRIORITY_CONFIG, OUTREACH_TYPE_CONFIG } from "../_lib/types"
 import { cn } from "@/lib/utils"
 import { format, formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
@@ -33,6 +33,7 @@ interface OwnerDetailPanelProps {
   loading: boolean
   onRefresh: () => void
   onRefreshAll: () => void
+  areas?: string[]
 }
 
 const typeIcons: Record<OutreachType, React.ElementType> = {
@@ -51,7 +52,9 @@ export function OwnerDetailPanel({
   loading,
   onRefresh,
   onRefreshAll,
+  areas,
 }: OwnerDetailPanelProps) {
+  const DUBAI_AREAS = areas || []
   const [saving, setSaving] = useState(false)
   const [editName, setEditName] = useState("")
   const [editPhone, setEditPhone] = useState("")

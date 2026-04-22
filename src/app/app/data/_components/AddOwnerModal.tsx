@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { DUBAI_AREAS } from "../_lib/types"
 import { addOwnerSchema } from "../_lib/schemas"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -27,9 +26,10 @@ interface AddOwnerModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  areas: string[]
 }
 
-export function AddOwnerModal({ open, onOpenChange, onSuccess }: AddOwnerModalProps) {
+export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwnerModalProps) {
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
@@ -114,7 +114,7 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess }: AddOwnerModalPr
               <Select value={area} onValueChange={setArea}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select area" /></SelectTrigger>
                 <SelectContent>
-                  {DUBAI_AREAS.map((a) => (
+                  {areas.map((a) => (
                     <SelectItem key={a} value={a}>{a}</SelectItem>
                   ))}
                 </SelectContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, X, Download, Plus, SlidersHorizontal } from "lucide-react"
+import { Search, X, Download, Plus, SlidersHorizontal, Phone } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { OwnerFiltersState } from "../_lib/types"
-import { DUBAI_AREAS } from "../_lib/types"
 
 interface OwnerFiltersProps {
   filters: OwnerFiltersState
@@ -20,6 +19,7 @@ interface OwnerFiltersProps {
   onAddOwner: () => void
   onLogOutreach: () => void
   onExport: () => void
+  areas: string[]
 }
 
 export function OwnerFilters({
@@ -28,6 +28,7 @@ export function OwnerFilters({
   onAddOwner,
   onLogOutreach,
   onExport,
+  areas,
 }: OwnerFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -89,7 +90,7 @@ export function OwnerFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Areas</SelectItem>
-            {DUBAI_AREAS.map((area) => (
+            {areas.map((area) => (
               <SelectItem key={area} value={area}>{area}</SelectItem>
             ))}
           </SelectContent>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Database, ListChecks, BarChart3 } from "lucide-react"
 import { StatsBar } from "./_components/StatsBar"
 import { OwnerFilters } from "./_components/OwnerFilters"
@@ -12,13 +12,34 @@ import { TodoPanel } from "./_components/TodoPanel"
 import { PerformancePanel } from "./_components/PerformancePanel"
 import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance } from "./_hooks/useOwners"
 import type { Owner, OwnerFiltersState } from "./_lib/types"
+import { DUBAI_AREAS } from "./_lib/types"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import Papa from "papaparse"
 
 type SideTab = "todo" | "performance"
 
+function useAreas() {
+  const [areas, setAreas] = useState<string[]>([...DUBAI_AREAS])
+
+  useEffect(() => {
+    fetch("/api/areas")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.areas && data.areas.length > 0) {
+          const names = data.areas.map((a: { name: string }) => a.name).sort()
+          setAreas(names)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  return areas
+}
+
 export default function DataPage() {
+  const areas = useAreas()
+
   const [filters, setFilters] = useState<OwnerFiltersState>({
     search: "",
     area: "",
@@ -143,6 +164,7 @@ export default function DataPage() {
           onAddOwner={() => setAddOwnerOpen(true)}
           onLogOutreach={() => { setOutreachOwner(null); setLogOutreachOpen(true) }}
           onExport={handleExport}
+          areas={areas}
         />
 
         {/* Table */}
@@ -207,7 +229,7 @@ export default function DataPage() {
       </div>
 
       {/* Modals */}
-      <AddOwnerModal open={addOwnerOpen} onOpenChange={setAddOwnerOpen} onSuccess={refreshAll} />
+      <AddOwnerModal open={addOwnerOpen} onOpenChange={setAddOwnerOpen} onSuccess={refreshAll} areas={areas} />
 
       <LogOutreachModal
         open={logOutreachOpen}
@@ -225,6 +247,7 @@ export default function DataPage() {
         loading={detailLoading}
         onRefresh={refetchDetail}
         onRefreshAll={refreshAll}
+        areas={areas}
       />
     </div>
   )
