@@ -56,6 +56,8 @@ export interface Listing {
   availability?: string
   ownerId: string // Agent who owns this listing
   ownerName: string // Display name of the agent
+  ownerContactId?: string | null // FK to owners table
+  ownerContactName?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -80,6 +82,8 @@ function mapApiListing(raw: Record<string, unknown>): Listing {
     availability: raw.availability as string | undefined,
     ownerId: raw.owner_id as string,
     ownerName: (raw.owner_name as string) || "Unknown",
+    ownerContactId: (raw.owner_contact_id as string | null) || null,
+    ownerContactName: (raw.owner_contact_name as string | null) || null,
     createdAt: raw.created_at as string,
     updatedAt: raw.updated_at as string,
   }

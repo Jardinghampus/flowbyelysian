@@ -154,10 +154,18 @@ export function ViewListingDialog({
         {/* Agent/Owner */}
         <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
           <User className="h-4 w-4 text-muted-foreground" />
-          <div>
+          <div className="flex-1">
             <p className="text-xs text-muted-foreground">Listed by</p>
             <p className="font-medium">{listing.ownerName}</p>
           </div>
+          {listing.ownerContactId && (
+            <a
+              href="/app/data"
+              className="text-xs text-[#C9A84C] hover:underline flex items-center gap-1"
+            >
+              Owner linked
+            </a>
+          )}
         </div>
 
         <Separator />

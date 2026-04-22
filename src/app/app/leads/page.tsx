@@ -31,6 +31,8 @@ import {
   HandMetal,
   Plus,
   X,
+  Database,
+  Link2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRole } from "@/contexts/role-context"
@@ -93,6 +95,60 @@ const statusConfig: Record<OpportunityStatus, { label: string; color: string; bg
 // Current agent ID — in production from Clerk/auth
 const CURRENT_AGENT_ID = "demo-agent-self"
 const CURRENT_AGENT_NAME = "Ahmed Hassan"
+
+function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string; area: string | null }) {
+  const [owner, setOwner] = useState<{ id: string; name: string; status: string; area: string; follow_up_at: string | null } | null>(null)
+  const [searching, setSearching] = useState(true)
+
+  useEffect(() => {
+    if (!phone) { setSearching(false); return }
+    fetch(`/api/owners?search=${encodeURIComponent(phone)}&limit=1`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.owners?.length > 0) setOwner(data.owners[0])
+      })
+      .catch(() => {})
+      .finally(() => setSearching(false))
+  }, [phone])
+
+  if (searching) return null
+
+  return (
+    <div className="rounded-xl border p-4 space-y-2">
+      <div className="flex items-center gap-2">
+        <Database className="h-4 w-4 text-[#C9A84C]" />
+        <h3 className="text-sm font-bold">Owner Database Link</h3>
+      </div>
+      {owner ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium flex items-center gap-1.5">
+              <Link2 className="h-3 w-3 text-emerald-500" />
+              {owner.name}
+            </p>
+            <p className="text-xs text-muted-foreground">{owner.area} · {owner.status}</p>
+          </div>
+          <a
+            href="/app/data"
+            className="text-xs text-[#C9A84C] hover:underline"
+          >
+            View in Data →
+          </a>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">No matching owner found in database</p>
+          <a
+            href={`/app/data?prefillName=${encodeURIComponent(name)}&prefillPhone=${encodeURIComponent(phone)}&prefillArea=${encodeURIComponent(area || "")}`}
+            className="text-xs text-[#C9A84C] hover:underline"
+          >
+            + Add to Data
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function LeadsPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
@@ -724,6 +780,11 @@ export default function LeadsPage() {
                   <h3 className="text-sm font-bold">Customer Notes</h3>
                   <p className="text-sm text-muted-foreground">{selectedOpp.notes}</p>
                 </div>
+              )}
+
+              {/* Linked Owner from Data Tab */}
+              {isInternal && (
+                <LinkedOwnerSection phone={selectedOpp.phone} name={selectedOpp.full_name} area={selectedOpp.area} />
               )}
 
               {/* Quick actions */}

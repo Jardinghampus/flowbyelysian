@@ -10,6 +10,7 @@ import {
   Eye,
   User,
   Map,
+  Link2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -179,6 +180,11 @@ export function InventoryTable({
                         <span className={`text-sm ${isOwner ? "font-medium text-primary" : "text-muted-foreground"}`}>
                           {isOwner ? "You" : listing.ownerName}
                         </span>
+                        {listing.ownerContactId && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-[#C9A84C]" title="Linked to owner in Data tab">
+                            <Link2 className="h-2.5 w-2.5" />
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
