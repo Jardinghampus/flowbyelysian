@@ -1212,3 +1212,84 @@ create policy "Users can update own bulk jobs" on bulk_jobs
 
 -- Enable realtime for bulk_jobs progress tracking
 alter publication supabase_realtime add table bulk_jobs;
+
+-- ============================================================================
+-- Data Tab - Owners + Outreach Logs
+-- ============================================================================
+
+create table if not exists owners (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null,
+  name text not null,
+  phone text not null,
+  whatsapp_number text generated always as (regexp_replace(phone, '[^0-9]', '', 'g')) stored,
+  area text not null,
+  unit_number text,
+  bedrooms text,
+  status text check (status in ('owner','considering','listed','sold','unresponsive')) default 'owner',
+  priority text check (priority in ('high','medium','low')) default 'medium',
+  last_contacted_at timestamptz,
+  follow_up_at timestamptz,
+  notes text,
+  assigned_agent_id text not null,
+  assigned_agent_name text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table if not exists outreach_logs (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references owners(id) on delete cascade,
+  agent_id text not null,
+  agent_name text,
+  type text check (type in ('call','whatsapp','email','meeting','sms')) not null,
+  outcome text,
+  status_changed_to text,
+  follow_up_set_to timestamptz,
+  logged_at timestamptz default now()
+);
+
+create index if not exists idx_owners_user_id on owners(user_id);
+create index if not exists idx_owners_area on owners(user_id, area);
+create index if not exists idx_owners_assigned_agent on owners(assigned_agent_id);
+create index if not exists idx_owners_follow_up on owners(follow_up_at);
+create index if not exists idx_owners_status on owners(status);
+create index if not exists idx_owners_last_contacted on owners(last_contacted_at);
+create index if not exists idx_outreach_owner on outreach_logs(owner_id);
+create index if not exists idx_outreach_agent on outreach_logs(agent_id, logged_at);
+
+alter table owners enable row level security;
+alter table outreach_logs enable row level security;
+
+create policy "Owners are viewable by authenticated users" on owners for select using (true);
+create policy "Users can insert owners" on owners for insert with check (true);
+create policy "Users can update owners" on owners for update using (true);
+create policy "Users can delete owners" on owners for delete using (true);
+
+create policy "Outreach logs are viewable by authenticated users" on outreach_logs for select using (true);
+create policy "Users can insert outreach logs" on outreach_logs for insert with check (true);
+create policy "Users can update outreach logs" on outreach_logs for update using (true);
+
+create or replace function update_owner_last_contacted()
+returns trigger as $$
+begin
+  update owners set last_contacted_at = NEW.logged_at, updated_at = now() where id = NEW.owner_id;
+  return NEW;
+end;
+$$ language plpgsql;
+
+create trigger trg_outreach_update_last_contacted
+  after insert on outreach_logs for each row execute function update_owner_last_contacted();
+
+create or replace view owners_with_counts as
+select o.*,
+  coalesce(counts.call_count, 0) as call_count,
+  coalesce(counts.whatsapp_count, 0) as whatsapp_count,
+  coalesce(counts.total_outreach, 0) as total_outreach
+from owners o
+left join lateral (
+  select count(*) filter (where type = 'call') as call_count,
+         count(*) filter (where type = 'whatsapp') as whatsapp_count,
+         count(*) as total_outreach
+  from outreach_logs where owner_id = o.id
+) counts on true;

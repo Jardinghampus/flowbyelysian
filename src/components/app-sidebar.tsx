@@ -30,6 +30,7 @@ import {
   ImagePlus,
   CheckSquare,
   MessageCircle,
+  Database,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -124,6 +125,7 @@ const navSections: NavSection[] = [
     title: "Intelligence",
     roles: ["admin", "agent"],
     items: [
+      { label: "Data", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
