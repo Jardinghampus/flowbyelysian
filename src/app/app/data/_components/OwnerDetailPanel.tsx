@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Phone, MessageSquare, Mail, Users, Smartphone, ExternalLink, Loader2, Save } from "lucide-react"
-import type { Owner, OutreachLog, OutreachType, OwnerStatus, OwnerPriority } from "../_lib/types"
+import { Phone, MessageSquare, Mail, Users, Smartphone, ExternalLink, Loader2, Save, Link2, Unlink, Building2 } from "lucide-react"
+import type { Owner, OutreachLog, OutreachType, OwnerStatus, OwnerPriority, LinkedListing } from "../_lib/types"
 import { STATUS_CONFIG, PRIORITY_CONFIG, OUTREACH_TYPE_CONFIG } from "../_lib/types"
 import { cn } from "@/lib/utils"
 import { format, formatDistanceToNow } from "date-fns"
@@ -30,6 +30,7 @@ interface OwnerDetailPanelProps {
   onOpenChange: (open: boolean) => void
   owner: Owner | null
   logs: OutreachLog[]
+  linkedListings?: LinkedListing[]
   loading: boolean
   onRefresh: () => void
   onRefreshAll: () => void
@@ -49,6 +50,7 @@ export function OwnerDetailPanel({
   onOpenChange,
   owner,
   logs,
+  linkedListings = [],
   loading,
   onRefresh,
   onRefreshAll,
@@ -239,6 +241,46 @@ export function OwnerDetailPanel({
                 Save Changes
               </Button>
             </div>
+
+            {/* Linked Properties */}
+            {linkedListings.length > 0 && (
+              <div className="p-6 border-b">
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Link2 className="h-3.5 w-3.5 text-[#C9A84C]" />
+                  Linked Properties ({linkedListings.length})
+                </h3>
+                <div className="space-y-2">
+                  {linkedListings.map((listing) => (
+                    <div key={listing.id} className="flex items-center gap-3 rounded-lg border bg-muted/20 p-2.5">
+                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{listing.title}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {listing.area_name} · {listing.type} · {listing.bedrooms ? `${listing.bedrooms}BR` : ""} · AED {listing.price?.toLocaleString()}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-red-400"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`/api/owners/${owner?.id}/link?listingId=${listing.id}`, { method: "DELETE" })
+                            if (!res.ok) throw new Error("Failed")
+                            toast.success("Listing unlinked")
+                            onRefresh()
+                          } catch {
+                            toast.error("Failed to unlink listing")
+                          }
+                        }}
+                      >
+                        <Unlink className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Outreach Timeline */}
             <div className="p-6">

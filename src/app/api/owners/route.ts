@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
       agent: searchParams.get("agent") || undefined,
       dateFrom: searchParams.get("dateFrom") || undefined,
       dateTo: searchParams.get("dateTo") || undefined,
+      showHidden: searchParams.get("showHidden") === "true",
       limit: parseInt(searchParams.get("limit") || "100"),
       offset: parseInt(searchParams.get("offset") || "0"),
     })

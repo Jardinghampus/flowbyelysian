@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
-import { fetchOwnerById, updateOwner, deleteOwner, fetchOutreachLogs } from "@/app/app/data/_lib/supabase-queries"
+import {
+  fetchOwnerById, updateOwner, deleteOwner, hideOwner, restoreOwner,
+  fetchOutreachLogs, fetchLinkedListings,
+} from "@/app/app/data/_lib/supabase-queries"
 import { updateOwnerSchema } from "@/app/app/data/_lib/schemas"
 
 export async function GET(
@@ -14,8 +17,12 @@ export async function GET(
       return NextResponse.json({ error: "Owner not found" }, { status: 404 })
     }
 
-    const logs = await fetchOutreachLogs(id)
-    return NextResponse.json({ owner, logs })
+    const [logs, linkedListings] = await Promise.all([
+      fetchOutreachLogs(id),
+      fetchLinkedListings(id),
+    ])
+
+    return NextResponse.json({ owner, logs, linkedListings })
   } catch (error) {
     console.error("Error fetching owner:", error)
     return NextResponse.json({ error: "Failed to fetch owner" }, { status: 500 })
@@ -34,8 +41,18 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const parsed = updateOwnerSchema.safeParse(body)
 
+    // Handle archive/restore actions
+    if (body._action === "hide") {
+      await hideOwner(id)
+      return NextResponse.json({ success: true })
+    }
+    if (body._action === "restore") {
+      await restoreOwner(id)
+      return NextResponse.json({ success: true })
+    }
+
+    const parsed = updateOwnerSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }

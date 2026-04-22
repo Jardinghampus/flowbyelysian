@@ -18,11 +18,23 @@ export interface Owner {
   notes: string | null
   assigned_agent_id: string
   assigned_agent_name: string | null
+  is_hidden: boolean
   created_at: string
   updated_at: string
   call_count: number
   whatsapp_count: number
   total_outreach: number
+}
+
+export interface LinkedListing {
+  id: string
+  title: string
+  area_name: string | null
+  type: string
+  price: number
+  transaction_type: string
+  status: string
+  bedrooms: number | null
 }
 
 export interface OutreachLog {

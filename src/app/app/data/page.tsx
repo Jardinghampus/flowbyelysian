@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { Database, ListChecks, BarChart3 } from "lucide-react"
+import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff } from "lucide-react"
 import { StatsBar } from "./_components/StatsBar"
 import { OwnerFilters } from "./_components/OwnerFilters"
 import { OwnerTable } from "./_components/OwnerTable"
@@ -13,8 +13,10 @@ import { PerformancePanel } from "./_components/PerformancePanel"
 import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance } from "./_hooks/useOwners"
 import type { Owner, OwnerFiltersState } from "./_lib/types"
 import { DUBAI_AREAS } from "./_lib/types"
+import { useRole } from "@/contexts/role-context"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import Papa from "papaparse"
 
 type SideTab = "todo" | "performance"
@@ -39,6 +41,7 @@ function useAreas() {
 
 export default function DataPage() {
   const areas = useAreas()
+  const { isAdmin } = useRole()
 
   const [filters, setFilters] = useState<OwnerFiltersState>({
     search: "",
@@ -50,7 +53,9 @@ export default function DataPage() {
     dateTo: "",
   })
 
-  const { owners, total, loading: ownersLoading, refetch: refetchOwners } = useOwners(filters)
+  const [showHidden, setShowHidden] = useState(false)
+
+  const { owners, total, loading: ownersLoading, refetch: refetchOwners } = useOwners(filters, showHidden)
   const { stats, loading: statsLoading, refetch: refetchStats } = useOwnerStats(filters)
   const { overdue, dueSoon, loading: todosLoading, refetch: refetchTodos } = useTodos()
   const { performance, loading: perfLoading } = useAgentPerformance()
@@ -61,11 +66,12 @@ export default function DataPage() {
 
   const [detailOwnerId, setDetailOwnerId] = useState<string | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
-  const { owner: detailOwner, logs: detailLogs, loading: detailLoading, refetch: refetchDetail } = useOwnerDetail(
+  const { owner: detailOwner, logs: detailLogs, linkedListings: detailLinkedListings, loading: detailLoading, refetch: refetchDetail } = useOwnerDetail(
     detailOpen ? detailOwnerId : null
   )
 
   const [sideTab, setSideTab] = useState<SideTab>("todo")
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const refreshAll = useCallback(() => {
     refetchOwners()
@@ -83,12 +89,46 @@ export default function DataPage() {
     setLogOutreachOpen(true)
   }
 
+  const handleArchive = async (owner: Owner) => {
+    try {
+      const res = await fetch(`/api/owners/${owner.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _action: "hide" }),
+      })
+      if (!res.ok) throw new Error("Failed to archive")
+      toast.success(`${owner.name} archived`)
+      refreshAll()
+    } catch {
+      toast.error("Failed to archive owner")
+    }
+  }
+
+  const handleRestore = async (owner: Owner) => {
+    try {
+      const res = await fetch(`/api/owners/${owner.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _action: "restore" }),
+      })
+      if (!res.ok) throw new Error("Failed to restore")
+      toast.success(`${owner.name} restored`)
+      refreshAll()
+    } catch {
+      toast.error("Failed to restore owner")
+    }
+  }
+
   const handleDelete = async (owner: Owner) => {
-    if (!confirm(`Delete ${owner.name}? This cannot be undone.`)) return
+    if (!isAdmin) {
+      toast.error("Only admins can permanently delete owners")
+      return
+    }
+    if (!confirm(`Permanently delete ${owner.name}? This cannot be undone.`)) return
     try {
       const res = await fetch(`/api/owners/${owner.id}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Failed to delete")
-      toast.success("Owner deleted")
+      toast.success("Owner permanently deleted")
       refreshAll()
     } catch {
       toast.error("Failed to delete owner")
@@ -140,8 +180,8 @@ export default function DataPage() {
       {/* Main content */}
       <div className="flex-1 flex flex-col gap-5 p-6 overflow-auto">
         {/* Header */}
-        <div>
-          <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-[#C9A84C]/10 flex items-center justify-center">
               <Database className="h-5 w-5 text-[#C9A84C]" />
             </div>
@@ -151,6 +191,27 @@ export default function DataPage() {
                 Owner intelligence & outreach tracking — {total} owners
               </p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("h-7 text-xs gap-1.5", showHidden && "text-amber-400")}
+                onClick={() => setShowHidden(!showHidden)}
+              >
+                {showHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showHidden ? "Showing archived" : "Show archived"}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hidden lg:flex"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              {sidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+            </Button>
           </div>
         </div>
 
@@ -174,58 +235,71 @@ export default function DataPage() {
           onRowClick={handleRowClick}
           onLogOutreach={handleLogOutreach}
           onDelete={handleDelete}
+          onArchive={handleArchive}
+          onRestore={handleRestore}
+          isAdmin={isAdmin}
+          showHidden={showHidden}
         />
       </div>
 
-      {/* Right sidebar */}
-      <div className="hidden lg:flex flex-col w-[320px] border-l bg-background/30 overflow-hidden">
-        {/* Tab switcher */}
-        <div className="flex border-b">
-          <button
-            onClick={() => setSideTab("todo")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
-              sideTab === "todo"
-                ? "text-foreground border-[#C9A84C]"
-                : "text-muted-foreground border-transparent hover:text-foreground"
-            )}
-          >
-            <ListChecks className="h-3.5 w-3.5" />
-            Follow-ups
-            {overdue.length > 0 && (
-              <span className="h-4 min-w-[16px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {overdue.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setSideTab("performance")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
-              sideTab === "performance"
-                ? "text-foreground border-[#C9A84C]"
-                : "text-muted-foreground border-transparent hover:text-foreground"
-            )}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            Performance
-          </button>
-        </div>
+      {/* Collapsible right sidebar */}
+      <div
+        className={cn(
+          "hidden lg:flex flex-col border-l bg-background/30 overflow-hidden transition-all duration-300",
+          sidebarOpen ? "w-[320px]" : "w-0 border-l-0"
+        )}
+      >
+        {sidebarOpen && (
+          <>
+            {/* Tab switcher */}
+            <div className="flex border-b">
+              <button
+                onClick={() => setSideTab("todo")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
+                  sideTab === "todo"
+                    ? "text-foreground border-[#C9A84C]"
+                    : "text-muted-foreground border-transparent hover:text-foreground"
+                )}
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+                Follow-ups
+                {overdue.length > 0 && (
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {overdue.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setSideTab("performance")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
+                  sideTab === "performance"
+                    ? "text-foreground border-[#C9A84C]"
+                    : "text-muted-foreground border-transparent hover:text-foreground"
+                )}
+              >
+                <BarChart3 className="h-3.5 w-3.5" />
+                Performance
+              </button>
+            </div>
 
-        {/* Tab content */}
-        <div className="flex-1 overflow-y-auto p-3">
-          {sideTab === "todo" && (
-            <TodoPanel
-              overdue={overdue}
-              dueSoon={dueSoon}
-              loading={todosLoading}
-              onOwnerClick={handleTodoOwnerClick}
-            />
-          )}
-          {sideTab === "performance" && (
-            <PerformancePanel performance={performance} loading={perfLoading} />
-          )}
-        </div>
+            {/* Tab content */}
+            <div className="flex-1 overflow-y-auto p-3">
+              {sideTab === "todo" && (
+                <TodoPanel
+                  overdue={overdue}
+                  dueSoon={dueSoon}
+                  loading={todosLoading}
+                  onOwnerClick={handleTodoOwnerClick}
+                />
+              )}
+              {sideTab === "performance" && (
+                <PerformancePanel performance={performance} loading={perfLoading} />
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modals */}
@@ -244,6 +318,7 @@ export default function DataPage() {
         onOpenChange={setDetailOpen}
         owner={detailOwner}
         logs={detailLogs}
+        linkedListings={detailLinkedListings}
         loading={detailLoading}
         onRefresh={refetchDetail}
         onRefreshAll={refreshAll}

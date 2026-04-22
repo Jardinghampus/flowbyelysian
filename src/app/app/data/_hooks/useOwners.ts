@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
-import type { Owner, OwnerFiltersState, OwnerStats } from "../_lib/types"
+import type { Owner, OwnerFiltersState, OwnerStats, LinkedListing } from "../_lib/types"
 
-export function useOwners(filters: OwnerFiltersState) {
+export function useOwners(filters: OwnerFiltersState, showHidden = false) {
   const [owners, setOwners] = useState<Owner[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -22,6 +22,7 @@ export function useOwners(filters: OwnerFiltersState) {
       if (filters.agent) params.set("agent", filters.agent)
       if (filters.dateFrom) params.set("dateFrom", filters.dateFrom)
       if (filters.dateTo) params.set("dateTo", filters.dateTo)
+      if (showHidden) params.set("showHidden", "true")
 
       const res = await fetch(`/api/owners?${params.toString()}`, {
         signal: controller.signal,
@@ -37,7 +38,7 @@ export function useOwners(filters: OwnerFiltersState) {
     } finally {
       setLoading(false)
     }
-  }, [filters.search, filters.area, filters.bedrooms, filters.status, filters.agent, filters.dateFrom, filters.dateTo])
+  }, [filters.search, filters.area, filters.bedrooms, filters.status, filters.agent, filters.dateFrom, filters.dateTo, showHidden])
 
   useEffect(() => {
     fetchData()
@@ -85,12 +86,14 @@ export function useOwnerStats(filters: OwnerFiltersState) {
 export function useOwnerDetail(ownerId: string | null) {
   const [owner, setOwner] = useState<Owner | null>(null)
   const [logs, setLogs] = useState<import("../_lib/types").OutreachLog[]>([])
+  const [linkedListings, setLinkedListings] = useState<LinkedListing[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchDetail = useCallback(async () => {
     if (!ownerId) {
       setOwner(null)
       setLogs([])
+      setLinkedListings([])
       return
     }
 
@@ -101,6 +104,7 @@ export function useOwnerDetail(ownerId: string | null) {
       const data = await res.json()
       setOwner(data.owner)
       setLogs(data.logs)
+      setLinkedListings(data.linkedListings || [])
     } catch (e) {
       console.error("Error fetching owner detail:", e)
     } finally {
@@ -112,7 +116,7 @@ export function useOwnerDetail(ownerId: string | null) {
     fetchDetail()
   }, [fetchDetail])
 
-  return { owner, logs, loading, refetch: fetchDetail }
+  return { owner, logs, linkedListings, loading, refetch: fetchDetail }
 }
 
 export function useTodos() {

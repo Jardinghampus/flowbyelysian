@@ -1,5 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server"
-import type { Owner, OutreachLog, OwnerStats } from "./types"
+import type { Owner, OutreachLog, OwnerStats, LinkedListing } from "./types"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = any
@@ -16,12 +16,14 @@ export async function fetchOwners(params: {
   agent?: string
   dateFrom?: string
   dateTo?: string
+  showHidden?: boolean
   limit?: number
   offset?: number
 }): Promise<{ owners: Owner[]; total: number }> {
   const supabase = getClient()
+  const view = params.showHidden ? "owners_with_counts" : "owners_active"
   let query = supabase
-    .from("owners_with_counts")
+    .from(view)
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
 
@@ -84,10 +86,56 @@ export async function updateOwner(id: string, updates: Partial<Owner>): Promise<
   return data as Owner
 }
 
+export async function hideOwner(id: string): Promise<void> {
+  const supabase = getClient()
+  const { error } = await supabase
+    .from("owners")
+    .update({ is_hidden: true, updated_at: new Date().toISOString() })
+    .eq("id", id)
+  if (error) throw error
+}
+
+export async function restoreOwner(id: string): Promise<void> {
+  const supabase = getClient()
+  const { error } = await supabase
+    .from("owners")
+    .update({ is_hidden: false, updated_at: new Date().toISOString() })
+    .eq("id", id)
+  if (error) throw error
+}
+
 export async function deleteOwner(id: string): Promise<void> {
   const supabase = getClient()
   const { error } = await supabase.from("owners").delete().eq("id", id)
   if (error) throw error
+}
+
+export async function bulkCreateOwners(
+  owners: Array<Partial<Owner>>
+): Promise<{ inserted: number; skipped: number; errors: string[] }> {
+  const supabase = getClient()
+  let inserted = 0
+  let skipped = 0
+  const errors: string[] = []
+  const BATCH = 100
+
+  for (let i = 0; i < owners.length; i += BATCH) {
+    const batch = owners.slice(i, i + BATCH)
+    const { data, error } = await supabase
+      .from("owners")
+      .upsert(batch, { onConflict: "id", ignoreDuplicates: true })
+      .select("id")
+
+    if (error) {
+      errors.push(`Batch ${Math.floor(i / BATCH) + 1}: ${error.message}`)
+      skipped += batch.length
+    } else {
+      inserted += (data || []).length
+      skipped += batch.length - (data || []).length
+    }
+  }
+
+  return { inserted, skipped, errors }
 }
 
 export async function fetchOutreachLogs(ownerId: string): Promise<OutreachLog[]> {
@@ -114,6 +162,36 @@ export async function createOutreachLog(log: Partial<OutreachLog>): Promise<Outr
   return data as OutreachLog
 }
 
+export async function fetchLinkedListings(ownerId: string): Promise<LinkedListing[]> {
+  const supabase = getClient()
+  const { data, error } = await supabase
+    .from("listings")
+    .select("id, title, area_name, type, price, transaction_type, status, bedrooms")
+    .eq("owner_contact_id", ownerId)
+    .order("created_at", { ascending: false })
+
+  if (error) return []
+  return (data || []) as LinkedListing[]
+}
+
+export async function linkListingToOwner(listingId: string, ownerId: string): Promise<void> {
+  const supabase = getClient()
+  const { error } = await supabase
+    .from("listings")
+    .update({ owner_contact_id: ownerId })
+    .eq("id", listingId)
+  if (error) throw error
+}
+
+export async function unlinkListing(listingId: string): Promise<void> {
+  const supabase = getClient()
+  const { error } = await supabase
+    .from("listings")
+    .update({ owner_contact_id: null })
+    .eq("id", listingId)
+  if (error) throw error
+}
+
 export async function fetchOwnerStats(filters?: {
   area?: string
   status?: string
@@ -121,7 +199,10 @@ export async function fetchOwnerStats(filters?: {
 }): Promise<OwnerStats> {
   const supabase = getClient()
 
-  let ownersQuery = supabase.from("owners").select("id, status, follow_up_at", { count: "exact" })
+  let ownersQuery = supabase
+    .from("owners")
+    .select("id, status, follow_up_at", { count: "exact" })
+    .eq("is_hidden", false)
   if (filters?.area) ownersQuery = ownersQuery.eq("area", filters.area)
   if (filters?.status) ownersQuery = ownersQuery.eq("status", filters.status)
   if (filters?.agent) ownersQuery = ownersQuery.eq("assigned_agent_id", filters.agent)
@@ -166,7 +247,7 @@ export async function fetchTodoOwners(): Promise<{
   const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: overdue } = await supabase
-    .from("owners_with_counts")
+    .from("owners_active")
     .select("*")
     .lt("follow_up_at", now)
     .not("follow_up_at", "is", null)
@@ -175,7 +256,7 @@ export async function fetchTodoOwners(): Promise<{
     .limit(20)
 
   const { data: dueSoon } = await supabase
-    .from("owners_with_counts")
+    .from("owners_active")
     .select("*")
     .gte("follow_up_at", now)
     .lte("follow_up_at", sevenDaysFromNow)
@@ -205,7 +286,10 @@ export async function fetchAgentPerformance(agentId?: string): Promise<
   const supabase = getClient()
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  let ownersQuery = supabase.from("owners").select("assigned_agent_id, assigned_agent_name, status")
+  let ownersQuery = supabase
+    .from("owners")
+    .select("assigned_agent_id, assigned_agent_name, status")
+    .eq("is_hidden", false)
   if (agentId) ownersQuery = ownersQuery.eq("assigned_agent_id", agentId)
 
   const { data: owners } = await ownersQuery

@@ -10,7 +10,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table"
 import { useState } from "react"
-import { ArrowUpDown, Phone, MessageSquare, MoreHorizontal, ExternalLink } from "lucide-react"
+import { ArrowUpDown, Phone, MessageSquare, MoreHorizontal, ExternalLink, Archive, RotateCcw, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -36,6 +36,10 @@ interface OwnerTableProps {
   onRowClick: (owner: Owner) => void
   onLogOutreach: (owner: Owner) => void
   onDelete: (owner: Owner) => void
+  onArchive?: (owner: Owner) => void
+  onRestore?: (owner: Owner) => void
+  isAdmin?: boolean
+  showHidden?: boolean
 }
 
 function StatusBadge({ status }: { status: OwnerStatus }) {
@@ -89,7 +93,7 @@ function LastContactedLabel({ date }: { date: string | null }) {
   )
 }
 
-export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelete }: OwnerTableProps) {
+export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelete, onArchive, onRestore, isAdmin, showHidden }: OwnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const columns = useMemo<ColumnDef<Owner>[]>(
@@ -219,31 +223,45 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
       {
         id: "actions",
         size: 50,
-        cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onRowClick(row.original)}>
-                <ExternalLink className="h-3.5 w-3.5 mr-2" /> View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onLogOutreach(row.original)}>
-                <Phone className="h-3.5 w-3.5 mr-2" /> Log Outreach
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => onDelete(row.original)}>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ),
+        cell: ({ row }) => {
+          const owner = row.original
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onRowClick(owner)}>
+                  <ExternalLink className="h-3.5 w-3.5 mr-2" /> View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onLogOutreach(owner)}>
+                  <Phone className="h-3.5 w-3.5 mr-2" /> Log Outreach
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {showHidden && owner.is_hidden ? (
+                  <DropdownMenuItem onClick={() => onRestore?.(owner)}>
+                    <RotateCcw className="h-3.5 w-3.5 mr-2" /> Restore
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => onArchive?.(owner)}>
+                    <Archive className="h-3.5 w-3.5 mr-2" /> Archive
+                  </DropdownMenuItem>
+                )}
+                {isAdmin && (
+                  <DropdownMenuItem className="text-destructive" onClick={() => onDelete(owner)}>
+                    <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete Permanently
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        },
         enableSorting: false,
       },
     ],
-    [onRowClick, onLogOutreach, onDelete]
+    [onRowClick, onLogOutreach, onDelete, onArchive, onRestore, isAdmin, showHidden]
   )
 
   const table = useReactTable({
@@ -305,7 +323,10 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
                 <tr
                   key={row.id}
                   onClick={() => onRowClick(row.original)}
-                  className="border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors"
+                  className={cn(
+                    "border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors",
+                    row.original.is_hidden && "opacity-50"
+                  )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-3 py-2.5">

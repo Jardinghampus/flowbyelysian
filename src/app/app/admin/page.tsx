@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useRole } from "@/contexts/role-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers, Settings2, ClipboardList, Calendar, Star, ChevronDown } from "lucide-react"
+import { Trash2, Shield, User, Search, TrendingUp, Users, Loader2, Mail, Building2, MapPin, Eye, Tag, Bed, Bath, Maximize2, Newspaper, FileText, Layers, Settings2, ClipboardList, Calendar, Star, ChevronDown, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -56,6 +56,7 @@ import { AgentPerformanceEditor } from "./components/agent-performance-editor"
 import { MarketUpdatesCms } from "./components/market-updates-cms"
 import { AgentOverviewPanel } from "./components/agent-overview-panel"
 import { AreaManagement } from "./components/area-management"
+import { CsvImportOwners } from "./components/csv-import-owners"
 import { toast } from "sonner"
 
 interface AgencyListing {
@@ -298,6 +299,10 @@ export default function AdminPage() {
             <TabsTrigger value="areas" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Areas & Access
+            </TabsTrigger>
+            <TabsTrigger value="import" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import
             </TabsTrigger>
           </TabsList>
 
@@ -736,6 +741,10 @@ export default function AdminPage() {
 
           <TabsContent value="areas" className="space-y-6">
             <AreaManagement />
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-6">
+            <CsvImportOwners />
           </TabsContent>
         </Tabs>
       </div>
