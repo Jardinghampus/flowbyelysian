@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff } from "lucide-react"
+import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, ShieldCheck } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { StatsBar } from "./_components/StatsBar"
 import { OwnerFilters } from "./_components/OwnerFilters"
 import { OwnerTable } from "./_components/OwnerTable"
@@ -10,7 +11,7 @@ import { LogOutreachModal } from "./_components/LogOutreachModal"
 import { OwnerDetailPanel } from "./_components/OwnerDetailPanel"
 import { TodoPanel } from "./_components/TodoPanel"
 import { PerformancePanel } from "./_components/PerformancePanel"
-import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance } from "./_hooks/useOwners"
+import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance, useAgentAreas } from "./_hooks/useOwners"
 import type { Owner, OwnerFiltersState } from "./_lib/types"
 import { DUBAI_AREAS } from "./_lib/types"
 import { useRole } from "@/contexts/role-context"
@@ -40,8 +41,12 @@ function useAreas() {
 }
 
 export default function DataPage() {
-  const areas = useAreas()
+  const allAreas = useAreas()
   const { isAdmin } = useRole()
+  const { areas: agentAreas, loading: agentAreasLoading } = useAgentAreas(isAdmin)
+
+  // Agents only see their assigned areas; admins see everything
+  const areas = isAdmin ? allAreas : (agentAreas.length > 0 ? agentAreas : allAreas)
 
   const [filters, setFilters] = useState<OwnerFiltersState>({
     search: "",
@@ -55,8 +60,13 @@ export default function DataPage() {
 
   const [showHidden, setShowHidden] = useState(false)
 
-  const { owners, total, loading: ownersLoading, refetch: refetchOwners } = useOwners(filters, showHidden)
-  const { stats, loading: statsLoading, refetch: refetchStats } = useOwnerStats(filters)
+  // For agents with area assignments, filter owners to their areas
+  const effectiveFilters = (!isAdmin && agentAreas.length > 0 && !filters.area)
+    ? { ...filters, area: agentAreas.join(",") }
+    : filters
+
+  const { owners, total, loading: ownersLoading, refetch: refetchOwners } = useOwners(effectiveFilters, showHidden)
+  const { stats, loading: statsLoading, refetch: refetchStats } = useOwnerStats(effectiveFilters)
   const { overdue, dueSoon, loading: todosLoading, refetch: refetchTodos } = useTodos()
   const { performance, loading: perfLoading } = useAgentPerformance()
 
@@ -190,6 +200,15 @@ export default function DataPage() {
               <p className="text-xs text-muted-foreground">
                 Owner intelligence & outreach tracking — {total} owners
               </p>
+              {!isAdmin && agentAreas.length > 0 && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <ShieldCheck className="h-3 w-3 text-[#C9A84C]" />
+                  <span className="text-[10px] text-muted-foreground">Your areas:</span>
+                  {agentAreas.map((a) => (
+                    <Badge key={a} variant="outline" className="text-[10px] h-4 px-1.5 border-[#C9A84C]/30 text-[#C9A84C]">{a}</Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">

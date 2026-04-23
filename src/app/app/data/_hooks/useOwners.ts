@@ -1,6 +1,32 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import type { Owner, OwnerFiltersState, OwnerStats, LinkedListing } from "../_lib/types"
 
+export function useAgentAreas(isAdmin: boolean) {
+  const [areas, setAreas] = useState<string[]>([])
+  const [loading, setLoading] = useState(!isAdmin)
+
+  useEffect(() => {
+    if (isAdmin) {
+      setAreas([])
+      setLoading(false)
+      return
+    }
+
+    fetch("/api/areas/assignments?agentId=demo-user-001")
+      .then((r) => r.json())
+      .then((data) => {
+        const names = (data.assignments || [])
+          .map((a: { areas?: { name: string } }) => a.areas?.name)
+          .filter(Boolean) as string[]
+        setAreas(names)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [isAdmin])
+
+  return { areas, loading }
+}
+
 export function useOwners(filters: OwnerFiltersState, showHidden = false) {
   const [owners, setOwners] = useState<Owner[]>([])
   const [total, setTotal] = useState(0)

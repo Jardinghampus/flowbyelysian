@@ -266,7 +266,7 @@ export function AreaManagement() {
               <TableHead className="w-[200px]">Area</TableHead>
               <TableHead>Description</TableHead>
               <TableHead className="w-[100px] text-center">Listings</TableHead>
-              <TableHead className="w-[280px]">Agents with Access</TableHead>
+              <TableHead className="w-[280px]">Agents with Data Access</TableHead>
               <TableHead className="w-[100px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

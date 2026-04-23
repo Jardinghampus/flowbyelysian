@@ -32,7 +32,13 @@ export async function fetchOwners(params: {
       `name.ilike.%${params.search}%,phone.ilike.%${params.search}%,unit_number.ilike.%${params.search}%`
     )
   }
-  if (params.area) query = query.eq("area", params.area)
+  if (params.area) {
+    if (params.area.includes(",")) {
+      query = query.in("area", params.area.split(",").map((a) => a.trim()))
+    } else {
+      query = query.eq("area", params.area)
+    }
+  }
   if (params.bedrooms) query = query.eq("bedrooms", params.bedrooms)
   if (params.status) query = query.eq("status", params.status)
   if (params.agent) query = query.eq("assigned_agent_id", params.agent)

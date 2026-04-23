@@ -21,7 +21,7 @@ import {
 import type { Owner, OutreachType } from "../_lib/types"
 import { OUTREACH_TYPE_CONFIG } from "../_lib/types"
 import { toast } from "sonner"
-import { Loader2, Phone, MessageSquare, Mail, Users, Smartphone } from "lucide-react"
+import { Loader2, Phone, MessageSquare, Mail, Users, Smartphone, CalendarCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface LogOutreachModalProps {
@@ -40,14 +40,21 @@ const typeIcons: Record<OutreachType, React.ElementType> = {
   sms: Smartphone,
 }
 
+const FOLLOW_UP_PRESETS = [
+  { label: "3 days", days: 3 },
+  { label: "7 days", days: 7 },
+  { label: "14 days", days: 14 },
+] as const
+
 export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onSuccess }: LogOutreachModalProps) {
   const [loading, setLoading] = useState(false)
   const [ownerId, setOwnerId] = useState("")
   const [type, setType] = useState<OutreachType>("call")
   const [outcome, setOutcome] = useState("")
   const [statusChange, setStatusChange] = useState("")
-  const [followUpDays, setFollowUpDays] = useState("")
+  const [followUpDays, setFollowUpDays] = useState<number | null>(null)
   const [customDate, setCustomDate] = useState("")
+  const [useCustomDate, setUseCustomDate] = useState(false)
 
   useEffect(() => {
     if (prefillOwner) {
@@ -56,8 +63,13 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
   }, [prefillOwner])
 
   const resetForm = () => {
-    setOwnerId(""); setType("call"); setOutcome("")
-    setStatusChange(""); setFollowUpDays(""); setCustomDate("")
+    setOwnerId("")
+    setType("call")
+    setOutcome("")
+    setStatusChange("")
+    setFollowUpDays(null)
+    setCustomDate("")
+    setUseCustomDate(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,10 +88,10 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
         outcome: outcome || undefined,
       }
       if (statusChange) body.status_changed_to = statusChange
-      if (followUpDays === "custom" && customDate) {
+      if (useCustomDate && customDate) {
         body.follow_up_date = customDate
       } else if (followUpDays) {
-        body.follow_up_days = parseInt(followUpDays)
+        body.follow_up_days = followUpDays
       }
 
       const res = await fetch("/api/outreach-logs", {
@@ -100,6 +112,8 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
       setLoading(false)
     }
   }
+
+  const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -133,6 +147,12 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
               <p className="text-xs text-muted-foreground">{prefillOwner.area} {prefillOwner.unit_number ? `· ${prefillOwner.unit_number}` : ""}</p>
             </div>
           )}
+
+          {/* Last contacted badge */}
+          <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2">
+            <CalendarCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Last contacted: {today}</span>
+          </div>
 
           {/* Outreach type */}
           <div>
@@ -190,28 +210,56 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
             </Select>
           </div>
 
-          {/* Follow-up */}
+          {/* Follow-up — quick buttons */}
           <div>
-            <Label className="text-xs">Set Next Follow-up</Label>
-            <Select value={followUpDays || "none"} onValueChange={(v) => setFollowUpDays(v === "none" ? "" : v)}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="No follow-up" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No follow-up</SelectItem>
-                <SelectItem value="3">In 3 days</SelectItem>
-                <SelectItem value="7">In 7 days</SelectItem>
-                <SelectItem value="14">In 14 days</SelectItem>
-                <SelectItem value="30">In 30 days</SelectItem>
-                <SelectItem value="custom">Custom date</SelectItem>
-              </SelectContent>
-            </Select>
-            {followUpDays === "custom" && (
+            <Label className="text-xs mb-2 block">Follow-up</Label>
+            <div className="flex items-center gap-2">
+              {FOLLOW_UP_PRESETS.map((preset) => (
+                <button
+                  key={preset.days}
+                  type="button"
+                  onClick={() => {
+                    if (followUpDays === preset.days && !useCustomDate) {
+                      setFollowUpDays(null)
+                    } else {
+                      setFollowUpDays(preset.days)
+                      setUseCustomDate(false)
+                      setCustomDate("")
+                    }
+                  }}
+                  className={cn(
+                    "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all",
+                    followUpDays === preset.days && !useCustomDate
+                      ? "border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                  )}
+                >
+                  {preset.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setUseCustomDate(!useCustomDate)
+                  setFollowUpDays(null)
+                }}
+                className={cn(
+                  "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all",
+                  useCustomDate
+                    ? "border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                )}
+              >
+                Custom
+              </button>
+            </div>
+            {useCustomDate && (
               <Input
                 type="date"
                 value={customDate}
                 onChange={(e) => setCustomDate(e.target.value)}
                 className="mt-2"
+                min={new Date().toISOString().split("T")[0]}
               />
             )}
           </div>
