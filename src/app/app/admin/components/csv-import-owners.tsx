@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react"
+import { useState, useCallback, useRef, useMemo } from "react"
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
@@ -12,6 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
@@ -108,11 +115,13 @@ export function CsvImportOwners() {
   const [result, setResult] = useState<{ inserted: number; skipped: number; invalid: number; errors: string[] } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragActive, setDragActive] = useState(false)
+  const [areaFilter, setAreaFilter] = useState<string>("__all__")
 
   const handleRows = useCallback((rows: Record<string, unknown>[], name: string) => {
     setFileName(name)
     setRawRows(rows)
     setParsedRows(rows.map(mapRow))
+    setAreaFilter("__all__")
     setStage("preview")
   }, [])
 
@@ -165,7 +174,12 @@ export function CsvImportOwners() {
   }
 
   const handleImport = async () => {
-    const validRaw = rawRows.filter((_row, idx) => parsedRows[idx]?.valid)
+    const validRaw = rawRows.filter((_row, idx) => {
+      const p = parsedRows[idx]
+      if (!p?.valid) return false
+      if (areaFilter !== "__all__" && p.area !== areaFilter) return false
+      return true
+    })
     if (validRaw.length === 0) {
       toast.error("No valid rows to import")
       return
@@ -200,8 +214,8 @@ export function CsvImportOwners() {
       setProgress(Math.round(((i + 1) / batches) * 100))
     }
 
-    const invalidCount = parsedRows.filter((r) => !r.valid).length
-    setResult({ inserted: totalInserted, skipped: totalSkipped, invalid: invalidCount, errors: allErrors })
+    const skippedInvalid = filteredRows.filter((r) => !r.valid).length
+    setResult({ inserted: totalInserted, skipped: totalSkipped, invalid: skippedInvalid, errors: allErrors })
     setStage("done")
     if (totalInserted > 0) toast.success(`Imported ${totalInserted} owners`)
   }
@@ -216,9 +230,25 @@ export function CsvImportOwners() {
     if (fileRef.current) fileRef.current.value = ""
   }
 
-  const validCount = parsedRows.filter((r) => r.valid).length
-  const invalidCount = parsedRows.filter((r) => !r.valid).length
   const isDld = rawRows.length > 0 && Boolean(rawRows[0].NameEn ?? rawRows[0]["Master Project"] ?? rawRows[0].Mobile)
+
+  // Unique areas for filter dropdown
+  const uniqueAreas = useMemo(() => {
+    const areas = new Set<string>()
+    for (const r of parsedRows) {
+      if (r.area) areas.add(r.area)
+    }
+    return Array.from(areas).sort()
+  }, [parsedRows])
+
+  // Filtered view
+  const filteredRows = useMemo(() => {
+    if (areaFilter === "__all__") return parsedRows
+    return parsedRows.filter((r) => r.area === areaFilter)
+  }, [parsedRows, areaFilter])
+
+  const validCount = filteredRows.filter((r) => r.valid).length
+  const invalidCount = filteredRows.filter((r) => !r.valid).length
 
   return (
     <Card>
@@ -275,15 +305,39 @@ export function CsvImportOwners() {
               </Button>
             </div>
 
-            <div className="flex gap-3 text-sm">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>{validCount} valid</span>
-              </div>
-              {invalidCount > 0 && (
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex gap-3 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                  <span>{invalidCount} invalid (missing name / phone / area)</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span>{validCount} valid</span>
+                </div>
+                {invalidCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <span>{invalidCount} invalid (missing name / phone / area)</span>
+                  </div>
+                )}
+              </div>
+
+              {uniqueAreas.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Select value={areaFilter} onValueChange={setAreaFilter}>
+                    <SelectTrigger className="h-8 w-[220px] text-xs">
+                      <SelectValue placeholder="All project areas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All project areas ({parsedRows.length})</SelectItem>
+                      {uniqueAreas.map((area) => {
+                        const count = parsedRows.filter((r) => r.area === area).length
+                        return (
+                          <SelectItem key={area} value={area}>
+                            {area} ({count})
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>
@@ -295,7 +349,7 @@ export function CsvImportOwners() {
                     <TableHead className="w-8">#</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Phone</TableHead>
-                    <TableHead>Area</TableHead>
+                    <TableHead>Project Area</TableHead>
                     <TableHead>Unit</TableHead>
                     {isDld && <TableHead>Size (sqft)</TableHead>}
                     {isDld && <TableHead>Price (AED)</TableHead>}
@@ -304,7 +358,7 @@ export function CsvImportOwners() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {parsedRows.slice(0, 50).map((row, idx) => (
+                  {filteredRows.slice(0, 100).map((row, idx) => (
                     <TableRow key={idx} className={row.valid ? "" : "bg-red-500/5"}>
                       <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
                       <TableCell className="text-sm">{row.name || "—"}</TableCell>
@@ -333,9 +387,9 @@ export function CsvImportOwners() {
                   ))}
                 </TableBody>
               </Table>
-              {parsedRows.length > 50 && (
+              {filteredRows.length > 100 && (
                 <p className="text-xs text-muted-foreground text-center py-2">
-                  Showing first 50 of {parsedRows.length} rows
+                  Showing first 100 of {filteredRows.length} rows
                 </p>
               )}
             </div>
@@ -348,6 +402,7 @@ export function CsvImportOwners() {
                 className="bg-[#C9A84C] hover:bg-[#B8973B] text-black"
               >
                 Import {validCount} Owners
+                {areaFilter !== "__all__" && ` from ${areaFilter}`}
               </Button>
             </div>
           </>
