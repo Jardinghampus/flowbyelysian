@@ -57,6 +57,7 @@ import { MarketUpdatesCms } from "./components/market-updates-cms"
 import { AgentOverviewPanel } from "./components/agent-overview-panel"
 import { AreaManagement } from "./components/area-management"
 import { CsvImportOwners } from "./components/csv-import-owners"
+import { DatabaseSetup } from "./components/database-setup"
 import { toast } from "sonner"
 
 interface AgencyListing {
@@ -744,6 +745,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="import" className="space-y-6">
+            <DatabaseSetup />
             <CsvImportOwners />
           </TabsContent>
         </Tabs>
