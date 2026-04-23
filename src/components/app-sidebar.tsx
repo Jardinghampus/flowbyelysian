@@ -207,8 +207,7 @@ export function AppSidebar() {
   const { settings: docSettings } = useDocumentSettings()
   const [open, setOpen] = useState(false)
 
-  // In fullscreen mode, sidebar is always expanded
-  const effectiveOpen = isFullscreen || open
+  const effectiveOpen = open
 
   // Filter sections and items based on current role
   const visibleSections = useMemo(() => {
