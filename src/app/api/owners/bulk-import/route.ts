@@ -51,12 +51,13 @@ export async function POST(request: NextRequest) {
       const name = dldName || genericName
       const phone = dldPhone || genericPhone
       const area = dldArea || genericArea
+      const subArea = dldProject || str(row.sub_area ?? row["Sub Area"] ?? row.subarea ?? row.Subarea)
       const unit_number = dldUnit || str(row.unit_number ?? row.unit ?? row.Unit ?? row["Unit Number"]) || null
       const bedrooms = str(row.bedrooms ?? row.Bedrooms ?? row.BR ?? row.br) || null
 
-      // Compose notes from DLD fields
+      // Compose notes from DLD fields (sub-area prepended when present)
       const noteParts: string[] = []
-      if (dldProject) noteParts.push(dldProject)
+      if (subArea) noteParts.push(`Sub-area: ${subArea}`)
       if (dldPartyType) noteParts.push(dldPartyType)
       if (dldPropType) noteParts.push(dldPropType)
       if (dldTxType) noteParts.push(dldTxType)

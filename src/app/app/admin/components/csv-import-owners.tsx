@@ -29,6 +29,7 @@ interface ParsedRow {
   name: string
   phone: string
   area: string
+  subArea: string
   unit_number: string
   bedrooms: string
   notes: string
@@ -76,12 +77,12 @@ function mapRow(row: Record<string, unknown>): ParsedRow {
   const name = dldName || genericName
   const phone = dldPhone || genericPhone
   const area = dldArea || genericArea
+  const subArea = dldProject || str(row.sub_area ?? row["Sub Area"] ?? row.subarea ?? row.Subarea)
   const unit_number = dldUnit || str(row.unit_number ?? row.unit ?? row.Unit ?? row["Unit Number"])
   const bedrooms = str(row.bedrooms ?? row.Bedrooms ?? row.BR ?? row.br)
 
-  // Compose notes: DLD fields → concise bullet string
+  // Compose notes: DLD fields → concise bullet string (sub-area excluded — it's its own field)
   const noteParts: string[] = []
-  if (dldProject) noteParts.push(dldProject)
   if (dldPartyType) noteParts.push(dldPartyType)
   if (dldPropType) noteParts.push(dldPropType)
   if (dldTxType) noteParts.push(dldTxType)
@@ -96,6 +97,7 @@ function mapRow(row: Record<string, unknown>): ParsedRow {
     name,
     phone,
     area,
+    subArea,
     unit_number,
     bedrooms,
     notes,
@@ -349,7 +351,8 @@ export function CsvImportOwners() {
                     <TableHead className="w-8">#</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Phone</TableHead>
-                    <TableHead>Project Area</TableHead>
+                    <TableHead>Area</TableHead>
+                    <TableHead>Sub-area</TableHead>
                     <TableHead>Unit</TableHead>
                     {isDld && <TableHead>Size (sqft)</TableHead>}
                     {isDld && <TableHead>Price (AED)</TableHead>}
@@ -364,6 +367,7 @@ export function CsvImportOwners() {
                       <TableCell className="text-sm">{row.name || "—"}</TableCell>
                       <TableCell className="text-sm font-mono text-xs">{row.phone || "—"}</TableCell>
                       <TableCell className="text-sm">{row.area || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{row.subArea || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{row.unit_number || "—"}</TableCell>
                       {isDld && (
                         <TableCell className="text-sm text-muted-foreground">{row.size || "—"}</TableCell>
