@@ -58,7 +58,7 @@ export default function AppLayout({
               <SiteHeader />
               <div className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth [-webkit-overflow-scrolling:touch]">
                 <div className="@container/main flex flex-col w-full max-w-full">
-                  <div className="flex flex-col gap-4 px-4 py-4 md:gap-5 md:px-6 md:py-5 pb-24 md:pb-5 w-full max-w-[1400px] mx-auto animate-page-in">
+                  <div className="flex flex-col gap-3 px-3 py-3 md:gap-4 md:px-5 md:py-4 pb-24 md:pb-4 w-full max-w-[1920px] mx-auto animate-page-in">
                     {children}
                   </div>
                 </div>

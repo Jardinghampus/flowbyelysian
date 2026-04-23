@@ -178,7 +178,7 @@ export default function DataPage() {
   return (
     <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       {/* Main content */}
-      <div className="flex-1 flex flex-col gap-5 p-6 overflow-auto">
+      <div className="flex-1 flex flex-col gap-3 p-0 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

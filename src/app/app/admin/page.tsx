@@ -264,8 +264,8 @@ export default function AdminPage() {
   return (
     <>
       {/* Page Title */}
-      <div className="px-4 lg:px-6">
-        <div className="flex flex-col gap-2">
+      <div>
+        <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
           <p className="text-muted-foreground">
             Manage users, roles, and agent performance
@@ -273,7 +273,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="px-4 lg:px-6 mt-6">
+      <div className="mt-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2">

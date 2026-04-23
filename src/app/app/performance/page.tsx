@@ -15,25 +15,25 @@ export default function PerformancePage() {
   return (
     <>
       {/* Page Title and Description */}
-      <div className="px-4 lg:px-6">
-        <div className="flex flex-col gap-2">
+      <div>
+        <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight">Performance</h1>
           <p className="text-muted-foreground">Monitor your team and business performance</p>
         </div>
       </div>
 
-      <div className="@container/main px-4 lg:px-6 space-y-6">
+      <div className="@container/main space-y-4">
         {/* Daily Activity Tracker */}
         <DailyTracker />
 
         {/* Personal Targets and AI Coach - Side by side */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <PersonalTargets />
           <AICoach />
         </div>
 
         {/* Gamification - Leaderboard and Achievements */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <Leaderboard />
           <Achievements />
         </div>

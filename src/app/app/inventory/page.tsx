@@ -386,12 +386,12 @@ export default function InventoryPage() {
 
   return (
     <>
-      <div className="px-4 lg:px-6">
+      <div>
         {/* AI Matching Table at top */}
         <MatchingTable listings={listings} currentUserId={currentUserId} />
 
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
             <p className="text-muted-foreground">
               Manage your property listings - Live, Pocket, and Unofficial
@@ -642,7 +642,7 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <div className="px-4 lg:px-6 mt-6">
+      <div className="mt-4">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="all">All ({listings.length})</TabsTrigger>

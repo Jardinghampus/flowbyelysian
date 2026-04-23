@@ -57,15 +57,15 @@ export default function TaskPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="flex flex-col gap-2 px-4 md:px-6">
+      <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight">Tasks</h1>
         <p className="text-muted-foreground">
           A powerful task and issue tracker built with Tanstack Table.
         </p>
       </div>
 
-      {/* Mobile view placeholder - shows message instead of images */}
-      <div className="md:hidden px-4 md:px-6">
+      {/* Mobile view placeholder */}
+      <div className="md:hidden">
         <div className="flex items-center justify-center h-96 border rounded-lg bg-muted/20">
           <div className="text-center p-8">
             <h3 className="text-lg font-semibold mb-2">Tasks Dashboard</h3>
@@ -77,7 +77,7 @@ export default function TaskPage() {
       </div>
 
       {/* Desktop view */}
-      <div className="hidden h-full flex-1 flex-col space-y-6 px-4 md:px-6 md:flex">
+      <div className="hidden h-full flex-1 flex-col space-y-4 md:flex">
         {/* Stats Cards */}
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <Card>

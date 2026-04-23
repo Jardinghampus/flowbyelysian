@@ -53,80 +53,82 @@ export default function Page() {
   }, [])
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden">
-      {/* Hero Section - Compact */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="text-center py-2"
-      >
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-          Welcome to <ColourfulText text="ZFlow" />
-        </h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Your real estate dashboard powered by Zaylo
-        </p>
-      </motion.div>
-
-      {/* Quick Links */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 mb-4">
-        {quickLinks.map((link) => (
-          <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
-            <RippleButton variant="outline" size="sm" className={`${link.color} border text-xs h-8`}>
-              <link.icon className="h-3 w-3 mr-1.5" />
-              {link.name}
-              <ExternalLink className="h-2.5 w-2.5 ml-1.5 opacity-40" />
-            </RippleButton>
-          </Link>
-        ))}
+    <div className="w-full max-w-full overflow-x-hidden -mt-1">
+      {/* Compact Header Row */}
+      <div className="flex items-center justify-between mb-3">
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight">
+            Welcome to <ColourfulText text="ZFlow" />
+          </h1>
+          <p className="text-[11px] text-muted-foreground">
+            Real estate dashboard — Zaylo
+          </p>
+        </motion.div>
+        <div className="flex flex-wrap items-center gap-1">
+          {quickLinks.map((link) => (
+            <Link key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
+              <RippleButton variant="outline" size="sm" className={`${link.color} border text-[11px] h-7 px-2`}>
+                <link.icon className="h-3 w-3 mr-1" />
+                {link.name}
+                <ExternalLink className="h-2 w-2 ml-1 opacity-40" />
+              </RippleButton>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {mounted && (
         <div className="w-full max-w-full">
           {/* Main Layout */}
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             {/* Main Content */}
-            <div className="flex-1 space-y-4 min-w-0">
+            <div className="flex-1 space-y-3 min-w-0">
               {/* Trend Cards */}
               <SectionCards />
 
-              {/* My Activity Tracker - Personal daily tracking */}
+              {/* My Activity Tracker */}
               <MyActivityTracker />
 
-              {/* Two Column Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Left: Matches + Activity stacked */}
-                <div className="space-y-4">
+              {/* Three Column Layout on wide screens */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {/* Left: Pipeline + Matches */}
+                <div className="space-y-3">
                   <PipelineAlerts />
                   <MyMatchesWidget />
+                </div>
+
+                {/* Center: Chart */}
+                <div className="space-y-3">
+                  <ChartAreaInteractive />
                   <ActivityFeed />
                 </div>
 
-                {/* Right: Chart + Actions */}
-                <div className="space-y-4">
-                  <ChartAreaInteractive />
-                  <div className="grid grid-cols-2 gap-4">
-                    <OnboardingProgress />
-                    <QuickActions />
-                  </div>
+                {/* Right: Actions + Onboarding */}
+                <div className="space-y-3">
+                  <DailyTrackerSummary />
+                  <OnboardingProgress />
+                  <QuickActions />
                 </div>
               </div>
 
-              {/* Performance Table */}
+              {/* Performance Table — full width */}
               <AgentPerformanceTable />
             </div>
 
-            {/* Team Sidebar - Desktop */}
-            <div className="hidden xl:block w-60 shrink-0">
-              <div className="sticky top-4">
+            {/* Team Sidebar - Desktop only on very wide */}
+            <div className="hidden 2xl:block w-56 shrink-0">
+              <div className="sticky top-3">
                 <TeamSidebar />
               </div>
             </div>
           </div>
 
-          {/* Team Sidebar - Mobile */}
-          <div className="xl:hidden mt-4">
+          {/* Team Sidebar - Below on smaller screens */}
+          <div className="2xl:hidden mt-3">
             <TeamSidebar />
           </div>
         </div>
