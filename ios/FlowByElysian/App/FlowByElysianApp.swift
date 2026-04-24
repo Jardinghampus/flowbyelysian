@@ -3,14 +3,16 @@ import SwiftData
 
 @main
 struct FlowByElysianApp: App {
-    @StateObject private var authManager = AuthManager()
-    @StateObject private var networkMonitor = NetworkMonitor()
+    @State private var auth    = AuthManager()
+    @State private var network = NetworkMonitor()
+    @State private var appState = AppState()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(authManager)
-                .environmentObject(networkMonitor)
+                .environment(auth)
+                .environment(network)
+                .environment(appState)
                 .modelContainer(PersistenceController.shared.container)
         }
     }

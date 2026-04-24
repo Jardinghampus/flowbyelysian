@@ -1,60 +1,51 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject private var authManager: AuthManager
-    @EnvironmentObject private var networkMonitor: NetworkMonitor
+    @Environment(AuthManager.self) private var auth
+    @Environment(NetworkMonitor.self) private var network
 
     var body: some View {
-        Group {
-            if authManager.isAuthenticated {
-                MainTabView()
+        ZStack {
+            switch auth.state {
+            case .splash:
+                SplashView()
+                    .transition(.opacity)
+
+            case .unauthenticated:
+                LoginView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+
+            case .authenticated:
+                MainShellView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .opacity
+                    ))
                     .overlay(alignment: .top) {
-                        if !networkMonitor.isConnected {
+                        if !network.isConnected {
                             OfflineBanner()
+                                .padding(.top, AppTheme.Spacing.sm)
+                                .transition(.move(edge: .top).combined(with: .opacity))
                         }
                     }
-            } else {
-                LoginView()
             }
         }
+        .animation(.spring(response: 0.42, dampingFraction: 0.82), value: auth.state)
+        .animation(.spring(response: 0.3), value: network.isConnected)
     }
 }
 
-struct MainTabView: View {
+private struct OfflineBanner: View {
     var body: some View {
-        TabView {
-            DashboardView()
-                .tabItem { Label("Dashboard", systemImage: "chart.bar.fill") }
-
-            ListingsView()
-                .tabItem { Label("Listings", systemImage: "building.2.fill") }
-
-            RequestsView()
-                .tabItem { Label("Requests", systemImage: "person.2.fill") }
-
-            ContactsView()
-                .tabItem { Label("Contacts", systemImage: "person.crop.circle.fill") }
-
-            NotificationsView()
-                .tabItem { Label("Alerts", systemImage: "bell.fill") }
-        }
-        .tint(.indigo)
-    }
-}
-
-struct OfflineBanner: View {
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "wifi.slash")
-            Text("Offline – visar cachad data")
-        }
-        .font(.caption.weight(.medium))
-        .foregroundStyle(.white)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(.orange, in: Capsule())
-        .padding(.top, 8)
-        .transition(.move(edge: .top).combined(with: .opacity))
-        .animation(.spring(), value: true)
+        Label("Offline – visar cachad data", systemImage: "wifi.slash")
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, AppTheme.Spacing.md)
+            .padding(.vertical, AppTheme.Spacing.sm)
+            .background(.orange.gradient, in: Capsule())
+            .shadow(color: .orange.opacity(0.35), radius: 8, y: 4)
     }
 }

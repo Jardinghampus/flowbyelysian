@@ -1,12 +1,15 @@
 import Foundation
 
 enum Config {
-    // Byt till din produktions-URL när du deployar
+    // Production URL – set to your Vercel deployment
     static let baseURL = URL(string: "https://flowbyelysian.vercel.app/api")!
 
-    // Demo-auth matchar web-appens demo-läge
+    // Clerk publishable key – get from Clerk dashboard → API Keys
+    // Format: pk_live_XXXX (production) or pk_test_XXXX (development)
+    static let clerkPublishableKey = "pk_test_REPLACE_ME"
+
+    // Demo fallback (mirrors web app demo mode)
     static let demoUserID = "demo-user-001"
-    static let demoEmail = "jardinghampus@gmail.com"
 
     enum Timeouts {
         static let request: TimeInterval = 30
