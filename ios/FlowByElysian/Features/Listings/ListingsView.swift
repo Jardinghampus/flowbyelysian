@@ -7,6 +7,7 @@ struct ListingsView: View {
     @Environment(\.modelContext) private var context
     @State private var vm = ListingsViewModel()
     @State private var path = NavigationPath()
+    @State private var showAddSheet = false
 
     private let statusOptions: [(String, String)] = [
         ("Alla", ""), ("Live", "live"), ("Pocket", "pocket"), ("Unofficial", "unofficial")
@@ -20,38 +21,49 @@ struct ListingsView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
                 FiltersSection(vm: vm, statusOptions: statusOptions, typeOptions: typeOptions)
-                    .onChange(of: vm.filterStatus) { _, _ in
-                        Task { await vm.load(context: context, isOnline: network.isConnected) }
-                    }
-                    .onChange(of: vm.filterType) { _, _ in
-                        Task { await vm.load(context: context, isOnline: network.isConnected) }
-                    }
+                    .onChange(of: vm.filterStatus) { _, _ in reload() }
+                    .onChange(of: vm.filterType)   { _, _ in reload() }
 
-                if vm.isLoading && vm.listings.isEmpty {
-                    ProgressView()
-                        .frame(maxHeight: .infinity)
-                } else {
-                    ListingsGrid(listings: vm.filtered, path: $path)
+                ZStack(alignment: .bottomTrailing) {
+                    ListingsContent(vm: vm, path: $path, context: context, network: network)
+                    AddButton { showAddSheet = true }
+                        .padding(AppTheme.Spacing.md)
                 }
             }
             .background(.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { listingsToolbar }
-            .navigationDestination(for: Listing.self) { ListingDetailView(listing: $0) }
-            .searchable(text: $vm.searchText, prompt: "Titel, typ, område…")
+            .navigationDestination(for: Listing.self) {
+                ListingDetailView(listing: $0, vm: vm)
+            }
+            .searchable(text: Bindable(vm).searchText, prompt: "Titel, typ, område…")
+            .sheet(isPresented: $showAddSheet) { addSheet }
             .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
         }
         .task { await vm.load(context: context, isOnline: network.isConnected) }
     }
 
+    private var addSheet: some View {
+        AddListingView { payload in
+            do {
+                try await vm.createListing(payload, context: context)
+            } catch {
+                vm.errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func reload() {
+        Task { await vm.load(context: context, isOnline: network.isConnected) }
+    }
+
     @ToolbarContentBuilder
     private var listingsToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Button("Menu", systemImage: "line.3.horizontal") { appState.openDrawer() }
+            Button("Menu", systemImage: "line.3.horizontal", action: appState.openDrawer)
         }
         ToolbarItem(placement: .principal) {
-            Text("Listings")
-                .font(.headline)
+            Text("Listings").font(.headline)
         }
         ToolbarItem(placement: .topBarTrailing) {
             if vm.isLoading { ProgressView() }
@@ -62,32 +74,23 @@ struct ListingsView: View {
 // MARK: - Sub-views
 
 private struct FiltersSection: View {
-    var vm: ListingsViewModel
+    @Bindable var vm: ListingsViewModel
     let statusOptions: [(String, String)]
     let typeOptions: [(String, String)]
-
-    @Bindable private var bindableVM: ListingsViewModel
-
-    init(vm: ListingsViewModel, statusOptions: [(String, String)], typeOptions: [(String, String)]) {
-        self.vm = vm
-        self.bindableVM = vm
-        self.statusOptions = statusOptions
-        self.typeOptions = typeOptions
-    }
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal) {
                 HStack(spacing: AppTheme.Spacing.sm) {
                     ForEach(statusOptions, id: \.0) { label, value in
-                        FilterChip(label: label, isSelected: bindableVM.filterStatus == value) {
-                            bindableVM.filterStatus = value
+                        FilterChip(label: label, isSelected: vm.filterStatus == value) {
+                            vm.filterStatus = value
                         }
                     }
                     Divider().frame(height: 20)
                     ForEach(typeOptions, id: \.0) { label, value in
-                        FilterChip(label: label, isSelected: bindableVM.filterType == value) {
-                            bindableVM.filterType = value
+                        FilterChip(label: label, isSelected: vm.filterType == value) {
+                            vm.filterType = value
                         }
                     }
                 }
@@ -100,69 +103,120 @@ private struct FiltersSection: View {
     }
 }
 
-private struct ListingsGrid: View {
-    let listings: [Listing]
+private struct ListingsContent: View {
+    @Bindable var vm: ListingsViewModel
     @Binding var path: NavigationPath
+    let context: ModelContext
+    let network: NetworkMonitor
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        if listings.isEmpty {
+        if vm.isLoading && vm.listings.isEmpty {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if vm.filtered.isEmpty {
             ContentUnavailableView.search
         } else {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: AppTheme.Spacing.sm) {
-                    ForEach(listings) { listing in
-                        ListingGridCard(listing: listing)
-                            .onTapGesture { path.append(listing) }
+                    ForEach(vm.filtered) { listing in
+                        ListingGridCard(listing: listing, onTap: { path.append(listing) },
+                                        onDelete: { deleteListing(listing) })
                     }
                 }
                 .padding(AppTheme.Spacing.md)
+                .padding(.bottom, 80) // clearance for FAB
             }
             .scrollIndicators(.hidden)
+        }
+    }
+
+    private func deleteListing(_ listing: Listing) {
+        Task {
+            do {
+                try await vm.deleteListing(id: listing.id, context: context)
+            } catch {
+                vm.errorMessage = error.localizedDescription
+            }
         }
     }
 }
 
 private struct ListingGridCard: View {
     let listing: Listing
+    let onTap: () -> Void
+    let onDelete: () -> Void
+    @State private var showDeleteConfirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            AsyncImage(url: listing.firstImage) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle().fill(.quinary)
-                    .overlay { Image(systemName: "building.2").foregroundStyle(.tertiary) }
-            }
-            .frame(height: 110)
-            .clipShape(.rect(topLeadingRadius: AppTheme.Radius.card,
-                             topTrailingRadius: AppTheme.Radius.card))
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 0) {
+                AsyncImage(url: listing.firstImage) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle().fill(.quinary)
+                        .overlay {
+                            Image(systemName: "building.2")
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
+                }
+                .frame(height: 110)
+                .clipShape(.rect(topLeadingRadius: AppTheme.Radius.card,
+                                 topTrailingRadius: AppTheme.Radius.card))
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(listing.title)
-                    .font(.footnote.bold())
-                    .lineLimit(1)
-
-                Text(listing.priceFormatted)
-                    .font(.footnote)
-                    .foregroundStyle(AppTheme.Color.brand)
-
-                HStack(spacing: AppTheme.Spacing.xs) {
-                    if let beds = listing.bedrooms, beds > 0 {
-                        Label("\(beds)", systemImage: "bed.double")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if let status = listing.status {
-                        Spacer()
-                        StatusBadge(status: status)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(listing.title)
+                        .font(.footnote.bold())
+                        .lineLimit(1)
+                    Text(listing.priceFormatted)
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.Color.brand)
+                    HStack(spacing: AppTheme.Spacing.xs) {
+                        if let beds = listing.bedrooms, beds > 0 {
+                            Label(beds.formatted(), systemImage: "bed.double")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if let status = listing.status {
+                            Spacer()
+                            StatusBadge(status: status)
+                        }
                     }
                 }
+                .padding(AppTheme.Spacing.sm)
             }
-            .padding(AppTheme.Spacing.sm)
+            .background(.regularMaterial, in: .rect(cornerRadius: AppTheme.Radius.card))
+            .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
         }
-        .background(.regularMaterial, in: .rect(cornerRadius: AppTheme.Radius.card))
-        .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(listing.title), \(listing.priceFormatted)")
+        .contextMenu {
+            Button("Radera", systemImage: "trash", role: .destructive) {
+                showDeleteConfirm = true
+            }
+        }
+        .confirmationDialog("Radera \(listing.title)?",
+                            isPresented: $showDeleteConfirm,
+                            titleVisibility: .visible) {
+            Button("Radera", role: .destructive, action: onDelete)
+        }
+    }
+}
+
+private struct AddButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button("Lägg till listing", systemImage: "plus", action: action)
+            .labelStyle(.iconOnly)
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(width: 56, height: 56)
+            .background(AppTheme.Color.brand.gradient, in: Circle())
+            .shadow(color: AppTheme.Color.brand.opacity(0.4), radius: 12, y: 6)
+            .sensoryFeedback(.impact, trigger: true)
     }
 }

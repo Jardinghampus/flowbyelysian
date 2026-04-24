@@ -2,25 +2,27 @@ import SwiftUI
 
 struct ListingDetailView: View {
     let listing: Listing
-    @State private var showShareSheet = false
+    var vm: ListingsViewModel? = nil
+
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    @State private var showEdit = false
+    @State private var showDeleteConfirm = false
+    @State private var showShare = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 HeroImage(url: listing.firstImage)
-
                 VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
                     ListingTitleRow(listing: listing)
                     Divider()
+                    ListingTagRow(listing: listing)
+                    Divider()
                     ListingSpecsGrid(listing: listing)
-
-                    if let desc = listing.description, !desc.isEmpty {
+                    if let notes = listing.notes, !notes.isEmpty {
                         Divider()
-                        Text("Beskrivning")
-                            .font(.headline)
-                        Text(desc)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
+                        NoteSection(text: notes)
                     }
                 }
                 .padding(AppTheme.Spacing.md)
@@ -29,16 +31,45 @@ struct ListingDetailView: View {
         .scrollIndicators(.hidden)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Dela", systemImage: "square.and.arrow.up") {
-                    showShareSheet = true
+        .toolbar { detailToolbar }
+        .sheet(isPresented: $showEdit) {
+            AddListingView { payload in
+                guard let vm else { return }
+                do {
+                    try await vm.updateListing(id: listing.id, payload: payload, context: context)
+                } catch { /* error shown via vm.errorMessage */ }
+            }
+        }
+        .confirmationDialog("Radera \(listing.title)?",
+                            isPresented: $showDeleteConfirm,
+                            titleVisibility: .visible) {
+            Button("Radera", role: .destructive) { deleteAndDismiss() }
+        }
+        .sheet(isPresented: $showShare) {
+            ShareSheet(activityItems: [listing.shareText])
+                .presentationDetents([.medium, .large])
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var detailToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu("Alternativ", systemImage: "ellipsis.circle") {
+                Button("Dela", systemImage: "square.and.arrow.up") { showShare = true }
+                if vm != nil {
+                    Button("Redigera", systemImage: "pencil") { showEdit = true }
+                    Button("Radera", systemImage: "trash", role: .destructive) {
+                        showDeleteConfirm = true
+                    }
                 }
             }
         }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(activityItems: [listing.shareText])
-                .presentationDetents([.medium, .large])
+    }
+
+    private func deleteAndDismiss() {
+        Task {
+            try? await vm?.deleteListing(id: listing.id, context: context)
+            dismiss()
         }
     }
 }
@@ -57,10 +88,12 @@ private struct HeroImage: View {
                     Image(systemName: "building.2")
                         .font(.largeTitle)
                         .foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
                 }
         }
         .frame(height: 280)
         .clipped()
+        .accessibilityLabel("Fastighetsbild")
     }
 }
 
@@ -75,6 +108,11 @@ private struct ListingTitleRow: View {
                 Text(listing.priceFormatted)
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(AppTheme.Color.brand)
+                if let area = listing.areaName {
+                    Label(area, systemImage: "mappin")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
             if let status = listing.status {
@@ -84,18 +122,56 @@ private struct ListingTitleRow: View {
     }
 }
 
+private struct ListingTagRow: View {
+    let listing: Listing
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.sm) {
+            if let tt = listing.transactionType {
+                TagPill(label: tt == "sale" ? "Försäljning" : "Uthyrning",
+                        tint: tt == "sale" ? AppTheme.Color.brand : .mint)
+            }
+            if let it = listing.inquiryType {
+                TagPill(label: it.capitalized, tint: .secondary)
+            }
+            if let type = listing.type {
+                TagPill(label: type.capitalized, tint: .secondary)
+            }
+        }
+    }
+}
+
+private struct TagPill: View {
+    let label: String
+    let tint: Color
+
+    var body: some View {
+        Text(label)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(tint)
+            .padding(.horizontal, AppTheme.Spacing.sm)
+            .padding(.vertical, 4)
+            .background(tint.opacity(0.12), in: Capsule())
+    }
+}
+
 private struct ListingSpecsGrid: View {
     let listing: Listing
 
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AppTheme.Spacing.sm) {
-            SpecCell(icon: "bed.double", label: "Sovrum",    value: "\(listing.bedrooms ?? 0)")
-            SpecCell(icon: "shower",     label: "Badrum",    value: "\(listing.bathrooms ?? 0)")
-            if let size = listing.sizeSqft, size > 0 {
-                SpecCell(icon: "square", label: "Storlek",   value: "\(Int(size)) sqft")
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())],
+                  spacing: AppTheme.Spacing.sm) {
+            if let beds = listing.bedrooms {
+                SpecCell(icon: "bed.double",  label: "Sovrum",  value: beds.formatted())
             }
-            if let type = listing.type {
-                SpecCell(icon: "building.2", label: "Typ",   value: type.capitalized)
+            if let baths = listing.bathrooms {
+                SpecCell(icon: "shower",      label: "Badrum",  value: baths.formatted())
+            }
+            if let size = listing.size, size > 0 {
+                SpecCell(icon: "square",      label: "Storlek", value: "\(Int(size)) sqft")
+            }
+            if let avail = listing.availability {
+                SpecCell(icon: "calendar",    label: "Tillg.",  value: avail)
             }
         }
     }
@@ -116,9 +192,18 @@ private struct SpecCell: View {
     }
 }
 
-// MARK: - Share helpers
+private struct NoteSection: View {
+    let text: String
 
-private struct ShareSheet: UIViewControllerRepresentable {
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            Text("Anteckningar").font(.headline)
+            Text(text).font(.body).foregroundStyle(.secondary)
+        }
+    }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
     let activityItems: [Any]
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
@@ -127,8 +212,11 @@ private struct ShareSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
-private extension Listing {
+extension Listing {
     var shareText: String {
-        "\(title) – \(priceFormatted)\nStatus: \(status?.capitalized ?? "N/A")"
+        var parts = ["\(title) – \(priceFormatted)"]
+        if let area = areaName { parts.append("Område: \(area)") }
+        if let status { parts.append("Status: \(status.capitalized)") }
+        return parts.joined(separator: "\n")
     }
 }

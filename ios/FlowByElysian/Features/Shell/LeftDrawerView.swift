@@ -32,10 +32,10 @@ struct LeftDrawerView: View {
                 VStack(spacing: AppTheme.Spacing.xs) {
                     DrawerActionItem(icon: "bubble.left.and.bubble.right.fill",
                                      label: "AI Coach",
-                                     action: { appState.navigate(to: .home) })
+                                     action: { appState.openChat() })
                     DrawerActionItem(icon: "bell.badge.fill",
                                      label: "Aviseringar",
-                                     action: { appState.closeDrawer() })
+                                     action: { appState.openNotifications() })
                     DrawerActionItem(icon: "gearshape.fill",
                                      label: "Inställningar",
                                      action: { appState.closeDrawer() })

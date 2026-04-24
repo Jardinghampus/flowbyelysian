@@ -1,91 +1,109 @@
 import SwiftData
 import Foundation
 
-// MARK: - API Model (matchar Supabase-schemat)
-
-struct Listing: Codable, Identifiable {
+// Matches the actual Supabase schema returned by /api/listings
+struct Listing: Codable, Identifiable, Hashable {
     let id: String
     let title: String
-    let areaId: String?
+    let areaName: String?       // area_name in DB (not area_id)
     let price: Double?
-    let type: String?
-    let status: String?
+    let type: String?           // villa/apartment/townhouse/penthouse/plot/office/retail
+    let status: String?         // live/pocket/unofficial
+    let inquiryType: String?    // stock/request/viewing
+    let transactionType: String? // sale/rent
     let bedrooms: Int?
     let bathrooms: Int?
-    let sizeSqft: Double?
+    let size: Double?           // sqft – field is "size" not "size_sqft"
     let images: [String]?
-    let description: String?
+    let notes: String?          // "notes" not "description"
+    let availability: String?
+    let propertyFinderUrl: String?
+    let ownerName: String?
     let createdAt: String?
 
     var priceFormatted: String {
         guard let price else { return "Pris ej angivet" }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "AED"
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: price)) ?? "AED \(Int(price))"
+        return price.formatted(.currency(code: "AED").precision(.fractionLength(0)))
     }
 
     var firstImage: URL? {
-        guard let urlString = images?.first else { return nil }
-        return URL(string: urlString)
+        images?.first.flatMap { URL(string: $0) }
     }
 
-    var statusColor: String {
-        switch status {
-        case "live": return "green"
-        case "pocket": return "purple"
-        case "unofficial": return "orange"
-        default: return "gray"
-        }
-    }
+    var isForRent: Bool { transactionType == "rent" }
 }
 
 struct ListingsResponse: Codable {
     let listings: [Listing]?
     let data: [Listing]?
+    let total: Int?
 }
 
-// MARK: - SwiftData Cache Model
+// Payload sent to POST /api/listings
+struct NewListingPayload: Encodable {
+    let title: String
+    let areaName: String
+    let price: Int
+    let type: String
+    let status: String
+    let inquiryType: String
+    let transactionType: String
+    let bedrooms: Int?
+    let bathrooms: Int?
+    let size: Int?
+    let notes: String?
+    let availability: String?
+}
+
+struct SingleListingResponse: Codable {
+    let listing: Listing
+}
+
+// MARK: - SwiftData cache
 
 @Model
 final class CachedListing {
     var id: String
     var title: String
-    var areaId: String?
+    var areaName: String?
     var price: Double
     var type: String?
     var status: String?
+    var transactionType: String?
     var bedrooms: Int
     var bathrooms: Int
-    var sizeSqft: Double
+    var size: Double
     var imagesJSON: String?
-    var listingDescription: String?
+    var notes: String?
     var cachedAt: Date
 
-    init(from listing: Listing) {
-        self.id = listing.id
-        self.title = listing.title
-        self.areaId = listing.areaId
-        self.price = listing.price ?? 0
-        self.type = listing.type
-        self.status = listing.status
-        self.bedrooms = listing.bedrooms ?? 0
-        self.bathrooms = listing.bathrooms ?? 0
-        self.sizeSqft = listing.sizeSqft ?? 0
-        self.imagesJSON = listing.images.flatMap { try? JSONEncoder().encode($0) }.flatMap { String(data: $0, encoding: .utf8) }
-        self.listingDescription = listing.description
-        self.cachedAt = Date()
+    init(from l: Listing) {
+        id            = l.id
+        title         = l.title
+        areaName      = l.areaName
+        price         = l.price ?? 0
+        type          = l.type
+        status        = l.status
+        transactionType = l.transactionType
+        bedrooms      = l.bedrooms ?? 0
+        bathrooms     = l.bathrooms ?? 0
+        size          = l.size ?? 0
+        imagesJSON    = l.images.flatMap { try? JSONEncoder().encode($0) }
+                               .flatMap { String(data: $0, encoding: .utf8) }
+        notes         = l.notes
+        cachedAt      = .now
     }
 
     func toListing() -> Listing {
-        let images = imagesJSON
+        let imgs = imagesJSON
             .flatMap { $0.data(using: .utf8) }
             .flatMap { try? JSONDecoder().decode([String].self, from: $0) }
         return Listing(
-            id: id, title: title, areaId: areaId, price: price,
-            type: type, status: status, bedrooms: bedrooms, bathrooms: bathrooms,
-            sizeSqft: sizeSqft, images: images, description: listingDescription, createdAt: nil
+            id: id, title: title, areaName: areaName, price: price,
+            type: type, status: status, inquiryType: nil, transactionType: transactionType,
+            bedrooms: bedrooms, bathrooms: bathrooms, size: size,
+            images: imgs, notes: notes, availability: nil,
+            propertyFinderUrl: nil, ownerName: nil, createdAt: nil
         )
     }
 }

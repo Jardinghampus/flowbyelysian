@@ -15,20 +15,24 @@ final class DashboardViewModel {
         defer { isLoading = false }
 
         if isOnline {
+            // Already @MainActor – no MainActor.run needed inside task group
             await withTaskGroup(of: Void.self) { group in
-                group.addTask {
+                group.addTask { [weak self] in
+                    guard let self else { return }
                     if let result = try? await self.sync.fetchListings(context: context) {
-                        await MainActor.run { self.listings = Array(result.prefix(6)) }
+                        self.listings = Array(result.prefix(6))
                     }
                 }
-                group.addTask {
+                group.addTask { [weak self] in
+                    guard let self else { return }
                     if let result = try? await self.sync.fetchRequests(context: context) {
-                        await MainActor.run { self.requests = Array(result.prefix(5)) }
+                        self.requests = Array(result.prefix(5))
                     }
                 }
-                group.addTask {
+                group.addTask { [weak self] in
+                    guard let self else { return }
                     if let result = try? await self.sync.fetchNotifications(context: context) {
-                        await MainActor.run { self.notifications = Array(result.prefix(5)) }
+                        self.notifications = Array(result.prefix(5))
                     }
                 }
             }
@@ -39,8 +43,8 @@ final class DashboardViewModel {
         }
     }
 
-    var liveListings:   Int { listings.filter { $0.status == "live" }.count }
-    var activeRequests: Int { requests.filter { $0.status == "active" }.count }
-    var unreadCount:    Int { notifications.filter { $0.isRead == false }.count }
-    var totalValue:     Double { listings.compactMap { $0.price }.reduce(0, +) }
+    var liveListings:   Int    { listings.count(where: { $0.status == "live" }) }
+    var activeRequests: Int    { requests.count(where: { $0.status == "active" }) }
+    var unreadCount:    Int    { notifications.count(where: { $0.isUnread }) }
+    var totalValue:     Double { listings.compactMap(\.price).reduce(0, +) }
 }

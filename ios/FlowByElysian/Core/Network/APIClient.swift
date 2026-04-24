@@ -66,6 +66,38 @@ final class APIClient {
         return try await perform(request)
     }
 
+    func postVoid<Body: Encodable>(_ path: String, body: Body) async throws {
+        let url = try buildURL(path: path)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        applyHeaders(&request)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        request.httpBody = try encoder.encode(body)
+        let (_, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            throw APIError.httpError(code)
+        }
+    }
+
+    func patchVoid<Body: Encodable>(_ path: String, body: Body) async throws {
+        let url = try buildURL(path: path)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        applyHeaders(&request)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        request.httpBody = try encoder.encode(body)
+        let (_, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            throw APIError.httpError(code)
+        }
+    }
+
     func delete(_ path: String) async throws {
         let url = try buildURL(path: path)
         var request = URLRequest(url: url)
