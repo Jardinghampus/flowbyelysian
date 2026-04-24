@@ -17,6 +17,7 @@ final class ChatViewModel {
     var errorMessage: String?
 
     private let api = APIClient.shared
+    private var streamTask: Task<Void, Never>?
 
     // Suggested prompts shown before first message
     let suggestedPrompts = [
@@ -26,7 +27,7 @@ final class ChatViewModel {
         "Freehold vs leasehold – skillnaden?",
     ]
 
-    func send() async {
+    func send() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isStreaming else { return }
 
@@ -34,28 +35,38 @@ final class ChatViewModel {
         inputText = ""
         errorMessage = nil
 
-        // Add assistant placeholder for streaming
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
         let assistantIndex = messages.count - 1
 
         isStreaming = true
-        defer { isStreaming = false }
-
-        do {
-            try await streamResponse(into: assistantIndex)
-        } catch {
-            messages[assistantIndex].content = "Fel: \(error.localizedDescription)"
-            errorMessage = error.localizedDescription
+        streamTask = Task {
+            do {
+                try await streamResponse(into: assistantIndex)
+            } catch is CancellationError {
+                if messages[assistantIndex].content.isEmpty {
+                    messages[assistantIndex].content = "Avbrutet."
+                }
+            } catch {
+                messages[assistantIndex].content = "Fel: \(error.localizedDescription)"
+                errorMessage = error.localizedDescription
+            }
+            isStreaming = false
         }
+    }
+
+    func cancelStream() {
+        streamTask?.cancel()
+        streamTask = nil
     }
 
     func sendSuggested(_ prompt: String) {
         inputText = prompt
-        Task { await send() }
+        send()
     }
 
     func clearMessages() {
+        cancelStream()
         messages = []
         errorMessage = nil
     }

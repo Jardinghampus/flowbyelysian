@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct NotificationsView: View {
+    @Environment(AppState.self) private var appState
     @Environment(NetworkMonitor.self) private var network
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -23,7 +24,7 @@ struct NotificationsView: View {
             .navigationTitle("Aviseringar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { notificationsToolbar }
-            .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
+            .refreshable { await vm.load(context: context, isOnline: network.isConnected, appState: appState) }
             .alert("Fel", isPresented: Binding(
                 get: { vm.errorMessage != nil },
                 set: { if !$0 { vm.errorMessage = nil } }
@@ -33,7 +34,7 @@ struct NotificationsView: View {
                 Text(vm.errorMessage ?? "")
             }
         }
-        .task { await vm.load(context: context, isOnline: network.isConnected) }
+        .task { await vm.load(context: context, isOnline: network.isConnected, appState: appState) }
     }
 
     private var notificationList: some View {

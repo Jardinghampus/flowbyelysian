@@ -224,13 +224,12 @@ private struct InputBar: View {
                 .padding(.vertical, 10)
                 .background(.quaternary, in: .rect(cornerRadius: AppTheme.Radius.md))
                 .submitLabel(.send)
-                .onSubmit {
-                    Task { await vm.send() }
-                }
+                .onSubmit { vm.send() }
                 .disabled(vm.isStreaming)
 
             Button {
-                Task { await vm.send() }
+                if vm.isStreaming { vm.cancelStream() }
+                else { vm.send() }
             } label: {
                 Image(systemName: vm.isStreaming ? "stop.circle.fill" : "arrow.up.circle.fill")
                     .font(.title2)
@@ -240,7 +239,7 @@ private struct InputBar: View {
             }
             .buttonStyle(.plain)
             .disabled(vm.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !vm.isStreaming)
-            .accessibilityLabel(vm.isStreaming ? "Stoppa" : "Skicka")
+            .accessibilityLabel(vm.isStreaming ? "Avbryt" : "Skicka")
         }
         .padding(.horizontal, AppTheme.Spacing.md)
         .padding(.vertical, AppTheme.Spacing.sm)
