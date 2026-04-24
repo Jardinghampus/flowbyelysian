@@ -7,6 +7,8 @@ struct ClientsView: View {
     @Environment(\.modelContext) private var context
     @State private var vm = ClientsViewModel()
     @State private var selectedContact: Contact?
+    @State private var showAddRequest = false
+    @State private var showAddContact = false
 
     private let statusOptions: [(String, String)] = [
         ("Alla", ""), ("Aktiva", "active"), ("Matchade", "matched"), ("Stängda", "closed")
@@ -15,20 +17,42 @@ struct ClientsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Segment: Requests / Contacts
                 SegmentedPicker(selection: Bindable(vm).selectedSegment)
+                    .padding(.horizontal, AppTheme.Spacing.md)
+                    .padding(.vertical, AppTheme.Spacing.sm)
+                Divider()
 
-                if vm.selectedSegment == 0 {
-                    RequestsTab(vm: vm, statusOptions: statusOptions)
-                } else {
-                    ContactsTab(vm: vm, selectedContact: $selectedContact)
+                ZStack(alignment: .bottomTrailing) {
+                    if vm.selectedSegment == 0 {
+                        RequestsTab(vm: vm, statusOptions: statusOptions, context: context)
+                    } else {
+                        ContactsTab(vm: vm, selectedContact: $selectedContact, context: context)
+                    }
+
+                    AddButton(label: vm.selectedSegment == 0 ? "Ny förfrågan" : "Ny kontakt") {
+                        if vm.selectedSegment == 0 { showAddRequest = true }
+                        else { showAddContact = true }
+                    }
+                    .padding(AppTheme.Spacing.md)
                 }
             }
             .background(.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { clientsToolbar }
             .searchable(text: Bindable(vm).searchText, prompt: "Sök…")
-            .sheet(item: $selectedContact, content: ContactDetailView.init)
+            .sheet(item: $selectedContact, content: ContactDetailSheet.init)
+            .sheet(isPresented: $showAddRequest) {
+                AddRequestView { payload in
+                    do { try await vm.createRequest(payload, context: context) }
+                    catch { vm.errorMessage = error.localizedDescription }
+                }
+            }
+            .sheet(isPresented: $showAddContact) {
+                AddContactView { payload in
+                    do { try await vm.createContact(payload, context: context) }
+                    catch { vm.errorMessage = error.localizedDescription }
+                }
+            }
             .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
         }
         .task { await vm.load(context: context, isOnline: network.isConnected) }
@@ -37,11 +61,10 @@ struct ClientsView: View {
     @ToolbarContentBuilder
     private var clientsToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Button("Menu", systemImage: "line.3.horizontal") { appState.openDrawer() }
+            Button("Menu", systemImage: "line.3.horizontal", action: appState.openDrawer)
         }
         ToolbarItem(placement: .principal) {
-            Text("Clients")
-                .font(.headline)
+            Text("Clients").font(.headline)
         }
         ToolbarItem(placement: .topBarTrailing) {
             if vm.isLoading { ProgressView() }
@@ -56,17 +79,15 @@ private struct SegmentedPicker: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            SegmentTab(title: "Requests", index: 0, selection: $selection)
-            SegmentTab(title: "Contacts",  index: 1, selection: $selection)
+            SegmentButton(title: "Requests", index: 0, selection: $selection)
+            SegmentButton(title: "Contacts",  index: 1, selection: $selection)
         }
         .padding(3)
         .background(.quinary, in: .rect(cornerRadius: AppTheme.Radius.sm))
-        .padding(.horizontal, AppTheme.Spacing.md)
-        .padding(.vertical, AppTheme.Spacing.sm)
     }
 }
 
-private struct SegmentTab: View {
+private struct SegmentButton: View {
     let title: String
     let index: Int
     @Binding var selection: Int
@@ -93,16 +114,17 @@ private struct SegmentTab: View {
 // MARK: - Requests tab
 
 private struct RequestsTab: View {
-    var vm: ClientsViewModel
+    @Bindable var vm: ClientsViewModel
     let statusOptions: [(String, String)]
+    let context: ModelContext
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal) {
                 HStack(spacing: AppTheme.Spacing.sm) {
                     ForEach(statusOptions, id: \.0) { label, value in
-                        FilterChip(label: label, isSelected: Bindable(vm).filterStatus.wrappedValue == value) {
-                            Bindable(vm).filterStatus.wrappedValue = value
+                        FilterChip(label: label, isSelected: vm.filterStatus == value) {
+                            vm.filterStatus = value
                         }
                     }
                 }
@@ -113,16 +135,29 @@ private struct RequestsTab: View {
             Divider()
 
             if vm.filteredRequests.isEmpty {
-                ContentUnavailableView.search
-                    .frame(maxHeight: .infinity)
+                ContentUnavailableView(
+                    "Inga förfrågningar",
+                    systemImage: "person.2.slash",
+                    description: Text(vm.filterStatus.isEmpty ? "Tryck + för att lägga till" : "Inga i status "\(vm.filterStatus)"")
+                )
+                .frame(maxHeight: .infinity)
             } else {
                 ScrollView {
                     LazyVStack(spacing: AppTheme.Spacing.sm) {
                         ForEach(vm.filteredRequests) { req in
-                            ClientRowView(request: req)
+                            RequestCard(request: req, onStatusChange: { newStatus in
+                                Task {
+                                    try? await vm.updateRequestStatus(id: req.id, status: newStatus)
+                                }
+                            }, onDelete: {
+                                Task {
+                                    try? await vm.deleteRequest(id: req.id, context: context)
+                                }
+                            })
                         }
                     }
                     .padding(AppTheme.Spacing.md)
+                    .padding(.bottom, 80)
                 }
                 .scrollIndicators(.hidden)
             }
@@ -133,27 +168,42 @@ private struct RequestsTab: View {
 // MARK: - Contacts tab
 
 private struct ContactsTab: View {
-    var vm: ClientsViewModel
+    @Bindable var vm: ClientsViewModel
     @Binding var selectedContact: Contact?
+    let context: ModelContext
 
     var body: some View {
         if vm.filteredContacts.isEmpty {
-            ContentUnavailableView.search
-                .frame(maxHeight: .infinity)
+            ContentUnavailableView(
+                "Inga kontakter",
+                systemImage: "person.slash",
+                description: Text("Tryck + för att lägga till")
+            )
+            .frame(maxHeight: .infinity)
         } else {
-            List(vm.filteredContacts) { contact in
-                ContactRow(contact: contact)
-                    .contentShape(.rect)
-                    .onTapGesture { selectedContact = contact }
+            List {
+                ForEach(vm.filteredContacts) { contact in
+                    Button {
+                        selectedContact = contact
+                    } label: {
+                        ContactRow(contact: contact)
+                    }
+                    .buttonStyle(.plain)
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button("Radera", role: .destructive) {
+                            Task { try? await vm.deleteContact(id: contact.id, context: context) }
+                        }
+                    }
+                }
             }
             .listStyle(.plain)
         }
     }
 }
 
-// MARK: - Shared row components
+// MARK: - Row components (also used in Dashboard)
 
 struct ClientRowView: View {
     let request: ClientRequest
@@ -164,30 +214,57 @@ struct ClientRowView: View {
                 Text(request.clientName)
                     .font(.subheadline.bold())
                 Spacer()
-                if let status = request.status {
-                    StatusBadge(status: status)
-                }
+                if let status = request.status { StatusBadge(status: status) }
             }
-
             HStack(spacing: AppTheme.Spacing.md) {
                 if let type = request.propertyType {
                     Label(type.capitalized, systemImage: "building.2")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 if let beds = request.bedrooms, beds > 0 {
                     Label("^[\(beds) sovrum](inflect: true)", systemImage: "bed.double")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if let area = request.areaName {
+                    Label(area, systemImage: "mappin")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
-
             Text(request.budgetFormatted)
                 .font(.footnote.bold())
                 .foregroundStyle(AppTheme.Color.brand)
         }
         .padding(AppTheme.Spacing.md)
         .glassCard()
+    }
+}
+
+private struct RequestCard: View {
+    let request: ClientRequest
+    let onStatusChange: (String) -> Void
+    let onDelete: () -> Void
+    @State private var showStatusPicker = false
+    @State private var showDeleteConfirm = false
+
+    var body: some View {
+        ClientRowView(request: request)
+            .contextMenu {
+                Menu("Ändra status", systemImage: "arrow.triangle.2.circlepath") {
+                    Button("Aktiv")    { onStatusChange("active") }
+                    Button("Matchad")  { onStatusChange("matched") }
+                    Button("Stängd")   { onStatusChange("closed") }
+                }
+                Divider()
+                Button("Radera", systemImage: "trash", role: .destructive) {
+                    showDeleteConfirm = true
+                }
+            }
+            .confirmationDialog("Radera \(request.clientName)?",
+                                isPresented: $showDeleteConfirm,
+                                titleVisibility: .visible) {
+                Button("Radera", role: .destructive, action: onDelete)
+            }
+            .accessibilityLabel("\(request.clientName), \(request.budgetFormatted)")
     }
 }
 
@@ -204,30 +281,25 @@ private struct ContactRow: View {
                         .font(.callout.bold())
                         .foregroundStyle(.white)
                 }
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(contact.name)
-                    .font(.subheadline.bold())
+                Text(contact.name).font(.subheadline.bold())
                 if let email = contact.email {
-                    Text(email)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(email).font(.caption).foregroundStyle(.secondary)
                 }
             }
-
             Spacer()
-
             if let role = contact.role {
-                Text(role.capitalized)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(role.capitalized).font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, AppTheme.Spacing.sm)
+        .accessibilityLabel("\(contact.name)\(contact.role.map { ", \($0)" } ?? "")")
     }
 }
 
-private struct ContactDetailView: View {
+private struct ContactDetailSheet: View {
     let contact: Contact
 
     var body: some View {
@@ -243,33 +315,53 @@ private struct ContactDetailView: View {
                                     .font(.title2.bold())
                                     .foregroundStyle(.white)
                             }
-                        Text(contact.name)
-                            .font(.title3.bold())
+                            .accessibilityHidden(true)
+                        Text(contact.name).font(.title3.bold())
                         if let role = contact.role {
-                            Text(role.capitalized)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            Text(role.capitalized).font(.subheadline).foregroundStyle(.secondary)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, AppTheme.Spacing.sm)
                     .listRowBackground(Color.clear)
                 }
-
-                if let email = contact.email {
-                    Section("Kontakt") {
+                Section("Kontakt") {
+                    if let email = contact.email {
                         Label(email, systemImage: "envelope")
-                        if let phone = contact.phone {
-                            Label(phone, systemImage: "phone")
-                        }
-                        if let wa = contact.whatsapp {
-                            Label(wa, systemImage: "message")
-                        }
+                            .accessibilityLabel("E-post: \(email)")
+                    }
+                    if let phone = contact.phone {
+                        Label(phone, systemImage: "phone")
+                            .accessibilityLabel("Telefon: \(phone)")
+                    }
+                    if let wa = contact.whatsapp {
+                        Label(wa, systemImage: "message")
+                            .accessibilityLabel("WhatsApp: \(wa)")
+                    }
+                }
+                if let area = contact.areaName {
+                    Section("Område") {
+                        Label(area, systemImage: "mappin")
                     }
                 }
             }
             .navigationTitle(contact.name)
             .navigationBarTitleDisplayMode(.inline)
         }
+    }
+}
+
+private struct AddButton: View {
+    let label: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(label, systemImage: "plus", action: action)
+            .labelStyle(.iconOnly)
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(width: 56, height: 56)
+            .background(AppTheme.Color.brand.gradient, in: Circle())
+            .shadow(color: AppTheme.Color.brand.opacity(0.4), radius: 12, y: 6)
     }
 }

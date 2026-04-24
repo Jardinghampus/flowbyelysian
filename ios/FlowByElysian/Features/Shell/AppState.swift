@@ -6,6 +6,8 @@ enum AppTab: Hashable { case home, listings, clients, reports }
 final class AppState {
     var selectedTab: AppTab = .home
     var drawerOpen = false
+    var showChat = false
+    var showNotifications = false
 
     func openDrawer() {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
@@ -24,5 +26,15 @@ final class AppState {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             selectedTab = tab
         }
+    }
+
+    func openChat() {
+        closeDrawer()
+        showChat = true
+    }
+
+    func openNotifications() {
+        closeDrawer()
+        showNotifications = true
     }
 }

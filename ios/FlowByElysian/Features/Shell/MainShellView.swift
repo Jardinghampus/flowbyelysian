@@ -45,5 +45,7 @@ struct MainShellView: View {
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: appState.drawerOpen)
                 .zIndex(10)
         }
+        .sheet(isPresented: $appState.showChat) { ChatView() }
+        .sheet(isPresented: $appState.showNotifications) { NotificationsView() }
     }
 }
