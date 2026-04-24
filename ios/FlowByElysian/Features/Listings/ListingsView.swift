@@ -2,105 +2,167 @@ import SwiftUI
 import SwiftData
 
 struct ListingsView: View {
+    @Environment(AppState.self) private var appState
+    @Environment(NetworkMonitor.self) private var network
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var networkMonitor: NetworkMonitor
-    @StateObject private var vm = ListingsViewModel()
+    @State private var vm = ListingsViewModel()
+    @State private var path = NavigationPath()
+
+    private let statusOptions: [(String, String)] = [
+        ("Alla", ""), ("Live", "live"), ("Pocket", "pocket"), ("Unofficial", "unofficial")
+    ]
+    private let typeOptions: [(String, String)] = [
+        ("Alla typer", ""), ("Villa", "villa"), ("Apartment", "apartment"),
+        ("Townhouse", "townhouse"), ("Penthouse", "penthouse"), ("Plot", "plot")
+    ]
 
     var body: some View {
-        NavigationStack {
-            Group {
+        NavigationStack(path: $path) {
+            VStack(spacing: 0) {
+                FiltersSection(vm: vm, statusOptions: statusOptions, typeOptions: typeOptions)
+                    .onChange(of: vm.filterStatus) { _, _ in
+                        Task { await vm.load(context: context, isOnline: network.isConnected) }
+                    }
+                    .onChange(of: vm.filterType) { _, _ in
+                        Task { await vm.load(context: context, isOnline: network.isConnected) }
+                    }
+
                 if vm.isLoading && vm.listings.isEmpty {
-                    ProgressView("Laddar listings...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if vm.filtered.isEmpty {
-                    ContentUnavailableView("Inga listings", systemImage: "building.2.slash")
+                    ProgressView()
+                        .frame(maxHeight: .infinity)
                 } else {
-                    List(vm.filtered) { listing in
-                        NavigationLink(destination: ListingDetailView(listing: listing)) {
-                            ListingRowView(listing: listing)
-                        }
-                    }
-                    .listStyle(.plain)
+                    ListingsGrid(listings: vm.filtered, path: $path)
                 }
             }
-            .navigationTitle("Listings")
-            .searchable(text: $vm.searchText, prompt: "Sök titel, typ...")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Picker("Status", selection: $vm.filterStatus) {
-                            Text("Alla").tag("")
-                            Text("Live").tag("live")
-                            Text("Pocket").tag("pocket")
-                            Text("Unofficial").tag("unofficial")
-                        }
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                    }
-                }
-            }
-            .task { await vm.load(context: context, isOnline: networkMonitor.isConnected) }
-            .refreshable { await vm.load(context: context, isOnline: networkMonitor.isConnected) }
-            .onChange(of: vm.filterStatus) {
-                Task { await vm.load(context: context, isOnline: networkMonitor.isConnected) }
-            }
+            .background(.background)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { listingsToolbar }
+            .navigationDestination(for: Listing.self) { ListingDetailView(listing: $0) }
+            .searchable(text: $vm.searchText, prompt: "Titel, typ, område…")
+            .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
+        }
+        .task { await vm.load(context: context, isOnline: network.isConnected) }
+    }
+
+    @ToolbarContentBuilder
+    private var listingsToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button("Menu", systemImage: "line.3.horizontal") { appState.openDrawer() }
+        }
+        ToolbarItem(placement: .principal) {
+            Text("Listings")
+                .font(.headline)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            if vm.isLoading { ProgressView() }
         }
     }
 }
 
-struct ListingRowView: View {
+// MARK: - Sub-views
+
+private struct FiltersSection: View {
+    var vm: ListingsViewModel
+    let statusOptions: [(String, String)]
+    let typeOptions: [(String, String)]
+
+    @Bindable private var bindableVM: ListingsViewModel
+
+    init(vm: ListingsViewModel, statusOptions: [(String, String)], typeOptions: [(String, String)]) {
+        self.vm = vm
+        self.bindableVM = vm
+        self.statusOptions = statusOptions
+        self.typeOptions = typeOptions
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView(.horizontal) {
+                HStack(spacing: AppTheme.Spacing.sm) {
+                    ForEach(statusOptions, id: \.0) { label, value in
+                        FilterChip(label: label, isSelected: bindableVM.filterStatus == value) {
+                            bindableVM.filterStatus = value
+                        }
+                    }
+                    Divider().frame(height: 20)
+                    ForEach(typeOptions, id: \.0) { label, value in
+                        FilterChip(label: label, isSelected: bindableVM.filterType == value) {
+                            bindableVM.filterType = value
+                        }
+                    }
+                }
+                .padding(.horizontal, AppTheme.Spacing.md)
+                .padding(.vertical, AppTheme.Spacing.sm)
+            }
+            .scrollIndicators(.hidden)
+            Divider()
+        }
+    }
+}
+
+private struct ListingsGrid: View {
+    let listings: [Listing]
+    @Binding var path: NavigationPath
+
+    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        if listings.isEmpty {
+            ContentUnavailableView.search
+        } else {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: AppTheme.Spacing.sm) {
+                    ForEach(listings) { listing in
+                        ListingGridCard(listing: listing)
+                            .onTapGesture { path.append(listing) }
+                    }
+                }
+                .padding(AppTheme.Spacing.md)
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+}
+
+private struct ListingGridCard: View {
     let listing: Listing
 
     var body: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             AsyncImage(url: listing.firstImage) { image in
                 image.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
-                Color.gray.opacity(0.2)
+                Rectangle().fill(.quinary)
+                    .overlay { Image(systemName: "building.2").foregroundStyle(.tertiary) }
             }
-            .frame(width: 72, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .frame(height: 110)
+            .clipShape(.rect(topLeadingRadius: AppTheme.Radius.card,
+                             topTrailingRadius: AppTheme.Radius.card))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(listing.title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.footnote.bold())
                     .lineLimit(1)
-                HStack(spacing: 6) {
-                    if let type = listing.type {
-                        Label(type.capitalized, systemImage: "building")
+
+                Text(listing.priceFormatted)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.Color.brand)
+
+                HStack(spacing: AppTheme.Spacing.xs) {
+                    if let beds = listing.bedrooms, beds > 0 {
+                        Label("\(beds)", systemImage: "bed.double")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if let beds = listing.bedrooms, beds > 0 {
-                        Label("\(beds) bd", systemImage: "bed.double")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    if let status = listing.status {
+                        Spacer()
+                        StatusBadge(status: status)
                     }
                 }
-                Text(listing.priceFormatted)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.indigo)
             }
-
-            Spacer()
-
-            if let status = listing.status {
-                Text(status)
-                    .font(.caption2.weight(.semibold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(statusBackground(status), in: Capsule())
-                    .foregroundStyle(.white)
-            }
+            .padding(AppTheme.Spacing.sm)
         }
-        .padding(.vertical, 4)
-    }
-
-    private func statusBackground(_ status: String) -> Color {
-        switch status {
-        case "live": return .green
-        case "pocket": return .purple
-        default: return .orange
-        }
+        .background(.regularMaterial, in: .rect(cornerRadius: AppTheme.Radius.card))
+        .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
     }
 }

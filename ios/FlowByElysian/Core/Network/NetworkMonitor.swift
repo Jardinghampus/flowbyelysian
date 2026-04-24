@@ -1,9 +1,9 @@
 import Network
-import Combine
+import SwiftUI
 
-@MainActor
-final class NetworkMonitor: ObservableObject {
-    @Published private(set) var isConnected = true
+@Observable @MainActor
+final class NetworkMonitor {
+    private(set) var isConnected = true
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "com.flowbyelysian.network")

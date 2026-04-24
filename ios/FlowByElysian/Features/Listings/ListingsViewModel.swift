@@ -1,32 +1,26 @@
+import SwiftUI
 import SwiftData
-import Foundation
 
-@MainActor
-final class ListingsViewModel: ObservableObject {
-    @Published var listings: [Listing] = []
-    @Published var isLoading = false
-    @Published var error: String?
-    @Published var searchText = ""
-    @Published var filterStatus = ""
-    @Published var filterType = ""
+@Observable @MainActor
+final class ListingsViewModel {
+    private(set) var listings: [Listing] = []
+    private(set) var isLoading = false
+    var searchText = ""
+    var filterStatus = ""
+    var filterType = ""
 
     private let sync = SyncManager.shared
 
     func load(context: ModelContext, isOnline: Bool) async {
         isLoading = true
         defer { isLoading = false }
-        error = nil
 
         if isOnline {
-            do {
-                var query: [String: String] = [:]
-                if !filterStatus.isEmpty { query["status"] = filterStatus }
-                if !filterType.isEmpty { query["type"] = filterType }
-                listings = try await sync.fetchListings(context: context, query: query)
-            } catch {
-                self.error = error.localizedDescription
-                listings = sync.cachedListings(context: context)
-            }
+            var query: [String: String] = [:]
+            if !filterStatus.isEmpty { query["status"] = filterStatus }
+            if !filterType.isEmpty   { query["type"]   = filterType }
+            listings = (try? await sync.fetchListings(context: context, query: query))
+                ?? sync.cachedListings(context: context)
         } else {
             listings = sync.cachedListings(context: context)
         }
@@ -34,9 +28,11 @@ final class ListingsViewModel: ObservableObject {
 
     var filtered: [Listing] {
         guard !searchText.isEmpty else { return listings }
+        let q = searchText.lowercased()
         return listings.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            ($0.type?.localizedCaseInsensitiveContains(searchText) == true)
+            $0.title.lowercased().contains(q) ||
+            ($0.type?.lowercased().contains(q) == true) ||
+            ($0.areaId?.lowercased().contains(q) == true)
         }
     }
 }

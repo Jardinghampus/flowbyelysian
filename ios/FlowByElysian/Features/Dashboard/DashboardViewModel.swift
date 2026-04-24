@@ -1,16 +1,14 @@
+import SwiftUI
 import SwiftData
-import Foundation
 
-@MainActor
-final class DashboardViewModel: ObservableObject {
-    @Published var listings: [Listing] = []
-    @Published var requests: [ClientRequest] = []
-    @Published var notifications: [AppNotification] = []
-    @Published var isLoading = false
-    @Published var error: String?
+@Observable @MainActor
+final class DashboardViewModel {
+    private(set) var listings: [Listing] = []
+    private(set) var requests: [ClientRequest] = []
+    private(set) var notifications: [AppNotification] = []
+    private(set) var isLoading = false
 
     private let sync = SyncManager.shared
-    private let api = APIClient.shared
 
     func load(context: ModelContext, isOnline: Bool) async {
         isLoading = true
@@ -20,7 +18,7 @@ final class DashboardViewModel: ObservableObject {
             await withTaskGroup(of: Void.self) { group in
                 group.addTask {
                     if let result = try? await self.sync.fetchListings(context: context) {
-                        await MainActor.run { self.listings = Array(result.prefix(5)) }
+                        await MainActor.run { self.listings = Array(result.prefix(6)) }
                     }
                 }
                 group.addTask {
@@ -35,13 +33,14 @@ final class DashboardViewModel: ObservableObject {
                 }
             }
         } else {
-            listings = Array(sync.cachedListings(context: context).prefix(5))
-            requests = Array(sync.cachedRequests(context: context).prefix(5))
+            listings      = Array(sync.cachedListings(context: context).prefix(6))
+            requests      = Array(sync.cachedRequests(context: context).prefix(5))
             notifications = Array(sync.cachedNotifications(context: context).prefix(5))
         }
     }
 
-    var unreadCount: Int { notifications.filter { $0.isRead == false }.count }
+    var liveListings:   Int { listings.filter { $0.status == "live" }.count }
     var activeRequests: Int { requests.filter { $0.status == "active" }.count }
-    var liveListings: Int { listings.filter { $0.status == "live" }.count }
+    var unreadCount:    Int { notifications.filter { $0.isRead == false }.count }
+    var totalValue:     Double { listings.compactMap { $0.price }.reduce(0, +) }
 }

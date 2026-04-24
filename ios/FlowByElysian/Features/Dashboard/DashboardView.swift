@@ -2,90 +2,188 @@ import SwiftUI
 import SwiftData
 
 struct DashboardView: View {
+    @Environment(AuthManager.self) private var auth
+    @Environment(AppState.self) private var appState
+    @Environment(NetworkMonitor.self) private var network
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var networkMonitor: NetworkMonitor
-    @StateObject private var vm = DashboardViewModel()
+    @State private var vm = DashboardViewModel()
+    @State private var listingPath = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $listingPath) {
             ScrollView {
-                VStack(spacing: 20) {
-                    // KPI-kort
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        KPICard(title: "Live listings", value: "\(vm.liveListings)", icon: "building.2.fill", color: .green)
-                        KPICard(title: "Aktiva requests", value: "\(vm.activeRequests)", icon: "person.2.fill", color: .indigo)
-                        KPICard(title: "Aviseringar", value: "\(vm.unreadCount)", icon: "bell.badge.fill", color: .orange)
-                    }
-                    .padding(.horizontal)
-
-                    // Senaste listings
-                    if !vm.listings.isEmpty {
-                        SectionHeader(title: "Senaste listings")
-                        ForEach(vm.listings) { listing in
-                            NavigationLink(destination: ListingDetailView(listing: listing)) {
-                                ListingRowView(listing: listing)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal)
-                        }
-                    }
-
-                    // Senaste requests
-                    if !vm.requests.isEmpty {
-                        SectionHeader(title: "Senaste requests")
-                        ForEach(vm.requests) { req in
-                            RequestRowView(request: req)
-                                .padding(.horizontal)
-                        }
-                    }
+                VStack(spacing: AppTheme.Spacing.md) {
+                    DashboardGreeting(user: auth.currentUser)
+                    KPIGrid(vm: vm)
+                    RecentListingsSection(listings: vm.listings, path: $listingPath)
+                    RecentRequestsSection(requests: vm.requests)
                 }
-                .padding(.vertical)
+                .padding(.horizontal, AppTheme.Spacing.md)
+                .padding(.vertical, AppTheme.Spacing.md)
             }
-            .navigationTitle("Dashboard")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if vm.isLoading { ProgressView() }
-                }
+            .scrollIndicators(.hidden)
+            .background(.background)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { dashboardToolbar }
+            .navigationDestination(for: Listing.self) { ListingDetailView(listing: $0) }
+            .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
+        }
+        .task { await vm.load(context: context, isOnline: network.isConnected) }
+    }
+
+    @ToolbarContentBuilder
+    private var dashboardToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Button("Menu", systemImage: "line.3.horizontal") {
+                appState.openDrawer()
             }
-            .task { await vm.load(context: context, isOnline: networkMonitor.isConnected) }
-            .refreshable { await vm.load(context: context, isOnline: networkMonitor.isConnected) }
+            .sensoryFeedback(.impact(flexibility: .soft), trigger: appState.drawerOpen)
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            if vm.isLoading { ProgressView() }
         }
     }
 }
 
-struct KPICard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
+// MARK: - Sub-views
 
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(color)
-            Text(value)
-                .font(.title.bold())
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+private struct DashboardGreeting: View {
+    let user: AppUser?
+
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: .now)
+        return switch hour {
+        case 0..<12:  "God morgon"
+        case 12..<18: "God eftermiddag"
+        default:      "God kväll"
         }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
     }
-}
 
-struct SectionHeader: View {
-    let title: String
     var body: some View {
         HStack {
-            Text(title)
-                .font(.headline)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(greeting)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Text(user?.name ?? "Agent")
+                    .font(.title2.bold())
+            }
             Spacer()
+            Circle()
+                .fill(AppTheme.Color.brand.gradient)
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Text(user?.initials ?? "?")
+                        .font(.callout.bold())
+                        .foregroundStyle(.white)
+                }
         }
-        .padding(.horizontal)
-        .padding(.top, 8)
+    }
+}
+
+private struct KPIGrid: View {
+    let vm: DashboardViewModel
+
+    private var totalValueFormatted: String {
+        let value = vm.totalValue
+        if value >= 1_000_000 { return String(format: "AED %.1fM", value / 1_000_000) }
+        if value >= 1_000 { return String(format: "AED %.0fK", value / 1_000) }
+        return "AED \(Int(value))"
+    }
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AppTheme.Spacing.sm) {
+            MetricCard(title: "Live listings",    value: "\(vm.liveListings)",   subtitle: nil, icon: "building.2.fill",           tint: AppTheme.Color.live,    trend: 12)
+            MetricCard(title: "Aktiva klienter",  value: "\(vm.activeRequests)", subtitle: nil, icon: "person.2.fill",             tint: AppTheme.Color.brand,   trend: 5)
+            MetricCard(title: "Portfölj",         value: totalValueFormatted,    subtitle: nil, icon: "banknote.fill",             tint: .mint,                  trend: 8)
+            MetricCard(title: "Notiser",          value: "\(vm.unreadCount)",    subtitle: nil, icon: "bell.badge.fill",           tint: AppTheme.Color.pending, trend: nil)
+        }
+    }
+}
+
+private struct RecentListingsSection: View {
+    let listings: [Listing]
+    @Binding var path: NavigationPath
+
+    var body: some View {
+        if !listings.isEmpty {
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+                SectionHeader(title: "Senaste listings")
+
+                ScrollView(.horizontal) {
+                    HStack(spacing: AppTheme.Spacing.sm) {
+                        ForEach(listings) { listing in
+                            ListingCard(listing: listing)
+                                .onTapGesture { path.append(listing) }
+                        }
+                    }
+                    .padding(.horizontal, AppTheme.Spacing.xs)
+                    .padding(.vertical, AppTheme.Spacing.xs)
+                }
+                .scrollIndicators(.hidden)
+                .scrollClipDisabled()
+            }
+        }
+    }
+}
+
+private struct RecentRequestsSection: View {
+    let requests: [ClientRequest]
+
+    var body: some View {
+        if !requests.isEmpty {
+            VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+                SectionHeader(title: "Senaste klienter")
+
+                VStack(spacing: AppTheme.Spacing.xs) {
+                    ForEach(requests) { req in
+                        ClientRowView(request: req)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct SectionHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.headline)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct ListingCard: View {
+    let listing: Listing
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            AsyncImage(url: listing.firstImage) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle().fill(.quinary)
+                    .overlay { Image(systemName: "building.2").foregroundStyle(.tertiary) }
+            }
+            .frame(width: 180, height: 120)
+            .clipShape(.rect(cornerRadius: AppTheme.Radius.sm))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(listing.title)
+                    .font(.footnote.bold())
+                    .lineLimit(1)
+                Text(listing.priceFormatted)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.Color.brand)
+                if let status = listing.status {
+                    StatusBadge(status: status)
+                }
+            }
+            .padding(.horizontal, AppTheme.Spacing.xs)
+            .padding(.bottom, AppTheme.Spacing.xs)
+        }
+        .frame(width: 180)
+        .glassCard()
     }
 }
