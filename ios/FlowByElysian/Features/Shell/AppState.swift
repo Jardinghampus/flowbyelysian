@@ -8,6 +8,7 @@ final class AppState {
     var drawerOpen = false
     var showChat = false
     var showNotifications = false
+    var notificationUnreadCount = 0
 
     func openDrawer() {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {

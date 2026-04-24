@@ -26,9 +26,15 @@ struct DashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { dashboardToolbar }
             .navigationDestination(for: Listing.self) { ListingDetailView(listing: $0) }
-            .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
+            .refreshable {
+                await vm.load(context: context, isOnline: network.isConnected)
+                appState.notificationUnreadCount = vm.unreadCount
+            }
         }
-        .task { await vm.load(context: context, isOnline: network.isConnected) }
+        .task {
+            await vm.load(context: context, isOnline: network.isConnected)
+            appState.notificationUnreadCount = vm.unreadCount
+        }
     }
 
     @ToolbarContentBuilder
@@ -38,7 +44,25 @@ struct DashboardView: View {
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: appState.drawerOpen)
         }
         ToolbarItem(placement: .topBarTrailing) {
-            if vm.isLoading { ProgressView() }
+            if vm.isLoading {
+                ProgressView()
+            } else {
+                Button("Aviseringar", systemImage: "bell.fill", action: appState.openNotifications)
+                    .symbolEffect(.bounce, value: appState.notificationUnreadCount)
+                    .overlay(alignment: .topTrailing) {
+                        if appState.notificationUnreadCount > 0 {
+                            Text(appState.notificationUnreadCount > 9 ? "9+" :
+                                 appState.notificationUnreadCount.formatted())
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 3)
+                                .frame(minWidth: 14, minHeight: 14)
+                                .background(AppTheme.Color.pending, in: Capsule())
+                                .offset(x: 6, y: -6)
+                                .accessibilityHidden(true)
+                        }
+                    }
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ final class NotificationsViewModel {
     private let sync = SyncManager.shared
     private let api  = APIClient.shared
 
-    func load(context: ModelContext, isOnline: Bool) async {
+    func load(context: ModelContext, isOnline: Bool, appState: AppState? = nil) async {
         isLoading = true
         defer { isLoading = false }
 
@@ -22,6 +22,7 @@ final class NotificationsViewModel {
         } else {
             notifications = sync.cachedNotifications(context: context)
         }
+        appState?.notificationUnreadCount = unreadCount
     }
 
     func markRead(id: String, context: ModelContext) async {

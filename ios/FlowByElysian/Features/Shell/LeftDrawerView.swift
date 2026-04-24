@@ -35,6 +35,7 @@ struct LeftDrawerView: View {
                                      action: { appState.openChat() })
                     DrawerActionItem(icon: "bell.badge.fill",
                                      label: "Aviseringar",
+                                     badge: appState.notificationUnreadCount,
                                      action: { appState.openNotifications() })
                     DrawerActionItem(icon: "gearshape.fill",
                                      label: "Inställningar",
@@ -125,17 +126,30 @@ private struct DrawerNavItem: View {
 private struct DrawerActionItem: View {
     let icon: String
     let label: String
+    var badge: Int = 0
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Label(label, systemImage: icon)
-                .font(.subheadline)
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, AppTheme.Spacing.sm)
-                .padding(.vertical, 11)
-                .contentShape(.rect)
+            HStack {
+                Label(label, systemImage: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                Spacer()
+                if badge > 0 {
+                    Text(badge > 99 ? "99+" : badge.formatted())
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .background(AppTheme.Color.pending, in: Capsule())
+                        .accessibilityLabel("\(badge) olästa")
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, AppTheme.Spacing.sm)
+            .padding(.vertical, 11)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
     }
