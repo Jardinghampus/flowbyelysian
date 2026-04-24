@@ -61,6 +61,7 @@ export function OwnerDetailPanel({
   const [editName, setEditName] = useState("")
   const [editPhone, setEditPhone] = useState("")
   const [editArea, setEditArea] = useState("")
+  const [editSubArea, setEditSubArea] = useState("")
   const [editUnit, setEditUnit] = useState("")
   const [editBedrooms, setEditBedrooms] = useState("")
   const [editStatus, setEditStatus] = useState("")
@@ -73,6 +74,7 @@ export function OwnerDetailPanel({
     setEditName(owner.name)
     setEditPhone(owner.phone)
     setEditArea(owner.area)
+    setEditSubArea(owner.sub_area || "")
     setEditUnit(owner.unit_number || "")
     setEditBedrooms(owner.bedrooms || "")
     setEditStatus(owner.status)
@@ -97,6 +99,7 @@ export function OwnerDetailPanel({
           name: editName,
           phone: editPhone,
           area: editArea,
+          sub_area: editSubArea || null,
           unit_number: editUnit || null,
           bedrooms: editBedrooms || null,
           status: editStatus,
@@ -173,9 +176,13 @@ export function OwnerDetailPanel({
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Unit</Label>
-                  <Input value={editUnit} onChange={(e) => setEditUnit(e.target.value)} className="mt-1 h-8 text-sm" />
+                  <Label className="text-xs text-muted-foreground">Sub-area / Project</Label>
+                  <Input value={editSubArea} onChange={(e) => setEditSubArea(e.target.value)} className="mt-1 h-8 text-sm" placeholder="e.g. Al Ranim 2" />
                 </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Unit</Label>
+                <Input value={editUnit} onChange={(e) => setEditUnit(e.target.value)} className="mt-1 h-8 text-sm" />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>

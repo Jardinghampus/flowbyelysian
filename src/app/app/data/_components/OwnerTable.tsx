@@ -142,7 +142,14 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
             Area <ArrowUpDown className="ml-1 h-3 w-3" />
           </Button>
         ),
-        cell: ({ row }) => <span className="text-sm">{row.original.area}</span>,
+        cell: ({ row }) => (
+          <div>
+            <span className="text-sm">{row.original.area}</span>
+            {row.original.sub_area && (
+              <span className="block text-[10px] text-muted-foreground">{row.original.sub_area}</span>
+            )}
+          </div>
+        ),
       },
       {
         accessorKey: "unit_number",
@@ -354,7 +361,7 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
                   <PriorityDot priority={owner.priority} />
                   <span className="font-medium text-sm truncate">{owner.name}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{owner.area} {owner.unit_number ? `· ${owner.unit_number}` : ""} {owner.bedrooms ? `· ${owner.bedrooms} BR` : ""}</p>
+                <p className="text-xs text-muted-foreground">{owner.area}{owner.sub_area ? ` · ${owner.sub_area}` : ""} {owner.unit_number ? `· ${owner.unit_number}` : ""} {owner.bedrooms ? `· ${owner.bedrooms} BR` : ""}</p>
               </div>
               <StatusBadge status={owner.status} />
             </div>

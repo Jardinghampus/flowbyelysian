@@ -55,9 +55,7 @@ export async function POST(request: NextRequest) {
       const unit_number = dldUnit || str(row.unit_number ?? row.unit ?? row.Unit ?? row["Unit Number"]) || null
       const bedrooms = str(row.bedrooms ?? row.Bedrooms ?? row.BR ?? row.br) || null
 
-      // Compose notes from DLD fields (sub-area prepended when present)
       const noteParts: string[] = []
-      if (subArea) noteParts.push(`Sub-area: ${subArea}`)
       if (dldPartyType) noteParts.push(dldPartyType)
       if (dldPropType) noteParts.push(dldPropType)
       if (dldTxType) noteParts.push(dldTxType)
@@ -73,6 +71,7 @@ export async function POST(request: NextRequest) {
         name,
         phone,
         area,
+        sub_area: subArea || null,
         unit_number: unit_number || null,
         bedrooms: bedrooms || null,
         status: "owner" as const,

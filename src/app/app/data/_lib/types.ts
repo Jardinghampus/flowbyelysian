@@ -9,6 +9,7 @@ export interface Owner {
   phone: string
   whatsapp_number: string
   area: string
+  sub_area: string | null
   unit_number: string | null
   bedrooms: string | null
   status: OwnerStatus
@@ -52,6 +53,7 @@ export interface OutreachLog {
 export interface OwnerFiltersState {
   search: string
   area: string
+  subArea: string
   bedrooms: string
   status: string
   agent: string

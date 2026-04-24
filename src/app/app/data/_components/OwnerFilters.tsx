@@ -20,6 +20,7 @@ interface OwnerFiltersProps {
   onLogOutreach: () => void
   onExport: () => void
   areas: string[]
+  subAreas: string[]
 }
 
 export function OwnerFilters({
@@ -29,6 +30,7 @@ export function OwnerFilters({
   onLogOutreach,
   onExport,
   areas,
+  subAreas,
 }: OwnerFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -43,13 +45,14 @@ export function OwnerFilters({
   }, [searchInput, filters, onFiltersChange])
 
   const hasActiveFilters =
-    filters.area || filters.bedrooms || filters.status || filters.agent || filters.dateFrom || filters.dateTo
+    filters.area || filters.subArea || filters.bedrooms || filters.status || filters.agent || filters.dateFrom || filters.dateTo
 
   const clearFilters = () => {
     setSearchInput("")
     onFiltersChange({
       search: "",
       area: "",
+      subArea: "",
       bedrooms: "",
       status: "",
       agent: "",
@@ -83,7 +86,7 @@ export function OwnerFilters({
         {/* Quick filters */}
         <Select
           value={filters.area || "all"}
-          onValueChange={(v) => onFiltersChange({ ...filters, area: v === "all" ? "" : v })}
+          onValueChange={(v) => onFiltersChange({ ...filters, area: v === "all" ? "" : v, subArea: "" })}
         >
           <SelectTrigger className="w-[160px] h-9 bg-background/50">
             <SelectValue placeholder="Area" />
@@ -95,6 +98,23 @@ export function OwnerFilters({
             ))}
           </SelectContent>
         </Select>
+
+        {subAreas.length > 0 && (
+          <Select
+            value={filters.subArea || "all"}
+            onValueChange={(v) => onFiltersChange({ ...filters, subArea: v === "all" ? "" : v })}
+          >
+            <SelectTrigger className="w-[160px] h-9 bg-background/50">
+              <SelectValue placeholder="Sub-area" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sub-areas</SelectItem>
+              {subAreas.map((sa) => (
+                <SelectItem key={sa} value={sa}>{sa}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select
           value={filters.status || "all"}

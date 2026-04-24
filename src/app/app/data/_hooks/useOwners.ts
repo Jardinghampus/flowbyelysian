@@ -43,6 +43,7 @@ export function useOwners(filters: OwnerFiltersState, showHidden = false) {
       const params = new URLSearchParams()
       if (filters.search) params.set("search", filters.search)
       if (filters.area) params.set("area", filters.area)
+      if (filters.subArea) params.set("subArea", filters.subArea)
       if (filters.bedrooms) params.set("bedrooms", filters.bedrooms)
       if (filters.status) params.set("status", filters.status)
       if (filters.agent) params.set("agent", filters.agent)

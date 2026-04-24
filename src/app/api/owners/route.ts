@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const result = await fetchOwners({
       search: searchParams.get("search") || undefined,
       area: searchParams.get("area") || undefined,
+      subArea: searchParams.get("subArea") || undefined,
       bedrooms: searchParams.get("bedrooms") || undefined,
       status: searchParams.get("status") || undefined,
       agent: searchParams.get("agent") || undefined,
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
       assigned_agent_id: ownerData.assigned_agent_id || userId,
       assigned_agent_name: ownerData.assigned_agent_name || user?.fullName || "Unknown",
       follow_up_at,
+      sub_area: ownerData.sub_area || null,
       unit_number: ownerData.unit_number || null,
       bedrooms: ownerData.bedrooms || null,
       notes: ownerData.notes || null,

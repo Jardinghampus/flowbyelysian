@@ -11,6 +11,7 @@ function getClient(): SupabaseClient {
 export async function fetchOwners(params: {
   search?: string
   area?: string
+  subArea?: string
   bedrooms?: string
   status?: string
   agent?: string
@@ -39,6 +40,7 @@ export async function fetchOwners(params: {
       query = query.eq("area", params.area)
     }
   }
+  if (params.subArea) query = query.eq("sub_area", params.subArea)
   if (params.bedrooms) query = query.eq("bedrooms", params.bedrooms)
   if (params.status) query = query.eq("status", params.status)
   if (params.agent) query = query.eq("assigned_agent_id", params.agent)

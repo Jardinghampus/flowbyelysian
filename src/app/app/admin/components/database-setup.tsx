@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS owners (
   phone text NOT NULL,
   whatsapp_number text GENERATED ALWAYS AS (regexp_replace(phone, '[^0-9]', '', 'g')) STORED,
   area text NOT NULL,
+  sub_area text,
   unit_number text,
   bedrooms text,
   status text CHECK (status IN ('owner','considering','listed','sold','unresponsive')) DEFAULT 'owner',
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS outreach_logs (
 
 CREATE INDEX IF NOT EXISTS idx_owners_user_id ON owners(user_id);
 CREATE INDEX IF NOT EXISTS idx_owners_area ON owners(user_id, area);
+CREATE INDEX IF NOT EXISTS idx_owners_sub_area ON owners(area, sub_area);
 CREATE INDEX IF NOT EXISTS idx_owners_assigned_agent ON owners(assigned_agent_id);
 CREATE INDEX IF NOT EXISTS idx_owners_follow_up ON owners(follow_up_at);
 CREATE INDEX IF NOT EXISTS idx_owners_status ON owners(status);

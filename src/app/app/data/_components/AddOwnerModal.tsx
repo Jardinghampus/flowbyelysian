@@ -34,6 +34,7 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwner
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [area, setArea] = useState("")
+  const [subArea, setSubArea] = useState("")
   const [unitNumber, setUnitNumber] = useState("")
   const [bedrooms, setBedrooms] = useState("")
   const [status, setStatus] = useState("owner")
@@ -42,7 +43,7 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwner
   const [notes, setNotes] = useState("")
 
   const resetForm = () => {
-    setName(""); setPhone(""); setArea(""); setUnitNumber("")
+    setName(""); setPhone(""); setArea(""); setSubArea(""); setUnitNumber("")
     setBedrooms(""); setStatus("owner"); setPriority("medium")
     setFollowUpDays(""); setNotes("")
   }
@@ -54,6 +55,7 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwner
       name,
       phone,
       area,
+      sub_area: subArea || undefined,
       unit_number: unitNumber || undefined,
       bedrooms: bedrooms || undefined,
       status: status as "owner" | "considering" | "listed" | "sold" | "unresponsive",
@@ -121,9 +123,14 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwner
               </Select>
             </div>
             <div>
-              <Label className="text-xs">Unit Number</Label>
-              <Input value={unitNumber} onChange={(e) => setUnitNumber(e.target.value)} placeholder="e.g. A-1204" className="mt-1" />
+              <Label className="text-xs">Sub-area / Project</Label>
+              <Input value={subArea} onChange={(e) => setSubArea(e.target.value)} placeholder="e.g. Al Ranim 2" className="mt-1" />
             </div>
+          </div>
+
+          <div>
+            <Label className="text-xs">Unit Number</Label>
+            <Input value={unitNumber} onChange={(e) => setUnitNumber(e.target.value)} placeholder="e.g. A-1204" className="mt-1" />
           </div>
 
           <div className="grid grid-cols-3 gap-3">

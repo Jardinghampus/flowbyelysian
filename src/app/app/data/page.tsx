@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, ShieldCheck } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { StatsBar } from "./_components/StatsBar"
@@ -51,6 +51,7 @@ export default function DataPage() {
   const [filters, setFilters] = useState<OwnerFiltersState>({
     search: "",
     area: "",
+    subArea: "",
     bedrooms: "",
     status: "",
     agent: "",
@@ -82,6 +83,14 @@ export default function DataPage() {
 
   const [sideTab, setSideTab] = useState<SideTab>("todo")
   const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  const subAreas = useMemo(() => {
+    const set = new Set<string>()
+    for (const o of owners) {
+      if (o.sub_area) set.add(o.sub_area)
+    }
+    return Array.from(set).sort()
+  }, [owners])
 
   const refreshAll = useCallback(() => {
     refetchOwners()
@@ -156,6 +165,7 @@ export default function DataPage() {
       Phone: o.phone,
       WhatsApp: o.whatsapp_number,
       Area: o.area,
+      "Sub-area": o.sub_area || "",
       Unit: o.unit_number || "",
       Bedrooms: o.bedrooms || "",
       Status: o.status,
@@ -245,6 +255,7 @@ export default function DataPage() {
           onLogOutreach={() => { setOutreachOwner(null); setLogOutreachOpen(true) }}
           onExport={handleExport}
           areas={areas}
+          subAreas={subAreas}
         />
 
         {/* Table */}
