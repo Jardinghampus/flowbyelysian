@@ -2,6 +2,27 @@
 
 import { useState, useEffect, useCallback } from "react"
 
+export interface FollowUpOwner {
+  id: string
+  name: string
+  phone: string
+  area: string
+  follow_up_at: string
+  priority: string
+  status: string
+}
+
+export interface RecentOutreach {
+  id: string
+  type: string
+  outcome: string | null
+  agent_name: string | null
+  logged_at: string
+  status_changed_to: string | null
+  owner_id: string
+  owner_name: string
+}
+
 export interface UnifiedStats {
   listings: { total: number; live: number; pocket: number; unofficial: number }
   leads: { total: number; new: number; contacted: number; inProgress: number; matched: number }
@@ -10,6 +31,8 @@ export interface UnifiedStats {
   agents: { total: number; activeToday: number }
   pipeline: { stale: number; unassigned: number; total: number }
   unreadNotifications: number
+  followUps: { overdue: FollowUpOwner[]; dueToday: FollowUpOwner[]; dueSoon: FollowUpOwner[] }
+  recentOutreach: RecentOutreach[]
 }
 
 const EMPTY_STATS: UnifiedStats = {
@@ -20,6 +43,8 @@ const EMPTY_STATS: UnifiedStats = {
   agents: { total: 0, activeToday: 0 },
   pipeline: { stale: 0, unassigned: 0, total: 0 },
   unreadNotifications: 0,
+  followUps: { overdue: [], dueToday: [], dueSoon: [] },
+  recentOutreach: [],
 }
 
 export function useUnifiedStats(refreshInterval = 60_000) {
@@ -31,7 +56,7 @@ export function useUnifiedStats(refreshInterval = 60_000) {
       const res = await fetch("/api/stats")
       if (!res.ok) return
       const data = await res.json()
-      setStats(data)
+      setStats({ ...EMPTY_STATS, ...data })
     } catch {
       // silently fail — dashboard still renders with zeros
     } finally {

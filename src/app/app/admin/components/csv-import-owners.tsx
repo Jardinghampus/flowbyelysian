@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef, useMemo } from "react"
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X, Filter } from "lucide-react"
+import { useState, useCallback, useRef, useMemo, useEffect } from "react"
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X, Filter, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
@@ -24,6 +24,13 @@ import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import Papa from "papaparse"
 import * as XLSX from "xlsx"
+
+interface ExistingOwner {
+  id: string
+  name: string
+  area: string
+  status: string
+}
 
 interface ParsedRow {
   name: string
@@ -114,18 +121,44 @@ export function CsvImportOwners() {
   const [rawRows, setRawRows] = useState<Record<string, unknown>[]>([])
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([])
   const [progress, setProgress] = useState(0)
-  const [result, setResult] = useState<{ inserted: number; skipped: number; invalid: number; errors: string[] } | null>(null)
+  const [result, setResult] = useState<{ inserted: number; skipped: number; invalid: number; duplicatesSkipped: number; errors: string[] } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragActive, setDragActive] = useState(false)
   const [areaFilter, setAreaFilter] = useState<string>("__all__")
+  const [duplicates, setDuplicates] = useState<Record<string, ExistingOwner>>({})
+  const [dupCheckLoading, setDupCheckLoading] = useState(false)
+  const [skipDuplicates, setSkipDuplicates] = useState(true)
+
+  const checkDuplicates = useCallback(async (rows: ParsedRow[]) => {
+    const phones = [...new Set(rows.filter((r) => r.phone).map((r) => r.phone))]
+    if (phones.length === 0) return
+    setDupCheckLoading(true)
+    try {
+      const res = await fetch("/api/owners/check-duplicates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phones }),
+      })
+      const data = await res.json()
+      setDuplicates(data.duplicates || {})
+    } catch {
+      // silently fail — import still works without dedup
+    } finally {
+      setDupCheckLoading(false)
+    }
+  }, [])
 
   const handleRows = useCallback((rows: Record<string, unknown>[], name: string) => {
     setFileName(name)
     setRawRows(rows)
-    setParsedRows(rows.map(mapRow))
+    const mapped = rows.map(mapRow)
+    setParsedRows(mapped)
     setAreaFilter("__all__")
+    setDuplicates({})
+    setSkipDuplicates(true)
     setStage("preview")
-  }, [])
+    checkDuplicates(mapped)
+  }, [checkDuplicates])
 
   const parseExcel = useCallback((file: File) => {
     const reader = new FileReader()
@@ -180,6 +213,7 @@ export function CsvImportOwners() {
       const p = parsedRows[idx]
       if (!p?.valid) return false
       if (areaFilter !== "__all__" && p.area !== areaFilter) return false
+      if (skipDuplicates && p.phone && duplicates[p.phone]) return false
       return true
     })
     if (validRaw.length === 0) {
@@ -217,7 +251,8 @@ export function CsvImportOwners() {
     }
 
     const skippedInvalid = filteredRows.filter((r) => !r.valid).length
-    setResult({ inserted: totalInserted, skipped: totalSkipped, invalid: skippedInvalid, errors: allErrors })
+    const skippedDups = skipDuplicates ? dupCount : 0
+    setResult({ inserted: totalInserted, skipped: totalSkipped, invalid: skippedInvalid, duplicatesSkipped: skippedDups, errors: allErrors })
     setStage("done")
     if (totalInserted > 0) toast.success(`Imported ${totalInserted} owners`)
   }
@@ -229,6 +264,8 @@ export function CsvImportOwners() {
     setParsedRows([])
     setProgress(0)
     setResult(null)
+    setDuplicates({})
+    setSkipDuplicates(true)
     if (fileRef.current) fileRef.current.value = ""
   }
 
@@ -249,7 +286,8 @@ export function CsvImportOwners() {
     return parsedRows.filter((r) => r.area === areaFilter)
   }, [parsedRows, areaFilter])
 
-  const validCount = filteredRows.filter((r) => r.valid).length
+  const dupCount = filteredRows.filter((r) => r.valid && r.phone && duplicates[r.phone]).length
+  const validCount = filteredRows.filter((r) => r.valid).length - (skipDuplicates ? dupCount : 0)
   const invalidCount = filteredRows.filter((r) => !r.valid).length
 
   return (
@@ -308,11 +346,30 @@ export function CsvImportOwners() {
             </div>
 
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex gap-3 text-sm">
+              <div className="flex gap-3 text-sm flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span>{validCount} valid</span>
+                  <span>{validCount} to import</span>
                 </div>
+                {dupCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Copy className="h-4 w-4 text-amber-500" />
+                    <span className="text-amber-500">{dupCount} duplicate{dupCount !== 1 ? "s" : ""}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSkipDuplicates(!skipDuplicates)}
+                      className="text-xs underline text-muted-foreground hover:text-foreground"
+                    >
+                      {skipDuplicates ? "Include anyway" : "Skip duplicates"}
+                    </button>
+                  </div>
+                )}
+                {dupCheckLoading && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span className="text-xs">Checking duplicates…</span>
+                  </div>
+                )}
                 {invalidCount > 0 && (
                   <div className="flex items-center gap-1.5">
                     <AlertCircle className="h-4 w-4 text-red-500" />
@@ -361,11 +418,21 @@ export function CsvImportOwners() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredRows.slice(0, 100).map((row, idx) => (
-                    <TableRow key={idx} className={row.valid ? "" : "bg-red-500/5"}>
+                  {filteredRows.slice(0, 100).map((row, idx) => {
+                    const isDup = row.valid && row.phone && duplicates[row.phone]
+                    const dupOwner = isDup ? duplicates[row.phone] : null
+                    return (
+                    <TableRow key={idx} className={!row.valid ? "bg-red-500/5" : isDup ? "bg-amber-500/5" : ""}>
                       <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
                       <TableCell className="text-sm">{row.name || "—"}</TableCell>
-                      <TableCell className="text-sm font-mono text-xs">{row.phone || "—"}</TableCell>
+                      <TableCell className="text-sm font-mono text-xs">
+                        {row.phone || "—"}
+                        {dupOwner && (
+                          <span className="block text-[10px] text-amber-500 mt-0.5" title={`Exists: ${dupOwner.name} (${dupOwner.area})`}>
+                            ↳ {dupOwner.name} · {dupOwner.area}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm">{row.area || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{row.subArea || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{row.unit_number || "—"}</TableCell>
@@ -381,14 +448,17 @@ export function CsvImportOwners() {
                         <TableCell className="text-sm text-muted-foreground">{row.partyType || "—"}</TableCell>
                       )}
                       <TableCell>
-                        {row.valid ? (
+                        {isDup ? (
+                          <Copy className="h-3.5 w-3.5 text-amber-500" />
+                        ) : row.valid ? (
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                         ) : (
                           <AlertCircle className="h-3.5 w-3.5 text-red-500" />
                         )}
                       </TableCell>
                     </TableRow>
-                  ))}
+                    )
+                  })}
                 </TableBody>
               </Table>
               {filteredRows.length > 100 && (
@@ -429,10 +499,14 @@ export function CsvImportOwners() {
               <CheckCircle2 className="h-5 w-5" />
               <span className="text-sm font-medium">Import Complete</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 text-sm">
+            <div className="grid grid-cols-4 gap-3 text-sm">
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-2xl font-bold text-emerald-500">{result.inserted}</p>
                 <p className="text-xs text-muted-foreground">Inserted</p>
+              </div>
+              <div className="rounded-lg border p-3 text-center">
+                <p className="text-2xl font-bold text-amber-500">{result.duplicatesSkipped}</p>
+                <p className="text-xs text-muted-foreground">Duplicates</p>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-2xl font-bold text-amber-500">{result.skipped}</p>

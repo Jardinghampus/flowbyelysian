@@ -5,6 +5,8 @@ export async function GET() {
   try {
     const supabase = createServerClient()
     const today = new Date().toISOString().split("T")[0]
+    const now = new Date().toISOString()
+    const threeDaysOut = new Date(Date.now() + 3 * 86400000).toISOString()
 
     const [
       listingsRes,
@@ -12,6 +14,10 @@ export async function GET() {
       ownersRes,
       activityRes,
       notifRes,
+      overdueRes,
+      dueTodayRes,
+      dueSoonRes,
+      recentOutreachRes,
     ] = await Promise.all([
       (supabase as ReturnType<typeof createServerClient>)
         .from("listings")
@@ -31,13 +37,45 @@ export async function GET() {
         .from("notifications")
         .select("read", { count: "exact" })
         .eq("read", false),
+      // Overdue follow-ups
+      (supabase as ReturnType<typeof createServerClient>)
+        .from("owners")
+        .select("id, name, phone, area, follow_up_at, priority, status")
+        .eq("is_hidden", false)
+        .lt("follow_up_at", now)
+        .not("follow_up_at", "is", null)
+        .order("follow_up_at", { ascending: true })
+        .limit(20),
+      // Due today
+      (supabase as ReturnType<typeof createServerClient>)
+        .from("owners")
+        .select("id, name, phone, area, follow_up_at, priority, status")
+        .eq("is_hidden", false)
+        .gte("follow_up_at", today)
+        .lt("follow_up_at", today + "T23:59:59.999Z")
+        .order("follow_up_at", { ascending: true })
+        .limit(20),
+      // Due within 3 days
+      (supabase as ReturnType<typeof createServerClient>)
+        .from("owners")
+        .select("id, name, phone, area, follow_up_at, priority, status")
+        .eq("is_hidden", false)
+        .gte("follow_up_at", today + "T23:59:59.999Z")
+        .lte("follow_up_at", threeDaysOut)
+        .order("follow_up_at", { ascending: true })
+        .limit(20),
+      // Recent outreach across all owners
+      (supabase as ReturnType<typeof createServerClient>)
+        .from("outreach_logs")
+        .select("id, type, outcome, agent_name, logged_at, status_changed_to, owner_id")
+        .order("logged_at", { ascending: false })
+        .limit(15),
     ])
 
     const listings = (listingsRes.data || []) as Array<{ status: string }>
     const leads = (leadsRes.data || []) as Array<{ status: string }>
     const owners = (ownersRes.data || []) as Array<{ status: string; follow_up_at: string | null }>
     const activity = (activityRes.data || []) as Array<{ agent_id: string; calls_wa: number; leads: number; viewings: number }>
-    const now = new Date().toISOString()
 
     const overdueFollowUps = owners.filter(
       (o) => o.follow_up_at && o.follow_up_at < now
@@ -56,8 +94,25 @@ export async function GET() {
       activity.filter((d) => (d.calls_wa || 0) + (d.leads || 0) + (d.viewings || 0) > 0).map((d) => d.agent_id)
     )
 
-    const staleLeads = leads.filter((l) => l.status === "new" || l.status === "contacted")
     const unassignedCount = leads.filter((l) => l.status === "new").length
+
+    // Enrich recent outreach with owner names
+    const outreachOwnerIds = [...new Set((recentOutreachRes.data || []).map((o: { owner_id: string }) => o.owner_id))]
+    let ownerNameMap: Record<string, string> = {}
+    if (outreachOwnerIds.length > 0) {
+      const { data: ownerNames } = await (supabase as ReturnType<typeof createServerClient>)
+        .from("owners")
+        .select("id, name")
+        .in("id", outreachOwnerIds)
+      if (ownerNames) {
+        ownerNameMap = Object.fromEntries(ownerNames.map((o: { id: string; name: string }) => [o.id, o.name]))
+      }
+    }
+
+    const recentOutreach = (recentOutreachRes.data || []).map((log: Record<string, unknown>) => ({
+      ...log,
+      owner_name: ownerNameMap[log.owner_id as string] || "Unknown",
+    }))
 
     return NextResponse.json({
       listings: {
@@ -89,11 +144,17 @@ export async function GET() {
         activeToday: uniqueAgentsToday.size,
       },
       pipeline: {
-        stale: staleLeads.length,
+        stale: leads.filter((l) => l.status === "new" || l.status === "contacted").length,
         unassigned: unassignedCount,
         total: leadsRes.count || 0,
       },
       unreadNotifications: notifRes.count || 0,
+      followUps: {
+        overdue: overdueRes.data || [],
+        dueToday: dueTodayRes.data || [],
+        dueSoon: dueSoonRes.data || [],
+      },
+      recentOutreach,
     })
   } catch (error) {
     console.error("Error fetching unified stats:", error)
