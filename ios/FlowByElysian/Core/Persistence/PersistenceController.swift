@@ -13,7 +13,8 @@ final class PersistenceController {
             CachedContact.self,
             CachedRequest.self,
             CachedNotification.self,
-            CachedArea.self
+            CachedArea.self,
+            CachedTask.self,
         ])
         let config = ModelConfiguration("FlowByElysian", schema: schema, isStoredInMemoryOnly: false)
         do {

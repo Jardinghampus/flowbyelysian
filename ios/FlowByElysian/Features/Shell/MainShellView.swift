@@ -50,5 +50,6 @@ struct MainShellView: View {
         .sheet(isPresented: $appState.showNotifications) { NotificationsView() }
         .sheet(isPresented: $appState.showAreas)         { AreasView() }
         .sheet(isPresented: $appState.showNews)          { NewsView() }
+        .sheet(isPresented: $appState.showTasks)         { TasksView() }
     }
 }
