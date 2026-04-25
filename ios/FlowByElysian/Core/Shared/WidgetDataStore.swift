@@ -42,7 +42,7 @@ struct WidgetEvent: Codable, Identifiable {
 
 // MARK: - Store
 
-final class WidgetDataStore {
+final class WidgetDataStore: @unchecked Sendable {
     static let shared = WidgetDataStore()
 
     private let appGroupID = "group.com.flowbyelysian.app"

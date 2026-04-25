@@ -47,4 +47,17 @@ final class DashboardViewModel {
     var activeRequests: Int    { requests.count(where: { $0.status == "active" }) }
     var unreadCount:    Int    { notifications.count(where: { $0.isUnread }) }
     var totalValue:     Double { listings.compactMap(\.price).reduce(0, +) }
+
+    func updateWidget(calendarEvents: [WidgetEvent]) {
+        let matchCount = MatchEngine.run(listings: listings, requests: requests).count
+        let commission = AgentTarget.defaults.first { $0.id == "commission" }
+        var data = WidgetData()
+        data.upcomingEvents = calendarEvents
+        data.matchCount = matchCount
+        data.liveListingsCount = liveListings
+        data.commissionCurrent = commission?.current ?? 0
+        data.commissionTarget  = commission?.target  ?? 125_000
+        data.currentRank = 3
+        WidgetDataStore.shared.save(data)
+    }
 }

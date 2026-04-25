@@ -5,6 +5,7 @@ struct DashboardView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(AppState.self) private var appState
     @Environment(NetworkMonitor.self) private var network
+    @Environment(CalendarManager.self) private var calendar
     @Environment(\.modelContext) private var context
     @State private var vm = DashboardViewModel()
     @State private var listingPath = NavigationPath()
@@ -29,12 +30,20 @@ struct DashboardView: View {
             .refreshable {
                 await vm.load(context: context, isOnline: network.isConnected)
                 appState.notificationUnreadCount = vm.unreadCount
+                await refreshWidget()
             }
         }
         .task {
             await vm.load(context: context, isOnline: network.isConnected)
             appState.notificationUnreadCount = vm.unreadCount
+            await refreshWidget()
         }
+    }
+
+    private func refreshWidget() async {
+        let granted = await calendar.requestAccess()
+        let events  = granted ? calendar.fetchUpcoming() : []
+        vm.updateWidget(calendarEvents: events)
     }
 
     @ToolbarContentBuilder
