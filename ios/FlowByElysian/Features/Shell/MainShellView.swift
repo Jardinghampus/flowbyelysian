@@ -7,7 +7,6 @@ struct MainShellView: View {
         @Bindable var appState = appState
 
         ZStack(alignment: .leading) {
-            // Tab content + dim
             ZStack {
                 TabView(selection: $appState.selectedTab) {
                     Tab("Home", systemImage: "house.fill", value: AppTab.home) {
@@ -16,11 +15,14 @@ struct MainShellView: View {
                     Tab("Listings", systemImage: "building.2.fill", value: AppTab.listings) {
                         ListingsView()
                     }
+                    Tab("Matches", systemImage: "sparkles", value: AppTab.matches) {
+                        MatchesView()
+                    }
                     Tab("Clients", systemImage: "person.2.fill", value: AppTab.clients) {
                         ClientsView()
                     }
-                    Tab("Reports", systemImage: "chart.bar.fill", value: AppTab.reports) {
-                        ReportsView()
+                    Tab("Performance", systemImage: "chart.line.uptrend.xyaxis", value: AppTab.performance) {
+                        PerformanceView()
                     }
                 }
                 .tint(AppTheme.Color.brand)
@@ -38,14 +40,15 @@ struct MainShellView: View {
                 }
             }
 
-            // Drawer
             LeftDrawerView()
                 .frame(width: 264)
                 .offset(x: appState.drawerOpen ? 0 : -280)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: appState.drawerOpen)
                 .zIndex(10)
         }
-        .sheet(isPresented: $appState.showChat) { ChatView() }
+        .sheet(isPresented: $appState.showChat)          { ChatView() }
         .sheet(isPresented: $appState.showNotifications) { NotificationsView() }
+        .sheet(isPresented: $appState.showAreas)         { AreasView() }
+        .sheet(isPresented: $appState.showNews)          { NewsView() }
     }
 }

@@ -7,7 +7,6 @@ struct LeftDrawerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Profile header
             ProfileHeader()
                 .padding(.top, 60)
                 .padding(.horizontal, AppTheme.Spacing.md)
@@ -15,21 +14,25 @@ struct LeftDrawerView: View {
             Divider()
                 .padding(.vertical, AppTheme.Spacing.md)
 
-            // Navigation items
             ScrollView {
                 VStack(spacing: AppTheme.Spacing.xs) {
-                    DrawerNavItem(icon: "house.fill",         label: "Dashboard",    tab: .home)
-                    DrawerNavItem(icon: "building.2.fill",    label: "Listings",     tab: .listings)
-                    DrawerNavItem(icon: "person.2.fill",      label: "Clients",      tab: .clients)
-                    DrawerNavItem(icon: "chart.bar.fill",     label: "Reports",      tab: .reports)
+                    // Main navigation tabs
+                    DrawerSectionHeader("Navigering")
+                    DrawerNavItem(icon: "house.fill",                   label: "Dashboard",   tab: .home)
+                    DrawerNavItem(icon: "building.2.fill",              label: "Listings",    tab: .listings)
+                    DrawerNavItem(icon: "sparkles",                     label: "AI Matches",  tab: .matches)
+                    DrawerNavItem(icon: "person.2.fill",                label: "Clients",     tab: .clients)
+                    DrawerNavItem(icon: "chart.line.uptrend.xyaxis",    label: "Performance", tab: .performance)
                 }
                 .padding(.horizontal, AppTheme.Spacing.sm)
 
                 Divider()
-                    .padding(.vertical, AppTheme.Spacing.md)
+                    .padding(.vertical, AppTheme.Spacing.sm)
                     .padding(.horizontal, AppTheme.Spacing.md)
 
                 VStack(spacing: AppTheme.Spacing.xs) {
+                    // Utilities
+                    DrawerSectionHeader("Verktyg")
                     DrawerActionItem(icon: "bubble.left.and.bubble.right.fill",
                                      label: "AI Coach",
                                      action: { appState.openChat() })
@@ -37,6 +40,12 @@ struct LeftDrawerView: View {
                                      label: "Aviseringar",
                                      badge: appState.notificationUnreadCount,
                                      action: { appState.openNotifications() })
+                    DrawerActionItem(icon: "mappin.and.ellipse",
+                                     label: "Områden",
+                                     action: { appState.openAreas() })
+                    DrawerActionItem(icon: "newspaper.fill",
+                                     label: "Nyheter",
+                                     action: { appState.openNews() })
                     DrawerActionItem(icon: "gearshape.fill",
                                      label: "Inställningar",
                                      action: { appState.closeDrawer() })
@@ -47,7 +56,6 @@ struct LeftDrawerView: View {
 
             Spacer()
 
-            // Sign out
             Button(action: auth.signOut) {
                 Label("Logga ut", systemImage: "rectangle.portrait.and.arrow.right")
                     .font(.subheadline.weight(.medium))
@@ -71,6 +79,25 @@ struct LeftDrawerView: View {
         }
     }
 }
+
+// MARK: - Section header
+
+private struct DrawerSectionHeader: View {
+    let title: String
+    init(_ title: String) { self.title = title }
+
+    var body: some View {
+        Text(title)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .textCase(.uppercase)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, AppTheme.Spacing.sm)
+            .padding(.top, AppTheme.Spacing.xs)
+    }
+}
+
+// MARK: - Profile header
 
 private struct ProfileHeader: View {
     @Environment(AuthManager.self) private var auth
@@ -97,6 +124,8 @@ private struct ProfileHeader: View {
     }
 }
 
+// MARK: - Nav item
+
 private struct DrawerNavItem: View {
     @Environment(AppState.self) private var appState
     let icon: String
@@ -122,6 +151,8 @@ private struct DrawerNavItem: View {
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 }
+
+// MARK: - Action item
 
 private struct DrawerActionItem: View {
     let icon: String
