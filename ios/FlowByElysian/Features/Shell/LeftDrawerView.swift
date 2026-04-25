@@ -46,6 +46,9 @@ struct LeftDrawerView: View {
                     DrawerActionItem(icon: "newspaper.fill",
                                      label: "Nyheter",
                                      action: { appState.openNews() })
+                    DrawerActionItem(icon: "checklist",
+                                     label: "Uppgifter",
+                                     action: { appState.openTasks() })
                     DrawerActionItem(icon: "gearshape.fill",
                                      label: "Inställningar",
                                      action: { appState.closeDrawer() })

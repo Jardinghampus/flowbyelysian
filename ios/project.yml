@@ -13,12 +13,13 @@ options:
   swift: "6.2"
 
 packages:
-  # Clerk iOS SDK – replace placeholder key in Config.swift after setup
   ClerkSDK:
     url: https://github.com/clerk/clerk-ios
     from: "2.0.0"
 
 targets:
+
+  # ─── Main App ─────────────────────────────────────────────────────────────
   FlowByElysian:
     type: application
     platform: iOS
@@ -26,6 +27,8 @@ targets:
       - FlowByElysian
     dependencies:
       - package: ClerkSDK
+      - target: FlowByElysianWidget
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.flowbyelysian.app
@@ -38,6 +41,9 @@ targets:
       path: FlowByElysian/FlowByElysian.entitlements
       properties:
         com.apple.security.network.client: true
+        com.apple.security.application-groups:
+          - group.com.flowbyelysian.app
+        aps-environment: development   # change to "production" before App Store
     info:
       path: FlowByElysian/Info.plist
       properties:
@@ -45,3 +51,29 @@ targets:
         UILaunchScreen: {}
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
+        NSCalendarsUsageDescription: "Flow läser dina kalenderhändelser för widgeten och kommande visningar."
+        NSCalendarsFullAccessUsageDescription: "Flow läser dina kalenderhändelser för widgeten och kommande visningar."
+        NSUserNotificationUsageDescription: "Få notiser om nya matchningar, klientförfrågningar och kommande visningar."
+
+  # ─── Widget Extension ─────────────────────────────────────────────────────
+  FlowByElysianWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - FlowByElysianWidget
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.flowbyelysian.widget
+        SWIFT_VERSION: 6.2
+        DEVELOPMENT_TEAM: ""           # Must match main app Team ID
+        SWIFT_STRICT_CONCURRENCY: complete
+    entitlements:
+      path: FlowByElysianWidget/FlowByElysianWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.flowbyelysian.app
+    info:
+      path: FlowByElysianWidget/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
