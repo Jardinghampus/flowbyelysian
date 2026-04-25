@@ -61,6 +61,8 @@ targets:
     platform: iOS
     sources:
       - FlowByElysianWidget
+      - path: FlowByElysian/Core/Shared/WidgetDataStore.swift
+        type: file
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.flowbyelysian.widget
