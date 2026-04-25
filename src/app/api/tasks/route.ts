@@ -19,8 +19,8 @@ import { auth, currentUser } from "@/lib/demo-auth"
 // );
 // alter table tasks enable row level security;
 // create policy "users manage own tasks" on tasks
-//   using (owner_id = requesting_user_id())
-//   with check (owner_id = requesting_user_id());
+//   using (owner_id = auth.uid()::text)
+//   with check (owner_id = auth.uid()::text);
 
 // GET /api/tasks
 export async function GET(request: NextRequest) {
