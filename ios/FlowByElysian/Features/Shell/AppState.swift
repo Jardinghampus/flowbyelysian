@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum AppTab: Hashable { case home, listings, clients, reports }
+enum AppTab: Hashable { case home, listings, matches, clients, performance }
 
 @Observable @MainActor
 final class AppState {
@@ -8,6 +8,8 @@ final class AppState {
     var drawerOpen = false
     var showChat = false
     var showNotifications = false
+    var showAreas = false
+    var showNews = false
     var notificationUnreadCount = 0
 
     func openDrawer() {
@@ -37,5 +39,15 @@ final class AppState {
     func openNotifications() {
         closeDrawer()
         showNotifications = true
+    }
+
+    func openAreas() {
+        closeDrawer()
+        showAreas = true
+    }
+
+    func openNews() {
+        closeDrawer()
+        showNews = true
     }
 }
