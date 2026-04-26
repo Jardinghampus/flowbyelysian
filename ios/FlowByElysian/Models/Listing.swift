@@ -22,7 +22,7 @@ struct Listing: Codable, Identifiable, Hashable {
     let createdAt: String?
 
     var priceFormatted: String {
-        guard let price else { return "Pris ej angivet" }
+        guard let price else { return "Price not set" }
         return price.formatted(.currency(code: "AED").precision(.fractionLength(0)))
     }
 

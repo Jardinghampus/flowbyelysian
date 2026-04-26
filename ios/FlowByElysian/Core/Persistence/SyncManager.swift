@@ -1,8 +1,8 @@
 import SwiftData
 import Foundation
 
-/// Hanterar synk mellan API och lokal SwiftData-cache.
-/// Används i alla ViewModels: om online → hämta + cacha, om offline → läs cache.
+/// Manages sync between API and local SwiftData cache.
+/// Used in all ViewModels: online → fetch + cache, offline → read cache.
 @MainActor
 final class SyncManager {
     static let shared = SyncManager()

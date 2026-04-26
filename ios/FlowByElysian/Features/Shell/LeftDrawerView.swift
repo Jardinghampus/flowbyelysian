@@ -52,6 +52,12 @@ struct LeftDrawerView: View {
                     DrawerActionItem(icon: "rectangle.split.3x1",
                                      label: "Pipeline",
                                      action: { appState.openPipeline() })
+                    DrawerActionItem(icon: "calendar",
+                                     label: "Calendar",
+                                     action: { appState.openCalendar() })
+                    DrawerActionItem(icon: "wand.and.sparkles",
+                                     label: "SEO Generator",
+                                     action: { appState.openSEO() })
                     DrawerActionItem(icon: "book.fill",
                                      label: "Training",
                                      action: { appState.openTraining() })

@@ -54,7 +54,9 @@ struct MainShellView: View {
         .sheet(isPresented: $appState.showTraining)      { TrainingView() }
         .sheet(isPresented: $appState.showSettings)      { SettingsView() }
         .sheet(isPresented: $appState.showSearch)        { GlobalSearchView() }
-        .sheet(isPresented: $appState.showPipeline)     { PipelineView() }
+        .sheet(isPresented: $appState.showPipeline)      { PipelineView() }
+        .sheet(isPresented: $appState.showCalendar)      { CalendarView() }
+        .sheet(isPresented: $appState.showSEO)           { SEOGeneratorView() }
         .toastOverlay()
     }
 }

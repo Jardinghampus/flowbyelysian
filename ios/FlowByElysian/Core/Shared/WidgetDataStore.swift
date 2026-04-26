@@ -29,13 +29,13 @@ struct WidgetEvent: Codable, Identifiable {
     let isAllDay: Bool
 
     var timeString: String {
-        if isAllDay { return "Heldag" }
+        if isAllDay { return "All day" }
         return startDate.formatted(.dateTime.hour().minute())
     }
 
     var dayString: String {
-        if Calendar.current.isDateInToday(startDate)    { return "Idag" }
-        if Calendar.current.isDateInTomorrow(startDate) { return "Imorgon" }
+        if Calendar.current.isDateInToday(startDate)    { return "Today" }
+        if Calendar.current.isDateInTomorrow(startDate) { return "Tomorrow" }
         return startDate.formatted(.dateTime.weekday(.wide))
     }
 }

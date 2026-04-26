@@ -18,7 +18,7 @@ struct ClientRequest: Codable, Identifiable, Hashable {
     let areas: AreaRef?
 
     var budgetFormatted: String {
-        guard let budget else { return "Budget ej angiven" }
+        guard let budget else { return "Budget not set" }
         return budget.formatted(.currency(code: "AED").precision(.fractionLength(0)))
     }
 

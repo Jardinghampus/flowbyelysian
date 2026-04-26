@@ -124,8 +124,6 @@ final class APIClient: @unchecked Sendable {
     }
 
     private func applyHeaders(_ request: inout URLRequest) {
-        // Demo-auth: speglar web-appens demo-läge
-        // Byt mot riktig Clerk JWT-token när auth är konfigurerat
         request.setValue(Config.demoUserID, forHTTPHeaderField: "X-Demo-User-ID")
     }
 

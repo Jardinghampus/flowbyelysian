@@ -7,6 +7,7 @@ final class DashboardViewModel {
     private(set) var requests: [ClientRequest] = []
     private(set) var notifications: [AppNotification] = []
     private(set) var tasks: [TaskItem] = []
+    private(set) var upcomingEvents: [WidgetEvent] = []
     private(set) var isLoading = false
 
     private let sync = SyncManager.shared
@@ -41,6 +42,7 @@ final class DashboardViewModel {
     var totalValue:     Double { listings.compactMap(\.price).reduce(0, +) }
 
     func updateWidget(calendarEvents: [WidgetEvent]) {
+        upcomingEvents = calendarEvents
         let matchCount = MatchEngine.run(listings: listings, requests: requests).count
         let commission = AgentTarget.defaults.first { $0.id == "commission" }
         var data = WidgetData()

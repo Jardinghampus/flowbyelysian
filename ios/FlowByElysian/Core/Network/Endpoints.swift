@@ -12,6 +12,7 @@ enum Endpoint {
     static let reports       = "reports/monthly"
     static let training      = "training"
     static let performance   = "performance"
+    static let generate      = "generate"
 
     static func listing(_ id: String) -> String      { "listings/\(id)" }
     static func contact(_ id: String) -> String      { "contacts/\(id)" }

@@ -33,6 +33,10 @@ struct DashboardView: View {
                             .padding(.horizontal, AppTheme.Spacing.md)
                     }
 
+                    if !vm.upcomingEvents.isEmpty {
+                        UpcomingEventsSection(events: vm.upcomingEvents)
+                    }
+
                     if !vm.tasks.isEmpty {
                         TodayFocusSection(tasks: vm.tasks)
                     }
@@ -661,5 +665,73 @@ private struct DashSectionHeader: View {
                     .foregroundStyle(AppTheme.Color.brand)
             }
         }
+    }
+}
+
+// MARK: - Upcoming Events (calendar)
+
+private struct UpcomingEventsSection: View {
+    let events: [WidgetEvent]
+    @Environment(AppState.self) private var appState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+            DashSectionHeader(title: "Upcoming", icon: "calendar", badge: nil) {
+                appState.openCalendar()
+            }
+            .padding(.horizontal, AppTheme.Spacing.md)
+
+            VStack(spacing: AppTheme.Spacing.xs) {
+                ForEach(Array(events.prefix(3).enumerated()), id: \.element.id) { idx, event in
+                    UpcomingEventRow(event: event)
+                        .padding(.horizontal, AppTheme.Spacing.md)
+                        .staggeredAppear(index: idx)
+                }
+            }
+        }
+    }
+}
+
+private struct UpcomingEventRow: View {
+    let event: WidgetEvent
+
+    var body: some View {
+        HStack(spacing: AppTheme.Spacing.sm) {
+            VStack(spacing: 2) {
+                Text(event.dayString)
+                    .font(.caption2.bold())
+                    .foregroundStyle(AppTheme.Color.brand)
+                Text(event.timeString)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 58, alignment: .leading)
+
+            Rectangle()
+                .fill(AppTheme.Color.brand.opacity(0.5))
+                .frame(width: 2)
+                .clipShape(.rect(cornerRadius: 1))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(event.title)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                if let loc = event.location {
+                    Label(loc, systemImage: "mappin")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(AppTheme.Spacing.sm + 2)
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: AppTheme.Radius.sm))
+        .overlay {
+            RoundedRectangle(cornerRadius: AppTheme.Radius.sm)
+                .strokeBorder(.white.opacity(0.07), lineWidth: 0.5)
+        }
+        .accessibilityLabel("\(event.title), \(event.dayString) \(event.timeString)\(event.location.map { ", \($0)" } ?? "")")
     }
 }
