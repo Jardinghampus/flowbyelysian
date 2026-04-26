@@ -104,7 +104,7 @@ private struct SegmentButton: View {
         .foregroundStyle(isSelected ? .primary : .secondary)
         .frame(maxWidth: .infinity)
         .padding(.vertical, AppTheme.Spacing.sm)
-        .background(isSelected ? .background : .clear, in: .rect(cornerRadius: AppTheme.Radius.sm - 2))
+        .background(isSelected ? AnyShapeStyle(.background) : AnyShapeStyle(Color.clear), in: .rect(cornerRadius: AppTheme.Radius.sm - 2))
         .shadow(color: isSelected ? .black.opacity(0.07) : .clear, radius: 4, y: 1)
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
@@ -135,10 +135,13 @@ private struct RequestsTab: View {
             Divider()
 
             if vm.filteredRequests.isEmpty {
+                let descriptionText = vm.filterStatus.isEmpty
+                    ? "Tryck + för att lägga till"
+                    : "Inga status \(vm.filterStatus)"
                 ContentUnavailableView(
                     "Inga förfrågningar",
                     systemImage: "person.2.slash",
-                    description: Text(vm.filterStatus.isEmpty ? "Tryck + för att lägga till" : "Inga i status "\(vm.filterStatus)"")
+                    description: Text(descriptionText)
                 )
                 .frame(maxHeight: .infinity)
             } else {
