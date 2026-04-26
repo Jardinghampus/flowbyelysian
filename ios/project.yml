@@ -15,7 +15,7 @@ options:
 packages:
   ClerkSDK:
     url: https://github.com/clerk/clerk-ios
-    from: "2.0.0"
+    branch: "main"
 
 targets:
 
