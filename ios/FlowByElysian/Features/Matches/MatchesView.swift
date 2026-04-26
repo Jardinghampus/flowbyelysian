@@ -39,7 +39,7 @@ struct MatchesView: View {
                     .padding(AppTheme.Spacing.md)
 
                 LazyVStack(spacing: AppTheme.Spacing.sm) {
-                    ForEach(vm.filteredMatches) { match in
+                    ForEach(Array(vm.filteredMatches.enumerated()), id: \.element.id) { index, match in
                         MatchCard(match: match) {
                             selectedMatch = match
                         } onDismiss: {
@@ -47,6 +47,7 @@ struct MatchesView: View {
                                 vm.dismiss(match)
                             }
                         }
+                        .staggeredAppear(index: index)
                     }
                 }
                 .padding(.horizontal, AppTheme.Spacing.md)

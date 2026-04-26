@@ -128,12 +128,16 @@ private struct KPIGrid: View {
                   spacing: AppTheme.Spacing.sm) {
             MetricCard(title: "Live listings",   value: vm.liveListings.formatted(),
                        subtitle: nil, icon: "building.2.fill",     tint: AppTheme.Color.live,    trend: 12)
+                .staggeredAppear(index: 0)
             MetricCard(title: "Aktiva klienter", value: vm.activeRequests.formatted(),
                        subtitle: nil, icon: "person.2.fill",       tint: AppTheme.Color.brand,   trend: 5)
+                .staggeredAppear(index: 1)
             MetricCard(title: "Portfölj",        value: portfolioFormatted,
                        subtitle: nil, icon: "banknote.fill",       tint: .mint,                  trend: 8)
+                .staggeredAppear(index: 2)
             MetricCard(title: "Notiser",         value: vm.unreadCount.formatted(),
                        subtitle: nil, icon: "bell.badge.fill",     tint: AppTheme.Color.pending, trend: nil)
+                .staggeredAppear(index: 3)
         }
     }
 }
@@ -151,10 +155,11 @@ private struct RecentListingsSection: View {
 
                 ScrollView(.horizontal) {
                     HStack(spacing: AppTheme.Spacing.sm) {
-                        ForEach(listings) { listing in
+                        ForEach(Array(listings.enumerated()), id: \.element.id) { index, listing in
                             DashboardListingCard(listing: listing) {
                                 path.append(listing)
                             }
+                            .staggeredAppear(index: index)
                         }
                     }
                     .padding(.horizontal, AppTheme.Spacing.xs)
@@ -221,8 +226,9 @@ private struct RecentRequestsSection: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(spacing: AppTheme.Spacing.xs) {
-                    ForEach(requests) { req in
+                    ForEach(Array(requests.enumerated()), id: \.element.id) { index, req in
                         ClientRowView(request: req)
+                            .staggeredAppear(index: index)
                     }
                 }
             }

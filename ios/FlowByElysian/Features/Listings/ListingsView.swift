@@ -120,9 +120,10 @@ private struct ListingsContent: View {
         } else {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: AppTheme.Spacing.sm) {
-                    ForEach(vm.filtered) { listing in
+                    ForEach(Array(vm.filtered.enumerated()), id: \.element.id) { index, listing in
                         ListingGridCard(listing: listing, onTap: { path.append(listing) },
                                         onDelete: { deleteListing(listing) })
+                            .staggeredAppear(index: index)
                     }
                 }
                 .padding(AppTheme.Spacing.md)
