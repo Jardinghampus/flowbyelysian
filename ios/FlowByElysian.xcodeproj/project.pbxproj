@@ -821,7 +821,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flowbyelysian.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flowbyelysian.app.widget;
 				SDKROOT = iphoneos;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.2;
@@ -840,7 +840,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flowbyelysian.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.flowbyelysian.app.widget;
 				SDKROOT = iphoneos;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.2;

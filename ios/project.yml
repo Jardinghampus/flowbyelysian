@@ -59,7 +59,7 @@ targets:
         type: file
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.flowbyelysian.widget
+        PRODUCT_BUNDLE_IDENTIFIER: com.flowbyelysian.app.widget
         SWIFT_VERSION: 6.2
         DEVELOPMENT_TEAM: ""           # Must match main app Team ID
         SWIFT_STRICT_CONCURRENCY: complete
