@@ -39,23 +39,23 @@ final class NotificationManager: NSObject {
 
     private func registerCategories() {
         // Match found
-        let viewMatch   = UNNotificationAction(identifier: "VIEW_MATCH",   title: "Visa Match",      options: .foreground)
-        let dismissMatch = UNNotificationAction(identifier: "DISMISS",      title: "Avvisa",          options: .destructive)
+        let viewMatch   = UNNotificationAction(identifier: "VIEW_MATCH",   title: "View Match",    options: .foreground)
+        let dismissMatch = UNNotificationAction(identifier: "DISMISS",      title: "Dismiss",       options: .destructive)
         let matchCat    = UNNotificationCategory(identifier: "MATCH_FOUND",
                                                  actions: [viewMatch, dismissMatch],
                                                  intentIdentifiers: [],
                                                  options: [])
 
         // Task reminder
-        let markDone  = UNNotificationAction(identifier: "MARK_DONE",  title: "Markera klar",   options: [])
-        let snooze    = UNNotificationAction(identifier: "SNOOZE",     title: "Påminn imorgon", options: [])
+        let markDone  = UNNotificationAction(identifier: "MARK_DONE",  title: "Mark Done",       options: [])
+        let snooze    = UNNotificationAction(identifier: "SNOOZE",     title: "Remind Tomorrow", options: [])
         let taskCat   = UNNotificationCategory(identifier: "TASK_DUE",
                                                actions: [markDone, snooze],
                                                intentIdentifiers: [],
                                                options: [])
 
         // Listing inquiry
-        let viewListing = UNNotificationAction(identifier: "VIEW_LISTING", title: "Visa Listing", options: .foreground)
+        let viewListing = UNNotificationAction(identifier: "VIEW_LISTING", title: "View Listing", options: .foreground)
         let listingCat  = UNNotificationCategory(identifier: "LISTING_INQUIRY",
                                                  actions: [viewListing, dismissMatch],
                                                  intentIdentifiers: [],
@@ -68,8 +68,8 @@ final class NotificationManager: NSObject {
 
     func scheduleMatchNotification(matchCount: Int) {
         let content = UNMutableNotificationContent()
-        content.title = "✨ \(matchCount) ny\(matchCount == 1 ? "" : "a") matchning\(matchCount == 1 ? "" : "ar")"
-        content.body  = "Öppna Flow för att se dina AI-matchningar."
+        content.title = "✨ \(matchCount) new match\(matchCount == 1 ? "" : "es") found"
+        content.body  = "Open Flow to review your AI matches."
         content.sound = .default
         content.badge = matchCount as NSNumber
         content.categoryIdentifier = "MATCH_FOUND"
@@ -82,7 +82,7 @@ final class NotificationManager: NSObject {
 
     func scheduleTaskReminder(taskID: String, title: String, dueDate: Date) {
         let content = UNMutableNotificationContent()
-        content.title = "📋 Uppgift förfaller"
+        content.title = "Task Due"
         content.body  = title
         content.sound = .default
         content.categoryIdentifier = "TASK_DUE"
@@ -120,21 +120,22 @@ extension NotificationManager: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler handler: @escaping () -> Void
     ) {
+        // Extract Sendable values before crossing actor boundary
+        let actionIdentifier = response.actionIdentifier
+        let taskID = response.notification.request.content.userInfo["taskID"] as? String
+        let body   = response.notification.request.content.body
         Task { @MainActor in
-            switch response.actionIdentifier {
+            switch actionIdentifier {
             case "VIEW_MATCH":
                 AppStateRouter.shared.navigateTo(.matches)
             case "VIEW_LISTING":
                 AppStateRouter.shared.navigateTo(.listings)
             case "MARK_DONE":
-                if let taskID = response.notification.request.content.userInfo["taskID"] as? String {
-                    AppStateRouter.shared.markTaskDone(taskID)
-                }
+                if let id = taskID { AppStateRouter.shared.markTaskDone(id) }
             case "SNOOZE":
-                if let taskID = response.notification.request.content.userInfo["taskID"] as? String {
+                if let id = taskID {
                     let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: .now) ?? .now
-                    let title = response.notification.request.content.body
-                    scheduleTaskReminder(taskID: taskID, title: title, dueDate: tomorrow)
+                    scheduleTaskReminder(taskID: id, title: body, dueDate: tomorrow)
                 }
             default:
                 break

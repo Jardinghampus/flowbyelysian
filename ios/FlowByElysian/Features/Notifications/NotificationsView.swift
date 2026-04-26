@@ -13,15 +13,15 @@ struct NotificationsView: View {
             Group {
                 if vm.notifications.isEmpty && !vm.isLoading {
                     ContentUnavailableView(
-                        "Inga aviseringar",
+                        "No Notifications",
                         systemImage: "bell.slash",
-                        description: Text("Du är à jour!")
+                        description: Text("You're all caught up!")
                     )
                 } else {
                     notificationList
                 }
             }
-            .navigationTitle("Aviseringar")
+            .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { notificationsToolbar }
             .refreshable { await vm.load(context: context, isOnline: network.isConnected, appState: appState) }
@@ -53,7 +53,7 @@ struct NotificationsView: View {
                 ))
                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                     if notification.isUnread {
-                        Button("Läst", systemImage: "checkmark") {
+                        Button("Read", systemImage: "checkmark") {
                             Task { await vm.markRead(id: notification.id, context: context) }
                         }
                         .tint(.green)
@@ -67,13 +67,13 @@ struct NotificationsView: View {
     @ToolbarContentBuilder
     private var notificationsToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Button("Stäng", action: dismiss.callAsFunction)
+            Button("Close", action: dismiss.callAsFunction)
         }
         ToolbarItem(placement: .topBarTrailing) {
             if vm.isLoading {
                 ProgressView()
             } else if vm.unreadCount > 0 {
-                Button("Markera alla") {
+                Button("Mark all read") {
                     Task { await vm.markAllRead(context: context) }
                 }
                 .font(.subheadline)
@@ -129,7 +129,7 @@ private struct NotificationRow: View {
                         .fill(AppTheme.Color.brand)
                         .frame(width: 8, height: 8)
                         .padding(.top, 5)
-                        .accessibilityLabel("Oläst")
+                        .accessibilityLabel("Unread")
                 }
             }
             .padding(AppTheme.Spacing.md)
@@ -140,7 +140,7 @@ private struct NotificationRow: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(notification.title)\(notification.message.map { ", \($0)" } ?? "")\(notification.isUnread ? ", oläst" : "")")
+        .accessibilityLabel("\(notification.title)\(notification.message.map { ", \($0)" } ?? "")\(notification.isUnread ? ", unread" : "")")
     }
 }
 

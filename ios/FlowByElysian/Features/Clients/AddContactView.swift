@@ -4,53 +4,63 @@ struct AddContactView: View {
     @Environment(\.dismiss) private var dismiss
     let onSave: (NewContactPayload) async -> Void
 
-    @State private var name = ""
-    @State private var email = ""
-    @State private var phone = ""
+    @State private var name     = ""
+    @State private var email    = ""
+    @State private var phone    = ""
     @State private var whatsapp = ""
-    @State private var role = "agent"
+    @State private var role     = "agent"
     @State private var isSaving = false
 
     private var isValid: Bool { !name.isEmpty }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Grunduppgifter") {
-                    TextField("Namn *", text: $name)
-                    Picker("Roll", selection: $role) {
-                        Text("Agent").tag("agent")
-                        Text("Senior Agent").tag("senior_agent")
-                        Text("Manager").tag("manager")
-                        Text("Admin").tag("admin")
-                        Text("Extern").tag("external")
+            ScrollView {
+                VStack(spacing: DS.Spacing.xl) {
+                    FormCard(title: "Basic Info") {
+                        FloatingLabelTextField(label: "Full Name *", text: $name, icon: "person.fill")
+                        InlinePickerRow(label: "Role", selection: $role, options: [
+                            ("agent", "Agent"), ("senior_agent", "Senior Agent"),
+                            ("manager", "Manager"), ("admin", "Admin"), ("external", "External")
+                        ])
+                    }
+
+                    FormCard(title: "Contact Details") {
+                        FloatingLabelTextField(
+                            label: "Email", text: $email,
+                            keyboardType: .emailAddress,
+                            autocapitalization: .never,
+                            icon: "envelope.fill"
+                        )
+                        FloatingLabelTextField(
+                            label: "Phone", text: $phone,
+                            keyboardType: .phonePad,
+                            icon: "phone.fill"
+                        )
+                        FloatingLabelTextField(
+                            label: "WhatsApp", text: $whatsapp,
+                            keyboardType: .phonePad,
+                            icon: "message.fill"
+                        )
                     }
                 }
-                Section("Kontaktuppgifter") {
-                    TextField("E-post", text: $email)
-                        .textContentType(.emailAddress)
-                        .keyboardType(.emailAddress)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                    TextField("Telefon", text: $phone)
-                        .textContentType(.telephoneNumber)
-                        .keyboardType(.phonePad)
-                    TextField("WhatsApp", text: $whatsapp)
-                        .keyboardType(.phonePad)
-                }
+                .padding(DS.Spacing.base)
+                .padding(.bottom, DS.Spacing.xxxl)
             }
-            .navigationTitle("Ny kontakt")
+            .background(Color.zBg.ignoresSafeArea())
+            .navigationTitle("New Contact")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Avbryt", action: dismiss.callAsFunction)
+                    Button("Cancel") { dismiss() }.tint(.secondary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Spara", action: save)
-                            .bold()
+                        Button("Save", action: save)
+                            .fontWeight(.semibold)
+                            .tint(Color.zBlue)
                             .disabled(!isValid)
                     }
                 }

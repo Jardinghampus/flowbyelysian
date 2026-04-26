@@ -19,6 +19,20 @@ struct Contact: Codable, Identifiable, Hashable {
     }
 
     var areaName: String? { areas?.name ?? areaId }
+
+    var whatsappURL: URL? {
+        let raw = whatsapp ?? phone ?? ""
+        let digits = raw.filter { $0.isNumber }
+        guard !digits.isEmpty else { return nil }
+        return URL(string: "https://wa.me/\(digits)")
+    }
+
+    var callURL: URL? {
+        guard let ph = phone else { return nil }
+        let formatted = ph.filter { $0.isNumber || $0 == "+" }
+        guard !formatted.isEmpty else { return nil }
+        return URL(string: "tel:\(formatted)")
+    }
 }
 
 struct ContactsResponse: Codable {

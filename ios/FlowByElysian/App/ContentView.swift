@@ -3,6 +3,15 @@ import SwiftUI
 struct ContentView: View {
     @Environment(AuthManager.self) private var auth
     @Environment(NetworkMonitor.self) private var network
+    @AppStorage("preferredColorScheme") private var preferredScheme: Int = 2
+
+    private var resolvedColorScheme: ColorScheme? {
+        switch preferredScheme {
+        case 1: .light
+        case 2: .dark
+        default: nil
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -33,19 +42,21 @@ struct ContentView: View {
                     }
             }
         }
-        .animation(.spring(response: 0.42, dampingFraction: 0.82), value: auth.state)
-        .animation(.spring(response: 0.3), value: network.isConnected)
+        .preferredColorScheme(resolvedColorScheme)
+        .animation(DS.Anim.standard, value: auth.state)
+        .animation(DS.Anim.quick, value: network.isConnected)
+        .animation(DS.Anim.quick, value: preferredScheme)
     }
 }
 
 private struct OfflineBanner: View {
     var body: some View {
-        Label("Offline – visar cachad data", systemImage: "wifi.slash")
-            .font(.footnote.weight(.medium))
+        Label("Offline – showing cached data", systemImage: "wifi.slash")
+            .font(AppFont.body(13, weight: .medium))
             .foregroundStyle(.white)
-            .padding(.horizontal, AppTheme.Spacing.md)
-            .padding(.vertical, AppTheme.Spacing.sm)
-            .background(.orange.gradient, in: Capsule())
-            .shadow(color: .orange.opacity(0.35), radius: 8, y: 4)
+            .padding(.horizontal, DS.Spacing.md)
+            .padding(.vertical, DS.Spacing.sm)
+            .background(Color.zOrange.gradient, in: Capsule())
+            .shadow(color: Color.zOrange.opacity(0.35), radius: 8, y: 4)
     }
 }

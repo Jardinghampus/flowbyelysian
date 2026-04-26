@@ -19,10 +19,8 @@ final class ClientsViewModel {
         defer { isLoading = false }
 
         if isOnline {
-            async let r = sync.fetchRequests(context: context)
-            async let c = sync.fetchContacts(context: context)
-            requests = (try? await r) ?? sync.cachedRequests(context: context)
-            contacts = (try? await c) ?? sync.cachedContacts(context: context)
+            requests = (try? await sync.fetchRequests(context: context)) ?? sync.cachedRequests(context: context)
+            contacts = (try? await sync.fetchContacts(context: context)) ?? sync.cachedContacts(context: context)
         } else {
             requests = sync.cachedRequests(context: context)
             contacts = sync.cachedContacts(context: context)

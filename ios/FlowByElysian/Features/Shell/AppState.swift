@@ -12,6 +12,10 @@ final class AppState {
     var showNews = false
     var showTasks = false
     var notificationUnreadCount = 0
+    var showTraining = false
+    var showSettings = false
+    var showSearch   = false
+    var showPipeline = false
 
     func openDrawer() {
         withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) { drawerOpen = true }
@@ -31,4 +35,8 @@ final class AppState {
     func openAreas()         { closeDrawer(); showAreas = true }
     func openNews()          { closeDrawer(); showNews = true }
     func openTasks()         { closeDrawer(); showTasks = true }
+    func openTraining()      { closeDrawer(); showTraining = true }
+    func openSettings()      { closeDrawer(); showSettings = true }
+    func openSearch()        { closeDrawer(); showSearch   = true }
+    func openPipeline()      { closeDrawer(); showPipeline = true }
 }

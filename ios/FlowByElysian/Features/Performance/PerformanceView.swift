@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PerformanceView: View {
     @Environment(AppState.self) private var appState
+    @Environment(NetworkMonitor.self) private var network
     @State private var vm = PerformanceViewModel()
     @State private var selectedSection = 0
 
@@ -31,7 +32,9 @@ struct PerformanceView: View {
             .background(.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { performanceToolbar }
+            .refreshable { await vm.load() }
         }
+        .task { await vm.load() }
     }
 
     @ToolbarContentBuilder
@@ -66,7 +69,7 @@ private struct RankSummaryCard: View {
                 Text(vm.totalPoints.formatted())
                     .font(.title.bold())
                     .foregroundStyle(AppTheme.Color.brand)
-                Text("Poäng").font(.caption2).foregroundStyle(.secondary)
+                Text("Points").font(.caption2).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity)
 
@@ -89,27 +92,39 @@ private struct RankSummaryCard: View {
 
 private struct SectionPicker: View {
     @Binding var selection: Int
+    private let labels = ["Leaderboard", "Achievements", "Targets", "Analytics"]
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(["Leaderboard", "Achievements", "Mål", "Statistik"].indices, id: \.self) { i in
-                let label = ["Leaderboard", "Achievements", "Mål", "Statistik"][i]
-                Button(label) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { selection = i }
-                }
-                .font(.subheadline.weight(selection == i ? .semibold : .regular))
-                .foregroundStyle(selection == i ? .primary : .secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, AppTheme.Spacing.sm)
-                .background(selection == i ? .background : .clear,
-                            in: .rect(cornerRadius: AppTheme.Radius.sm - 2))
-                .shadow(color: selection == i ? .black.opacity(0.07) : .clear, radius: 4, y: 1)
-                .buttonStyle(.plain)
-                .sensoryFeedback(.selection, trigger: selection)
+            ForEach(labels.indices, id: \.self) { i in
+                SectionTab(label: labels[i], index: i, selection: $selection)
             }
         }
         .padding(3)
         .background(.quinary, in: .rect(cornerRadius: AppTheme.Radius.sm))
+    }
+}
+
+private struct SectionTab: View {
+    let label: String
+    let index: Int
+    @Binding var selection: Int
+
+    var isSelected: Bool { selection == index }
+
+    var body: some View {
+        Button(label) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { selection = index }
+        }
+        .font(.subheadline.weight(isSelected ? .semibold : .regular))
+        .foregroundStyle(isSelected ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Color.secondary))
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, AppTheme.Spacing.sm)
+        .background(isSelected ? Color(.systemBackground) : Color.clear,
+                    in: .rect(cornerRadius: AppTheme.Radius.sm - 2))
+        .shadow(color: isSelected ? .black.opacity(0.07) : .clear, radius: 4, y: 1)
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: isSelected)
     }
 }
 
@@ -169,7 +184,7 @@ private struct PodiumPillar: View {
             Text(medal).font(.title2).accessibilityHidden(true)
 
             Circle()
-                .fill(entry.isCurrentUser ? AppTheme.Color.brand.gradient : AnyShapeStyle(.quaternary))
+                .fill(entry.isCurrentUser ? AnyShapeStyle(AppTheme.Color.brand.gradient) : AnyShapeStyle(Color(.quaternarySystemFill)))
                 .frame(width: 44, height: 44)
                 .overlay {
                     Text(entry.initials)
@@ -186,12 +201,12 @@ private struct PodiumPillar: View {
                 .font(.caption2).foregroundStyle(.secondary)
 
             Rectangle()
-                .fill(entry.isCurrentUser ? AppTheme.Color.brand.gradient : AnyShapeStyle(.quinary))
+                .fill(entry.isCurrentUser ? AnyShapeStyle(AppTheme.Color.brand.gradient) : AnyShapeStyle(Color.gray.opacity(0.15)))
                 .frame(height: height)
                 .clipShape(.rect(topLeadingRadius: 4, topTrailingRadius: 4))
         }
         .frame(maxWidth: .infinity)
-        .accessibilityLabel("\(medal) \(entry.name), \(entry.points) poäng")
+        .accessibilityLabel("\(medal) \(entry.name), \(entry.points) points")
     }
 }
 
@@ -217,7 +232,7 @@ private struct LeaderboardRow: View {
                 .frame(width: 28, alignment: .leading)
 
             Circle()
-                .fill(entry.isCurrentUser ? AppTheme.Color.brand.gradient : AnyShapeStyle(.quaternary))
+                .fill(entry.isCurrentUser ? AnyShapeStyle(AppTheme.Color.brand.gradient) : AnyShapeStyle(Color(.quaternarySystemFill)))
                 .frame(width: 36, height: 36)
                 .overlay {
                     Text(entry.initials)
@@ -230,9 +245,9 @@ private struct LeaderboardRow: View {
                 Text(entry.name)
                     .font(.subheadline.weight(entry.isCurrentUser ? .semibold : .regular))
                 HStack(spacing: AppTheme.Spacing.xs) {
-                    Text("\(entry.deals) affärer")
+                    Text("\(entry.deals) deals")
                     if entry.streak > 0 {
-                        Label("\(entry.streak) dagar", systemImage: "flame.fill")
+                        Label("\(entry.streak) days", systemImage: "flame.fill")
                             .foregroundStyle(.orange)
                     }
                 }
@@ -258,7 +273,7 @@ private struct LeaderboardRow: View {
                     .strokeBorder(AppTheme.Color.brand.opacity(0.25), lineWidth: 1)
             }
         }
-        .accessibilityLabel("\(entry.name), rank \(entry.rank), \(entry.points) poäng")
+        .accessibilityLabel("\(entry.name), rank \(entry.rank), \(entry.points) points")
     }
 }
 
@@ -268,7 +283,7 @@ private struct AchievementsSection: View {
     @Bindable var vm: PerformanceViewModel
 
     private let categories: [(String?, Achievement.Category?)] = [
-        ("Alla", nil),
+        ("All", nil),
         ("Sales", .sales),
         ("Streaks", .streak),
         ("Milestones", .milestone),
@@ -360,9 +375,9 @@ private struct AchievementCard: View {
         .background(rarityGradient, in: .rect(cornerRadius: AppTheme.Radius.sm))
         .overlay {
             RoundedRectangle(cornerRadius: AppTheme.Radius.sm)
-                .strokeBorder(achievement.unlocked ? .yellow.opacity(0.3) : .separator, lineWidth: 0.5)
+                .strokeBorder(achievement.unlocked ? AnyShapeStyle(Color.yellow.opacity(0.3)) : AnyShapeStyle(Color(.separator)), lineWidth: 0.5)
         }
-        .accessibilityLabel("\(achievement.name)\(achievement.unlocked ? ", upplåst" : ", låst")")
+        .accessibilityLabel("\(achievement.name)\(achievement.unlocked ? ", unlocked" : ", locked")")
     }
 }
 
@@ -386,7 +401,7 @@ private struct TargetsSection: View {
                     } else {
                         Image(systemName: "checkmark")
                     }
-                    Text(vm.isSavingTargets ? "Sparar…" : "Spara mål")
+                    Text(vm.isSavingTargets ? "Saving…" : "Save Targets")
                 }
                 .font(.subheadline.bold())
                 .foregroundStyle(.white)
@@ -423,10 +438,10 @@ private struct TargetRow: View {
                 .tint(target.progressFraction >= 1 ? .green : AppTheme.Color.brand)
 
             HStack {
-                Text("Nuvarande: \(target.current) \(target.unit)")
+                Text("Current: \(target.current) \(target.unit)")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Text("Mål: \(target.target) \(target.unit)")
+                Text("Target: \(target.target) \(target.unit)")
                     .font(.caption.bold())
             }
 

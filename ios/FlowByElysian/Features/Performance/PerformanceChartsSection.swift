@@ -16,14 +16,14 @@ struct PerformanceChartsSection: View {
             // KPI summary row
             HStack(spacing: AppTheme.Spacing.sm) {
                 StatKPICard(
-                    label: "Provision (månad)",
+                    label: "Commission (month)",
                     value: formattedCommission(lastMonth?.commission ?? 0),
                     delta: commissionDelta,
                     icon: "banknote.fill",
                     tint: AppTheme.Color.brand
                 )
                 StatKPICard(
-                    label: "Affärer (månad)",
+                    label: "Deals (month)",
                     value: "\(lastMonth?.deals ?? 0)",
                     delta: dealsDelta,
                     icon: "checkmark.seal.fill",
@@ -34,9 +34,9 @@ struct PerformanceChartsSection: View {
             .staggeredAppear(index: 0)
 
             // Chart type picker
-            Picker("Visa", selection: $selectedChart) {
-                Text("Provision").tag(0)
-                Text("Affärer").tag(1)
+            Picker("View", selection: $selectedChart) {
+                Text("Commission").tag(0)
+                Text("Deals").tag(1)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, AppTheme.Spacing.md)
@@ -127,19 +127,19 @@ private struct CommissionChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
-            Text("Provision 6 månader (AED)")
+            Text("Commission last 6 months (AED)")
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
 
             Chart(stats) { stat in
                 AreaMark(
-                    x: .value("Månad", stat.month),
-                    y: .value("Provision", stat.commission)
+                    x: .value("Month", stat.month),
+                    y: .value("Commission", stat.commission)
                 )
                 .foregroundStyle(
                     LinearGradient(
                         gradient: Gradient(stops: [
-                            .init(color: AppTheme.Color.brand.opacity(0.28), location: 0),
+                            .init(color: Color.zBlue.opacity(0.28), location: 0),
                             .init(color: .clear, location: 1),
                         ]),
                         startPoint: .top,
@@ -149,18 +149,18 @@ private struct CommissionChart: View {
                 .interpolationMethod(.catmullRom)
 
                 LineMark(
-                    x: .value("Månad", stat.month),
-                    y: .value("Provision", stat.commission)
+                    x: .value("Month", stat.month),
+                    y: .value("Commission", stat.commission)
                 )
-                .foregroundStyle(AppTheme.Color.brand)
+                .foregroundStyle(Color.zBlue)
                 .lineStyle(StrokeStyle(lineWidth: 2.5))
                 .interpolationMethod(.catmullRom)
 
                 PointMark(
-                    x: .value("Månad", stat.month),
-                    y: .value("Provision", stat.commission)
+                    x: .value("Month", stat.month),
+                    y: .value("Commission", stat.commission)
                 )
-                .foregroundStyle(AppTheme.Color.brand)
+                .foregroundStyle(Color.zBlue)
                 .symbolSize(36)
             }
             .chartYAxis {
@@ -198,20 +198,20 @@ private struct DealsChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
-            Text("Affärer stängda 6 månader")
+            Text("Deals closed last 6 months")
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
 
             Chart(stats) { stat in
                 BarMark(
-                    x: .value("Månad", stat.month),
-                    y: .value("Affärer", stat.deals)
+                    x: .value("Month", stat.month),
+                    y: .value("Deals", stat.deals)
                 )
-                .foregroundStyle(AppTheme.Color.brand.gradient)
+                .foregroundStyle(Color.zBlue.gradient)
                 .annotation(position: .top, alignment: .center) {
                     Text("\(stat.deals)")
                         .font(.caption2.bold())
-                        .foregroundStyle(AppTheme.Color.brand)
+                        .foregroundStyle(Color.zBlue)
                 }
             }
             .chartYAxis {

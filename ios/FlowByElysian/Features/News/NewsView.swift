@@ -12,19 +12,19 @@ struct NewsView: View {
                     newsSkeletonList
                 } else if vm.articles.isEmpty {
                     ContentUnavailableView(
-                        "Inga nyheter",
+                        "No News",
                         systemImage: "newspaper",
-                        description: Text("Kontrollera nätverksanslutningen")
+                        description: Text("Check your network connection")
                     )
                 } else {
                     newsList
                 }
             }
-            .navigationTitle("Nyheter")
+            .navigationTitle("News")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Stäng", action: dismiss.callAsFunction)
+                    Button("Close", action: dismiss.callAsFunction)
                 }
             }
             .sheet(item: $selectedURL) { url in
@@ -154,7 +154,7 @@ private struct SafariSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Stäng", action: dismiss.callAsFunction)
+                        Button("Close", action: dismiss.callAsFunction)
                     }
                 }
         }

@@ -36,7 +36,7 @@ final class AuthManager {
         try? await Task.sleep(for: .milliseconds(900))
 
         guard email.contains("@"), password.count >= 6 else {
-            errorMessage = "Ogiltig e-post eller lösenord (minst 6 tecken)"
+            errorMessage = "Invalid email or password (min. 6 characters)"
             return
         }
 

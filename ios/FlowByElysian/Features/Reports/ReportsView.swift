@@ -13,7 +13,7 @@ struct ReportsView: View {
         NavigationStack {
             Group {
                 if vm.isLoading {
-                    ProgressView("Laddar data…")
+                    ProgressView("Loading data…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     reportsList
@@ -36,11 +36,11 @@ struct ReportsView: View {
             VStack(spacing: AppTheme.Spacing.sm) {
                 ReportsSummaryRow(listingCount: vm.listings.count, requestCount: vm.requests.count)
 
-                SectionLabel(title: "Generera rapport")
+                SectionLabel(title: "Generate Report")
 
                 ReportCard(
                     title: "Landlord Report",
-                    subtitle: "Fullständig portföljöversikt för fastighetsägare",
+                    subtitle: "Complete portfolio overview for property owners",
                     icon: "doc.text.fill",
                     tint: AppTheme.Color.brand,
                     isGenerating: vm.isGenerating
@@ -52,7 +52,7 @@ struct ReportsView: View {
 
                 ReportCard(
                     title: "Inventory Report",
-                    subtitle: "Sorterat per fastighetstyp med priser och status",
+                    subtitle: "Sorted by property type with prices and status",
                     icon: "list.clipboard.fill",
                     tint: .mint,
                     isGenerating: vm.isGenerating
@@ -64,7 +64,7 @@ struct ReportsView: View {
 
                 ReportCard(
                     title: "Performance Report",
-                    subtitle: "KPIs, konverteringsgrad och pipeline-status",
+                    subtitle: "KPIs, conversion rate and pipeline status",
                     icon: "chart.bar.doc.horizontal.fill",
                     tint: AppTheme.Color.live,
                     isGenerating: vm.isGenerating
@@ -74,7 +74,7 @@ struct ReportsView: View {
                     shareItem = PDFShareItem(data: pdf, filename: "performance-report.pdf")
                 }
 
-                Text("Rapporter genereras som PDF och kan delas eller sparas i Files.")
+                Text("Reports are generated as PDF and can be shared or saved to Files.")
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
@@ -105,8 +105,8 @@ private struct ReportsSummaryRow: View {
 
     var body: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
-            SummaryPill(label: "Listings", value: "\(listingCount)", icon: "building.2.fill", tint: AppTheme.Color.brand)
-            SummaryPill(label: "Klienter",  value: "\(requestCount)", icon: "person.2.fill",   tint: .mint)
+            SummaryPill(label: "Listings", value: "\(listingCount)", icon: "building.2.fill", tint: Color.zBlue)
+            SummaryPill(label: "Clients",  value: "\(requestCount)", icon: "person.2.fill",   tint: .mint)
         }
     }
 }
@@ -201,11 +201,4 @@ struct PDFShareItem: Identifiable {
     let filename: String
 }
 
-struct ShareSheet: UIViewControllerRepresentable {
-    let activityItems: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-    }
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
+// ShareSheet is defined in ListingDetailView.swift

@@ -4,58 +4,73 @@ struct AddRequestView: View {
     @Environment(\.dismiss) private var dismiss
     let onSave: (NewRequestPayload) async -> Void
 
-    @State private var clientName = ""
-    @State private var budget = ""
+    @State private var clientName   = ""
+    @State private var budgetValue: Double? = nil
     @State private var propertyType = "villa"
-    @State private var bedrooms = ""
-    @State private var areaName = ""
-    @State private var notes = ""
-    @State private var isSaving = false
+    @State private var bedrooms     = 0
+    @State private var areaName     = ""
+    @State private var notes        = ""
+    @State private var isSaving     = false
 
     private var isValid: Bool { !clientName.isEmpty }
 
     private let areas = Area.dubaiAreas.map(\.name)
-    private let types = ["villa", "apartment", "townhouse", "penthouse", "plot", "office", "retail"]
+    private let types = ["villa","apartment","townhouse","penthouse","plot","office","retail"]
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Klientinformation") {
-                    TextField("Klientnamn *", text: $clientName)
-
-                    TextField("Budget (AED)", text: $budget)
-                        .keyboardType(.numberPad)
-                }
-
-                Section("Önskemål") {
-                    Picker("Fastighetstyp", selection: $propertyType) {
-                        ForEach(types, id: \.self) { Text($0.capitalized).tag($0) }
+            ScrollView {
+                VStack(spacing: DS.Spacing.xl) {
+                    FormCard(title: "Client Info") {
+                        FloatingLabelTextField(label: "Client Name *", text: $clientName,
+                                              icon: "person.fill")
+                        CurrencyTextField(label: "Budget (AED)", value: $budgetValue)
                     }
-                    Picker("Område", selection: $areaName) {
-                        Text("Inget specifikt").tag("")
-                        ForEach(areas, id: \.self) { Text($0).tag($0) }
-                    }
-                    TextField("Sovrum (min)", text: $bedrooms)
-                        .keyboardType(.numberPad)
-                }
 
-                Section("Anteckningar") {
-                    TextField("Övrigt om klienten…", text: $notes, axis: .vertical)
-                        .lineLimit(3...)
+                    FormCard(title: "Preferences") {
+                        InlinePickerRow(label: "Property Type", selection: $propertyType,
+                                        options: types.map { ($0, $0.capitalized) })
+
+                        Picker("Area", selection: $areaName) {
+                            Text("No preference").tag("")
+                            ForEach(areas, id: \.self) { Text($0).tag($0) }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(Color.zBlue)
+                        .padding(.horizontal, DS.Spacing.md)
+                        .padding(.vertical, DS.Spacing.md)
+                        .background(Color.zCard, in: .rect(cornerRadius: DS.Radius.md))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: DS.Radius.md)
+                                .strokeBorder(Color.zBorderSubtle, lineWidth: 0.5)
+                        }
+
+                        TabStepper(label: "Bedrooms", value: $bedrooms,
+                                   options: [0,1,2,3,4,5,6,7])
+                    }
+
+                    FormCard(title: "Notes") {
+                        FloatingLabelTextField(label: "Additional details…", text: $notes,
+                                              icon: "note.text")
+                    }
                 }
+                .padding(DS.Spacing.base)
+                .padding(.bottom, DS.Spacing.xxxl)
             }
-            .navigationTitle("Ny klientförfrågan")
+            .background(Color.zBg.ignoresSafeArea())
+            .navigationTitle("New Client Request")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Avbryt", action: dismiss.callAsFunction)
+                    Button("Cancel") { dismiss() }.tint(.secondary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Spara", action: save)
-                            .bold()
+                        Button("Save", action: save)
+                            .fontWeight(.semibold)
+                            .tint(Color.zBlue)
                             .disabled(!isValid)
                     }
                 }
@@ -67,10 +82,10 @@ struct AddRequestView: View {
     private func save() {
         let payload = NewRequestPayload(
             clientName: clientName,
-            budget: Int(budget),
+            budget: budgetValue.map(Int.init),
             propertyType: propertyType,
-            bedrooms: Int(bedrooms),
-            areaId: nil,   // area lookup by name requires extra step; pass nil for now
+            bedrooms: bedrooms > 0 ? bedrooms : nil,
+            areaId: nil,
             status: "active",
             notes: notes.isEmpty ? nil : notes
         )

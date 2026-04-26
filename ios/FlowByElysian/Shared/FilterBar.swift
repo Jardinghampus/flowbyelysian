@@ -8,17 +8,26 @@ struct FilterChip: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                .font(AppFont.body(13, weight: isSelected ? .semibold : .regular))
                 .foregroundStyle(isSelected ? .white : .primary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
+                .padding(.horizontal, DS.Spacing.md)
+                .padding(.vertical, DS.Spacing.xs + 3)
                 .background {
                     Capsule()
-                        .fill(isSelected ? AnyShapeStyle(AppTheme.Color.brand.gradient) : AnyShapeStyle(Color.secondary.opacity(0.12)))
+                        .fill(isSelected
+                              ? AnyShapeStyle(LinearGradient.zBlue)
+                              : AnyShapeStyle(Color.zCard))
+                }
+                .overlay {
+                    Capsule()
+                        .strokeBorder(
+                            isSelected ? Color.clear : Color.zBorderDefault,
+                            lineWidth: 0.5
+                        )
                 }
         }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.28, dampingFraction: 0.72), value: isSelected)
+        .buttonStyle(LiquidButtonStyle())
+        .animation(DS.Anim.quick, value: isSelected)
         .sensoryFeedback(.selection, trigger: isSelected)
     }
 }

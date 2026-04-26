@@ -10,10 +10,10 @@ struct ListingsView: View {
     @State private var showAddSheet = false
 
     private let statusOptions: [(String, String)] = [
-        ("Alla", ""), ("Live", "live"), ("Pocket", "pocket"), ("Unofficial", "unofficial")
+        ("All", ""), ("Live", "live"), ("Pocket", "pocket"), ("Unofficial", "unofficial")
     ]
     private let typeOptions: [(String, String)] = [
-        ("Alla typer", ""), ("Villa", "villa"), ("Apartment", "apartment"),
+        ("All Types", ""), ("Villa", "villa"), ("Apartment", "apartment"),
         ("Townhouse", "townhouse"), ("Penthouse", "penthouse"), ("Plot", "plot")
     ]
 
@@ -36,7 +36,7 @@ struct ListingsView: View {
             .navigationDestination(for: Listing.self) {
                 ListingDetailView(listing: $0, vm: vm)
             }
-            .searchable(text: Bindable(vm).searchText, prompt: "Titel, typ, område…")
+            .searchable(text: Bindable(vm).searchText, prompt: "Title, type, area…")
             .sheet(isPresented: $showAddSheet) { addSheet }
             .refreshable { await vm.load(context: context, isOnline: network.isConnected) }
         }
@@ -113,8 +113,13 @@ private struct ListingsContent: View {
 
     var body: some View {
         if vm.isLoading && vm.listings.isEmpty {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: AppTheme.Spacing.sm) {
+                    ForEach(0..<6, id: \.self) { _ in ListingCardSkeleton() }
+                }
+                .padding(AppTheme.Spacing.md)
+            }
+            .scrollIndicators(.hidden)
         } else if vm.filtered.isEmpty {
             ContentUnavailableView.search
         } else {
@@ -153,56 +158,74 @@ private struct ListingGridCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
-                AsyncImage(url: listing.firstImage) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Rectangle().fill(.quinary)
-                        .overlay {
-                            Image(systemName: "building.2")
-                                .foregroundStyle(.tertiary)
-                                .accessibilityHidden(true)
-                        }
+                ZStack(alignment: .bottomLeading) {
+                    AsyncImage(url: listing.firstImage) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color.zCardRaised)
+                            .shimmer()
+                            .overlay {
+                                Image(systemName: "building.2")
+                                    .foregroundStyle(.tertiary)
+                                    .font(.title3)
+                                    .accessibilityHidden(true)
+                            }
+                    }
+                    .frame(height: 115)
+                    .clipShape(.rect(topLeadingRadius: DS.Radius.lg,
+                                     topTrailingRadius: DS.Radius.lg))
+                    .accessibilityHidden(true)
+
+                    LinearGradient(
+                        colors: [.black.opacity(0.5), .clear],
+                        startPoint: .bottom, endPoint: .center
+                    )
+                    .clipShape(UnevenRoundedRectangle(
+                        topLeadingRadius: DS.Radius.lg, bottomLeadingRadius: 0,
+                        bottomTrailingRadius: 0, topTrailingRadius: DS.Radius.lg
+                    ))
+
+                    if let status = listing.status {
+                        StatusBadge(status: status)
+                            .padding(DS.Spacing.sm)
+                    }
                 }
-                .frame(height: 110)
-                .clipShape(.rect(topLeadingRadius: AppTheme.Radius.card,
-                                 topTrailingRadius: AppTheme.Radius.card))
-                .accessibilityHidden(true)
+                .frame(height: 115)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(listing.title)
-                        .font(.footnote.bold())
+                        .font(AppFont.body(12, weight: .semibold))
                         .lineLimit(1)
                     Text(listing.priceFormatted)
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.Color.brand)
-                    HStack(spacing: AppTheme.Spacing.xs) {
-                        if let beds = listing.bedrooms, beds > 0 {
-                            Label(beds.formatted(), systemImage: "bed.double")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        if let status = listing.status {
-                            Spacer()
-                            StatusBadge(status: status)
-                        }
+                        .font(AppFont.body(12, weight: .bold))
+                        .foregroundStyle(Color.zBlue)
+                    if let beds = listing.bedrooms, beds > 0 {
+                        Label("\(beds) BR", systemImage: "bed.double")
+                            .font(AppFont.body(11))
+                            .foregroundStyle(.secondary)
                     }
                 }
-                .padding(AppTheme.Spacing.sm)
+                .padding(DS.Spacing.sm + 2)
             }
-            .background(.regularMaterial, in: .rect(cornerRadius: AppTheme.Radius.card))
-            .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
+            .background(Color.zCard, in: .rect(cornerRadius: DS.Radius.lg))
+            .overlay {
+                RoundedRectangle(cornerRadius: DS.Radius.lg)
+                    .strokeBorder(Color.zBorderSubtle, lineWidth: 0.5)
+            }
+            .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LiquidButtonStyle())
         .accessibilityLabel("\(listing.title), \(listing.priceFormatted)")
         .contextMenu {
-            Button("Radera", systemImage: "trash", role: .destructive) {
+            Button("Delete", systemImage: "trash", role: .destructive) {
                 showDeleteConfirm = true
             }
         }
-        .confirmationDialog("Radera \(listing.title)?",
+        .confirmationDialog("Delete \(listing.title)?",
                             isPresented: $showDeleteConfirm,
                             titleVisibility: .visible) {
-            Button("Radera", role: .destructive, action: onDelete)
+            Button("Delete", role: .destructive, action: onDelete)
         }
     }
 }
@@ -211,7 +234,7 @@ private struct AddButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button("Lägg till listing", systemImage: "plus", action: action)
+        Button("Add Listing", systemImage: "plus", action: action)
             .labelStyle(.iconOnly)
             .font(.title2.weight(.semibold))
             .foregroundStyle(.white)

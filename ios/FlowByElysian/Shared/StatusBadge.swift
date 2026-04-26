@@ -5,10 +5,10 @@ struct StatusBadge: View {
 
     var body: some View {
         Text(status.capitalized)
-            .font(.caption.weight(.bold))
+            .font(AppFont.label(10))
             .foregroundStyle(.white)
-            .padding(.horizontal, AppTheme.Spacing.sm)
-            .padding(.vertical, 4)
+            .padding(.horizontal, DS.Spacing.sm)
+            .padding(.vertical, 3)
             .background(status.statusColor, in: Capsule())
     }
 }

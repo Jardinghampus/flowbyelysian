@@ -9,13 +9,14 @@ struct MetricCard: View {
     var trend: Double? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             HStack(alignment: .top) {
                 Image(systemName: icon)
-                    .font(.system(size: 15).weight(.semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(tint)
                     .frame(width: 32, height: 32)
-                    .background(tint.opacity(0.14), in: .rect(cornerRadius: 8))
+                    .background(tint.opacity(0.14), in: .rect(cornerRadius: DS.Radius.sm))
+                    .accessibilityHidden(true)
                 Spacer()
                 if let trend {
                     TrendBadge(value: trend)
@@ -23,22 +24,29 @@ struct MetricCard: View {
             }
 
             Text(value)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(AppFont.display(24))
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
+                .contentTransition(.numericText())
 
             Text(title)
-                .font(.footnote)
+                .font(AppFont.body(13))
                 .foregroundStyle(.secondary)
 
             if let sub = subtitle {
                 Text(sub)
-                    .font(.caption)
+                    .font(AppFont.body(12))
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(AppTheme.Spacing.md)
-        .glassCard()
+        .padding(DS.Spacing.md)
+        .background(Color.zCard, in: .rect(cornerRadius: DS.Radius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: DS.Radius.lg)
+                .strokeBorder(Color.zBorderSubtle, lineWidth: 0.5)
+        }
+        .shadow(color: .black.opacity(0.22), radius: 16, y: 6)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -49,10 +57,10 @@ private struct TrendBadge: View {
     var body: some View {
         Label(String(format: "%.0f%%", abs(value)),
               systemImage: isUp ? "arrow.up.right" : "arrow.down.right")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(isUp ? AppTheme.Color.live : .red)
-            .padding(.horizontal, 6)
+            .font(AppFont.label(10))
+            .foregroundStyle(isUp ? Color.zGreen : Color.zRed)
+            .padding(.horizontal, DS.Spacing.sm)
             .padding(.vertical, 3)
-            .background((isUp ? AppTheme.Color.live : Color.red).opacity(0.1), in: Capsule())
+            .background((isUp ? Color.zGreen : Color.zRed).opacity(0.1), in: Capsule())
     }
 }

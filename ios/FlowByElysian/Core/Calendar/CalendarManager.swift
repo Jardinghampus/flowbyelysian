@@ -41,7 +41,7 @@ final class CalendarManager {
             .map { event in
                 WidgetEvent(
                     id: event.eventIdentifier ?? UUID().uuidString,
-                    title: event.title ?? "Händelse",
+                    title: event.title ?? "Event",
                     startDate: event.startDate,
                     location: event.location,
                     isAllDay: event.isAllDay

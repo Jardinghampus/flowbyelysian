@@ -13,23 +13,23 @@ struct AreasView: View {
                 if vm.isLoading && vm.areas.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if vm.filteredAreas.isEmpty {
-                    ContentUnavailableView("Inga områden", systemImage: "map",
-                                          description: Text("Kontrollera söktermen"))
+                    ContentUnavailableView("No Areas", systemImage: "map",
+                                          description: Text("Check your search term"))
                 } else {
                     areaGrid
                 }
             }
-            .navigationTitle("Områden")
+            .navigationTitle("Areas")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Stäng", action: dismiss.callAsFunction)
+                    Button("Close", action: dismiss.callAsFunction)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if vm.isLoading { ProgressView() }
                 }
             }
-            .searchable(text: Bindable(vm).searchText, prompt: "Sök område…")
+            .searchable(text: Bindable(vm).searchText, prompt: "Search areas…")
             .navigationDestination(for: Area.self) { area in
                 AreaDetailView(area: area)
             }
@@ -144,9 +144,9 @@ struct AreaDetailView: View {
             }
 
             // Segment tabs
-            Picker("Visa", selection: $selectedTab) {
-                Text("Lager").tag(0)
-                Text("Förfrågningar").tag(1)
+            Picker("View", selection: $selectedTab) {
+                Text("Stock").tag(0)
+                Text("Requests").tag(1)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, AppTheme.Spacing.md)
@@ -212,7 +212,7 @@ private struct AreaListingsTab: View {
 
     var body: some View {
         if listings.isEmpty {
-            ContentUnavailableView("Inga listings", systemImage: "building.2.slash")
+            ContentUnavailableView("No Listings", systemImage: "building.2.slash")
                 .frame(maxHeight: .infinity)
         } else {
             ScrollView {
@@ -262,7 +262,7 @@ private struct AreaRequestsTab: View {
 
     var body: some View {
         if requests.isEmpty {
-            ContentUnavailableView("Inga förfrågningar", systemImage: "person.2.slash")
+            ContentUnavailableView("No Requests", systemImage: "person.2.slash")
                 .frame(maxHeight: .infinity)
         } else {
             ScrollView {

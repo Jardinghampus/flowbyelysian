@@ -1,15 +1,18 @@
 import SwiftUI
 
-// Single source of truth for all design tokens.
 enum AppTheme {
 
     enum Color {
-        // Brand – override in asset catalog for production
-        static let brand     = SwiftUI.Color.indigo
-        static let live      = SwiftUI.Color.green
-        static let pocket    = SwiftUI.Color(hue: 0.76, saturation: 0.70, brightness: 0.85)
-        static let pending   = SwiftUI.Color.orange
+        static let brand     = SwiftUI.Color.zBlue
+        static let live      = SwiftUI.Color.zGreen
+        static let pocket    = SwiftUI.Color.zPurple
+        static let pending   = SwiftUI.Color.zOrange
         static let closed    = SwiftUI.Color.gray
+
+        // Hero gradient (deep navy, AMOLED-optimised)
+        static let heroTop    = SwiftUI.Color(hex: "#0A1628")
+        static let heroMid    = SwiftUI.Color(hex: "#0D1F3C")
+        static let heroBottom = SwiftUI.Color(hex: "#0A0F1E")
     }
 
     enum Spacing {
@@ -21,14 +24,14 @@ enum AppTheme {
     }
 
     enum Radius {
-        static let sm: CGFloat  = 10
-        static let md: CGFloat  = 16
-        static let lg: CGFloat  = 22
+        static let sm: CGFloat   = 10
+        static let md: CGFloat   = 16
+        static let lg: CGFloat   = 22
         static let card: CGFloat = 18
     }
 }
 
-// MARK: - Liquid Glass card modifier
+// MARK: - Liquid Glass card
 
 struct GlassCardModifier: ViewModifier {
     var radius: CGFloat
@@ -38,9 +41,9 @@ struct GlassCardModifier: ViewModifier {
             .background(.regularMaterial, in: .rect(cornerRadius: radius))
             .overlay {
                 RoundedRectangle(cornerRadius: radius)
-                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+                    .strokeBorder(.white.opacity(0.10), lineWidth: 0.5)
             }
-            .shadow(color: .black.opacity(0.07), radius: 16, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.22), radius: 18, x: 0, y: 6)
     }
 }
 

@@ -40,10 +40,10 @@ struct ListingDetailView: View {
                 } catch { /* error shown via vm.errorMessage */ }
             }
         }
-        .confirmationDialog("Radera \(listing.title)?",
+        .confirmationDialog("Delete \(listing.title)?",
                             isPresented: $showDeleteConfirm,
                             titleVisibility: .visible) {
-            Button("Radera", role: .destructive) { deleteAndDismiss() }
+            Button("Delete", role: .destructive) { deleteAndDismiss() }
         }
         .sheet(isPresented: $showShare) {
             ShareSheet(activityItems: [listing.shareText])
@@ -54,11 +54,11 @@ struct ListingDetailView: View {
     @ToolbarContentBuilder
     private var detailToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Menu("Alternativ", systemImage: "ellipsis.circle") {
-                Button("Dela", systemImage: "square.and.arrow.up") { showShare = true }
+            Menu("Options", systemImage: "ellipsis.circle") {
+                Button("Share", systemImage: "square.and.arrow.up") { showShare = true }
                 if vm != nil {
-                    Button("Redigera", systemImage: "pencil") { showEdit = true }
-                    Button("Radera", systemImage: "trash", role: .destructive) {
+                    Button("Edit", systemImage: "pencil") { showEdit = true }
+                    Button("Delete", systemImage: "trash", role: .destructive) {
                         showDeleteConfirm = true
                     }
                 }
@@ -128,7 +128,7 @@ private struct ListingTagRow: View {
     var body: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
             if let tt = listing.transactionType {
-                TagPill(label: tt == "sale" ? "Försäljning" : "Uthyrning",
+                TagPill(label: tt == "sale" ? "For Sale" : "For Rent",
                         tint: tt == "sale" ? AppTheme.Color.brand : .mint)
             }
             if let it = listing.inquiryType {
@@ -162,16 +162,16 @@ private struct ListingSpecsGrid: View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())],
                   spacing: AppTheme.Spacing.sm) {
             if let beds = listing.bedrooms {
-                SpecCell(icon: "bed.double",  label: "Sovrum",  value: beds.formatted())
+                SpecCell(icon: "bed.double",  label: "Bedrooms",     value: beds.formatted())
             }
             if let baths = listing.bathrooms {
-                SpecCell(icon: "shower",      label: "Badrum",  value: baths.formatted())
+                SpecCell(icon: "shower",      label: "Bathrooms",    value: baths.formatted())
             }
             if let size = listing.size, size > 0 {
-                SpecCell(icon: "square",      label: "Storlek", value: "\(Int(size)) sqft")
+                SpecCell(icon: "square",      label: "Size",         value: "\(Int(size)) sqft")
             }
             if let avail = listing.availability {
-                SpecCell(icon: "calendar",    label: "Tillg.",  value: avail)
+                SpecCell(icon: "calendar",    label: "Availability", value: avail)
             }
         }
     }
@@ -197,7 +197,7 @@ private struct NoteSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
-            Text("Anteckningar").font(.headline)
+            Text("Notes").font(.headline)
             Text(text).font(.body).foregroundStyle(.secondary)
         }
     }
@@ -215,7 +215,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 extension Listing {
     var shareText: String {
         var parts = ["\(title) – \(priceFormatted)"]
-        if let area = areaName { parts.append("Område: \(area)") }
+        if let area = areaName { parts.append("Area: \(area)") }
         if let status { parts.append("Status: \(status.capitalized)") }
         return parts.joined(separator: "\n")
     }

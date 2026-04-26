@@ -26,7 +26,7 @@ struct LoginView: View {
                     )
                     .padding(.top, AppTheme.Spacing.lg)
 
-                    Text("Powered by Clerk · Flow by Elysian © 2026")
+                    Text("Powered by Clerk · Flow by Elysian © 2026")  // keep brand line in English
                         .font(.footnote)
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -40,15 +40,20 @@ struct LoginView: View {
     }
 
     private var backgroundGradient: some View {
-        LinearGradient(
-            colors: scheme == .dark
-                ? [Color(hue: 0.68, saturation: 0.25, brightness: 0.08),
-                   Color(hue: 0.72, saturation: 0.30, brightness: 0.14)]
-                : [Color(hue: 0.68, saturation: 0.08, brightness: 0.98),
-                   Color(hue: 0.70, saturation: 0.12, brightness: 0.94)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        Group {
+            if scheme == .dark {
+                LinearGradient.zHero
+            } else {
+                LinearGradient(
+                    colors: [
+                        Color(hue: 0.62, saturation: 0.06, brightness: 0.97),
+                        Color(hue: 0.64, saturation: 0.10, brightness: 0.93)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
         .ignoresSafeArea()
     }
 }
@@ -62,7 +67,7 @@ private struct LoginHeader: View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
             HStack(spacing: AppTheme.Spacing.sm) {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(AppTheme.Color.brand.gradient)
+                    .fill(Color.zBlue.gradient)
                     .frame(width: 44, height: 44)
                     .overlay {
                         Image(systemName: "building.2.fill")
@@ -74,11 +79,11 @@ private struct LoginHeader: View {
                     .font(.system(size: 22, weight: .bold, design: .rounded))
             }
 
-            Text("Välkommen tillbaka")
+            Text("Welcome back")
                 .font(.title.bold())
                 .padding(.top, AppTheme.Spacing.xl)
 
-            Text("Logga in för att se dina listings, klienter och rapporter.")
+            Text("Sign in to view your listings, clients and reports.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -127,15 +132,15 @@ private struct EmailField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("E-post")
+            Text("Email")
                 .font(.footnote.bold())
                 .foregroundStyle(.secondary)
 
             HStack(spacing: AppTheme.Spacing.sm) {
                 Image(systemName: "envelope")
-                    .foregroundStyle(AppTheme.Color.brand)
+                    .foregroundStyle(Color.zBlue)
                     .frame(width: 20)
-                TextField("namn@elysian.ae", text: $email)
+                TextField("name@elysian.ae", text: $email)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
@@ -149,7 +154,7 @@ private struct EmailField: View {
             .overlay {
                 RoundedRectangle(cornerRadius: AppTheme.Radius.sm)
                     .strokeBorder(
-                        focus.wrappedValue == .email ? AppTheme.Color.brand : .clear,
+                        focus.wrappedValue == .email ? Color.zBlue : .clear,
                         lineWidth: 1.5
                     )
             }
@@ -165,13 +170,13 @@ private struct PasswordField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Lösenord")
+            Text("Password")
                 .font(.footnote.bold())
                 .foregroundStyle(.secondary)
 
             HStack(spacing: AppTheme.Spacing.sm) {
                 Image(systemName: "lock")
-                    .foregroundStyle(AppTheme.Color.brand)
+                    .foregroundStyle(Color.zBlue)
                     .frame(width: 20)
 
                 Group {
@@ -197,7 +202,7 @@ private struct PasswordField: View {
             .overlay {
                 RoundedRectangle(cornerRadius: AppTheme.Radius.sm)
                     .strokeBorder(
-                        focus.wrappedValue == .password ? AppTheme.Color.brand : .clear,
+                        focus.wrappedValue == .password ? Color.zBlue : .clear,
                         lineWidth: 1.5
                     )
             }
@@ -218,7 +223,7 @@ private struct SignInButton: View {
                 if auth.isLoading {
                     ProgressView().tint(.white)
                 } else {
-                    Text("Logga in")
+                    Text("Sign In")
                         .font(.body.bold())
                 }
             }
@@ -226,8 +231,8 @@ private struct SignInButton: View {
             .frame(height: 50)
             .foregroundStyle(.white)
         }
-        .background(AppTheme.Color.brand.gradient, in: .rect(cornerRadius: AppTheme.Radius.sm))
-        .shadow(color: AppTheme.Color.brand.opacity(0.4), radius: 10, y: 4)
+        .background(Color.zBlue.gradient, in: .rect(cornerRadius: AppTheme.Radius.sm))
+        .shadow(color: Color.zBlue.opacity(0.4), radius: 10, y: 4)
         .disabled(auth.isLoading || email.isEmpty || password.isEmpty)
         .sensoryFeedback(.success, trigger: auth.state == .authenticated)
     }
@@ -237,7 +242,7 @@ private struct DividerRow: View {
     var body: some View {
         HStack {
             Rectangle().fill(.separator).frame(height: 0.5)
-            Text("eller")
+            Text("or")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
             Rectangle().fill(.separator).frame(height: 0.5)
@@ -256,7 +261,7 @@ private struct AppleSignInButton: View {
         } label: {
             HStack(spacing: AppTheme.Spacing.sm) {
                 Image(systemName: "apple.logo")
-                Text("Fortsätt med Apple")
+                Text("Continue with Apple")
                     .font(.body.bold())
             }
             .frame(maxWidth: .infinity)

@@ -15,9 +15,9 @@ struct MatchesView: View {
                     MatchesSkeletonView()
                 } else if vm.filteredMatches.isEmpty {
                     ContentUnavailableView(
-                        "Inga matchningar",
+                        "No Matches",
                         systemImage: "sparkles",
-                        description: Text("Inga aktiva förfrågningar matchar ditt lager just nu.")
+                        description: Text("No active requests match your inventory right now.")
                     )
                 } else {
                     matchList
@@ -80,9 +80,9 @@ private struct MatchHeaderBanner: View {
                 .foregroundStyle(AppTheme.Color.brand.gradient)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("^[\(count) matchning](inflect: true) hittade")
+                Text("\(count) match\(count == 1 ? "" : "es") found")
                     .font(.subheadline.bold())
-                Text("Swipa för att avvisa · Tryck för detaljer")
+                Text("Swipe to dismiss · Tap for details")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -205,35 +205,35 @@ private struct MatchDetailSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Fastighet (Lager)") {
-                    DetailRow(label: "Titel",   value: match.stock.title)
-                    DetailRow(label: "Pris",    value: match.stock.priceFormatted)
+                Section("Property (Stock)") {
+                    DetailRow(label: "Title",    value: match.stock.title)
+                    DetailRow(label: "Price",    value: match.stock.priceFormatted)
                     if let area = match.stock.areaName {
-                        DetailRow(label: "Område", value: area)
+                        DetailRow(label: "Area",  value: area)
                     }
                     if let type = match.stock.type {
-                        DetailRow(label: "Typ",   value: type.capitalized)
+                        DetailRow(label: "Type",  value: type.capitalized)
                     }
                     if let beds = match.stock.bedrooms, beds > 0 {
-                        DetailRow(label: "Sovrum", value: "\(beds)")
+                        DetailRow(label: "Bedrooms", value: "\(beds)")
                     }
                 }
 
-                Section("Klientförfrågan") {
-                    DetailRow(label: "Klient",  value: match.request.clientName)
-                    DetailRow(label: "Budget",  value: match.request.budgetFormatted)
+                Section("Client Request") {
+                    DetailRow(label: "Client",   value: match.request.clientName)
+                    DetailRow(label: "Budget",   value: match.request.budgetFormatted)
                     if let area = match.request.areaName {
-                        DetailRow(label: "Önskat område", value: area)
+                        DetailRow(label: "Desired Area", value: area)
                     }
                     if let type = match.request.propertyType {
-                        DetailRow(label: "Typ",  value: type.capitalized)
+                        DetailRow(label: "Type",  value: type.capitalized)
                     }
                     if let beds = match.request.bedrooms, beds > 0 {
-                        DetailRow(label: "Sovrum", value: "\(beds)")
+                        DetailRow(label: "Bedrooms", value: "\(beds)")
                     }
                 }
 
-                Section("Matchningsorsaker") {
+                Section("Match Reasons") {
                     ForEach(match.reasons, id: \.self) { reason in
                         Label(reason, systemImage: "checkmark.circle.fill")
                             .font(.subheadline)
@@ -255,7 +255,7 @@ private struct MatchDetailSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Stäng", action: dismiss.callAsFunction)
+                    Button("Close", action: dismiss.callAsFunction)
                 }
             }
         }

@@ -25,7 +25,7 @@ struct MainShellView: View {
                         PerformanceView()
                     }
                 }
-                .tint(AppTheme.Color.brand)
+                .tint(Color.zBlue)
                 .scaleEffect(appState.drawerOpen ? 0.93 : 1, anchor: .trailing)
                 .offset(x: appState.drawerOpen ? 264 : 0)
                 .blur(radius: appState.drawerOpen ? 1.5 : 0)
@@ -51,5 +51,10 @@ struct MainShellView: View {
         .sheet(isPresented: $appState.showAreas)         { AreasView() }
         .sheet(isPresented: $appState.showNews)          { NewsView() }
         .sheet(isPresented: $appState.showTasks)         { TasksView() }
+        .sheet(isPresented: $appState.showTraining)      { TrainingView() }
+        .sheet(isPresented: $appState.showSettings)      { SettingsView() }
+        .sheet(isPresented: $appState.showSearch)        { GlobalSearchView() }
+        .sheet(isPresented: $appState.showPipeline)     { PipelineView() }
+        .toastOverlay()
     }
 }

@@ -4,52 +4,111 @@ struct AddListingView: View {
     @Environment(\.dismiss) private var dismiss
     let onSave: (NewListingPayload) async -> Void
 
-    @State private var title = ""
-    @State private var areaName = ""
-    @State private var price = ""
-    @State private var type = "villa"
-    @State private var status = "live"
+    @State private var title        = ""
+    @State private var areaName     = ""
+    @State private var priceValue: Double? = nil
+    @State private var type         = "villa"
+    @State private var status       = "live"
     @State private var transactionType = "sale"
-    @State private var inquiryType = "stock"
-    @State private var bedrooms = ""
-    @State private var bathrooms = ""
-    @State private var size = ""
-    @State private var notes = ""
+    @State private var inquiryType  = "stock"
+    @State private var bedrooms     = 0
+    @State private var bathrooms    = 0
+    @State private var sizeText     = ""
+    @State private var notes        = ""
     @State private var availability = ""
-    @State private var isSaving = false
+    @State private var isSaving     = false
     @State private var errorMessage: String?
 
-    private var isValid: Bool { !title.isEmpty && !areaName.isEmpty && !price.isEmpty }
+    private var isValid: Bool { !title.isEmpty && !areaName.isEmpty && priceValue != nil }
+
+    private let areas = [
+        "Palm Jumeirah", "Downtown Dubai", "Dubai Marina", "Emirates Hills",
+        "Arabian Ranches", "Dubai Hills Estate", "Business Bay", "JBR",
+        "DIFC", "City Walk", "Jumeirah Golf Estates", "Al Barari", "Tilal Al Ghaf"
+    ]
 
     var body: some View {
         NavigationStack {
-            Form {
-                BasicDetailsSection(title: $title, areaName: $areaName, price: $price)
-                ClassificationSection(type: $type, status: $status,
-                                      transactionType: $transactionType, inquiryType: $inquiryType)
-                PropertySpecsSection(bedrooms: $bedrooms, bathrooms: $bathrooms, size: $size)
-                ExtraSection(notes: $notes, availability: $availability)
+            ScrollView {
+                VStack(spacing: DS.Spacing.xl) {
+                    // Basic details
+                    FormCard(title: "Basic Details") {
+                        FloatingLabelTextField(label: "Title *", text: $title, icon: "text.alignleft")
 
-                if let err = errorMessage {
-                    Section {
+                        Picker("Area *", selection: $areaName) {
+                            Text("Select area…").tag("")
+                            ForEach(areas, id: \.self) { Text($0).tag($0) }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(Color.zBlue)
+                        .padding(.horizontal, DS.Spacing.md)
+                        .padding(.vertical, DS.Spacing.md)
+                        .background(Color.zCard, in: .rect(cornerRadius: DS.Radius.md))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: DS.Radius.md)
+                                .strokeBorder(Color.zBorderSubtle, lineWidth: 0.5)
+                        }
+
+                        CurrencyTextField(label: "Price (AED) *", value: $priceValue)
+                    }
+
+                    // Classification
+                    FormCard(title: "Classification") {
+                        InlinePickerRow(label: "Type", selection: $type, options: [
+                            ("villa", "Villa"), ("apartment", "Apartment"),
+                            ("townhouse", "Townhouse"), ("penthouse", "Penthouse"),
+                            ("plot", "Plot"), ("office", "Office"), ("retail", "Retail")
+                        ])
+                        InlinePickerRow(label: "Status", selection: $status, options: [
+                            ("live", "Live"), ("pocket", "Pocket"), ("unofficial", "Unofficial")
+                        ])
+                        InlinePickerRow(label: "Transaction", selection: $transactionType, options: [
+                            ("sale", "Sale"), ("rent", "Rent")
+                        ])
+                        InlinePickerRow(label: "Inquiry", selection: $inquiryType, options: [
+                            ("stock", "Stock"), ("request", "Request"), ("viewing", "Viewing")
+                        ])
+                    }
+
+                    // Specs
+                    FormCard(title: "Specifications") {
+                        TabStepper(label: "Bedrooms", value: $bedrooms, options: [0,1,2,3,4,5,6,7])
+                        TabStepper(label: "Bathrooms", value: $bathrooms, options: [0,1,2,3,4,5,6])
+                        FloatingLabelTextField(label: "Size (sqft)", text: $sizeText,
+                                              keyboardType: .numberPad, icon: "ruler")
+                    }
+
+                    // Additional
+                    FormCard(title: "Additional") {
+                        FloatingLabelTextField(label: "Notes", text: $notes, icon: "note.text")
+                        FloatingLabelTextField(label: "Availability", text: $availability, icon: "calendar")
+                    }
+
+                    if let err = errorMessage {
                         Label(err, systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.red)
-                            .font(.footnote)
+                            .font(AppFont.body(13))
+                            .foregroundStyle(Color.zRed)
+                            .padding(DS.Spacing.md)
+                            .background(Color.zRed.opacity(0.08), in: .rect(cornerRadius: DS.Radius.md))
                     }
                 }
+                .padding(DS.Spacing.base)
+                .padding(.bottom, DS.Spacing.xxxl)
             }
-            .navigationTitle("Ny listing")
+            .background(Color.zBg.ignoresSafeArea())
+            .navigationTitle("New Listing")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Avbryt", action: dismiss.callAsFunction)
+                    Button("Cancel") { dismiss() }.tint(.secondary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Spara", action: save)
-                            .bold()
+                        Button("Save", action: save)
+                            .fontWeight(.semibold)
+                            .tint(Color.zBlue)
                             .disabled(!isValid)
                     }
                 }
@@ -59,21 +118,14 @@ struct AddListingView: View {
     }
 
     private func save() {
-        guard let priceInt = Int(price) else {
-            errorMessage = "Ange ett giltigt pris"
-            return
-        }
+        guard let p = priceValue else { errorMessage = "Enter a valid price"; return }
         let payload = NewListingPayload(
-            title: title,
-            areaName: areaName,
-            price: priceInt,
-            type: type,
-            status: status,
-            inquiryType: inquiryType,
+            title: title, areaName: areaName, price: Int(p),
+            type: type, status: status, inquiryType: inquiryType,
             transactionType: transactionType,
-            bedrooms: Int(bedrooms),
-            bathrooms: Int(bathrooms),
-            size: Int(size),
+            bedrooms: bedrooms > 0 ? bedrooms : nil,
+            bathrooms: bathrooms > 0 ? bathrooms : nil,
+            size: Int(sizeText),
             notes: notes.isEmpty ? nil : notes,
             availability: availability.isEmpty ? nil : availability
         )
@@ -86,92 +138,52 @@ struct AddListingView: View {
     }
 }
 
-// MARK: - Form sections
+// MARK: - Shared form helpers
 
-private struct BasicDetailsSection: View {
-    @Binding var title: String
-    @Binding var areaName: String
-    @Binding var price: String
-
-    private let areas = ["Palm Jumeirah", "Downtown Dubai", "Dubai Marina",
-                         "Emirates Hills", "Arabian Ranches", "Dubai Hills Estate",
-                         "Business Bay", "JBR", "DIFC", "City Walk",
-                         "Jumeirah Golf Estates", "Al Barari", "Tilal Al Ghaf"]
+struct FormCard<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
 
     var body: some View {
-        Section("Grunduppgifter") {
-            TextField("Titel *", text: $title)
-            Picker("Område *", selection: $areaName) {
-                Text("Välj område").tag("")
-                ForEach(areas, id: \.self) { Text($0).tag($0) }
-            }
-            TextField("Pris (AED) *", text: $price)
-                .keyboardType(.numberPad)
-        }
-    }
-}
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            Text(title)
+                .font(AppFont.label(11))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .tracking(0.8)
 
-private struct ClassificationSection: View {
-    @Binding var type: String
-    @Binding var status: String
-    @Binding var transactionType: String
-    @Binding var inquiryType: String
-
-    var body: some View {
-        Section("Klassificering") {
-            Picker("Typ", selection: $type) {
-                Text("Villa").tag("villa")
-                Text("Apartment").tag("apartment")
-                Text("Townhouse").tag("townhouse")
-                Text("Penthouse").tag("penthouse")
-                Text("Plot").tag("plot")
-                Text("Office").tag("office")
-                Text("Retail").tag("retail")
-            }
-            Picker("Status", selection: $status) {
-                Text("Live").tag("live")
-                Text("Pocket").tag("pocket")
-                Text("Unofficial").tag("unofficial")
-            }
-            Picker("Transaktion", selection: $transactionType) {
-                Text("Försäljning").tag("sale")
-                Text("Uthyrning").tag("rent")
-            }
-            Picker("Förfrågan", selection: $inquiryType) {
-                Text("Stock").tag("stock")
-                Text("Request").tag("request")
-                Text("Viewing").tag("viewing")
+            VStack(spacing: DS.Spacing.sm) {
+                content
             }
         }
     }
 }
 
-private struct PropertySpecsSection: View {
-    @Binding var bedrooms: String
-    @Binding var bathrooms: String
-    @Binding var size: String
+struct InlinePickerRow: View {
+    let label: String
+    @Binding var selection: String
+    let options: [(String, String)]
 
     var body: some View {
-        Section("Specifikationer") {
-            TextField("Sovrum", text: $bedrooms)
-                .keyboardType(.numberPad)
-            TextField("Badrum", text: $bathrooms)
-                .keyboardType(.numberPad)
-            TextField("Storlek (sqft)", text: $size)
-                .keyboardType(.numberPad)
+        HStack {
+            Text(label)
+                .font(AppFont.body(15))
+                .foregroundStyle(.primary)
+            Spacer()
+            Picker(label, selection: $selection) {
+                ForEach(options, id: \.0) { value, display in
+                    Text(display).tag(value)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(Color.zBlue)
         }
-    }
-}
-
-private struct ExtraSection: View {
-    @Binding var notes: String
-    @Binding var availability: String
-
-    var body: some View {
-        Section("Övrigt") {
-            TextField("Anteckningar", text: $notes, axis: .vertical)
-                .lineLimit(3...)
-            TextField("Tillgänglighet", text: $availability)
+        .padding(.horizontal, DS.Spacing.md)
+        .padding(.vertical, DS.Spacing.sm + 2)
+        .background(Color.zCard, in: .rect(cornerRadius: DS.Radius.md))
+        .overlay {
+            RoundedRectangle(cornerRadius: DS.Radius.md)
+                .strokeBorder(Color.zBorderSubtle, lineWidth: 0.5)
         }
     }
 }

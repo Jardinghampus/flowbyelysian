@@ -9,16 +9,16 @@ enum APIError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL: return "Ogiltig URL"
-        case .noData: return "Inget svar från servern"
-        case .httpError(let code): return "Serverfel: \(code)"
-        case .decodingError(let e): return "Tolkningsfel: \(e.localizedDescription)"
+        case .invalidURL: return "Invalid URL"
+        case .noData: return "No response from server"
+        case .httpError(let code): return "Server error: \(code)"
+        case .decodingError(let e): return "Decoding error: \(e.localizedDescription)"
         case .networkError(let e): return e.localizedDescription
         }
     }
 }
 
-final class APIClient {
+final class APIClient: @unchecked Sendable {
     static let shared = APIClient()
 
     private let session: URLSession
@@ -112,7 +112,7 @@ final class APIClient {
 
     // MARK: - Private
 
-    private func buildURL(path: String, query: [String: String] = []) throws -> URL {
+    private func buildURL(path: String, query: [String: String] = [:]) throws -> URL {
         guard var components = URLComponents(url: Config.baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true) else {
             throw APIError.invalidURL
         }

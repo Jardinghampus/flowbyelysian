@@ -20,7 +20,7 @@ struct ChatView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Stäng", action: dismiss.callAsFunction)
+                    Button("Close", action: dismiss.callAsFunction)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if !vm.messages.isEmpty {
@@ -60,14 +60,14 @@ private struct SuggestedPromptsView: View {
                     .accessibilityHidden(true)
                 Text("AI Coach")
                     .font(.title2.bold())
-                Text("Ställ frågor om Dubai-fastigheter,\nRERA-regler och mäklartips.")
+                Text("Ask questions about Dubai real estate,\nRERA regulations, and agent tips.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
             VStack(spacing: AppTheme.Spacing.sm) {
-                Text("Förslag")
+                Text("Suggestions")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -239,7 +239,7 @@ private struct InputBar: View {
             }
             .buttonStyle(.plain)
             .disabled(vm.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !vm.isStreaming)
-            .accessibilityLabel(vm.isStreaming ? "Avbryt" : "Skicka")
+            .accessibilityLabel(vm.isStreaming ? "Cancel" : "Send")
         }
         .padding(.horizontal, AppTheme.Spacing.md)
         .padding(.vertical, AppTheme.Spacing.sm)

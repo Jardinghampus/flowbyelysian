@@ -21,10 +21,10 @@ final class ChatViewModel {
 
     // Suggested prompts shown before first message
     let suggestedPrompts = [
-        "Förklara RERA-reglerna för off-plan",
-        "Vad är mäklarprovisionen i Dubai?",
-        "Hur fungerar Ejari-registrering?",
-        "Freehold vs leasehold – skillnaden?",
+        "Explain RERA regulations for off-plan",
+        "What is the broker commission in Dubai?",
+        "How does Ejari registration work?",
+        "Freehold vs leasehold — what's the difference?",
     ]
 
     func send() {

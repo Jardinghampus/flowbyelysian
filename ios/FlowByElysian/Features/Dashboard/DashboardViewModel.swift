@@ -6,40 +6,32 @@ final class DashboardViewModel {
     private(set) var listings: [Listing] = []
     private(set) var requests: [ClientRequest] = []
     private(set) var notifications: [AppNotification] = []
+    private(set) var tasks: [TaskItem] = []
     private(set) var isLoading = false
 
     private let sync = SyncManager.shared
+    private let api  = APIClient.shared
 
     func load(context: ModelContext, isOnline: Bool) async {
         isLoading = true
         defer { isLoading = false }
 
         if isOnline {
-            // Already @MainActor – no MainActor.run needed inside task group
-            await withTaskGroup(of: Void.self) { group in
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    if let result = try? await self.sync.fetchListings(context: context) {
-                        self.listings = Array(result.prefix(6))
-                    }
-                }
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    if let result = try? await self.sync.fetchRequests(context: context) {
-                        self.requests = Array(result.prefix(5))
-                    }
-                }
-                group.addTask { [weak self] in
-                    guard let self else { return }
-                    if let result = try? await self.sync.fetchNotifications(context: context) {
-                        self.notifications = Array(result.prefix(5))
-                    }
-                }
-            }
+            listings      = Array((try? await sync.fetchListings(context: context))?.prefix(6)      ?? [])
+            requests      = Array((try? await sync.fetchRequests(context: context))?.prefix(5)      ?? [])
+            notifications = Array((try? await sync.fetchNotifications(context: context))?.prefix(5) ?? [])
+            let taskResp: TasksResponse? = try? await api.get(Endpoint.tasks)
+            tasks = Array((taskResp?.tasks ?? taskResp?.data ?? [])
+                .filter { $0.status == .todo || $0.status == .inProgress }
+                .prefix(5))
         } else {
             listings      = Array(sync.cachedListings(context: context).prefix(6))
             requests      = Array(sync.cachedRequests(context: context).prefix(5))
             notifications = Array(sync.cachedNotifications(context: context).prefix(5))
+            tasks         = (try? context.fetch(FetchDescriptor<CachedTask>()))?.compactMap { t -> TaskItem? in
+                let item = t.toTaskItem()
+                return (item.status == .todo || item.status == .inProgress) ? item : nil
+            }.prefix(5).map { $0 } ?? []
         }
     }
 

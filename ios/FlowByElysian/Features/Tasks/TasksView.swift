@@ -8,27 +8,21 @@ struct TasksView: View {
     @State private var vm = TasksViewModel()
     @State private var showAdd = false
 
-    private let statuses = TaskItem.TaskStatus.allCases
-    private let priorities = TaskItem.TaskPriority.allCases
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // KPI strip
                 TaskKPIStrip(vm: vm)
                     .padding(AppTheme.Spacing.md)
 
-                // Filter chips
                 TaskFilterBar(vm: vm)
 
                 Divider()
 
-                // List
                 if vm.filteredTasks.isEmpty {
                     ContentUnavailableView(
-                        "Inga uppgifter",
+                        "No Tasks",
                         systemImage: "checkmark.circle",
-                        description: Text(vm.searchText.isEmpty ? "Tryck + för att lägga till" : "Inga resultat för \"\(vm.searchText)\"")
+                        description: Text(vm.searchText.isEmpty ? "Tap + to add a task" : "No results for \"\(vm.searchText)\"")
                     )
                     .frame(maxHeight: .infinity)
                 } else {
@@ -36,10 +30,10 @@ struct TasksView: View {
                 }
             }
             .background(.background)
-            .navigationTitle("Uppgifter")
+            .navigationTitle("Tasks")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { tasksToolbar }
-            .searchable(text: Bindable(vm).searchText, prompt: "Sök uppgifter…")
+            .searchable(text: Bindable(vm).searchText, prompt: "Search tasks…")
             .sheet(isPresented: $showAdd) { AddTaskView { payload in
                 try await vm.createTask(payload, context: context)
             }}
@@ -61,13 +55,13 @@ struct TasksView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Radera", role: .destructive) {
+                                Button("Delete", role: .destructive) {
                                     Task { await vm.deleteTask(task, context: context) }
                                 }
                             }
                             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                 if status != .completed {
-                                    Button("Klar", systemImage: "checkmark") {
+                                    Button("Done", systemImage: "checkmark") {
                                         Task { await vm.updateStatus(task, status: .completed, context: context) }
                                     }
                                     .tint(.green)
@@ -84,13 +78,13 @@ struct TasksView: View {
     @ToolbarContentBuilder
     private var tasksToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Button("Stäng", action: dismiss.callAsFunction)
+            Button("Close", action: dismiss.callAsFunction)
         }
         ToolbarItem(placement: .topBarTrailing) {
             if vm.isLoading {
                 ProgressView()
             } else {
-                Button("Lägg till", systemImage: "plus") { showAdd = true }
+                Button("Add", systemImage: "plus") { showAdd = true }
             }
         }
     }
@@ -103,9 +97,9 @@ private struct TaskKPIStrip: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            TaskKPI(label: "Att göra",  value: vm.todoCount,       color: .secondary)
-            TaskKPI(label: "Pågående",  value: vm.inProgressCount, color: AppTheme.Color.brand)
-            TaskKPI(label: "Klara",     value: vm.completedCount,  color: .green)
+            TaskKPI(label: "To Do",      value: vm.todoCount,       color: .secondary)
+            TaskKPI(label: "In Progress", value: vm.inProgressCount, color: AppTheme.Color.brand)
+            TaskKPI(label: "Done",        value: vm.completedCount,  color: .green)
         }
         .glassCard(radius: AppTheme.Radius.sm)
     }
@@ -138,7 +132,7 @@ private struct TaskFilterBar: View {
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: AppTheme.Spacing.xs) {
-                FilterChip(label: "Alla", isSelected: vm.filterStatus == nil) {
+                FilterChip(label: "All", isSelected: vm.filterStatus == nil) {
                     vm.filterStatus = nil
                 }
                 ForEach(TaskItem.TaskStatus.allCases, id: \.self) { s in
@@ -162,10 +156,8 @@ private struct TaskRow: View {
 
     var body: some View {
         HStack(spacing: AppTheme.Spacing.sm) {
-            // Tap icon to cycle status
             Button {
-                let next = nextStatus(task.status)
-                onStatusChange(next)
+                onStatusChange(nextStatus(task.status))
             } label: {
                 Image(systemName: task.status.icon)
                     .font(.title3)
@@ -206,7 +198,7 @@ private struct TaskRow: View {
             RoundedRectangle(cornerRadius: AppTheme.Radius.sm)
                 .strokeBorder(.separator, lineWidth: 0.5)
         }
-        .accessibilityLabel("\(task.title), \(task.status.label), \(task.priority.label) prioritet")
+        .accessibilityLabel("\(task.title), \(task.status.label), \(task.priority.label) priority")
     }
 
     private func nextStatus(_ current: TaskItem.TaskStatus) -> TaskItem.TaskStatus {
@@ -228,7 +220,7 @@ private struct TaskRow: View {
     }
 }
 
-private struct PriorityPill: View {
+struct PriorityPill: View {
     let priority: TaskItem.TaskPriority
 
     private var color: Color {
@@ -269,30 +261,30 @@ struct AddTaskView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Uppgift") {
-                    TextField("Titel *", text: $title)
+                Section("Task") {
+                    TextField("Title *", text: $title)
                 }
-                Section("Klassificering") {
+                Section("Classification") {
                     Picker("Status",   selection: $status)   { ForEach(TaskItem.TaskStatus.allCases,   id: \.self) { Text($0.label).tag($0) } }
-                    Picker("Prioritet", selection: $priority) { ForEach(TaskItem.TaskPriority.allCases, id: \.self) { Text($0.label).tag($0) } }
-                    Picker("Kategori", selection: $category) { ForEach(TaskItem.TaskCategory.allCases, id: \.self) { Text($0.label).tag($0) } }
+                    Picker("Priority", selection: $priority) { ForEach(TaskItem.TaskPriority.allCases, id: \.self) { Text($0.label).tag($0) } }
+                    Picker("Category", selection: $category) { ForEach(TaskItem.TaskCategory.allCases, id: \.self) { Text($0.label).tag($0) } }
                 }
-                Section("Anteckningar") {
-                    TextField("Valfritt…", text: $notes, axis: .vertical)
+                Section("Notes") {
+                    TextField("Optional…", text: $notes, axis: .vertical)
                         .lineLimit(3...)
                 }
                 if let err = errorMessage {
                     Section { Text(err).foregroundStyle(.red).font(.caption) }
                 }
             }
-            .navigationTitle("Ny uppgift")
+            .navigationTitle("New Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading)  { Button("Avbryt", action: dismiss.callAsFunction) }
+                ToolbarItem(placement: .topBarLeading)  { Button("Cancel", action: dismiss.callAsFunction) }
                 ToolbarItem(placement: .topBarTrailing) {
                     if isSaving { ProgressView() }
                     else {
-                        Button("Spara") { save() }
+                        Button("Save") { save() }
                             .bold()
                             .disabled(!isValid)
                     }

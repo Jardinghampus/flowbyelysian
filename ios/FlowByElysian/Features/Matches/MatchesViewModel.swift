@@ -19,10 +19,8 @@ final class MatchesViewModel {
         let requests: [ClientRequest]
 
         if isOnline {
-            async let l = sync.fetchListings(context: context)
-            async let r = sync.fetchRequests(context: context)
-            listings = (try? await l) ?? sync.cachedListings(context: context)
-            requests = (try? await r) ?? sync.cachedRequests(context: context)
+            listings = (try? await sync.fetchListings(context: context)) ?? sync.cachedListings(context: context)
+            requests = (try? await sync.fetchRequests(context: context)) ?? sync.cachedRequests(context: context)
         } else {
             listings = sync.cachedListings(context: context)
             requests = sync.cachedRequests(context: context)

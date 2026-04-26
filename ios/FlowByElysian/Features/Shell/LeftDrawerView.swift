@@ -17,7 +17,7 @@ struct LeftDrawerView: View {
             ScrollView {
                 VStack(spacing: AppTheme.Spacing.xs) {
                     // Main navigation tabs
-                    DrawerSectionHeader("Navigering")
+                    DrawerSectionHeader("Navigation")
                     DrawerNavItem(icon: "house.fill",                   label: "Dashboard",   tab: .home)
                     DrawerNavItem(icon: "building.2.fill",              label: "Listings",    tab: .listings)
                     DrawerNavItem(icon: "sparkles",                     label: "AI Matches",  tab: .matches)
@@ -32,26 +32,32 @@ struct LeftDrawerView: View {
 
                 VStack(spacing: AppTheme.Spacing.xs) {
                     // Utilities
-                    DrawerSectionHeader("Verktyg")
+                    DrawerSectionHeader("Tools")
                     DrawerActionItem(icon: "bubble.left.and.bubble.right.fill",
                                      label: "AI Coach",
                                      action: { appState.openChat() })
                     DrawerActionItem(icon: "bell.badge.fill",
-                                     label: "Aviseringar",
+                                     label: "Notifications",
                                      badge: appState.notificationUnreadCount,
                                      action: { appState.openNotifications() })
                     DrawerActionItem(icon: "mappin.and.ellipse",
-                                     label: "Områden",
+                                     label: "Areas",
                                      action: { appState.openAreas() })
                     DrawerActionItem(icon: "newspaper.fill",
-                                     label: "Nyheter",
+                                     label: "News",
                                      action: { appState.openNews() })
                     DrawerActionItem(icon: "checklist",
-                                     label: "Uppgifter",
+                                     label: "Tasks",
                                      action: { appState.openTasks() })
+                    DrawerActionItem(icon: "rectangle.split.3x1",
+                                     label: "Pipeline",
+                                     action: { appState.openPipeline() })
+                    DrawerActionItem(icon: "book.fill",
+                                     label: "Training",
+                                     action: { appState.openTraining() })
                     DrawerActionItem(icon: "gearshape.fill",
-                                     label: "Inställningar",
-                                     action: { appState.closeDrawer() })
+                                     label: "Settings",
+                                     action: { appState.openSettings() })
                 }
                 .padding(.horizontal, AppTheme.Spacing.sm)
             }
@@ -60,7 +66,7 @@ struct LeftDrawerView: View {
             Spacer()
 
             Button(action: auth.signOut) {
-                Label("Logga ut", systemImage: "rectangle.portrait.and.arrow.right")
+                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -177,7 +183,7 @@ private struct DrawerActionItem: View {
                         .padding(.horizontal, 5)
                         .frame(minWidth: 18, minHeight: 18)
                         .background(AppTheme.Color.pending, in: Capsule())
-                        .accessibilityLabel("\(badge) olästa")
+                        .accessibilityLabel("\(badge) unread")
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
