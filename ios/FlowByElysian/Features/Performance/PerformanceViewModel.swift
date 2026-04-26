@@ -1,5 +1,12 @@
 import SwiftUI
 
+struct MonthlyStats: Identifiable {
+    let id = UUID()
+    let month: String
+    let commission: Double
+    let deals: Int
+}
+
 @Observable @MainActor
 final class PerformanceViewModel {
     // Targets (editable)
@@ -9,6 +16,7 @@ final class PerformanceViewModel {
     // here we keep mock data matching the web app
     private(set) var leaderboard: [LeaderboardEntry] = LeaderboardEntry.mock
     private(set) var achievements: [Achievement] = Achievement.mock
+    let monthlyStats: [MonthlyStats] = MonthlyStats.mock
     var leaderboardPeriod: Period = .monthly
     var achievementFilter: Achievement.Category? = nil
     private(set) var isSavingTargets = false
@@ -93,5 +101,16 @@ extension AgentTarget {
                     current: 8,  target: 12,  max: 30,     unit: "listings",   colorName: "purple"),
         AgentTarget(id: "viewings",   label: "Visningar",  icon: "eye",
                     current: 22, target: 30,  max: 60,     unit: "visningar",  colorName: "orange"),
+    ]
+}
+
+extension MonthlyStats {
+    static let mock: [MonthlyStats] = [
+        MonthlyStats(month: "Okt", commission: 38_000, deals: 1),
+        MonthlyStats(month: "Nov", commission: 45_000, deals: 1),
+        MonthlyStats(month: "Dec", commission: 62_000, deals: 2),
+        MonthlyStats(month: "Jan", commission: 78_000, deals: 2),
+        MonthlyStats(month: "Feb", commission: 85_000, deals: 3),
+        MonthlyStats(month: "Mar", commission: 92_000, deals: 4),
     ]
 }

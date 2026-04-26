@@ -21,6 +21,7 @@ struct PerformanceView: View {
                     case 0: LeaderboardSection(vm: vm)
                     case 1: AchievementsSection(vm: vm)
                     case 2: TargetsSection(vm: vm)
+                    case 3: PerformanceChartsSection(vm: vm)
                     default: EmptyView()
                     }
                 }
@@ -91,8 +92,8 @@ private struct SectionPicker: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(["Leaderboard", "Achievements", "Mål"].indices, id: \.self) { i in
-                let label = ["Leaderboard", "Achievements", "Mål"][i]
+            ForEach(["Leaderboard", "Achievements", "Mål", "Statistik"].indices, id: \.self) { i in
+                let label = ["Leaderboard", "Achievements", "Mål", "Statistik"][i]
                 Button(label) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { selection = i }
                 }
@@ -135,8 +136,9 @@ private struct LeaderboardSection: View {
 
             // Rest of the list
             VStack(spacing: AppTheme.Spacing.xs) {
-                ForEach(vm.leaderboard.dropFirst(3)) { entry in
+                ForEach(Array(vm.leaderboard.dropFirst(3).enumerated()), id: \.element.id) { index, entry in
                     LeaderboardRow(entry: entry)
+                        .staggeredAppear(index: index)
                 }
             }
             .padding(.horizontal, AppTheme.Spacing.md)
@@ -291,8 +293,9 @@ private struct AchievementsSection: View {
                 columns: [GridItem(.flexible()), GridItem(.flexible())],
                 spacing: AppTheme.Spacing.sm
             ) {
-                ForEach(vm.filteredAchievements) { achievement in
+                ForEach(Array(vm.filteredAchievements.enumerated()), id: \.element.id) { index, achievement in
                     AchievementCard(achievement: achievement)
+                        .staggeredAppear(index: index)
                 }
             }
             .padding(.horizontal, AppTheme.Spacing.md)
