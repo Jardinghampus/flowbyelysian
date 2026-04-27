@@ -16,10 +16,8 @@ final class ReportsViewModel {
         defer { isLoading = false }
 
         if isOnline {
-            async let l = sync.fetchListings(context: context)
-            async let r = sync.fetchRequests(context: context)
-            listings = (try? await l) ?? sync.cachedListings(context: context)
-            requests = (try? await r) ?? sync.cachedRequests(context: context)
+            listings = (try? await sync.fetchListings(context: context)) ?? sync.cachedListings(context: context)
+            requests = (try? await sync.fetchRequests(context: context)) ?? sync.cachedRequests(context: context)
         } else {
             listings = sync.cachedListings(context: context)
             requests = sync.cachedRequests(context: context)
@@ -30,7 +28,7 @@ final class ReportsViewModel {
         isGenerating = true
         defer { isGenerating = false }
         return await Task.detached(priority: .userInitiated) {
-            PDFGenerator.landlordReport(listings: self.listings, agentName: agentName)
+            await PDFGenerator.landlordReport(listings: self.listings, agentName: agentName)
         }.value
     }
 
@@ -38,7 +36,7 @@ final class ReportsViewModel {
         isGenerating = true
         defer { isGenerating = false }
         return await Task.detached(priority: .userInitiated) {
-            PDFGenerator.inventoryReport(listings: self.listings, agentName: agentName)
+            await PDFGenerator.inventoryReport(listings: self.listings, agentName: agentName)
         }.value
     }
 
@@ -46,7 +44,7 @@ final class ReportsViewModel {
         isGenerating = true
         defer { isGenerating = false }
         return await Task.detached(priority: .userInitiated) {
-            PDFGenerator.performanceReport(
+            await PDFGenerator.performanceReport(
                 listings: self.listings,
                 requests: self.requests,
                 agentName: agentName

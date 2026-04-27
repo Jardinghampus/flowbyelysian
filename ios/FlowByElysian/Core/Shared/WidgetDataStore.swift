@@ -45,7 +45,7 @@ struct WidgetEvent: Codable, Identifiable {
 final class WidgetDataStore: @unchecked Sendable {
     static let shared = WidgetDataStore()
 
-    private let appGroupID = "group.com.flowbyelysian.app"
+    private let appGroupID = "group.com.dsp.app"
     private let storageKey = "flowWidgetData"
 
     private init() {}

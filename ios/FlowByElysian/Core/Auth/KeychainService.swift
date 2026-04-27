@@ -2,7 +2,7 @@ import Security
 import Foundation
 
 final class KeychainService {
-    private let service = "com.flowbyelysian.app"
+    private let service = "com.dsp.app"
 
     func save(token: String, key: String) {
         guard let data = token.data(using: .utf8) else { return }

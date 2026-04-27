@@ -183,7 +183,7 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/40 text-sm">
-              © {new Date().getFullYear()} Elysian Real Estate. All rights reserved.
+              © {new Date().getFullYear()} Derrick Signature Properties. All rights reserved.
             </p>
             <div className="flex gap-6">
               {footerLinks.legal.map((link) => (

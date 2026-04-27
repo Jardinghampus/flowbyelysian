@@ -21,11 +21,12 @@ struct MainShellView: View {
                     Tab("Clients", systemImage: "person.2.fill", value: AppTab.clients) {
                         ClientsView()
                     }
-                    Tab("Performance", systemImage: "chart.line.uptrend.xyaxis", value: AppTab.performance) {
+                    Tab("Performance", systemImage: "chart.xyaxis.line", value: AppTab.performance) {
                         PerformanceView()
                     }
                 }
                 .tint(Color.zBlue)
+                .tabBarMinimizeBehavior(.onScrollDown)
                 .scaleEffect(appState.drawerOpen ? 0.93 : 1, anchor: .trailing)
                 .offset(x: appState.drawerOpen ? 264 : 0)
                 .blur(radius: appState.drawerOpen ? 1.5 : 0)

@@ -79,18 +79,17 @@ struct ClientsView: View {
     }
 }
 
-// MARK: - Segment picker
+// MARK: - Segment picker (Revolut sliding underline style)
 
 private struct SegmentedPicker: View {
     @Binding var selection: Int
+    @Namespace private var ns
 
     var body: some View {
         HStack(spacing: 0) {
-            SegmentButton(title: "Requests", index: 0, selection: $selection)
-            SegmentButton(title: "Contacts",  index: 1, selection: $selection)
+            SegmentButton(title: "Requests", index: 0, selection: $selection, namespace: ns)
+            SegmentButton(title: "Contacts",  index: 1, selection: $selection, namespace: ns)
         }
-        .padding(3)
-        .background(.quinary, in: .rect(cornerRadius: AppTheme.Radius.sm))
     }
 }
 
@@ -98,21 +97,35 @@ private struct SegmentButton: View {
     let title: String
     let index: Int
     @Binding var selection: Int
+    let namespace: Namespace.ID
 
     var isSelected: Bool { selection == index }
 
     var body: some View {
-        Button(title) {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                selection = index
+        Button {
+            withAnimation(DS.Anim.standard) { selection = index }
+        } label: {
+            VStack(spacing: DS.Spacing.xs) {
+                Text(title)
+                    .font(AppFont.body(15, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .padding(.vertical, DS.Spacing.sm)
+
+                if isSelected {
+                    Rectangle()
+                        .fill(Color.zBlue)
+                        .frame(height: 2)
+                        .clipShape(.rect(cornerRadius: 1))
+                        .matchedGeometryEffect(id: "seg", in: namespace)
+                } else {
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 2)
+                }
             }
+            .frame(maxWidth: .infinity)
+            .contentShape(.rect)
         }
-        .font(.subheadline.weight(isSelected ? .semibold : .regular))
-        .foregroundStyle(isSelected ? .primary : .secondary)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, AppTheme.Spacing.sm)
-        .background(isSelected ? AnyShapeStyle(.background) : AnyShapeStyle(Color.clear), in: .rect(cornerRadius: AppTheme.Radius.sm - 2))
-        .shadow(color: isSelected ? .black.opacity(0.07) : .clear, radius: 4, y: 1)
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isSelected)
     }

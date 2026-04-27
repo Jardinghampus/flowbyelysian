@@ -62,7 +62,7 @@ export default function Page() {
           Welcome to <ColourfulText text="Eflow" />
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Your real estate dashboard powered by Elysian
+          Your real estate dashboard · DSP
         </p>
       </motion.div>
 

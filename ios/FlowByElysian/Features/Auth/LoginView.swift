@@ -26,7 +26,7 @@ struct LoginView: View {
                     )
                     .padding(.top, AppTheme.Spacing.lg)
 
-                    Text("Powered by Clerk · Flow by Elysian © 2026")  // keep brand line in English
+                    Text("Derrick Signature Properties · Dubai © 2026")
                         .font(.footnote)
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -66,17 +66,28 @@ private struct LoginHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
             HStack(spacing: AppTheme.Spacing.sm) {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.zBlue.gradient)
+                Circle()
+                    .fill(Color.black)
                     .frame(width: 44, height: 44)
                     .overlay {
-                        Image(systemName: "building.2.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
+                        Circle()
+                            .strokeBorder(Color.zGold.opacity(0.8), lineWidth: 1)
+                    }
+                    .overlay {
+                        Text("D")
+                            .font(.system(size: 20, weight: .thin, design: .serif))
+                            .foregroundStyle(Color.zGold)
                     }
 
-                Text("Flow by Elysian")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("DERRICK")
+                        .font(.system(size: 13, weight: .light))
+                        .tracking(4)
+                    Text("SIGNATURE PROPERTIES")
+                        .font(.system(size: 7, weight: .regular))
+                        .foregroundStyle(.secondary)
+                        .tracking(2)
+                }
             }
 
             Text("Welcome back")

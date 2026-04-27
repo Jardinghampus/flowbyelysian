@@ -4,8 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>DSP</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,23 +13,15 @@
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>NSAppTransportSecurity</key>
+	<key>NSExtension</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.widgetkit-extension</string>
 	</dict>
-	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>DSP reads your calendar events for the widget and upcoming viewings.</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>DSP reads your calendar events for the widget and upcoming viewings.</string>
-	<key>NSUserNotificationUsageDescription</key>
-	<string>Get notified about new matches, client requests and upcoming viewings.</string>
-	<key>UILaunchScreen</key>
-	<dict/>
 </dict>
 </plist>

@@ -62,7 +62,7 @@ struct AgentTarget: Identifiable {
     let unit: String
     let colorName: String
 
-    var progressFraction: Double { min(Double(current) / max(Double(target), 1), 1) }
+    var progressFraction: Double { min(Double(current) / Swift.max(Double(target), 1), 1) }
     var percentComplete: Int { Int(progressFraction * 100) }
 }
 

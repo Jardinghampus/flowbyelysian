@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server"
 
 // RERA Dubai Real Estate Regulations Context
 const RERA_CONTEXT = `
-You are an AI assistant specialized in Dubai real estate, RERA regulations, and property listings for Flow by Elysian.
+You are an AI assistant specialized in Dubai real estate, RERA regulations, and property listings for Derrick Signature Properties.
 
 ## RERA (Real Estate Regulatory Agency) Dubai Key Regulations:
 

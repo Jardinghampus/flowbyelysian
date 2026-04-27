@@ -519,7 +519,7 @@ export default function PropertiesPage() {
       <footer className="border-t border-neutral-100 py-8">
         <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
           <p className="text-sm text-neutral-500">
-            &copy; {new Date().getFullYear()} Elysian Real Estate
+            &copy; {new Date().getFullYear()} Derrick Signature Properties
           </p>
           <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
             Back to Home

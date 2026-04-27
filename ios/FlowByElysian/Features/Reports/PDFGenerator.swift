@@ -56,7 +56,7 @@ struct PDFGenerator {
             let draw = PDFDraw(ctx: ctx, page: pageRect)
 
             draw.header(title: "Inventory Report",
-                        subtitle: "Flow by Elysian · \(agentName)",
+                        subtitle: "Derrick Signature Properties · \(agentName)",
                         date: .now)
 
             var y: CGFloat = 140
@@ -184,7 +184,7 @@ private struct PDFDraw {
              color: .gray,
              rect: CGRect(x: margin + 360, y: y + 6, width: 80, height: 16))
 
-        draw("\(listing.bedrooms ?? 0) bd · \(Int(listing.sizeSqft ?? 0)) sqft",
+        draw("\(listing.bedrooms ?? 0) bd · \(Int(listing.size ?? 0)) sqft",
              font: .systemFont(ofSize: 10),
              color: .gray,
              rect: CGRect(x: margin + 6, y: y + 24, width: 300, height: 14))
@@ -209,7 +209,7 @@ private struct PDFDraw {
         let y = pageRect.height - 30
         UIColor.lightGray.setFill()
         UIRectFill(CGRect(x: margin, y: y, width: pageRect.width - margin * 2, height: 0.5))
-        draw("Flow by Elysian · Confidential",
+        draw("Derrick Signature Properties · Confidential",
              font: .systemFont(ofSize: 9),
              color: .lightGray,
              rect: CGRect(x: margin, y: y + 6, width: 300, height: 16))

@@ -46,6 +46,7 @@ extension Color {
     static let zRed     = Color(hex: "#FF453A")  // danger, delete
     static let zOrange  = Color(hex: "#FF6B35")  // tasks, pending
     static let zPurple  = Color(hex: "#BF5AF2")  // AI, premium
+    static let zGold    = Color(hex: "#C8A96E")  // DSP brand signature gold
 
     // ── AMOLED-first adaptive backgrounds ──────────────────────
     static let zBg: Color = Color(UIColor { t in

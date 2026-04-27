@@ -673,7 +673,7 @@ function AgentProductivitySection() {
               </blockquote>
               <div>
                 <p className="font-semibold text-white">Ahmed Al Khouri</p>
-                <p className="text-sm text-white/60">Sales Director, Elysian Real Estate</p>
+                <p className="text-sm text-white/60">Sales Director, Derrick Signature Properties</p>
               </div>
             </div>
           </div>

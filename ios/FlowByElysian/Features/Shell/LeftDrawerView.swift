@@ -7,8 +7,8 @@ struct LeftDrawerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ProfileHeader()
-                .padding(.top, 60)
+            DSPDrawerHeader()
+                .padding(.top, 56)
                 .padding(.horizontal, AppTheme.Spacing.md)
 
             Divider()
@@ -112,28 +112,55 @@ private struct DrawerSectionHeader: View {
     }
 }
 
-// MARK: - Profile header
+// MARK: - DSP branded drawer header
 
-private struct ProfileHeader: View {
+private struct DSPDrawerHeader: View {
     @Environment(AuthManager.self) private var auth
 
     var body: some View {
-        HStack(spacing: AppTheme.Spacing.sm) {
-            Circle()
-                .fill(AppTheme.Color.brand.gradient)
-                .frame(width: 48, height: 48)
-                .overlay {
-                    Text(auth.currentUser?.initials ?? "?")
-                        .font(.callout.bold())
-                        .foregroundStyle(.white)
-                }
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            // Brand wordmark
+            HStack(spacing: DS.Spacing.sm) {
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: 32, height: 32)
+                    .overlay { Circle().strokeBorder(Color.zGold.opacity(0.7), lineWidth: 1) }
+                    .overlay {
+                        Text("D")
+                            .font(.system(size: 14, weight: .thin, design: .serif))
+                            .foregroundStyle(Color.zGold)
+                    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(auth.currentUser?.name ?? "Agent")
-                    .font(.subheadline.bold())
-                Text(auth.currentUser?.role.capitalized ?? "")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("DERRICK")
+                        .font(.system(size: 10, weight: .light))
+                        .tracking(3)
+                        .foregroundStyle(.primary)
+                    Text("SIGNATURE PROPERTIES")
+                        .font(.system(size: 6, weight: .regular))
+                        .tracking(2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Agent info
+            HStack(spacing: DS.Spacing.sm) {
+                Circle()
+                    .fill(Color.zBlue.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                    .overlay {
+                        Text(auth.currentUser?.initials ?? "?")
+                            .font(AppFont.heading(15))
+                            .foregroundStyle(Color.zBlue)
+                    }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(auth.currentUser?.name ?? "Agent")
+                        .font(AppFont.body(14, weight: .semibold))
+                    Text(auth.currentUser?.role.capitalized ?? "Agent")
+                        .font(AppFont.body(12))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }

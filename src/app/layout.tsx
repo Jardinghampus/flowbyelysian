@@ -7,8 +7,8 @@ import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Flow by Elysian",
-  description: "Modern dashboard and workflow management by Elysian",
+  title: "DSP — Derrick Signature Properties",
+  description: "Dubai luxury real estate CRM for Derrick Signature Properties agents.",
   viewport: {
     width: "device-width",
     initialScale: 1,
