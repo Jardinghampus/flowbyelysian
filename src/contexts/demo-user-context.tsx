@@ -45,6 +45,4 @@ export function DemoUserProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-export const DEMO_USER_ID = "demo-user-001"
-
 export type DemoUser = ReturnType<typeof useDemoUser>["user"]

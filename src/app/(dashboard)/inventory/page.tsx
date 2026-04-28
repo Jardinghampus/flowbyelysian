@@ -105,31 +105,8 @@ function mapListingToDb(listing: Omit<Listing, "id" | "createdAt" | "updatedAt" 
   }
 }
 
-const FALLBACK_USER_ID = "demo-user-001"
-const FALLBACK_USER_NAME = "Agent"
-
-const AREAS = [
-  "Emirates Hills",
-  "Downtown Dubai",
-  "Al Murooj",
-  "Tilal Al Ghaf",
-  "Dubai Marina",
-  "Arabian Ranches",
-  "Palm Jumeirah",
-  "Business Bay",
-  "JBR",
-  "DIFC",
-  "Jumeirah Golf Estates",
-  "Dubai Hills Estate",
-  "Jumeirah Beach Residence",
-  "City Walk",
-  "Al Barari",
-  "Mohammed Bin Rashid City",
-]
-
 interface Filters {
   search: string
-  area: string
   subArea: string
   propertyType: string
   transactionType: string
@@ -145,7 +122,6 @@ interface Filters {
 
 const defaultFilters: Filters = {
   search: "",
-  area: "all",
   subArea: "all",
   propertyType: "all",
   transactionType: "all",
@@ -161,8 +137,8 @@ const defaultFilters: Filters = {
 
 export default function InventoryPage() {
   const { user } = useUser()
-  const CURRENT_USER_ID = user?.id ?? FALLBACK_USER_ID
-  const CURRENT_USER_NAME = user?.fullName ?? FALLBACK_USER_NAME
+  const currentUserId = user?.id ?? ""
+  const currentUserName = user?.fullName ?? user?.firstName ?? ""
 
   const [listings, setListings] = useState<Listing[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -170,7 +146,7 @@ export default function InventoryPage() {
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
-  const [activeTab, setActiveTab] = useState<"all" | "mine" | "mymatches" | ListingStatus | InquiryType | TransactionType>("all")
+  const [activeTab, setActiveTab] = useState("all")
   const { isAdmin } = useRole()
 
   const loadListings = useCallback(async () => {
@@ -191,12 +167,22 @@ export default function InventoryPage() {
     loadListings()
   }, [loadListings])
 
-  // Unique sub-areas from loaded listings (for filter dropdown)
+  // Unique areas from all loaded listings, sorted alphabetically
+  const areaTabs = useMemo(() => {
+    const areaSet = new Set<string>()
+    listings.forEach((l) => { if (l.area) areaSet.add(l.area) })
+    return Array.from(areaSet).sort()
+  }, [listings])
+
+  // Unique sub-areas for filter dropdown
   const subAreas = useMemo(() => {
     const set = new Set<string>()
-    listings.forEach((l) => { if (l.subArea) set.add(l.subArea) })
+    const source = activeTab !== "all" && activeTab !== "mine" && activeTab !== "mymatches"
+      ? listings.filter((l) => l.area === activeTab)
+      : listings
+    source.forEach((l) => { if (l.subArea) set.add(l.subArea) })
     return Array.from(set).sort()
-  }, [listings])
+  }, [listings, activeTab])
 
   const agents = useMemo(() => {
     const uniqueAgents = new Map<string, string>()
@@ -207,7 +193,6 @@ export default function InventoryPage() {
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.search) count++
-    if (filters.area !== "all") count++
     if (filters.subArea !== "all") count++
     if (filters.propertyType !== "all") count++
     if (filters.transactionType !== "all") count++
@@ -223,6 +208,12 @@ export default function InventoryPage() {
   }, [filters])
 
   const resetFilters = () => setFilters(defaultFilters)
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    // Reset sub-area filter when switching area tabs
+    if (filters.subArea !== "all") setFilters((f) => ({ ...f, subArea: "all" }))
+  }
 
   const handleCreateListing = async (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
     try {
@@ -242,7 +233,7 @@ export default function InventoryPage() {
 
   const handleDeleteListing = async (id: string) => {
     const listing = listings.find((l) => l.id === id)
-    if (!listing || (!isAdmin && listing.ownerId !== CURRENT_USER_ID)) return
+    if (!listing || (!isAdmin && listing.ownerId !== currentUserId)) return
     try {
       const res = await fetch(`/api/listings/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Failed to delete")
@@ -254,7 +245,7 @@ export default function InventoryPage() {
 
   const handleUpdateListing = async (updatedListing: Listing) => {
     const existing = listings.find((l) => l.id === updatedListing.id)
-    if (!existing || (!isAdmin && existing.ownerId !== CURRENT_USER_ID)) return
+    if (!existing || (!isAdmin && existing.ownerId !== currentUserId)) return
     try {
       const res = await fetch(`/api/listings/${updatedListing.id}`, {
         method: "PATCH",
@@ -290,37 +281,27 @@ export default function InventoryPage() {
   const getFilteredListings = () => {
     let filtered = [...listings]
 
-    switch (activeTab) {
-      case "mine":
-        filtered = filtered.filter((l) => l.ownerId === CURRENT_USER_ID)
-        break
-      case "stock":
-      case "request":
-        filtered = filtered.filter((l) => l.inquiryType === activeTab)
-        break
-      case "sale":
-      case "rent":
-        filtered = filtered.filter((l) => l.transactionType === activeTab)
-        break
-      case "live":
-      case "pocket":
-      case "unofficial":
-        filtered = filtered.filter((l) => l.status === activeTab)
-        break
+    // Tab-level filter
+    if (activeTab === "mine") {
+      filtered = filtered.filter((l) => l.ownerId === currentUserId)
+    } else if (activeTab !== "all" && activeTab !== "mymatches") {
+      // area tab
+      filtered = filtered.filter((l) => l.area === activeTab)
     }
 
+    // Panel filters
     if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
+      const q = filters.search.toLowerCase()
       filtered = filtered.filter(
         (l) =>
-          l.title.toLowerCase().includes(searchLower) ||
-          l.area.toLowerCase().includes(searchLower) ||
-          (l.subArea || "").toLowerCase().includes(searchLower) ||
-          l.notes.toLowerCase().includes(searchLower)
+          l.title.toLowerCase().includes(q) ||
+          l.area.toLowerCase().includes(q) ||
+          (l.subArea || "").toLowerCase().includes(q) ||
+          l.notes.toLowerCase().includes(q) ||
+          l.ownerName.toLowerCase().includes(q)
       )
     }
 
-    if (filters.area !== "all") filtered = filtered.filter((l) => l.area === filters.area)
     if (filters.subArea !== "all") filtered = filtered.filter((l) => l.subArea === filters.subArea)
     if (filters.propertyType !== "all") filtered = filtered.filter((l) => l.type === filters.propertyType)
     if (filters.transactionType !== "all") filtered = filtered.filter((l) => l.transactionType === filters.transactionType)
@@ -336,24 +317,22 @@ export default function InventoryPage() {
     return filtered
   }
 
-  const myListingsCount = listings.filter((l) => l.ownerId === CURRENT_USER_ID).length
-  const stockCount = listings.filter((l) => l.inquiryType === "stock").length
-  const requestCount = listings.filter((l) => l.inquiryType === "request").length
-  const saleCount = listings.filter((l) => l.transactionType === "sale").length
-  const rentCount = listings.filter((l) => l.transactionType === "rent").length
-  const myMatchesCount = useMemo(() => getUserMatches(listings, CURRENT_USER_ID).length, [listings])
-  const myMatches = useMemo(() => getUserMatches(listings, CURRENT_USER_ID), [listings])
+  const myListingsCount = listings.filter((l) => l.ownerId === currentUserId).length
+  const myMatchesCount = useMemo(() => getUserMatches(listings, currentUserId).length, [listings, currentUserId])
+  const myMatches = useMemo(() => getUserMatches(listings, currentUserId), [listings, currentUserId])
+
+  const areaCount = (area: string) => listings.filter((l) => l.area === area).length
 
   return (
     <>
       <div className="px-4 lg:px-6">
-        <MatchingTable listings={listings} currentUserId={CURRENT_USER_ID} />
+        <MatchingTable listings={listings} currentUserId={currentUserId} />
 
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
             <p className="text-muted-foreground">
-              Manage your property listings — Live, Pocket, and Unofficial
+              {isAdmin ? "All listings across every area and agent" : "Manage your property listings — Live, Pocket, and Unofficial"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -381,49 +360,30 @@ export default function InventoryPage() {
                   <div className="space-y-2">
                     <Label>Search</Label>
                     <Input
-                      placeholder="Search by title, area, sub-area, notes..."
+                      placeholder="Search by title, area, sub-area, agent, notes..."
                       value={filters.search}
                       onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     />
                   </div>
 
-                  {/* Area & Sub-Area */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Area</Label>
-                      <Select
-                        value={filters.area}
-                        onValueChange={(v) => setFilters({ ...filters, area: v, subArea: "all" })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Areas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Areas</SelectItem>
-                          {AREAS.map((area) => (
-                            <SelectItem key={area} value={area}>{area}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Sub-Area</Label>
-                      <Select
-                        value={filters.subArea}
-                        onValueChange={(v) => setFilters({ ...filters, subArea: v })}
-                        disabled={subAreas.length === 0}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Sub-Areas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Sub-Areas</SelectItem>
-                          {subAreas.map((sa) => (
-                            <SelectItem key={sa} value={sa}>{sa}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  {/* Sub-Area */}
+                  <div className="space-y-2">
+                    <Label>Sub-Area</Label>
+                    <Select
+                      value={filters.subArea}
+                      onValueChange={(v) => setFilters({ ...filters, subArea: v })}
+                      disabled={subAreas.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Sub-Areas" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Sub-Areas</SelectItem>
+                        {subAreas.map((sa) => (
+                          <SelectItem key={sa} value={sa}>{sa}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Property Type */}
@@ -563,7 +523,7 @@ export default function InventoryPage() {
                     </div>
                   </div>
 
-                  {/* Agent */}
+                  {/* Agent (always visible — useful for admin and for agents looking at teammates) */}
                   <div className="space-y-2">
                     <Label>Agent</Label>
                     <Select
@@ -614,20 +574,25 @@ export default function InventoryPage() {
             <span className="ml-2 text-muted-foreground">Loading listings...</span>
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-            <TabsList className="flex-wrap h-auto gap-1">
-              <TabsTrigger value="all">All ({listings.length})</TabsTrigger>
-              <TabsTrigger value="mine">My Listings ({myListingsCount})</TabsTrigger>
-              <TabsTrigger value="mymatches" className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="flex-wrap h-auto gap-1 mb-1">
+              <TabsTrigger value="all">
+                All ({listings.length})
+              </TabsTrigger>
+              {areaTabs.map((area) => (
+                <TabsTrigger key={area} value={area}>
+                  {area} ({areaCount(area)})
+                </TabsTrigger>
+              ))}
+              <TabsTrigger value="mine">
+                My Listings ({myListingsCount})
+              </TabsTrigger>
+              <TabsTrigger
+                value="mymatches"
+                className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
                 My Matches ({myMatchesCount})
               </TabsTrigger>
-              <TabsTrigger value="sale">Sale ({saleCount})</TabsTrigger>
-              <TabsTrigger value="rent">Rent ({rentCount})</TabsTrigger>
-              <TabsTrigger value="live">Live</TabsTrigger>
-              <TabsTrigger value="pocket">Pocket</TabsTrigger>
-              <TabsTrigger value="unofficial">Unofficial</TabsTrigger>
-              <TabsTrigger value="stock">Stock ({stockCount})</TabsTrigger>
-              <TabsTrigger value="request">Requests ({requestCount})</TabsTrigger>
             </TabsList>
 
             {activeTab === "mymatches" ? (
@@ -638,7 +603,8 @@ export default function InventoryPage() {
               <TabsContent value={activeTab} className="mt-4">
                 <InventoryTable
                   listings={getFilteredListings()}
-                  currentUserId={CURRENT_USER_ID}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
                   isAdmin={isAdmin}
                   onDelete={handleDeleteListing}
                   onUpdate={handleUpdateListing}
