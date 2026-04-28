@@ -1,40 +1,32 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-// Demo mode: Authentication is simulated via demo-user-context.
-// Role-based access is enforced at the component level using the RoleProvider.
-//
-// In production, this middleware would:
-// 1. Verify JWT/session tokens
-// 2. Check user roles from the token claims
-// 3. Block access to protected routes server-side
-//
-// Route architecture:
-//   /                    → Landing page (public)
-//   /sign-in             → Auth pages (public)
-//   /my-opportunities    → Public opportunity portal (login-gated)
-//   /opportunity         → Public opportunity submission form
-//   /user/my-opportunities → Customer portal: manage opportunities (customer only)
-//   /user/settings/*     → Customer portal: profile & settings (customer only)
-//   /user/*              → Agent/admin portal features (blocked for customers via CustomerGuard)
-//   /app/*               → CRM / ZFLOW agent platform (admin + agent only via CrmGuard)
-//   /app/admin           → Admin CMS & management (admin only)
-//
-// The /app layout includes a CrmGuard component that blocks non-internal users.
-// In production, this middleware would enforce the same server-side.
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/sign-in-2(.*)",
+  "/sign-up-2(.*)",
+  "/sign-in-3(.*)",
+  "/sign-up-3(.*)",
+  "/forgot-password(.*)",
+  "/errors(.*)",
+  "/feature(.*)",
+  "/properties(.*)",
+  "/api/chat/inbound(.*)",
+  "/api/mock/(.*)",
+  "/api/news(.*)",
+  "/api/webhooks/(.*)",
+])
 
-export function middleware(request: NextRequest) {
-  // In demo mode, all requests pass through.
-  // Role enforcement happens client-side via RoleProvider + useRole().
-  // See ZFLOW_ROUTES above for the intended server-side blocking in production.
-  return NextResponse.next()
-}
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect()
+  }
+})
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 }

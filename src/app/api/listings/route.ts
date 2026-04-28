@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
 
     // Parse filter params
     const area = searchParams.get("area")
+    const subArea = searchParams.get("subArea")
     const type = searchParams.get("type")
     const status = searchParams.get("status")
     const inquiryType = searchParams.get("inquiryType")
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (area) query = query.eq("area_name", area)
+    if (subArea) query = query.eq("sub_area", subArea)
     if (type) query = query.eq("type", type)
     if (status) query = query.eq("status", status)
     if (inquiryType) query = query.eq("inquiry_type", inquiryType)

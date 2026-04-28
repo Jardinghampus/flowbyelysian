@@ -1,12 +1,18 @@
 "use client"
 
-import { DemoUserProvider } from "@/contexts/demo-user-context"
+import { ClerkProvider } from "@clerk/nextjs"
 
-// Demo mode: Using mock user context instead of Clerk
 export function ClerkProviderWrapper({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <DemoUserProvider>{children}</DemoUserProvider>
+  return (
+    <ClerkProvider
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
+    >
+      {children}
+    </ClerkProvider>
+  )
 }

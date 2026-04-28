@@ -46,9 +46,11 @@ import type { Listing } from "../page"
 interface InventoryTableProps {
   listings: Listing[]
   currentUserId: string
+  currentUserName: string
   isAdmin: boolean
   onDelete: (id: string) => void
   onUpdate: (listing: Listing) => void
+  existingSubAreas?: string[]
 }
 
 const statusColors: Record<string, string> = {
@@ -83,9 +85,11 @@ function formatSize(size: number): string {
 export function InventoryTable({
   listings,
   currentUserId,
+  currentUserName,
   isAdmin,
   onDelete,
   onUpdate,
+  existingSubAreas = [],
 }: InventoryTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editListing, setEditListing] = useState<Listing | null>(null)
@@ -111,13 +115,14 @@ export function InventoryTable({
               <TableHead>For</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Agent</TableHead>
+              {isAdmin && <TableHead className="max-w-[200px]">Notes</TableHead>}
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={isAdmin ? 10 : 9} className="text-center py-8 text-muted-foreground">
                   No listings found. Add your first listing to get started.
                 </TableCell>
               </TableRow>
@@ -153,7 +158,14 @@ export function InventoryTable({
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{listing.area}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="text-sm">{listing.area}</p>
+                        {listing.subArea && (
+                          <p className="text-xs text-muted-foreground">{listing.subArea}</p>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="capitalize">{listing.type}</TableCell>
                     <TableCell className="text-right">{formatSize(listing.size)}</TableCell>
                     <TableCell className="text-right font-medium">
@@ -178,7 +190,7 @@ export function InventoryTable({
                       <div className="flex items-center gap-1.5">
                         <User className="h-3 w-3 text-muted-foreground" />
                         <span className={`text-sm ${isOwner ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                          {isOwner ? "You" : listing.ownerName}
+                          {isOwner ? (currentUserName || "You") : listing.ownerName}
                         </span>
                         {listing.ownerContactId && (
                           <span className="inline-flex items-center gap-0.5 text-[10px] text-[#C9A84C]" title="Linked to owner in Data tab">
@@ -187,6 +199,15 @@ export function InventoryTable({
                         )}
                       </div>
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell className="max-w-[200px]">
+                        {listing.notes ? (
+                          <p className="text-xs text-muted-foreground line-clamp-2">{listing.notes}</p>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/40">—</span>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -283,6 +304,7 @@ export function InventoryTable({
           open={!!editListing}
           onOpenChange={() => setEditListing(null)}
           listing={editListing}
+          existingSubAreas={existingSubAreas}
           onSubmit={(updated) => {
             onUpdate(updated)
             setEditListing(null)

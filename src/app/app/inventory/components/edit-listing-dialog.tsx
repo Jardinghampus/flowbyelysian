@@ -28,6 +28,7 @@ interface EditListingDialogProps {
   onOpenChange: (open: boolean) => void
   listing: Listing
   onSubmit: (listing: Listing) => void
+  existingSubAreas?: string[]
 }
 
 const areas = [
@@ -53,10 +54,12 @@ export function EditListingDialog({
   onOpenChange,
   listing,
   onSubmit,
+  existingSubAreas = [],
 }: EditListingDialogProps) {
   const [title, setTitle] = useState(listing.title)
   const [area, setArea] = useState(areas.includes(listing.area) ? listing.area : "custom")
   const [customArea, setCustomArea] = useState(areas.includes(listing.area) ? "" : listing.area)
+  const [subArea, setSubArea] = useState(listing.subArea || "")
   const [size, setSize] = useState(listing.size.toString())
   const [price, setPrice] = useState(listing.price.toString())
   const [type, setType] = useState<ListingType>(listing.type)
@@ -76,6 +79,7 @@ export function EditListingDialog({
     setTitle(listing.title)
     setArea(areas.includes(listing.area) ? listing.area : "custom")
     setCustomArea(areas.includes(listing.area) ? "" : listing.area)
+    setSubArea(listing.subArea || "")
     setSize(listing.size.toString())
     setPrice(listing.price.toString())
     setType(listing.type)
@@ -98,6 +102,7 @@ export function EditListingDialog({
       ...listing,
       title,
       area: area === "custom" ? customArea : area,
+      subArea: subArea.trim() || undefined,
       size: parseInt(size),
       price: parseInt(price),
       type,
@@ -174,6 +179,26 @@ export function EditListingDialog({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="subArea">Sub-Area / Community</Label>
+                <Input
+                  id="subArea"
+                  value={subArea}
+                  onChange={(e) => setSubArea(e.target.value)}
+                  placeholder="e.g., Elan, Harmony, Alaya..."
+                  list="edit-subarea-suggestions"
+                />
+                {existingSubAreas.length > 0 && (
+                  <datalist id="edit-subarea-suggestions">
+                    {existingSubAreas.map((sa) => (
+                      <option key={sa} value={sa} />
+                    ))}
+                  </datalist>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label>Property Type *</Label>
                 <Select value={type} onValueChange={(v) => setType(v as ListingType)}>
                   <SelectTrigger>
@@ -189,6 +214,15 @@ export function EditListingDialog({
                     <SelectItem value="retail">Retail</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="availability">Availability</Label>
+                <Input
+                  id="availability"
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value)}
+                />
               </div>
             </div>
 
@@ -216,7 +250,7 @@ export function EditListingDialog({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="bedrooms">Bedrooms</Label>
                 <Input
@@ -234,15 +268,6 @@ export function EditListingDialog({
                   type="number"
                   value={bathrooms}
                   onChange={(e) => setBathrooms(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="availability">Availability</Label>
-                <Input
-                  id="availability"
-                  value={availability}
-                  onChange={(e) => setAvailability(e.target.value)}
                 />
               </div>
             </div>
