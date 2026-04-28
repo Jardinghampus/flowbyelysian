@@ -104,6 +104,9 @@ export function ViewListingDialog({
             <div>
               <p className="text-xs text-muted-foreground">Area</p>
               <p className="font-medium">{listing.area}</p>
+              {listing.subArea && (
+                <p className="text-xs text-muted-foreground">{listing.subArea}</p>
+              )}
             </div>
           </div>
 

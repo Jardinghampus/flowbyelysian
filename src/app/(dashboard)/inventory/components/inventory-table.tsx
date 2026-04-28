@@ -47,6 +47,7 @@ interface InventoryTableProps {
   isAdmin: boolean
   onDelete: (id: string) => void
   onUpdate: (listing: Listing) => void
+  existingSubAreas?: string[]
 }
 
 const statusColors: Record<string, string> = {
@@ -84,6 +85,7 @@ export function InventoryTable({
   isAdmin,
   onDelete,
   onUpdate,
+  existingSubAreas = [],
 }: InventoryTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editListing, setEditListing] = useState<Listing | null>(null)
@@ -151,7 +153,14 @@ export function InventoryTable({
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{listing.area}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="text-sm">{listing.area}</p>
+                        {listing.subArea && (
+                          <p className="text-xs text-muted-foreground">{listing.subArea}</p>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="capitalize">{listing.type}</TableCell>
                     <TableCell className="text-right">{formatSize(listing.size)}</TableCell>
                     <TableCell className="text-right font-medium">
@@ -264,6 +273,7 @@ export function InventoryTable({
           open={!!editListing}
           onOpenChange={() => setEditListing(null)}
           listing={editListing}
+          existingSubAreas={existingSubAreas}
           onSubmit={(updated) => {
             onUpdate(updated)
             setEditListing(null)

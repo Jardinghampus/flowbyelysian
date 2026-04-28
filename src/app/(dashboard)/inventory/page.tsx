@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Plus, Sparkles, Filter, X } from "lucide-react"
+import { useState, useMemo, useEffect, useCallback } from "react"
+import { Plus, Sparkles, Filter, X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,7 +39,8 @@ export interface Listing {
   id: string
   title: string
   area: string
-  size: number // sqft
+  subArea?: string
+  size: number
   price: number
   type: ListingType
   status: ListingStatus
@@ -47,147 +48,65 @@ export interface Listing {
   transactionType: TransactionType
   notes: string
   propertyFinderUrl?: string
-  images: string[] // URLs, max 5
+  images: string[]
   bedrooms?: number
   bathrooms?: number
   availability?: string
-  ownerId: string // Agent who owns this listing
-  ownerName: string // Display name of the agent
+  ownerId: string
+  ownerName: string
   createdAt: string
   updatedAt: string
 }
 
-// Current user - in production this would come from Clerk/auth
-const CURRENT_USER_ID = "user-1"
-const CURRENT_USER_NAME = "Ahmed Hassan"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapDbToListing(row: any): Listing {
+  return {
+    id: row.id,
+    title: row.title,
+    area: row.area_name || "",
+    subArea: row.sub_area || undefined,
+    size: row.size || 0,
+    price: row.price,
+    type: row.type,
+    status: row.status,
+    inquiryType: row.inquiry_type,
+    transactionType: row.transaction_type,
+    notes: row.notes || "",
+    propertyFinderUrl: row.property_finder_url || undefined,
+    images: row.images || [],
+    bedrooms: row.bedrooms || undefined,
+    bathrooms: row.bathrooms || undefined,
+    availability: row.availability || undefined,
+    ownerId: row.owner_id,
+    ownerName: row.owner_name || "Unknown",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
 
-// Demo data with multiple agents
-const initialListings: Listing[] = [
-  {
-    id: "1",
-    title: "Luxury Villa with Pool",
-    area: "Emirates Hills",
-    size: 8500,
-    price: 15000000,
-    type: "villa",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Corner plot, upgraded kitchen, private pool",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/123456",
-    images: [],
-    bedrooms: 5,
-    bathrooms: 6,
-    availability: "Immediate",
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "2",
-    title: "Modern Apartment Downtown",
-    area: "Downtown Dubai",
-    size: 1800,
-    price: 180000,
-    type: "apartment",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "rent",
-    notes: "Burj Khalifa view, high floor, yearly rent",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/234567",
-    images: [],
-    bedrooms: 2,
-    bathrooms: 3,
-    availability: "Q2 2024",
-    ownerId: "user-2",
-    ownerName: "Sarah Miller",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-18",
-  },
-  {
-    id: "3",
-    title: "Family Villa in Murooj",
-    area: "Al Murooj",
-    size: 5200,
-    price: 8500000,
-    type: "villa",
-    status: "pocket",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Quiet community, near school, motivated seller",
-    images: [],
-    bedrooms: 4,
-    bathrooms: 5,
-    availability: "Negotiable",
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-08",
-    updatedAt: "2024-01-15",
-  },
-  {
-    id: "4",
-    title: "Client Looking for Villa",
-    area: "Tilal Al Ghaf",
-    size: 6000,
-    price: 10000000,
-    type: "villa",
-    status: "unofficial",
-    inquiryType: "request",
-    transactionType: "sale",
-    notes: "Buyer prequalified, 10M budget, prefers new builds",
-    images: [],
-    bedrooms: 5,
-    bathrooms: 5,
-    ownerId: "user-1",
-    ownerName: "Ahmed Hassan",
-    createdAt: "2024-01-20",
-    updatedAt: "2024-01-20",
-  },
-  {
-    id: "5",
-    title: "Penthouse Marina",
-    area: "Dubai Marina",
-    size: 4200,
-    price: 450000,
-    type: "penthouse",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "rent",
-    notes: "Full sea view, private terrace, luxury finish",
-    propertyFinderUrl: "https://www.propertyfinder.ae/property/345678",
-    images: [],
-    bedrooms: 3,
-    bathrooms: 4,
-    availability: "March 2024",
-    ownerId: "user-3",
-    ownerName: "Omar Khan",
-    createdAt: "2024-01-12",
-    updatedAt: "2024-01-19",
-  },
-  {
-    id: "6",
-    title: "Townhouse Arabian Ranches",
-    area: "Arabian Ranches",
-    size: 3800,
-    price: 5200000,
-    type: "townhouse",
-    status: "live",
-    inquiryType: "stock",
-    transactionType: "sale",
-    notes: "Community pool access, landscaped garden",
-    images: [],
-    bedrooms: 4,
-    bathrooms: 4,
-    availability: "Immediate",
-    ownerId: "user-2",
-    ownerName: "Sarah Miller",
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-14",
-  },
-]
+function mapListingToDb(listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) {
+  return {
+    title: listing.title,
+    area_name: listing.area,
+    sub_area: listing.subArea || null,
+    size: listing.size,
+    price: listing.price,
+    type: listing.type,
+    status: listing.status,
+    inquiry_type: listing.inquiryType,
+    transaction_type: listing.transactionType,
+    notes: listing.notes || null,
+    property_finder_url: listing.propertyFinderUrl || null,
+    images: listing.images,
+    bedrooms: listing.bedrooms || null,
+    bathrooms: listing.bathrooms || null,
+    availability: listing.availability || null,
+  }
+}
 
-// Get unique areas from listings
+const CURRENT_USER_ID = "demo-user-001"
+const CURRENT_USER_NAME = "Demo User"
+
 const AREAS = [
   "Emirates Hills",
   "Downtown Dubai",
@@ -199,11 +118,18 @@ const AREAS = [
   "Business Bay",
   "JBR",
   "DIFC",
+  "Jumeirah Golf Estates",
+  "Dubai Hills Estate",
+  "Jumeirah Beach Residence",
+  "City Walk",
+  "Al Barari",
+  "Mohammed Bin Rashid City",
 ]
 
 interface Filters {
   search: string
   area: string
+  subArea: string
   propertyType: string
   transactionType: string
   status: string
@@ -219,6 +145,7 @@ interface Filters {
 const defaultFilters: Filters = {
   search: "",
   area: "all",
+  subArea: "all",
   propertyType: "all",
   transactionType: "all",
   status: "all",
@@ -232,7 +159,8 @@ const defaultFilters: Filters = {
 }
 
 export default function InventoryPage() {
-  const [listings, setListings] = useState<Listing[]>(initialListings)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -240,21 +168,42 @@ export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<"all" | "mine" | "mymatches" | ListingStatus | InquiryType | TransactionType>("all")
   const { isAdmin } = useRole()
 
-  const currentUserId = CURRENT_USER_ID
-  const currentUserName = CURRENT_USER_NAME
+  const loadListings = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const res = await fetch("/api/listings?limit=500")
+      if (!res.ok) throw new Error("Failed to fetch")
+      const data = await res.json()
+      setListings((data.listings || []).map(mapDbToListing))
+    } catch (err) {
+      console.error("Failed to load listings:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-  // Get unique agents from listings
+  useEffect(() => {
+    loadListings()
+  }, [loadListings])
+
+  // Unique sub-areas from loaded listings (for filter dropdown)
+  const subAreas = useMemo(() => {
+    const set = new Set<string>()
+    listings.forEach((l) => { if (l.subArea) set.add(l.subArea) })
+    return Array.from(set).sort()
+  }, [listings])
+
   const agents = useMemo(() => {
     const uniqueAgents = new Map<string, string>()
     listings.forEach((l) => uniqueAgents.set(l.ownerId, l.ownerName))
     return Array.from(uniqueAgents, ([id, name]) => ({ id, name }))
   }, [listings])
 
-  // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (filters.search) count++
     if (filters.area !== "all") count++
+    if (filters.subArea !== "all") count++
     if (filters.propertyType !== "all") count++
     if (filters.transactionType !== "all") count++
     if (filters.status !== "all") count++
@@ -268,50 +217,77 @@ export default function InventoryPage() {
     return count
   }, [filters])
 
-  const resetFilters = () => {
-    setFilters(defaultFilters)
-  }
+  const resetFilters = () => setFilters(defaultFilters)
 
-  const handleCreateListing = (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
-    const newListing: Listing = {
-      ...listing,
-      id: Date.now().toString(),
-      ownerId: currentUserId,
-      ownerName: currentUserName,
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: new Date().toISOString().split("T")[0],
+  const handleCreateListing = async (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => {
+    try {
+      const res = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mapListingToDb(listing)),
+      })
+      if (!res.ok) throw new Error("Failed to create")
+      const data = await res.json()
+      setListings((prev) => [mapDbToListing(data.listing), ...prev])
+      setIsCreateOpen(false)
+    } catch (err) {
+      console.error("Failed to create listing:", err)
     }
-    setListings([newListing, ...listings])
-    setIsCreateOpen(false)
   }
 
-  const handleDeleteListing = (id: string) => {
+  const handleDeleteListing = async (id: string) => {
     const listing = listings.find((l) => l.id === id)
-    // Only allow deletion if user owns the listing or is admin
-    if (listing && (listing.ownerId === currentUserId || isAdmin)) {
-      setListings(listings.filter((l) => l.id !== id))
+    if (!listing || (!isAdmin && listing.ownerId !== CURRENT_USER_ID)) return
+    try {
+      const res = await fetch(`/api/listings/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Failed to delete")
+      setListings((prev) => prev.filter((l) => l.id !== id))
+    } catch (err) {
+      console.error("Failed to delete listing:", err)
     }
   }
 
-  const handleUpdateListing = (updatedListing: Listing) => {
-    // Only allow update if user owns the listing or is admin
-    const existingListing = listings.find((l) => l.id === updatedListing.id)
-    if (existingListing && (existingListing.ownerId === currentUserId || isAdmin)) {
-      setListings(listings.map((l) =>
-        l.id === updatedListing.id
-          ? { ...updatedListing, updatedAt: new Date().toISOString().split("T")[0] }
-          : l
-      ))
+  const handleUpdateListing = async (updatedListing: Listing) => {
+    const existing = listings.find((l) => l.id === updatedListing.id)
+    if (!existing || (!isAdmin && existing.ownerId !== CURRENT_USER_ID)) return
+    try {
+      const res = await fetch(`/api/listings/${updatedListing.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: updatedListing.title,
+          area_name: updatedListing.area,
+          sub_area: updatedListing.subArea || null,
+          size: updatedListing.size,
+          price: updatedListing.price,
+          type: updatedListing.type,
+          status: updatedListing.status,
+          inquiry_type: updatedListing.inquiryType,
+          transaction_type: updatedListing.transactionType,
+          notes: updatedListing.notes || null,
+          property_finder_url: updatedListing.propertyFinderUrl || null,
+          images: updatedListing.images,
+          bedrooms: updatedListing.bedrooms || null,
+          bathrooms: updatedListing.bathrooms || null,
+          availability: updatedListing.availability || null,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to update")
+      const data = await res.json()
+      setListings((prev) =>
+        prev.map((l) => l.id === updatedListing.id ? mapDbToListing(data.listing) : l)
+      )
+    } catch (err) {
+      console.error("Failed to update listing:", err)
     }
   }
 
   const getFilteredListings = () => {
     let filtered = [...listings]
 
-    // Apply tab filter first
     switch (activeTab) {
       case "mine":
-        filtered = filtered.filter((l) => l.ownerId === currentUserId)
+        filtered = filtered.filter((l) => l.ownerId === CURRENT_USER_ID)
         break
       case "stock":
       case "request":
@@ -328,85 +304,51 @@ export default function InventoryPage() {
         break
     }
 
-    // Apply advanced filters
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
       filtered = filtered.filter(
         (l) =>
           l.title.toLowerCase().includes(searchLower) ||
           l.area.toLowerCase().includes(searchLower) ||
+          (l.subArea || "").toLowerCase().includes(searchLower) ||
           l.notes.toLowerCase().includes(searchLower)
       )
     }
 
-    if (filters.area !== "all") {
-      filtered = filtered.filter((l) => l.area === filters.area)
-    }
-
-    if (filters.propertyType !== "all") {
-      filtered = filtered.filter((l) => l.type === filters.propertyType)
-    }
-
-    if (filters.transactionType !== "all") {
-      filtered = filtered.filter((l) => l.transactionType === filters.transactionType)
-    }
-
-    if (filters.status !== "all") {
-      filtered = filtered.filter((l) => l.status === filters.status)
-    }
-
-    if (filters.inquiryType !== "all") {
-      filtered = filtered.filter((l) => l.inquiryType === filters.inquiryType)
-    }
-
-    if (filters.minPrice) {
-      filtered = filtered.filter((l) => l.price >= Number(filters.minPrice))
-    }
-
-    if (filters.maxPrice) {
-      filtered = filtered.filter((l) => l.price <= Number(filters.maxPrice))
-    }
-
-    if (filters.minSize) {
-      filtered = filtered.filter((l) => l.size >= Number(filters.minSize))
-    }
-
-    if (filters.maxSize) {
-      filtered = filtered.filter((l) => l.size <= Number(filters.maxSize))
-    }
-
-    if (filters.bedrooms !== "all") {
-      filtered = filtered.filter((l) => l.bedrooms === Number(filters.bedrooms))
-    }
-
-    if (filters.agent !== "all") {
-      filtered = filtered.filter((l) => l.ownerId === filters.agent)
-    }
+    if (filters.area !== "all") filtered = filtered.filter((l) => l.area === filters.area)
+    if (filters.subArea !== "all") filtered = filtered.filter((l) => l.subArea === filters.subArea)
+    if (filters.propertyType !== "all") filtered = filtered.filter((l) => l.type === filters.propertyType)
+    if (filters.transactionType !== "all") filtered = filtered.filter((l) => l.transactionType === filters.transactionType)
+    if (filters.status !== "all") filtered = filtered.filter((l) => l.status === filters.status)
+    if (filters.inquiryType !== "all") filtered = filtered.filter((l) => l.inquiryType === filters.inquiryType)
+    if (filters.minPrice) filtered = filtered.filter((l) => l.price >= Number(filters.minPrice))
+    if (filters.maxPrice) filtered = filtered.filter((l) => l.price <= Number(filters.maxPrice))
+    if (filters.minSize) filtered = filtered.filter((l) => l.size >= Number(filters.minSize))
+    if (filters.maxSize) filtered = filtered.filter((l) => l.size <= Number(filters.maxSize))
+    if (filters.bedrooms !== "all") filtered = filtered.filter((l) => l.bedrooms === Number(filters.bedrooms))
+    if (filters.agent !== "all") filtered = filtered.filter((l) => l.ownerId === filters.agent)
 
     return filtered
   }
 
-  const myListingsCount = listings.filter((l) => l.ownerId === currentUserId).length
+  const myListingsCount = listings.filter((l) => l.ownerId === CURRENT_USER_ID).length
   const stockCount = listings.filter((l) => l.inquiryType === "stock").length
   const requestCount = listings.filter((l) => l.inquiryType === "request").length
   const saleCount = listings.filter((l) => l.transactionType === "sale").length
   const rentCount = listings.filter((l) => l.transactionType === "rent").length
-  const myMatchesCount = useMemo(() => getUserMatches(listings, currentUserId).length, [listings, currentUserId])
-
-  // Get my matches for the tab view
-  const myMatches = useMemo(() => getUserMatches(listings, currentUserId), [listings, currentUserId])
+  const myMatchesCount = useMemo(() => getUserMatches(listings, CURRENT_USER_ID).length, [listings])
+  const myMatches = useMemo(() => getUserMatches(listings, CURRENT_USER_ID), [listings])
 
   return (
     <>
       <div className="px-4 lg:px-6">
-        {/* AI Matching Table at top */}
-        <MatchingTable listings={listings} currentUserId={currentUserId} />
+        <MatchingTable listings={listings} currentUserId={CURRENT_USER_ID} />
 
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
             <p className="text-muted-foreground">
-              Manage your property listings - Live, Pocket, and Unofficial
+              Manage your property listings — Live, Pocket, and Unofficial
             </p>
           </div>
           <div className="flex gap-2">
@@ -434,19 +376,19 @@ export default function InventoryPage() {
                   <div className="space-y-2">
                     <Label>Search</Label>
                     <Input
-                      placeholder="Search by title, area, notes..."
+                      placeholder="Search by title, area, sub-area, notes..."
                       value={filters.search}
                       onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                     />
                   </div>
 
-                  {/* Area & Property Type */}
+                  {/* Area & Sub-Area */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Area</Label>
                       <Select
                         value={filters.area}
-                        onValueChange={(v) => setFilters({ ...filters, area: v })}
+                        onValueChange={(v) => setFilters({ ...filters, area: v, subArea: "all" })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="All Areas" />
@@ -454,34 +396,52 @@ export default function InventoryPage() {
                         <SelectContent>
                           <SelectItem value="all">All Areas</SelectItem>
                           {AREAS.map((area) => (
-                            <SelectItem key={area} value={area}>
-                              {area}
-                            </SelectItem>
+                            <SelectItem key={area} value={area}>{area}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Property Type</Label>
+                      <Label>Sub-Area</Label>
                       <Select
-                        value={filters.propertyType}
-                        onValueChange={(v) => setFilters({ ...filters, propertyType: v })}
+                        value={filters.subArea}
+                        onValueChange={(v) => setFilters({ ...filters, subArea: v })}
+                        disabled={subAreas.length === 0}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="All Types" />
+                          <SelectValue placeholder="All Sub-Areas" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="villa">Villa</SelectItem>
-                          <SelectItem value="apartment">Apartment</SelectItem>
-                          <SelectItem value="townhouse">Townhouse</SelectItem>
-                          <SelectItem value="penthouse">Penthouse</SelectItem>
-                          <SelectItem value="plot">Plot</SelectItem>
-                          <SelectItem value="office">Office</SelectItem>
-                          <SelectItem value="retail">Retail</SelectItem>
+                          <SelectItem value="all">All Sub-Areas</SelectItem>
+                          {subAreas.map((sa) => (
+                            <SelectItem key={sa} value={sa}>{sa}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Property Type */}
+                  <div className="space-y-2">
+                    <Label>Property Type</Label>
+                    <Select
+                      value={filters.propertyType}
+                      onValueChange={(v) => setFilters({ ...filters, propertyType: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="villa">Villa</SelectItem>
+                        <SelectItem value="apartment">Apartment</SelectItem>
+                        <SelectItem value="townhouse">Townhouse</SelectItem>
+                        <SelectItem value="penthouse">Penthouse</SelectItem>
+                        <SelectItem value="plot">Plot</SelectItem>
+                        <SelectItem value="office">Office</SelectItem>
+                        <SelectItem value="retail">Retail</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Transaction & Status */}
@@ -643,44 +603,53 @@ export default function InventoryPage() {
       </div>
 
       <div className="px-4 lg:px-6 mt-6">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="all">All ({listings.length})</TabsTrigger>
-            <TabsTrigger value="mine">My Listings ({myListingsCount})</TabsTrigger>
-            <TabsTrigger value="mymatches" className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              My Matches ({myMatchesCount})
-            </TabsTrigger>
-            <TabsTrigger value="sale">Sale ({saleCount})</TabsTrigger>
-            <TabsTrigger value="rent">Rent ({rentCount})</TabsTrigger>
-            <TabsTrigger value="live">Live</TabsTrigger>
-            <TabsTrigger value="pocket">Pocket</TabsTrigger>
-            <TabsTrigger value="unofficial">Unofficial</TabsTrigger>
-            <TabsTrigger value="stock">Stock ({stockCount})</TabsTrigger>
-            <TabsTrigger value="request">Requests ({requestCount})</TabsTrigger>
-          </TabsList>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-muted-foreground">Loading listings...</span>
+          </div>
+        ) : (
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+            <TabsList className="flex-wrap h-auto gap-1">
+              <TabsTrigger value="all">All ({listings.length})</TabsTrigger>
+              <TabsTrigger value="mine">My Listings ({myListingsCount})</TabsTrigger>
+              <TabsTrigger value="mymatches" className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                My Matches ({myMatchesCount})
+              </TabsTrigger>
+              <TabsTrigger value="sale">Sale ({saleCount})</TabsTrigger>
+              <TabsTrigger value="rent">Rent ({rentCount})</TabsTrigger>
+              <TabsTrigger value="live">Live</TabsTrigger>
+              <TabsTrigger value="pocket">Pocket</TabsTrigger>
+              <TabsTrigger value="unofficial">Unofficial</TabsTrigger>
+              <TabsTrigger value="stock">Stock ({stockCount})</TabsTrigger>
+              <TabsTrigger value="request">Requests ({requestCount})</TabsTrigger>
+            </TabsList>
 
-          {activeTab === "mymatches" ? (
-            <TabsContent value="mymatches" className="mt-4">
-              <MyMatchesView matches={myMatches} />
-            </TabsContent>
-          ) : (
-            <TabsContent value={activeTab} className="mt-4">
-              <InventoryTable
-                listings={getFilteredListings()}
-                currentUserId={currentUserId}
-                isAdmin={isAdmin}
-                onDelete={handleDeleteListing}
-                onUpdate={handleUpdateListing}
-              />
-            </TabsContent>
-          )}
-        </Tabs>
+            {activeTab === "mymatches" ? (
+              <TabsContent value="mymatches" className="mt-4">
+                <MyMatchesView matches={myMatches} />
+              </TabsContent>
+            ) : (
+              <TabsContent value={activeTab} className="mt-4">
+                <InventoryTable
+                  listings={getFilteredListings()}
+                  currentUserId={CURRENT_USER_ID}
+                  isAdmin={isAdmin}
+                  onDelete={handleDeleteListing}
+                  onUpdate={handleUpdateListing}
+                  existingSubAreas={subAreas}
+                />
+              </TabsContent>
+            )}
+          </Tabs>
+        )}
       </div>
 
       <CreateListingDialog
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onSubmit={handleCreateListing}
+        existingSubAreas={subAreas}
       />
 
       <AIMatchingDialog

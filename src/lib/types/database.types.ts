@@ -83,6 +83,7 @@ export type Database = {
           title: string
           area_id: string | null
           area_name: string | null
+          sub_area: string | null
           size: number | null
           price: number
           type: 'villa' | 'apartment' | 'townhouse' | 'penthouse' | 'plot' | 'office' | 'retail'
@@ -105,6 +106,7 @@ export type Database = {
           title: string
           area_id?: string | null
           area_name?: string | null
+          sub_area?: string | null
           size?: number | null
           price: number
           type: 'villa' | 'apartment' | 'townhouse' | 'penthouse' | 'plot' | 'office' | 'retail'
@@ -127,6 +129,7 @@ export type Database = {
           title?: string
           area_id?: string | null
           area_name?: string | null
+          sub_area?: string | null
           size?: number | null
           price?: number
           type?: 'villa' | 'apartment' | 'townhouse' | 'penthouse' | 'plot' | 'office' | 'retail'

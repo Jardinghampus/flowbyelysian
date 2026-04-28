@@ -51,6 +51,7 @@ create table listings (
   title text not null,
   area_id uuid references areas(id) on delete set null,
   area_name text,
+  sub_area text,
   size integer,
   price numeric not null,
   type listing_type not null,

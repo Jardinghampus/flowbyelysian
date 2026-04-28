@@ -27,6 +27,7 @@ interface CreateListingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (listing: Omit<Listing, "id" | "createdAt" | "updatedAt" | "ownerId" | "ownerName">) => void
+  existingSubAreas?: string[]
 }
 
 const areas = [
@@ -51,10 +52,12 @@ export function CreateListingDialog({
   open,
   onOpenChange,
   onSubmit,
+  existingSubAreas = [],
 }: CreateListingDialogProps) {
   const [title, setTitle] = useState("")
   const [area, setArea] = useState("")
   const [customArea, setCustomArea] = useState("")
+  const [subArea, setSubArea] = useState("")
   const [size, setSize] = useState("")
   const [price, setPrice] = useState("")
   const [type, setType] = useState<ListingType>("villa")
@@ -73,6 +76,7 @@ export function CreateListingDialog({
     setTitle("")
     setArea("")
     setCustomArea("")
+    setSubArea("")
     setSize("")
     setPrice("")
     setType("villa")
@@ -94,6 +98,7 @@ export function CreateListingDialog({
     onSubmit({
       title,
       area: area === "custom" ? customArea : area,
+      subArea: subArea.trim() || undefined,
       size: parseInt(size),
       price: parseInt(price),
       type,
@@ -172,6 +177,26 @@ export function CreateListingDialog({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="subArea">Sub-Area / Community</Label>
+                <Input
+                  id="subArea"
+                  value={subArea}
+                  onChange={(e) => setSubArea(e.target.value)}
+                  placeholder="e.g., Elan, Harmony, Alaya..."
+                  list="subarea-suggestions"
+                />
+                {existingSubAreas.length > 0 && (
+                  <datalist id="subarea-suggestions">
+                    {existingSubAreas.map((sa) => (
+                      <option key={sa} value={sa} />
+                    ))}
+                  </datalist>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label>Property Type *</Label>
                 <Select value={type} onValueChange={(v) => setType(v as ListingType)}>
                   <SelectTrigger>
@@ -187,6 +212,16 @@ export function CreateListingDialog({
                     <SelectItem value="retail">Retail</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="availability">Availability</Label>
+                <Input
+                  id="availability"
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value)}
+                  placeholder="e.g., Immediate"
+                />
               </div>
             </div>
 
@@ -216,7 +251,7 @@ export function CreateListingDialog({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="bedrooms">Bedrooms</Label>
                 <Input
@@ -236,16 +271,6 @@ export function CreateListingDialog({
                   value={bathrooms}
                   onChange={(e) => setBathrooms(e.target.value)}
                   placeholder="e.g., 5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="availability">Availability</Label>
-                <Input
-                  id="availability"
-                  value={availability}
-                  onChange={(e) => setAvailability(e.target.value)}
-                  placeholder="e.g., Immediate"
                 />
               </div>
             </div>
