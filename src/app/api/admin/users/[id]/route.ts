@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient, DEMO_USER } from "@/lib/demo-auth"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 // GET /api/admin/users/:id - Get single user
 export async function GET(
@@ -12,9 +12,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Demo mode: return demo user
     const { id } = await params
-    const user = DEMO_USER
+    const client = await clerkClient()
+    const user = await client.users.getUser(id)
 
     return NextResponse.json({
       user: {
@@ -54,16 +54,32 @@ export async function PATCH(
     const body = await request.json()
     const { role, area, firstName, lastName } = body
 
-    // Demo mode: simulate update
-    console.log("Demo mode: User update simulated", { id, role, area, firstName, lastName })
+    const client = await clerkClient()
+
+    // Update name if provided
+    if (firstName !== undefined || lastName !== undefined) {
+      await client.users.updateUser(id, { firstName, lastName })
+    }
+
+    // Update publicMetadata role/area
+    const currentUser = await client.users.getUser(id)
+    await client.users.updateUserMetadata(id, {
+      publicMetadata: {
+        ...currentUser.publicMetadata,
+        ...(role !== undefined && { role }),
+        ...(area !== undefined && { area }),
+      },
+    })
+
+    const updatedUser = await client.users.getUser(id)
 
     return NextResponse.json({
       user: {
-        id,
-        name: `${firstName || DEMO_USER.firstName} ${lastName || DEMO_USER.lastName}`.trim(),
-        email: DEMO_USER.emailAddresses[0]?.emailAddress || "",
-        role: role || "agent",
-        area: area || null,
+        id: updatedUser.id,
+        name: `${updatedUser.firstName || ""} ${updatedUser.lastName || ""}`.trim(),
+        email: updatedUser.emailAddresses[0]?.emailAddress || "",
+        role: (updatedUser.publicMetadata?.role as string) || "agent",
+        area: (updatedUser.publicMetadata?.area as string) || null,
       },
     })
   } catch (error) {
@@ -88,7 +104,6 @@ export async function DELETE(
 
     const { id } = await params
 
-    // Prevent self-deletion
     if (id === userId) {
       return NextResponse.json(
         { error: "Cannot delete your own account" },
@@ -96,8 +111,8 @@ export async function DELETE(
       )
     }
 
-    // Demo mode: simulate deletion
-    console.log("Demo mode: User deletion simulated", id)
+    const client = await clerkClient()
+    await client.users.deleteUser(id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

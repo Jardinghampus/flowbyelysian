@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient } from "@/lib/demo-auth"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 // GET /api/admin/users - List all users (admin only)
 export async function GET() {
@@ -9,9 +9,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Demo mode: always admin access
-    const clerk = await clerkClient()
-    const { data: users } = await clerk.users.getUserList()
+    const client = await clerkClient()
+    const { data: users } = await client.users.getUserList({ limit: 100 })
 
     const transformedUsers = users.map((user) => ({
       id: user.id,
@@ -49,9 +48,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 })
     }
 
-    // Demo mode: simulate invitation creation
-    const clerk = await clerkClient()
-    const invitation = await clerk.invitations.createInvitation({
+    const client = await clerkClient()
+    const invitation = await client.invitations.createInvitation({
       emailAddress: email,
       publicMetadata: {
         role,

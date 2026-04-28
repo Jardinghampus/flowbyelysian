@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, DEMO_USER_ID } from "@/lib/demo-auth"
+import { auth } from "@/lib/demo-auth"
 
 type NotificationRow = {
   id: string

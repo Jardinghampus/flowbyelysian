@@ -1,18 +1,31 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-// Demo mode: No authentication required
-// All routes are accessible for demonstration purposes
-export function middleware(request: NextRequest) {
-  // Allow all requests to pass through
-  return NextResponse.next()
-}
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/sign-in-2(.*)",
+  "/sign-up-2(.*)",
+  "/sign-in-3(.*)",
+  "/sign-up-3(.*)",
+  "/forgot-password(.*)",
+  "/errors(.*)",
+  "/feature(.*)",
+  "/properties(.*)",
+  "/api/chat/inbound(.*)",
+  "/api/mock/(.*)",
+  "/api/news(.*)",
+])
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect()
+  }
+})
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 }

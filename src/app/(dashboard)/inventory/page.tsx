@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react"
 import { Plus, Sparkles, Filter, X, Loader2 } from "lucide-react"
+import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -104,8 +105,8 @@ function mapListingToDb(listing: Omit<Listing, "id" | "createdAt" | "updatedAt" 
   }
 }
 
-const CURRENT_USER_ID = "demo-user-001"
-const CURRENT_USER_NAME = "Demo User"
+const FALLBACK_USER_ID = "demo-user-001"
+const FALLBACK_USER_NAME = "Agent"
 
 const AREAS = [
   "Emirates Hills",
@@ -159,6 +160,10 @@ const defaultFilters: Filters = {
 }
 
 export default function InventoryPage() {
+  const { user } = useUser()
+  const CURRENT_USER_ID = user?.id ?? FALLBACK_USER_ID
+  const CURRENT_USER_NAME = user?.fullName ?? FALLBACK_USER_NAME
+
   const [listings, setListings] = useState<Listing[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)

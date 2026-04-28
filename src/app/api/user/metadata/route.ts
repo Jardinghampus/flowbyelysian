@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient, DEMO_USER } from "@/lib/demo-auth"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
 // GET /api/user/metadata - Get current user metadata
 export async function GET() {
@@ -9,10 +9,12 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Demo mode: return demo user metadata
+    const client = await clerkClient()
+    const user = await client.users.getUser(userId)
+
     return NextResponse.json({
-      publicMetadata: DEMO_USER.publicMetadata,
-      privateMetadata: DEMO_USER.privateMetadata,
+      publicMetadata: user.publicMetadata,
+      privateMetadata: user.privateMetadata,
     })
   } catch (error) {
     console.error("Error fetching user metadata:", error)
@@ -34,15 +36,19 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { phone, area, ...otherMetadata } = body
 
-    // Demo mode: simulate metadata update
+    const client = await clerkClient()
+    const currentUser = await client.users.getUser(userId)
+
     const updatedMetadata = {
-      ...DEMO_USER.publicMetadata,
+      ...currentUser.publicMetadata,
       ...(phone !== undefined && { phone }),
       ...(area !== undefined && { area }),
       ...otherMetadata,
     }
 
-    console.log("Demo mode: Metadata update simulated", updatedMetadata)
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: updatedMetadata,
+    })
 
     return NextResponse.json({
       success: true,
