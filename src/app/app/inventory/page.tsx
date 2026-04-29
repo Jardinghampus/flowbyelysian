@@ -49,12 +49,14 @@ export interface Listing {
   transactionType: TransactionType
   notes: string
   propertyFinderUrl?: string
+  googleMapsUrl?: string
   images: string[]
   bedrooms?: number
   bathrooms?: number
   availability?: string
   ownerId: string
   ownerName: string
+  ownerContactId?: string
   createdAt: string
   updatedAt: string
 }
@@ -74,12 +76,14 @@ function mapDbToListing(row: any): Listing {
     transactionType: row.transaction_type,
     notes: row.notes || "",
     propertyFinderUrl: row.property_finder_url || undefined,
+    googleMapsUrl: row.google_maps_url || undefined,
     images: row.images || [],
     bedrooms: row.bedrooms || undefined,
     bathrooms: row.bathrooms || undefined,
     availability: row.availability || undefined,
     ownerId: row.owner_id,
     ownerName: row.owner_name || "Unknown",
+    ownerContactId: row.owner_contact_id || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -98,6 +102,7 @@ function mapListingToDb(listing: Omit<Listing, "id" | "createdAt" | "updatedAt" 
     transaction_type: listing.transactionType,
     notes: listing.notes || null,
     property_finder_url: listing.propertyFinderUrl || null,
+    google_maps_url: listing.googleMapsUrl || null,
     images: listing.images,
     bedrooms: listing.bedrooms || null,
     bathrooms: listing.bathrooms || null,

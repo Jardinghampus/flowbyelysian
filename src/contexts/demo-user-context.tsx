@@ -22,6 +22,8 @@ export function useDemoUser() {
             role?: string
             phone?: string
             area?: string
+            brn?: string
+            [key: string]: unknown
           },
           update: (data: { firstName?: string; lastName?: string }) =>
             user.update(data),

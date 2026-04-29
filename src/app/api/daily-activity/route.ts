@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createServerClient } from "@/lib/supabase/server"
 
 // GET - Fetch daily activity logs (supports ?date=YYYY-MM-DD and ?agent_id=xxx)
 export async function GET(request: Request) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServerClient() as any
   try {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get("date")
@@ -49,6 +46,8 @@ export async function GET(request: Request) {
 
 // POST - Create or update daily activity (upsert on agent_id + activity_date)
 export async function POST(request: Request) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServerClient() as any
   try {
     const body = await request.json()
     const { agent_id, activity_date, calls_wa, leads, viewings, notes } = body

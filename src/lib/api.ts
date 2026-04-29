@@ -1,4 +1,4 @@
-import { DEMO_USER_ID } from "@/lib/demo-auth"
+const DEMO_USER_ID = ""
 
 export interface ActiveUserSummary {
   userId: string
