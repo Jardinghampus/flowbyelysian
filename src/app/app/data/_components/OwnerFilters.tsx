@@ -19,7 +19,6 @@ interface OwnerFiltersProps {
   onAddOwner: () => void
   onLogOutreach: () => void
   onExport: () => void
-  areas: string[]
   subAreas: string[]
 }
 
@@ -29,7 +28,6 @@ export function OwnerFilters({
   onAddOwner,
   onLogOutreach,
   onExport,
-  areas,
   subAreas,
 }: OwnerFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search)
@@ -45,7 +43,7 @@ export function OwnerFilters({
   }, [searchInput, filters, onFiltersChange])
 
   const hasActiveFilters =
-    filters.area || filters.subArea || filters.bedrooms || filters.status || filters.agent || filters.dateFrom || filters.dateTo
+    filters.subArea || filters.bedrooms || filters.status || filters.agent || filters.dateFrom || filters.dateTo
 
   const clearFilters = () => {
     setSearchInput("")
@@ -84,21 +82,6 @@ export function OwnerFilters({
         </div>
 
         {/* Quick filters */}
-        <Select
-          value={filters.area || "all"}
-          onValueChange={(v) => onFiltersChange({ ...filters, area: v === "all" ? "" : v, subArea: "" })}
-        >
-          <SelectTrigger className="w-[160px] h-9 bg-background/50">
-            <SelectValue placeholder="Area" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Areas</SelectItem>
-            {areas.map((area) => (
-              <SelectItem key={area} value={area}>{area}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         {subAreas.length > 0 && (
           <Select
             value={filters.subArea || "all"}

@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useMemo } from "react"
-import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, ShieldCheck, Zap } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, Zap } from "lucide-react"
 import { StatsBar } from "./_components/StatsBar"
 import { OwnerFilters } from "./_components/OwnerFilters"
 import { OwnerTable } from "./_components/OwnerTable"
@@ -53,6 +52,13 @@ export default function DataPage() {
   // Agents only see their assigned areas; admins see everything
   const areas = isAdmin ? allAreas : (agentAreas.length > 0 ? agentAreas : allAreas)
 
+  // Area tab state — "all" or a specific area name
+  const [activeAreaTab, setActiveAreaTab] = useState("all")
+
+  // Stable tab list for admins: computed from unfiltered owners on first load,
+  // then frozen so switching tabs doesn't destroy the list
+  const [adminAreaTabs, setAdminAreaTabs] = useState<string[]>([])
+
   const [filters, setFilters] = useState<OwnerFiltersState>({
     search: "",
     area: "",
@@ -66,15 +72,37 @@ export default function DataPage() {
 
   const [showHidden, setShowHidden] = useState(false)
 
-  // For agents with area assignments, filter owners to their areas
-  const effectiveFilters = (!isAdmin && agentAreas.length > 0 && !filters.area)
-    ? { ...filters, area: agentAreas.join(",") }
-    : filters
+  // Area tabs to render: agents use their assigned areas, admins derive from loaded owners
+  const areaTabs = useMemo(() => {
+    if (!isAdmin && agentAreas.length > 0) return agentAreas
+    return adminAreaTabs
+  }, [isAdmin, agentAreas, adminAreaTabs])
+
+  // Effective query filters: area driven by tab, then by agent assignment for "all" tab
+  const effectiveFilters = useMemo(() => {
+    if (activeAreaTab !== "all") return { ...filters, area: activeAreaTab }
+    if (!isAdmin && agentAreas.length > 0) return { ...filters, area: agentAreas.join(",") }
+    return filters
+  }, [filters, isAdmin, agentAreas, activeAreaTab])
 
   const { owners, total, loading: ownersLoading, refetch: refetchOwners } = useOwners(effectiveFilters, showHidden)
   const { stats, loading: statsLoading, refetch: refetchStats } = useOwnerStats(effectiveFilters)
   const { overdue, dueSoon, loading: todosLoading, refetch: refetchTodos } = useTodos()
   const { performance, loading: perfLoading } = useAgentPerformance()
+
+  // Build stable admin tab list from all-areas load
+  useEffect(() => {
+    if (!isAdmin || activeAreaTab !== "all" || ownersLoading || owners.length === 0) return
+    const set = new Set<string>()
+    owners.forEach((o) => { if (o.area) set.add(o.area) })
+    const sorted = Array.from(set).sort()
+    if (sorted.length > 0) setAdminAreaTabs(sorted)
+  }, [isAdmin, owners, ownersLoading, activeAreaTab])
+
+  const handleAreaTabChange = (tab: string) => {
+    setActiveAreaTab(tab)
+    setFilters((f) => ({ ...f, subArea: "" }))
+  }
 
   const [addOwnerOpen, setAddOwnerOpen] = useState(false)
   const [logOutreachOpen, setLogOutreachOpen] = useState(false)
@@ -89,6 +117,7 @@ export default function DataPage() {
   const [sideTab, setSideTab] = useState<SideTab>("todo")
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
+  // Sub-areas narrow automatically based on what's in the current area's owners
   const subAreas = useMemo(() => {
     const set = new Set<string>()
     for (const o of owners) {
@@ -215,15 +244,6 @@ export default function DataPage() {
               <p className="text-xs text-muted-foreground">
                 Owner intelligence & outreach tracking — {total} owners
               </p>
-              {!isAdmin && agentAreas.length > 0 && (
-                <div className="flex items-center gap-1.5 mt-1">
-                  <ShieldCheck className="h-3 w-3 text-[#C9A84C]" />
-                  <span className="text-[10px] text-muted-foreground">Your areas:</span>
-                  {agentAreas.map((a) => (
-                    <Badge key={a} variant="outline" className="text-[10px] h-4 px-1.5 border-[#C9A84C]/30 text-[#C9A84C]">{a}</Badge>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -252,6 +272,37 @@ export default function DataPage() {
         {/* Stats */}
         <StatsBar stats={stats} loading={statsLoading} />
 
+        {/* Area tabs */}
+        {(areaTabs.length > 0 || agentAreasLoading) && (
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none -mx-0 pb-0.5">
+            <button
+              onClick={() => handleAreaTabChange("all")}
+              className={cn(
+                "shrink-0 h-7 px-3 rounded-full text-xs font-medium transition-colors",
+                activeAreaTab === "all"
+                  ? "bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30"
+                  : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
+              )}
+            >
+              All
+            </button>
+            {areaTabs.map((area) => (
+              <button
+                key={area}
+                onClick={() => handleAreaTabChange(area)}
+                className={cn(
+                  "shrink-0 h-7 px-3 rounded-full text-xs font-medium transition-colors whitespace-nowrap",
+                  activeAreaTab === area
+                    ? "bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30"
+                    : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
+                )}
+              >
+                {area}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Filters */}
         <OwnerFilters
           filters={filters}
@@ -259,7 +310,6 @@ export default function DataPage() {
           onAddOwner={() => setAddOwnerOpen(true)}
           onLogOutreach={() => { setOutreachOwner(null); setLogOutreachOpen(true) }}
           onExport={handleExport}
-          areas={areas}
           subAreas={subAreas}
         />
 
