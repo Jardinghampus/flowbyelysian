@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useMemo } from "react"
-import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, ShieldCheck } from "lucide-react"
+import { Database, ListChecks, BarChart3, PanelRightClose, PanelRightOpen, Eye, EyeOff, ShieldCheck, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { StatsBar } from "./_components/StatsBar"
 import { OwnerFilters } from "./_components/OwnerFilters"
@@ -9,6 +9,7 @@ import { OwnerTable } from "./_components/OwnerTable"
 import { AddOwnerModal } from "./_components/AddOwnerModal"
 import { LogOutreachModal } from "./_components/LogOutreachModal"
 import { OwnerDetailPanel } from "./_components/OwnerDetailPanel"
+import { OutreachScriptPanel } from "./_components/OutreachScriptPanel"
 import { TodoPanel } from "./_components/TodoPanel"
 import { PerformancePanel } from "./_components/PerformancePanel"
 import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance, useAgentAreas } from "./_hooks/useOwners"
@@ -18,6 +19,7 @@ import { useRole } from "@/contexts/role-context"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { useUser } from "@clerk/nextjs"
 import Papa from "papaparse"
 
 type SideTab = "todo" | "performance"
@@ -43,6 +45,9 @@ function useAreas() {
 export default function DataPage() {
   const allAreas = useAreas()
   const { isAdmin } = useRole()
+  const { user } = useUser()
+  const agentName = user?.fullName || user?.firstName || ""
+  const [scriptsOpen, setScriptsOpen] = useState(false)
   const { areas: agentAreas, loading: agentAreasLoading } = useAgentAreas(isAdmin)
 
   // Agents only see their assigned areas; admins see everything
@@ -353,6 +358,26 @@ export default function DataPage() {
         onRefresh={refetchDetail}
         onRefreshAll={refreshAll}
         areas={areas}
+      />
+
+      {/* Floating scripts button */}
+      <button
+        onClick={() => setScriptsOpen(true)}
+        className={cn(
+          "fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full px-4 py-2.5 shadow-lg",
+          "bg-[#C9A84C] text-black font-semibold text-sm",
+          "hover:bg-[#B8973B] transition-colors duration-150",
+          scriptsOpen && "opacity-0 pointer-events-none"
+        )}
+      >
+        <Zap className="h-4 w-4 fill-current" />
+        Scripts
+      </button>
+
+      <OutreachScriptPanel
+        open={scriptsOpen}
+        onOpenChange={setScriptsOpen}
+        agentName={agentName}
       />
     </div>
   )
