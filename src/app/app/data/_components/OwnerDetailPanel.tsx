@@ -18,12 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Phone, MessageSquare, Mail, Users, Smartphone, ExternalLink, Loader2, Save, Link2, Unlink, Building2 } from "lucide-react"
+import { Phone, MessageSquare, Mail, Users, Smartphone, ExternalLink, Loader2, Save, Link2, Unlink, Building2, Zap } from "lucide-react"
 import type { Owner, OutreachLog, OutreachType, OwnerStatus, OwnerPriority, LinkedListing } from "../_lib/types"
 import { STATUS_CONFIG, PRIORITY_CONFIG, OUTREACH_TYPE_CONFIG } from "../_lib/types"
 import { cn } from "@/lib/utils"
 import { format, formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
+import { OutreachScriptPanel } from "./OutreachScriptPanel"
+import { useUser } from "@clerk/nextjs"
 
 interface OwnerDetailPanelProps {
   open: boolean
@@ -57,7 +59,10 @@ export function OwnerDetailPanel({
   areas,
 }: OwnerDetailPanelProps) {
   const DUBAI_AREAS = areas || []
+  const { user } = useUser()
+  const agentName = user?.fullName || user?.firstName || "Your Agent"
   const [saving, setSaving] = useState(false)
+  const [scriptsOpen, setScriptsOpen] = useState(false)
   const [editName, setEditName] = useState("")
   const [editPhone, setEditPhone] = useState("")
   const [editArea, setEditArea] = useState("")
@@ -150,8 +155,25 @@ export function OwnerDetailPanel({
                   WhatsApp
                   <ExternalLink className="h-3 w-3" />
                 </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto h-7 gap-1.5 px-2.5 text-xs text-[#C9A84C] hover:text-[#C9A84C] hover:bg-[#C9A84C]/10 border border-[#C9A84C]/30"
+                  onClick={() => setScriptsOpen(true)}
+                >
+                  <Zap className="h-3 w-3" />
+                  Scripts
+                </Button>
               </div>
             </SheetHeader>
+
+            <OutreachScriptPanel
+              open={scriptsOpen}
+              onOpenChange={setScriptsOpen}
+              ownerName={owner.name}
+              ownerArea={owner.area}
+              agentName={agentName}
+            />
 
             {/* Editable fields */}
             <div className="p-6 space-y-4 border-b">
