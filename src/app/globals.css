@@ -3,6 +3,58 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─────────────────────────────────────────────────────────
+   DESIGN SYSTEM — COLOR PALETTE
+   Neutrals override the built-in Tailwind neutral scale so
+   every existing bg-neutral-* / text-neutral-* class in the
+   CRM automatically picks up the new blue-gray tones.
+   Named tokens (black-*, white-*, semantic, gold) are
+   available as utility classes: bg-black-100, text-green-60, etc.
+   ───────────────────────────────────────────────────────── */
+@theme {
+  /* Neutral scale — remapped to blue-gray design palette */
+  --color-neutral-50:  #FFFFFF;
+  --color-neutral-100: #F0F1F5;
+  --color-neutral-200: #E0E4EB;
+  --color-neutral-300: #D1D6E0;
+  --color-neutral-400: #BFC6D4;
+  --color-neutral-500: #AAB2C0;
+  --color-neutral-600: #667085;
+  --color-neutral-700: #4E576A;
+  --color-neutral-800: #373F4E;
+  --color-neutral-900: #212631;
+  --color-neutral-950: #0A0E15;
+
+  /* Semantic surface tokens — named explicitly for component use */
+  --color-black-100: #0A0E15;  /* app canvas (darkest) */
+  --color-black-90:  #212631;  /* cards, panels */
+  --color-black-80:  #373F4E;  /* elevated surfaces, hover */
+  --color-black-70:  #4E576A;  /* borders, dividers */
+  --color-black-60:  #667085;  /* disabled text, tertiary UI */
+
+  --color-white-100: #FFFFFF;
+  --color-white-90:  #F0F1F5;  /* light-mode cards */
+  --color-white-80:  #E0E4EB;  /* secondary surfaces / dark-mode body text */
+  --color-white-70:  #D1D6E0;  /* light-mode borders */
+  --color-white-60:  #BFC6D4;  /* disabled states */
+
+  /* Semantic / context colors */
+  --color-green-100: #BEEFEB;  /* success background tint */
+  --color-green-80:  #98D1D7;  /* hover / subtle fill */
+  --color-green-60:  #66CCBE;  /* primary semantic accent */
+
+  --color-yellow-100: #FBEFBB; /* warning background tint */
+  --color-yellow-80:  #EED263; /* hover / subtle fill */
+  --color-yellow-60:  #E5C443; /* warning text / icon */
+
+  --color-red-100: #FFE4E4;    /* error background tint */
+  --color-red-60:  #E05C5C;    /* error text / icon (not neon) */
+
+  /* Brand gold — CTA primary throughout the CRM */
+  --color-gold:       #C9A84C;
+  --color-gold-hover: #B8973B;
+}
+
 @theme inline {
   --font-sans: var(--font-inter);
   --radius-sm: calc(var(--radius) - 4px);
@@ -44,42 +96,47 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --card: #ffffff;
-  --card-foreground: #0a0a0a;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #0a0a0a;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #0a0a0a;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #0a0a0a;
-  --chart-1: #0a0a0a;
-  --chart-2: #333333;
-  --chart-3: #666666;
-  --chart-4: #999999;
-  --chart-5: #cccccc;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0a0a0a;
-  --sidebar-primary: #0a0a0a;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #0a0a0a;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #0a0a0a;
+
+  /* Light mode — white-* surfaces, l.* text, gold primary */
+  --background:            #FFFFFF;
+  --foreground:            #373F4E;   /* l.body */
+  --card:                  #F0F1F5;   /* white-90 */
+  --card-foreground:       #373F4E;
+  --popover:               #FFFFFF;
+  --popover-foreground:    #373F4E;
+  --primary:               #C9A84C;   /* brand gold */
+  --primary-foreground:    #0A0E15;
+  --secondary:             #E0E4EB;   /* white-80 */
+  --secondary-foreground:  #373F4E;
+  --muted:                 #F0F1F5;   /* white-90 */
+  --muted-foreground:      #667085;   /* l.secondary */
+  --accent:                #E0E4EB;
+  --accent-foreground:     #0A0E15;
+  --destructive:           #E05C5C;   /* red-60 */
+  --border:                #D1D6E0;   /* white-70 */
+  --input:                 #E0E4EB;   /* white-80 */
+  --ring:                  #C9A84C;
+
+  /* Charts — semantic palette for light mode */
+  --chart-1: #66CCBE;
+  --chart-2: #E5C443;
+  --chart-3: #C9A84C;
+  --chart-4: #98D1D7;
+  --chart-5: #EED263;
+
+  /* Sidebar */
+  --sidebar:                      #F0F1F5;
+  --sidebar-foreground:           #373F4E;
+  --sidebar-primary:              #C9A84C;
+  --sidebar-primary-foreground:   #0A0E15;
+  --sidebar-accent:               #E0E4EB;
+  --sidebar-accent-foreground:    #373F4E;
+  --sidebar-border:               #D1D6E0;
+  --sidebar-ring:                 #C9A84C;
 
   /* Mobile Fluid Sizing System */
   --fluid-min-width: 320;
   --fluid-max-width: 430;
-
   --fluid-screen: 100vw;
   --fluid-bp: calc((var(--fluid-screen) - var(--fluid-min-width) * 1px) / (var(--fluid-max-width) - var(--fluid-min-width)));
 
@@ -94,37 +151,42 @@
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #fafafa;
-  --card: #0a0a0a;
-  --card-foreground: #fafafa;
-  --popover: #0a0a0a;
-  --popover-foreground: #fafafa;
-  --primary: #00d4ff;
-  --primary-foreground: #000000;
-  --secondary: #0a0a0a;
-  --secondary-foreground: #fafafa;
-  --muted: #0a0a0a;
-  --muted-foreground: #a3a3a3;
-  --accent: #00d4ff;
-  --accent-foreground: #000000;
-  --destructive: #cf6679;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #00d4ff;
-  --chart-1: #00d4ff;
-  --chart-2: #03dac6;
-  --chart-3: #00a8cc;
-  --chart-4: #0088a8;
-  --chart-5: #006688;
-  --sidebar: #000000;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #00d4ff;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #0a0a0a;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #00d4ff;
+  /* Dark mode — black-* surfaces, d.* text, gold primary */
+  --background:            #0A0E15;   /* black-100 — canvas */
+  --foreground:            #E0E4EB;   /* d.body */
+  --card:                  #212631;   /* black-90 — panels */
+  --card-foreground:       #E0E4EB;
+  --popover:               #212631;
+  --popover-foreground:    #E0E4EB;
+  --primary:               #C9A84C;   /* brand gold */
+  --primary-foreground:    #0A0E15;
+  --secondary:             #373F4E;   /* black-80 — elevated */
+  --secondary-foreground:  #E0E4EB;
+  --muted:                 #212631;   /* black-90 */
+  --muted-foreground:      #AAB2C0;   /* d.secondary */
+  --accent:                #373F4E;   /* black-80 */
+  --accent-foreground:     #E0E4EB;
+  --destructive:           #E05C5C;   /* red-60 */
+  --border:                #4E576A;   /* black-70 */
+  --input:                 #373F4E;   /* black-80 */
+  --ring:                  #C9A84C;
+
+  /* Charts — semantic palette */
+  --chart-1: #66CCBE;
+  --chart-2: #E5C443;
+  --chart-3: #C9A84C;
+  --chart-4: #98D1D7;
+  --chart-5: #EED263;
+
+  /* Sidebar */
+  --sidebar:                      #0A0E15;
+  --sidebar-foreground:           #E0E4EB;
+  --sidebar-primary:              #C9A84C;
+  --sidebar-primary-foreground:   #0A0E15;
+  --sidebar-accent:               #373F4E;
+  --sidebar-accent-foreground:    #E0E4EB;
+  --sidebar-border:               #4E576A;
+  --sidebar-ring:                 #C9A84C;
 }
 
 @layer base {
@@ -335,7 +397,7 @@ html {
 }
 
 .dark .card-hover-glow:hover {
-  box-shadow: 0 8px 40px -8px rgba(0, 212, 255, 0.08);
+  box-shadow: 0 8px 40px -8px rgba(201, 168, 76, 0.08);
 }
 
 /* Gradient text utility */
@@ -444,10 +506,10 @@ html {
 
 /* Selection styling */
 ::selection {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(201, 168, 76, 0.18);
   color: inherit;
 }
 
 .dark ::selection {
-  background: rgba(0, 212, 255, 0.2);
+  background: rgba(201, 168, 76, 0.22);
 }
