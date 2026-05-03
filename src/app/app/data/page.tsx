@@ -142,6 +142,21 @@ export default function DataPage() {
     setLogOutreachOpen(true)
   }
 
+  const handleQuickLog = useCallback(async (owner: Owner, type: "call" | "whatsapp") => {
+    try {
+      const res = await fetch("/api/outreach-logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner_id: owner.id, type, outcome: "No answer" }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success(`${type === "call" ? "Call" : "WhatsApp"} attempt logged`)
+      refreshAll()
+    } catch {
+      toast.error("Failed to log attempt")
+    }
+  }, [refreshAll])
+
   const handleArchive = async (owner: Owner) => {
     try {
       const res = await fetch(`/api/owners/${owner.id}`, {
@@ -236,8 +251,8 @@ export default function DataPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-[#C9A84C]/10 flex items-center justify-center">
-              <Database className="h-5 w-5 text-[#C9A84C]" />
+            <div className="h-9 w-9 rounded-xl bg-[#4B8EDB]/10 flex items-center justify-center">
+              <Database className="h-5 w-5 text-[#4B8EDB]" />
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight">Data</h1>
@@ -280,7 +295,7 @@ export default function DataPage() {
               className={cn(
                 "shrink-0 h-7 px-3 rounded-full text-xs font-medium transition-colors",
                 activeAreaTab === "all"
-                  ? "bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30"
+                  ? "bg-[#4B8EDB]/15 text-[#4B8EDB] border border-[#4B8EDB]/30"
                   : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
               )}
             >
@@ -293,7 +308,7 @@ export default function DataPage() {
                 className={cn(
                   "shrink-0 h-7 px-3 rounded-full text-xs font-medium transition-colors whitespace-nowrap",
                   activeAreaTab === area
-                    ? "bg-[#C9A84C]/15 text-[#C9A84C] border border-[#C9A84C]/30"
+                    ? "bg-[#4B8EDB]/15 text-[#4B8EDB] border border-[#4B8EDB]/30"
                     : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
                 )}
               >
@@ -319,6 +334,7 @@ export default function DataPage() {
           loading={ownersLoading}
           onRowClick={handleRowClick}
           onLogOutreach={handleLogOutreach}
+          onQuickLog={handleQuickLog}
           onDelete={handleDelete}
           onArchive={handleArchive}
           onRestore={handleRestore}
@@ -343,7 +359,7 @@ export default function DataPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
                   sideTab === "todo"
-                    ? "text-foreground border-[#C9A84C]"
+                    ? "text-foreground border-[#4B8EDB]"
                     : "text-muted-foreground border-transparent hover:text-foreground"
                 )}
               >
@@ -360,7 +376,7 @@ export default function DataPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-medium transition-colors border-b-2",
                   sideTab === "performance"
-                    ? "text-foreground border-[#C9A84C]"
+                    ? "text-foreground border-[#4B8EDB]"
                     : "text-muted-foreground border-transparent hover:text-foreground"
                 )}
               >
@@ -415,8 +431,8 @@ export default function DataPage() {
         onClick={() => setScriptsOpen(true)}
         className={cn(
           "fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full px-4 py-2.5 shadow-lg",
-          "bg-[#C9A84C] text-black font-semibold text-sm",
-          "hover:bg-[#B8973B] transition-colors duration-150",
+          "bg-[#4B8EDB] text-white font-semibold text-sm",
+          "hover:bg-[#3A7DCB] transition-colors duration-150",
           scriptsOpen && "opacity-0 pointer-events-none"
         )}
       >

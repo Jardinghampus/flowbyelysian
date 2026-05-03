@@ -160,7 +160,7 @@ export function OwnerFilters({
             <Phone className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Log Outreach</span>
           </Button>
-          <Button size="sm" className="h-9 gap-1.5 bg-[#C9A84C] hover:bg-[#B8973B] text-black" onClick={onAddOwner}>
+          <Button size="sm" className="h-9 gap-1.5 bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white" onClick={onAddOwner}>
             <Plus className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Add Owner</span>
           </Button>

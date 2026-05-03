@@ -83,11 +83,11 @@ export function PerformancePanel({ performance, loading }: PerformancePanelProps
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Conversion</span>
-              <span className="font-medium text-[#C9A84C]">{agent.conversion_rate}%</span>
+              <span className="font-medium text-[#4B8EDB]">{agent.conversion_rate}%</span>
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#C9A84C] transition-all"
+                className="h-full rounded-full bg-[#4B8EDB] transition-all"
                 style={{ width: `${Math.min(agent.conversion_rate, 100)}%` }}
               />
             </div>

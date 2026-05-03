@@ -164,7 +164,7 @@ export function ViewListingDialog({
           {listing.ownerContactId && (
             <a
               href="/app/data"
-              className="text-xs text-[#C9A84C] hover:underline flex items-center gap-1"
+              className="text-xs text-[#4B8EDB] hover:underline flex items-center gap-1"
             >
               Owner linked
             </a>

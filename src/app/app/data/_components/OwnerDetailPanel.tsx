@@ -129,7 +129,7 @@ export function OwnerDetailPanel({
       <SheetContent className="w-full sm:max-w-[480px] overflow-y-auto p-0">
         {loading || !owner ? (
           <div className="flex items-center justify-center h-full">
-            <div className="h-6 w-6 rounded-full border-2 border-[#C9A84C] border-t-transparent animate-spin" />
+            <div className="h-6 w-6 rounded-full border-2 border-[#4B8EDB] border-t-transparent animate-spin" />
           </div>
         ) : (
           <>
@@ -158,7 +158,7 @@ export function OwnerDetailPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="ml-auto h-7 gap-1.5 px-2.5 text-xs text-[#C9A84C] hover:text-[#C9A84C] hover:bg-[#C9A84C]/10 border border-[#C9A84C]/30"
+                  className="ml-auto h-7 gap-1.5 px-2.5 text-xs text-[#4B8EDB] hover:text-[#4B8EDB] hover:bg-[#4B8EDB]/10 border border-[#4B8EDB]/30"
                   onClick={() => setScriptsOpen(true)}
                 >
                   <Zap className="h-3 w-3" />
@@ -265,7 +265,7 @@ export function OwnerDetailPanel({
                   className="mt-1 text-sm resize-none"
                 />
               </div>
-              <Button onClick={handleSave} disabled={saving} size="sm" className="w-full bg-[#C9A84C] hover:bg-[#B8973B] text-black">
+              <Button onClick={handleSave} disabled={saving} size="sm" className="w-full bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white">
                 {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Save Changes
               </Button>
@@ -275,7 +275,7 @@ export function OwnerDetailPanel({
             {linkedListings.length > 0 && (
               <div className="p-6 border-b">
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  <Link2 className="h-3.5 w-3.5 text-[#C9A84C]" />
+                  <Link2 className="h-3.5 w-3.5 text-[#4B8EDB]" />
                   Linked Properties ({linkedListings.length})
                 </h3>
                 <div className="space-y-2">

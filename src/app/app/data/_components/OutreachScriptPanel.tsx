@@ -148,7 +148,7 @@ function ScriptCard({
       onClick={handleCopy}
       className={cn(
         "group relative flex flex-col gap-1.5 rounded-xl border p-3 text-left transition-all duration-150",
-        "bg-neutral-900 border-neutral-800 hover:border-[#C9A84C]/50 hover:bg-neutral-800/80",
+        "bg-neutral-900 border-neutral-800 hover:border-[#4B8EDB]/50 hover:bg-neutral-800/80",
         copied && "border-emerald-500/50 bg-emerald-500/5"
       )}
     >
@@ -159,7 +159,7 @@ function ScriptCard({
             "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all",
             copied
               ? "bg-emerald-500 text-white"
-              : "bg-neutral-800 text-neutral-500 group-hover:bg-[#C9A84C]/20 group-hover:text-[#C9A84C]"
+              : "bg-neutral-800 text-neutral-500 group-hover:bg-[#4B8EDB]/20 group-hover:text-[#4B8EDB]"
           )}
         >
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
@@ -204,7 +204,7 @@ export function OutreachScriptPanel({
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
-          <Zap className="h-3.5 w-3.5 text-[#C9A84C] shrink-0" />
+          <Zap className="h-3.5 w-3.5 text-[#4B8EDB] shrink-0" />
           <span className="text-sm font-semibold text-white">Message Scripts</span>
           {ownerNameProp && (
             <span className="ml-1 text-xs text-neutral-500 truncate">{ownerNameProp}</span>
@@ -216,7 +216,7 @@ export function OutreachScriptPanel({
               className={cn(
                 "h-6 w-6 rounded-full",
                 isPinned
-                  ? "text-[#C9A84C] hover:text-[#C9A84C]/80"
+                  ? "text-[#4B8EDB] hover:text-[#4B8EDB]/80"
                   : "text-neutral-500 hover:text-neutral-300"
               )}
               onClick={() => setIsPinned((p) => !p)}
@@ -256,7 +256,7 @@ export function OutreachScriptPanel({
         {/* Pin hint */}
         <div className={cn(
           "px-4 py-1 text-[10px] border-b border-neutral-800/50",
-          isPinned ? "text-[#C9A84C]/70 bg-[#C9A84C]/5" : "text-neutral-600"
+          isPinned ? "text-[#4B8EDB]/70 bg-[#4B8EDB]/5" : "text-neutral-600"
         )}>
           {isPinned ? "Pinned — stays open after copying" : "Tap a card to copy · Pin to keep open"}
         </div>
@@ -272,7 +272,7 @@ export function OutreachScriptPanel({
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="flex-1 h-7 rounded-md px-2 text-[11px] font-medium data-[state=active]:bg-[#C9A84C]/15 data-[state=active]:text-[#C9A84C] text-neutral-500 hover:text-neutral-300 transition-colors"
+                className="flex-1 h-7 rounded-md px-2 text-[11px] font-medium data-[state=active]:bg-[#4B8EDB]/15 data-[state=active]:text-[#4B8EDB] text-neutral-500 hover:text-neutral-300 transition-colors"
               >
                 {t.label}
               </TabsTrigger>

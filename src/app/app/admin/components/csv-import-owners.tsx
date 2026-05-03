@@ -308,7 +308,7 @@ export function CsvImportOwners() {
             onDragLeave={() => setDragActive(false)}
             onDrop={handleDrop}
             className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 transition-colors cursor-pointer ${
-              dragActive ? "border-[#C9A84C] bg-[#C9A84C]/5" : "border-muted-foreground/20 hover:border-muted-foreground/40"
+              dragActive ? "border-[#4B8EDB] bg-[#4B8EDB]/5" : "border-muted-foreground/20 hover:border-muted-foreground/40"
             }`}
             onClick={() => fileRef.current?.click()}
           >
@@ -331,11 +331,11 @@ export function CsvImportOwners() {
           <>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-wrap">
-                <FileSpreadsheet className="h-4 w-4 text-[#C9A84C]" />
+                <FileSpreadsheet className="h-4 w-4 text-[#4B8EDB]" />
                 <span className="text-sm font-medium">{fileName}</span>
                 <Badge variant="outline">{parsedRows.length} rows</Badge>
                 {isDld && (
-                  <Badge className="bg-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/30 text-xs">
+                  <Badge className="bg-[#4B8EDB]/10 text-[#4B8EDB] border border-[#4B8EDB]/30 text-xs">
                     DLD Format
                   </Badge>
                 )}
@@ -473,7 +473,7 @@ export function CsvImportOwners() {
               <Button
                 onClick={handleImport}
                 disabled={validCount === 0}
-                className="bg-[#C9A84C] hover:bg-[#B8973B] text-black"
+                className="bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white"
               >
                 Import {validCount} Owners
                 {areaFilter !== "__all__" && ` from ${areaFilter}`}
@@ -485,7 +485,7 @@ export function CsvImportOwners() {
         {stage === "importing" && (
           <div className="space-y-4 py-4">
             <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 animate-spin text-[#C9A84C]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[#4B8EDB]" />
               <span className="text-sm font-medium">Importing owners...</span>
             </div>
             <Progress value={progress} className="h-2" />

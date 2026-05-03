@@ -116,7 +116,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
   return (
     <div className="rounded-xl border p-4 space-y-2">
       <div className="flex items-center gap-2">
-        <Database className="h-4 w-4 text-[#C9A84C]" />
+        <Database className="h-4 w-4 text-[#4B8EDB]" />
         <h3 className="text-sm font-bold">Owner Database Link</h3>
       </div>
       {owner ? (
@@ -130,7 +130,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
           </div>
           <a
             href="/app/data"
-            className="text-xs text-[#C9A84C] hover:underline"
+            className="text-xs text-[#4B8EDB] hover:underline"
           >
             View in Data →
           </a>
@@ -140,7 +140,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
           <p className="text-xs text-muted-foreground">No matching owner found in database</p>
           <a
             href={`/app/data?prefillName=${encodeURIComponent(name)}&prefillPhone=${encodeURIComponent(phone)}&prefillArea=${encodeURIComponent(area || "")}`}
-            className="text-xs text-[#C9A84C] hover:underline"
+            className="text-xs text-[#4B8EDB] hover:underline"
           >
             + Add to Data
           </a>

@@ -168,7 +168,7 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
                     className={cn(
                       "flex flex-col items-center gap-1 rounded-lg border p-2.5 text-xs transition-all",
                       type === key
-                        ? "border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]"
+                        ? "border-[#4B8EDB] bg-[#4B8EDB]/10 text-[#4B8EDB]"
                         : "border-border hover:border-border/80 text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -230,7 +230,7 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
                   className={cn(
                     "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all",
                     followUpDays === preset.days && !useCustomDate
-                      ? "border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]"
+                      ? "border-[#4B8EDB] bg-[#4B8EDB]/10 text-[#4B8EDB]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-border/80"
                   )}
                 >
@@ -246,7 +246,7 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
                 className={cn(
                   "flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all",
                   useCustomDate
-                    ? "border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]"
+                    ? "border-[#4B8EDB] bg-[#4B8EDB]/10 text-[#4B8EDB]"
                     : "border-border text-muted-foreground hover:text-foreground hover:border-border/80"
                 )}
               >
@@ -266,7 +266,7 @@ export function LogOutreachModal({ open, onOpenChange, prefillOwner, owners, onS
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={loading} className="bg-[#C9A84C] hover:bg-[#B8973B] text-black">
+            <Button type="submit" disabled={loading} className="bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white">
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Log Outreach
             </Button>

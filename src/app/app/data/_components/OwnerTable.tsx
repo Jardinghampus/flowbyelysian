@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,8 +9,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table"
-import { useState } from "react"
-import { ArrowUpDown, Phone, MessageSquare, MoreHorizontal, ExternalLink, Archive, RotateCcw, Trash2 } from "lucide-react"
+import { ArrowUpDown, Phone, MessageSquare, MoreHorizontal, ExternalLink, Archive, RotateCcw, Trash2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -35,11 +34,89 @@ interface OwnerTableProps {
   loading: boolean
   onRowClick: (owner: Owner) => void
   onLogOutreach: (owner: Owner) => void
+  onQuickLog: (owner: Owner, type: "call" | "whatsapp") => Promise<void>
   onDelete: (owner: Owner) => void
   onArchive?: (owner: Owner) => void
   onRestore?: (owner: Owner) => void
   isAdmin?: boolean
   showHidden?: boolean
+}
+
+function QuickAttemptCell({
+  owner,
+  onQuickLog,
+}: {
+  owner: Owner
+  onQuickLog: (owner: Owner, type: "call" | "whatsapp") => Promise<void>
+}) {
+  const [callBusy, setCallBusy] = useState(false)
+  const [waBusy, setWaBusy] = useState(false)
+
+  const handleCall = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCallBusy(true)
+    await onQuickLog(owner, "call")
+    setCallBusy(false)
+  }
+
+  const handleWA = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setWaBusy(true)
+    await onQuickLog(owner, "whatsapp")
+    setWaBusy(false)
+  }
+
+  return (
+    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleCall}
+            className={cn(
+              "flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium transition-all",
+              owner.call_count === 0
+                ? "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/60"
+                : owner.call_count >= 3
+                  ? "text-amber-400 bg-amber-400/10 hover:bg-amber-400/20"
+                  : "text-[#4B8EDB] bg-[#4B8EDB]/10 hover:bg-[#4B8EDB]/20"
+            )}
+          >
+            {callBusy
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : <Phone className="h-3 w-3" />}
+            {owner.call_count > 0 && <span>{owner.call_count}</span>}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs">
+          {owner.call_count === 0 ? "Log call attempt" : `${owner.call_count} call${owner.call_count !== 1 ? "s" : ""} — click to add`}
+        </TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleWA}
+            className={cn(
+              "flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium transition-all",
+              owner.whatsapp_count === 0
+                ? "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/60"
+                : owner.whatsapp_count >= 3
+                  ? "text-amber-400 bg-amber-400/10 hover:bg-amber-400/20"
+                  : "text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20"
+            )}
+          >
+            {waBusy
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : <MessageSquare className="h-3 w-3" />}
+            {owner.whatsapp_count > 0 && <span>{owner.whatsapp_count}</span>}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs">
+          {owner.whatsapp_count === 0 ? "Log WhatsApp attempt" : `${owner.whatsapp_count} WhatsApp${owner.whatsapp_count !== 1 ? "s" : ""} — click to add`}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  )
 }
 
 function StatusBadge({ status }: { status: OwnerStatus }) {
@@ -93,7 +170,7 @@ function LastContactedLabel({ date }: { date: string | null }) {
   )
 }
 
-export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelete, onArchive, onRestore, isAdmin, showHidden }: OwnerTableProps) {
+export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onQuickLog, onDelete, onArchive, onRestore, isAdmin, showHidden }: OwnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const columns = useMemo<ColumnDef<Owner>[]>(
@@ -193,16 +270,9 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
       },
       {
         id: "outreach",
-        header: "Outreach",
+        header: "Attempts",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-0.5">
-              <Phone className="h-3 w-3" /> {row.original.call_count}
-            </span>
-            <span className="flex items-center gap-0.5">
-              <MessageSquare className="h-3 w-3" /> {row.original.whatsapp_count}
-            </span>
-          </div>
+          <QuickAttemptCell owner={row.original} onQuickLog={onQuickLog} />
         ),
         enableSorting: false,
       },
@@ -268,7 +338,7 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
         enableSorting: false,
       },
     ],
-    [onRowClick, onLogOutreach, onDelete, onArchive, onRestore, isAdmin, showHidden]
+    [onRowClick, onLogOutreach, onQuickLog, onDelete, onArchive, onRestore, isAdmin, showHidden]
   )
 
   const table = useReactTable({
@@ -285,7 +355,7 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onDelet
       <div className="rounded-xl border bg-background/50">
         <div className="p-8 text-center text-sm text-muted-foreground">
           <div className="flex items-center justify-center gap-2">
-            <div className="h-4 w-4 rounded-full border-2 border-[#C9A84C] border-t-transparent animate-spin" />
+            <div className="h-4 w-4 rounded-full border-2 border-[#4B8EDB] border-t-transparent animate-spin" />
             Loading owners...
           </div>
         </div>

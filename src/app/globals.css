@@ -8,7 +8,7 @@
    Neutrals override the built-in Tailwind neutral scale so
    every existing bg-neutral-* / text-neutral-* class in the
    CRM automatically picks up the new blue-gray tones.
-   Named tokens (black-*, white-*, semantic, gold) are
+   Named tokens (black-*, white-*, semantic, blue) are
    available as utility classes: bg-black-100, text-green-60, etc.
    ───────────────────────────────────────────────────────── */
 @theme {
@@ -50,9 +50,9 @@
   --color-red-100: #FFE4E4;    /* error background tint */
   --color-red-60:  #E05C5C;    /* error text / icon (not neon) */
 
-  /* Brand gold — CTA primary throughout the CRM */
-  --color-gold:       #C9A84C;
-  --color-gold-hover: #B8973B;
+  /* Brand blue — CTA primary throughout the CRM */
+  --color-blue:       #4B8EDB;
+  --color-blue-hover: #3A7DCB;
 }
 
 @theme inline {
@@ -104,7 +104,7 @@
   --card-foreground:       #373F4E;
   --popover:               #FFFFFF;
   --popover-foreground:    #373F4E;
-  --primary:               #C9A84C;   /* brand gold */
+  --primary:               #4B8EDB;   /* brand blue */
   --primary-foreground:    #0A0E15;
   --secondary:             #E0E4EB;   /* white-80 */
   --secondary-foreground:  #373F4E;
@@ -115,24 +115,24 @@
   --destructive:           #E05C5C;   /* red-60 */
   --border:                #D1D6E0;   /* white-70 */
   --input:                 #E0E4EB;   /* white-80 */
-  --ring:                  #C9A84C;
+  --ring:                  #4B8EDB;
 
   /* Charts — semantic palette for light mode */
   --chart-1: #66CCBE;
   --chart-2: #E5C443;
-  --chart-3: #C9A84C;
+  --chart-3: #4B8EDB;
   --chart-4: #98D1D7;
   --chart-5: #EED263;
 
   /* Sidebar */
   --sidebar:                      #F0F1F5;
   --sidebar-foreground:           #373F4E;
-  --sidebar-primary:              #C9A84C;
+  --sidebar-primary:              #4B8EDB;
   --sidebar-primary-foreground:   #0A0E15;
   --sidebar-accent:               #E0E4EB;
   --sidebar-accent-foreground:    #373F4E;
   --sidebar-border:               #D1D6E0;
-  --sidebar-ring:                 #C9A84C;
+  --sidebar-ring:                 #4B8EDB;
 
   /* Mobile Fluid Sizing System */
   --fluid-min-width: 320;
@@ -158,7 +158,7 @@
   --card-foreground:       #E0E4EB;
   --popover:               #212631;
   --popover-foreground:    #E0E4EB;
-  --primary:               #C9A84C;   /* brand gold */
+  --primary:               #4B8EDB;   /* brand blue */
   --primary-foreground:    #0A0E15;
   --secondary:             #373F4E;   /* black-80 — elevated */
   --secondary-foreground:  #E0E4EB;
@@ -169,24 +169,24 @@
   --destructive:           #E05C5C;   /* red-60 */
   --border:                #4E576A;   /* black-70 */
   --input:                 #373F4E;   /* black-80 */
-  --ring:                  #C9A84C;
+  --ring:                  #4B8EDB;
 
   /* Charts — semantic palette */
   --chart-1: #66CCBE;
   --chart-2: #E5C443;
-  --chart-3: #C9A84C;
+  --chart-3: #4B8EDB;
   --chart-4: #98D1D7;
   --chart-5: #EED263;
 
   /* Sidebar */
   --sidebar:                      #0A0E15;
   --sidebar-foreground:           #E0E4EB;
-  --sidebar-primary:              #C9A84C;
+  --sidebar-primary:              #4B8EDB;
   --sidebar-primary-foreground:   #0A0E15;
   --sidebar-accent:               #373F4E;
   --sidebar-accent-foreground:    #E0E4EB;
   --sidebar-border:               #4E576A;
-  --sidebar-ring:                 #C9A84C;
+  --sidebar-ring:                 #4B8EDB;
 }
 
 @layer base {
@@ -397,7 +397,7 @@ html {
 }
 
 .dark .card-hover-glow:hover {
-  box-shadow: 0 8px 40px -8px rgba(201, 168, 76, 0.08);
+  box-shadow: 0 8px 40px -8px rgba(75, 142, 219, 0.08);
 }
 
 /* Gradient text utility */
@@ -506,10 +506,10 @@ html {
 
 /* Selection styling */
 ::selection {
-  background: rgba(201, 168, 76, 0.18);
+  background: rgba(75, 142, 219, 0.18);
   color: inherit;
 }
 
 .dark ::selection {
-  background: rgba(201, 168, 76, 0.22);
+  background: rgba(75, 142, 219, 0.22);
 }

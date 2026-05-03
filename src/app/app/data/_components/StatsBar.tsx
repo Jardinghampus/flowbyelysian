@@ -10,7 +10,7 @@ interface StatsBarProps {
 }
 
 const cards = [
-  { key: "totalOwners" as const, label: "Total Owners", icon: Users, accent: "text-[#C9A84C]" },
+  { key: "totalOwners" as const, label: "Total Owners", icon: Users, accent: "text-[#4B8EDB]" },
   { key: "callsLast7Days" as const, label: "Calls (7d)", icon: Phone, accent: "text-blue-400" },
   { key: "whatsappLast7Days" as const, label: "WhatsApp (7d)", icon: MessageSquare, accent: "text-emerald-400" },
   { key: "consideringCount" as const, label: "Considering", icon: Clock, accent: "text-amber-400" },

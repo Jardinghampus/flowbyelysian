@@ -200,7 +200,7 @@ export function AddOwnerModal({ open, onOpenChange, onSuccess, areas }: AddOwner
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={loading} className="bg-[#C9A84C] hover:bg-[#B8973B] text-black">
+            <Button type="submit" disabled={loading} className="bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white">
               {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Owner
             </Button>

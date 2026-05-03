@@ -193,7 +193,7 @@ export function InventoryTable({
                           {isOwner ? (currentUserName || "You") : listing.ownerName}
                         </span>
                         {listing.ownerContactId && (
-                          <span className="inline-flex items-center gap-0.5 text-[10px] text-[#C9A84C]" title="Linked to owner in Data tab">
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-[#4B8EDB]" title="Linked to owner in Data tab">
                             <Link2 className="h-2.5 w-2.5" />
                           </span>
                         )}
