@@ -35,6 +35,7 @@ interface OwnerTableProps {
   onRowClick: (owner: Owner) => void
   onLogOutreach: (owner: Owner) => void
   onQuickLog: (owner: Owner, type: "call" | "whatsapp") => Promise<void>
+  onScheduleFollowUp: (owner: Owner) => void
   onDelete: (owner: Owner) => void
   onArchive?: (owner: Owner) => void
   onRestore?: (owner: Owner) => void
@@ -170,7 +171,7 @@ function LastContactedLabel({ date }: { date: string | null }) {
   )
 }
 
-export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onQuickLog, onDelete, onArchive, onRestore, isAdmin, showHidden }: OwnerTableProps) {
+export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onQuickLog, onScheduleFollowUp, onDelete, onArchive, onRestore, isAdmin, showHidden }: OwnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const columns = useMemo<ColumnDef<Owner>[]>(
@@ -266,7 +267,18 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onQuick
             Follow-up <ArrowUpDown className="ml-1 h-3 w-3" />
           </Button>
         ),
-        cell: ({ row }) => <FollowUpLabel date={row.original.follow_up_at} />,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5 group/fu">
+            <FollowUpLabel date={row.original.follow_up_at} />
+            <button
+              onClick={(e) => { e.stopPropagation(); onScheduleFollowUp(row.original) }}
+              className="opacity-0 group-hover/fu:opacity-100 text-[10px] text-[#4B8EDB] hover:text-[#3A7DCB] font-medium transition-all px-1 py-0.5 rounded hover:bg-[#4B8EDB]/10"
+              title="Schedule follow-up"
+            >
+              +date
+            </button>
+          </div>
+        ),
       },
       {
         id: "outreach",
@@ -338,7 +350,7 @@ export function OwnerTable({ owners, loading, onRowClick, onLogOutreach, onQuick
         enableSorting: false,
       },
     ],
-    [onRowClick, onLogOutreach, onQuickLog, onDelete, onArchive, onRestore, isAdmin, showHidden]
+    [onRowClick, onLogOutreach, onQuickLog, onScheduleFollowUp, onDelete, onArchive, onRestore, isAdmin, showHidden]
   )
 
   const table = useReactTable({

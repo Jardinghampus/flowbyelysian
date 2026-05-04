@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertTriangle, Clock } from "lucide-react"
+import { AlertTriangle, Clock, Plus } from "lucide-react"
 import type { Owner, OwnerStatus, OwnerPriority } from "../_lib/types"
 import { STATUS_CONFIG, PRIORITY_CONFIG } from "../_lib/types"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,7 @@ interface TodoPanelProps {
   dueSoon: Owner[]
   loading: boolean
   onOwnerClick: (owner: Owner) => void
+  onSchedule: () => void
 }
 
 function TodoItem({ owner, isOverdue, onOwnerClick }: { owner: Owner; isOverdue: boolean; onOwnerClick: (o: Owner) => void }) {
@@ -49,7 +50,7 @@ function TodoItem({ owner, isOverdue, onOwnerClick }: { owner: Owner; isOverdue:
   )
 }
 
-export function TodoPanel({ overdue, dueSoon, loading, onOwnerClick }: TodoPanelProps) {
+export function TodoPanel({ overdue, dueSoon, loading, onOwnerClick, onSchedule }: TodoPanelProps) {
   if (loading) {
     return (
       <div className="space-y-3 p-4">
@@ -68,12 +69,29 @@ export function TodoPanel({ overdue, dueSoon, loading, onOwnerClick }: TodoPanel
         <Clock className="h-8 w-8 text-muted-foreground/30 mb-3" />
         <p className="text-sm text-muted-foreground">No follow-ups scheduled</p>
         <p className="text-xs text-muted-foreground/60 mt-1">Add follow-up dates to owners to see them here</p>
+        <button
+          onClick={onSchedule}
+          className="mt-4 flex items-center gap-1.5 text-xs text-[#4B8EDB] hover:text-[#3A7DCB] font-medium transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Schedule a follow-up
+        </button>
       </div>
     )
   }
 
   return (
     <div className="space-y-1">
+      {/* Header button */}
+      <div className="flex justify-end px-3 pb-1">
+        <button
+          onClick={onSchedule}
+          className="flex items-center gap-1 text-xs text-[#4B8EDB] hover:text-[#3A7DCB] font-medium transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Schedule
+        </button>
+      </div>
       {/* Overdue section */}
       {overdue.length > 0 && (
         <div>

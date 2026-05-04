@@ -10,6 +10,7 @@ import { LogOutreachModal } from "./_components/LogOutreachModal"
 import { OwnerDetailPanel } from "./_components/OwnerDetailPanel"
 import { OutreachScriptPanel } from "./_components/OutreachScriptPanel"
 import { TodoPanel } from "./_components/TodoPanel"
+import { ScheduleFollowUpModal } from "./_components/ScheduleFollowUpModal"
 import { PerformancePanel } from "./_components/PerformancePanel"
 import { useOwners, useOwnerStats, useOwnerDetail, useTodos, useAgentPerformance, useAgentAreas } from "./_hooks/useOwners"
 import type { Owner, OwnerFiltersState } from "./_lib/types"
@@ -116,6 +117,8 @@ export default function DataPage() {
 
   const [sideTab, setSideTab] = useState<SideTab>("todo")
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [scheduleFollowUpOwner, setScheduleFollowUpOwner] = useState<Owner | null>(null)
 
   // Sub-areas narrow automatically based on what's in the current area's owners
   const subAreas = useMemo(() => {
@@ -244,6 +247,16 @@ export default function DataPage() {
     setLogOutreachOpen(true)
   }
 
+  const handleScheduleFollowUp = (owner: Owner) => {
+    setScheduleFollowUpOwner(owner)
+    setScheduleOpen(true)
+  }
+
+  const handleOpenSchedule = () => {
+    setScheduleFollowUpOwner(null)
+    setScheduleOpen(true)
+  }
+
   return (
     <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       {/* Main content */}
@@ -335,6 +348,7 @@ export default function DataPage() {
           onRowClick={handleRowClick}
           onLogOutreach={handleLogOutreach}
           onQuickLog={handleQuickLog}
+          onScheduleFollowUp={handleScheduleFollowUp}
           onDelete={handleDelete}
           onArchive={handleArchive}
           onRestore={handleRestore}
@@ -393,6 +407,7 @@ export default function DataPage() {
                   dueSoon={dueSoon}
                   loading={todosLoading}
                   onOwnerClick={handleTodoOwnerClick}
+                  onSchedule={handleOpenSchedule}
                 />
               )}
               {sideTab === "performance" && (
@@ -444,6 +459,14 @@ export default function DataPage() {
         open={scriptsOpen}
         onOpenChange={setScriptsOpen}
         agentName={agentName}
+      />
+
+      <ScheduleFollowUpModal
+        open={scheduleOpen}
+        onOpenChange={(v) => { setScheduleOpen(v); if (!v) setScheduleFollowUpOwner(null) }}
+        owners={owners}
+        prefillOwner={scheduleFollowUpOwner}
+        onSuccess={refreshAll}
       />
     </div>
   )
