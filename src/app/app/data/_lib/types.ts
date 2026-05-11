@@ -20,6 +20,7 @@ export interface Owner {
   assigned_agent_id: string
   assigned_agent_name: string | null
   is_hidden: boolean
+  dataset_name: string | null
   created_at: string
   updated_at: string
   call_count: number

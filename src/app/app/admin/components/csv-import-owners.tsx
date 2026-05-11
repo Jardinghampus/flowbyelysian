@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef, useMemo, useEffect } from "react"
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X, Filter, Copy } from "lucide-react"
+import { useState, useCallback, useRef, useMemo } from "react"
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X, Filter, Copy, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
@@ -47,6 +48,7 @@ interface ParsedRow {
 }
 
 type ImportStage = "idle" | "preview" | "importing" | "done"
+type ColumnFormat = "company" | "dld" | "generic"
 
 const BATCH_SIZE = 200
 
@@ -62,55 +64,110 @@ function normalizePrice(v: unknown): string {
   return String(v ?? "").replace(/,/g, "").trim()
 }
 
+function detectFormat(row: Record<string, unknown>): ColumnFormat {
+  if ("Transaction (AED)" in row || ("Community" in row && "Property Ref" in row)) return "company"
+  if (row.NameEn || row["Master Project"] || row.Mobile) return "dld"
+  return "generic"
+}
+
 function mapRow(row: Record<string, unknown>): ParsedRow {
-  // Generic columns
-  const genericName = str(row.name ?? row.Name ?? row.owner_name ?? row["Owner Name"])
-  const genericPhone = normalizePhone(str(row.phone ?? row.Phone ?? row.number))
-  const genericArea = str(row.area ?? row.Area ?? row.location ?? row.Location)
+  const fmt = detectFormat(row)
 
-  // DLD columns
-  const dldName = str(row.NameEn)
-  const dldPhone = normalizePhone(str(row.Mobile ?? row.mobile))
-  const dldArea = str(row["Master Project"])
-  const dldProject = str(row.Project)
-  const dldUnit = str(row.UnitNumber)
-  const dldSize = str(row.Size)
-  const dldPrice = normalizePrice(row.ProcedureValue)
-  const dldPartyType = str(row.ProcedurePartyTypeNameEn)
-  const dldPropType = str(row.PropertyTypeEn)
-  const dldTxType = str(row.ProcedureNameEn)
-  const dldCountry = str(row.CountryNameEn)
+  if (fmt === "company") {
+    // Company format: # Date Area Community Unit No Property Ref Type Beds Size (sqm) Transaction (AED) Role Transaction Type Name Phone Nationality Source
+    const name = str(row.Name ?? row.name)
+    const phone = normalizePhone(str(row.Phone ?? row.phone))
+    const area = str(row.Area ?? row.area)
+    const subArea = str(row.Community ?? row.community)
+    const unit_number = str(row["Unit No"] ?? row["Unit No."] ?? row.UnitNo)
+    const bedrooms = str(row.Beds ?? row.beds ?? row.Bedrooms)
 
-  const name = dldName || genericName
-  const phone = dldPhone || genericPhone
-  const area = dldArea || genericArea
-  const subArea = dldProject || str(row.sub_area ?? row["Sub Area"] ?? row.subarea ?? row.Subarea)
-  const unit_number = dldUnit || str(row.unit_number ?? row.unit ?? row.Unit ?? row["Unit Number"])
+    const role = str(row.Role)
+    const txType = str(row["Transaction Type"])
+    const propType = str(row.Type)
+    const size = str(row["Size (sqm)"])
+    const transaction = normalizePrice(row["Transaction (AED)"])
+    const nationality = str(row.Nationality)
+    const source = str(row.Source)
+    const propRef = str(row["Property Ref"])
+    const date = str(row.Date)
+
+    const noteParts: string[] = []
+    if (role) noteParts.push(role)
+    if (txType) noteParts.push(txType)
+    if (propType) noteParts.push(propType)
+    if (size) noteParts.push(`${size} sqm`)
+    if (transaction) noteParts.push(`AED ${Number(transaction).toLocaleString()}`)
+    if (nationality) noteParts.push(nationality)
+    if (propRef) noteParts.push(`Ref: ${propRef}`)
+    if (date) noteParts.push(date)
+    if (source) noteParts.push(`Source: ${source}`)
+
+    return {
+      name,
+      phone,
+      area,
+      subArea,
+      unit_number,
+      bedrooms,
+      notes: noteParts.join(" • "),
+      price: transaction,
+      size,
+      partyType: role,
+      valid: !!(name && phone && area),
+    }
+  }
+
+  if (fmt === "dld") {
+    // DLD format: NameEn, Mobile, Master Project, Project, UnitNumber, Size, ProcedureValue…
+    const name = str(row.NameEn)
+    const phone = normalizePhone(str(row.Mobile ?? row.mobile))
+    const area = str(row["Master Project"])
+    const subArea = str(row.Project)
+    const unit_number = str(row.UnitNumber)
+    const bedrooms = str(row.bedrooms ?? row.Bedrooms ?? row.BR)
+    const size = str(row.Size)
+    const price = normalizePrice(row.ProcedureValue)
+    const partyType = str(row.ProcedurePartyTypeNameEn)
+    const propType = str(row.PropertyTypeEn)
+    const txType = str(row.ProcedureNameEn)
+    const country = str(row.CountryNameEn)
+
+    const noteParts: string[] = []
+    if (partyType) noteParts.push(partyType)
+    if (propType) noteParts.push(propType)
+    if (txType) noteParts.push(txType)
+    if (country) noteParts.push(country)
+    if (size) noteParts.push(`${size} sqft`)
+    if (price) noteParts.push(`AED ${Number(price).toLocaleString()}`)
+
+    return {
+      name,
+      phone,
+      area,
+      subArea,
+      unit_number,
+      bedrooms,
+      notes: noteParts.join(" • "),
+      price,
+      size,
+      partyType,
+      valid: !!(name && phone && area),
+    }
+  }
+
+  // Generic format
+  const name = str(row.name ?? row.Name ?? row.owner_name ?? row["Owner Name"])
+  const phone = normalizePhone(str(row.phone ?? row.Phone ?? row.number))
+  const area = str(row.area ?? row.Area ?? row.location ?? row.Location)
+  const subArea = str(row.sub_area ?? row["Sub Area"] ?? row.subarea ?? row.Subarea)
+  const unit_number = str(row.unit_number ?? row.unit ?? row.Unit ?? row["Unit Number"])
   const bedrooms = str(row.bedrooms ?? row.Bedrooms ?? row.BR ?? row.br)
-
-  // Compose notes: DLD fields → concise bullet string (sub-area excluded — it's its own field)
-  const noteParts: string[] = []
-  if (dldPartyType) noteParts.push(dldPartyType)
-  if (dldPropType) noteParts.push(dldPropType)
-  if (dldTxType) noteParts.push(dldTxType)
-  if (dldCountry) noteParts.push(dldCountry)
-  if (dldSize) noteParts.push(`${dldSize} sqft`)
-  if (dldPrice) noteParts.push(`AED ${Number(dldPrice).toLocaleString()}`)
-  const notes = noteParts.length > 0
-    ? noteParts.join(" • ")
-    : str(row.notes ?? row.Notes ?? row.remarks ?? row.Remarks)
+  const notes = str(row.notes ?? row.Notes ?? row.remarks ?? row.Remarks)
 
   return {
-    name,
-    phone,
-    area,
-    subArea,
-    unit_number,
-    bedrooms,
-    notes,
-    price: dldPrice,
-    size: dldSize,
-    partyType: dldPartyType,
+    name, phone, area, subArea, unit_number, bedrooms, notes,
+    price: "", size: "", partyType: "",
     valid: !!(name && phone && area),
   }
 }
@@ -118,6 +175,7 @@ function mapRow(row: Record<string, unknown>): ParsedRow {
 export function CsvImportOwners() {
   const [stage, setStage] = useState<ImportStage>("idle")
   const [fileName, setFileName] = useState("")
+  const [datasetName, setDatasetName] = useState("")
   const [rawRows, setRawRows] = useState<Record<string, unknown>[]>([])
   const [parsedRows, setParsedRows] = useState<ParsedRow[]>([])
   const [progress, setProgress] = useState(0)
@@ -142,7 +200,7 @@ export function CsvImportOwners() {
       const data = await res.json()
       setDuplicates(data.duplicates || {})
     } catch {
-      // silently fail — import still works without dedup
+      // silently fail
     } finally {
       setDupCheckLoading(false)
     }
@@ -208,7 +266,31 @@ export function CsvImportOwners() {
     if (file) parseFile(file)
   }
 
+  const columnFormat: ColumnFormat = rawRows.length > 0 ? detectFormat(rawRows[0]) : "generic"
+
+  const uniqueAreas = useMemo(() => {
+    const areas = new Set<string>()
+    for (const r of parsedRows) {
+      if (r.area) areas.add(r.area)
+    }
+    return Array.from(areas).sort()
+  }, [parsedRows])
+
+  const filteredRows = useMemo(() => {
+    if (areaFilter === "__all__") return parsedRows
+    return parsedRows.filter((r) => r.area === areaFilter)
+  }, [parsedRows, areaFilter])
+
+  const dupCount = filteredRows.filter((r) => r.valid && r.phone && duplicates[r.phone]).length
+  const validCount = filteredRows.filter((r) => r.valid).length - (skipDuplicates ? dupCount : 0)
+  const invalidCount = filteredRows.filter((r) => !r.valid).length
+
   const handleImport = async () => {
+    if (!datasetName.trim()) {
+      toast.error("Enter a dataset name before importing")
+      return
+    }
+
     const validRaw = rawRows.filter((_row, idx) => {
       const p = parsedRows[idx]
       if (!p?.valid) return false
@@ -234,7 +316,7 @@ export function CsvImportOwners() {
         const res = await fetch("/api/owners/bulk-import", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rows: batch }),
+          body: JSON.stringify({ rows: batch, datasetName: datasetName.trim() }),
         })
         const data = await res.json()
         if (!res.ok) {
@@ -254,12 +336,13 @@ export function CsvImportOwners() {
     const skippedDups = skipDuplicates ? dupCount : 0
     setResult({ inserted: totalInserted, skipped: totalSkipped, invalid: skippedInvalid, duplicatesSkipped: skippedDups, errors: allErrors })
     setStage("done")
-    if (totalInserted > 0) toast.success(`Imported ${totalInserted} owners`)
+    if (totalInserted > 0) toast.success(`Imported ${totalInserted} owners into "${datasetName.trim()}"`)
   }
 
   const handleReset = () => {
     setStage("idle")
     setFileName("")
+    setDatasetName("")
     setRawRows([])
     setParsedRows([])
     setProgress(0)
@@ -269,39 +352,19 @@ export function CsvImportOwners() {
     if (fileRef.current) fileRef.current.value = ""
   }
 
-  const isDld = rawRows.length > 0 && Boolean(rawRows[0].NameEn ?? rawRows[0]["Master Project"] ?? rawRows[0].Mobile)
-
-  // Unique areas for filter dropdown
-  const uniqueAreas = useMemo(() => {
-    const areas = new Set<string>()
-    for (const r of parsedRows) {
-      if (r.area) areas.add(r.area)
-    }
-    return Array.from(areas).sort()
-  }, [parsedRows])
-
-  // Filtered view
-  const filteredRows = useMemo(() => {
-    if (areaFilter === "__all__") return parsedRows
-    return parsedRows.filter((r) => r.area === areaFilter)
-  }, [parsedRows, areaFilter])
-
-  const dupCount = filteredRows.filter((r) => r.valid && r.phone && duplicates[r.phone]).length
-  const validCount = filteredRows.filter((r) => r.valid).length - (skipDuplicates ? dupCount : 0)
-  const invalidCount = filteredRows.filter((r) => !r.valid).length
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileSpreadsheet className="h-5 w-5" />
-          Import — Owners & DLD Transactions
+          Import Owners
         </CardTitle>
         <CardDescription>
-          CSV or Excel (.xlsx / .xls). Auto-detects DLD format (NameEn, Mobile, Master Project…) and generic format (name, phone, area).
+          CSV or Excel (.xlsx / .xls). Supports company format (Name, Phone, Area, Community, Beds…), DLD format, and generic format.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+
         {stage === "idle" && (
           <div
             onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
@@ -334,15 +397,38 @@ export function CsvImportOwners() {
                 <FileSpreadsheet className="h-4 w-4 text-[#4B8EDB]" />
                 <span className="text-sm font-medium">{fileName}</span>
                 <Badge variant="outline">{parsedRows.length} rows</Badge>
-                {isDld && (
-                  <Badge className="bg-[#4B8EDB]/10 text-[#4B8EDB] border border-[#4B8EDB]/30 text-xs">
-                    DLD Format
-                  </Badge>
-                )}
+                <Badge className={`text-xs border ${
+                  columnFormat === "company"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    : columnFormat === "dld"
+                      ? "bg-[#4B8EDB]/10 text-[#4B8EDB] border-[#4B8EDB]/30"
+                      : "bg-muted text-muted-foreground border-border"
+                }`}>
+                  {columnFormat === "company" ? "Company Format" : columnFormat === "dld" ? "DLD Format" : "Generic"}
+                </Badge>
               </div>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <X className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Dataset name — required before import */}
+            <div className="rounded-lg border border-[#4B8EDB]/20 bg-[#4B8EDB]/5 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-[#4B8EDB]" />
+                <span className="text-sm font-medium">Dataset name</span>
+                <span className="text-xs text-red-400">required</span>
+              </div>
+              <Input
+                placeholder="e.g. Mudon, JVC Q2 2026, Palm Jumeirah Buyers…"
+                value={datasetName}
+                onChange={(e) => setDatasetName(e.target.value)}
+                className="h-9 text-sm bg-background"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Labels this import so admins can control which agents have access to it.
+              </p>
             </div>
 
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -409,11 +495,12 @@ export function CsvImportOwners() {
                     <TableHead>Name</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Area</TableHead>
-                    <TableHead>Sub-area</TableHead>
+                    <TableHead>Community / Sub-area</TableHead>
                     <TableHead>Unit</TableHead>
-                    {isDld && <TableHead>Size (sqft)</TableHead>}
-                    {isDld && <TableHead>Price (AED)</TableHead>}
-                    {isDld && <TableHead>Party</TableHead>}
+                    <TableHead>BR</TableHead>
+                    {columnFormat !== "generic" && <TableHead>Size</TableHead>}
+                    {columnFormat !== "generic" && <TableHead>Transaction</TableHead>}
+                    {columnFormat !== "generic" && <TableHead>Role / Party</TableHead>}
                     <TableHead className="w-12">OK</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -422,41 +509,42 @@ export function CsvImportOwners() {
                     const isDup = row.valid && row.phone && duplicates[row.phone]
                     const dupOwner = isDup ? duplicates[row.phone] : null
                     return (
-                    <TableRow key={idx} className={!row.valid ? "bg-red-500/5" : isDup ? "bg-amber-500/5" : ""}>
-                      <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
-                      <TableCell className="text-sm">{row.name || "—"}</TableCell>
-                      <TableCell className="text-sm font-mono text-xs">
-                        {row.phone || "—"}
-                        {dupOwner && (
-                          <span className="block text-[10px] text-amber-500 mt-0.5" title={`Exists: ${dupOwner.name} (${dupOwner.area})`}>
-                            ↳ {dupOwner.name} · {dupOwner.area}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">{row.area || "—"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{row.subArea || "—"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{row.unit_number || "—"}</TableCell>
-                      {isDld && (
-                        <TableCell className="text-sm text-muted-foreground">{row.size || "—"}</TableCell>
-                      )}
-                      {isDld && (
-                        <TableCell className="text-sm text-muted-foreground">
-                          {row.price ? Number(row.price).toLocaleString() : "—"}
+                      <TableRow key={idx} className={!row.valid ? "bg-red-500/5" : isDup ? "bg-amber-500/5" : ""}>
+                        <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
+                        <TableCell className="text-sm">{row.name || "—"}</TableCell>
+                        <TableCell className="text-sm font-mono text-xs">
+                          {row.phone || "—"}
+                          {dupOwner && (
+                            <span className="block text-[10px] text-amber-500 mt-0.5" title={`Exists: ${dupOwner.name} (${dupOwner.area})`}>
+                              ↳ {dupOwner.name} · {dupOwner.area}
+                            </span>
+                          )}
                         </TableCell>
-                      )}
-                      {isDld && (
-                        <TableCell className="text-sm text-muted-foreground">{row.partyType || "—"}</TableCell>
-                      )}
-                      <TableCell>
-                        {isDup ? (
-                          <Copy className="h-3.5 w-3.5 text-amber-500" />
-                        ) : row.valid ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                        ) : (
-                          <AlertCircle className="h-3.5 w-3.5 text-red-500" />
+                        <TableCell className="text-sm">{row.area || "—"}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{row.subArea || "—"}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{row.unit_number || "—"}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{row.bedrooms || "—"}</TableCell>
+                        {columnFormat !== "generic" && (
+                          <TableCell className="text-sm text-muted-foreground">{row.size || "—"}</TableCell>
                         )}
-                      </TableCell>
-                    </TableRow>
+                        {columnFormat !== "generic" && (
+                          <TableCell className="text-sm text-muted-foreground">
+                            {row.price ? Number(row.price).toLocaleString() : "—"}
+                          </TableCell>
+                        )}
+                        {columnFormat !== "generic" && (
+                          <TableCell className="text-sm text-muted-foreground">{row.partyType || "—"}</TableCell>
+                        )}
+                        <TableCell>
+                          {isDup ? (
+                            <Copy className="h-3.5 w-3.5 text-amber-500" />
+                          ) : row.valid ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                          ) : (
+                            <AlertCircle className="h-3.5 w-3.5 text-red-500" />
+                          )}
+                        </TableCell>
+                      </TableRow>
                     )
                   })}
                 </TableBody>
@@ -472,10 +560,11 @@ export function CsvImportOwners() {
               <Button variant="outline" onClick={handleReset}>Cancel</Button>
               <Button
                 onClick={handleImport}
-                disabled={validCount === 0}
+                disabled={validCount === 0 || !datasetName.trim()}
                 className="bg-[#4B8EDB] hover:bg-[#3A7DCB] text-white"
               >
                 Import {validCount} Owners
+                {datasetName.trim() && ` → "${datasetName.trim()}"`}
                 {areaFilter !== "__all__" && ` from ${areaFilter}`}
               </Button>
             </div>
@@ -486,7 +575,7 @@ export function CsvImportOwners() {
           <div className="space-y-4 py-4">
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-[#4B8EDB]" />
-              <span className="text-sm font-medium">Importing owners...</span>
+              <span className="text-sm font-medium">Importing into &ldquo;{datasetName}&rdquo;…</span>
             </div>
             <Progress value={progress} className="h-2" />
             <p className="text-xs text-muted-foreground">{progress}% complete</p>
@@ -497,7 +586,7 @@ export function CsvImportOwners() {
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-2 text-emerald-500">
               <CheckCircle2 className="h-5 w-5" />
-              <span className="text-sm font-medium">Import Complete</span>
+              <span className="text-sm font-medium">Import complete — dataset &ldquo;{datasetName}&rdquo;</span>
             </div>
             <div className="grid grid-cols-4 gap-3 text-sm">
               <div className="rounded-lg border p-3 text-center">
