@@ -14,6 +14,7 @@ import {
   Moon,
   Sun,
   TrendingUp,
+  BarChart2,
   Mail,
   Newspaper,
   MapPin,
@@ -90,6 +91,11 @@ const navItems = [
     icon: <MapPin className="h-5 w-5 flex-shrink-0" />,
   },
   // Analytics
+  {
+    label: "Market Analysis",
+    href: "/market",
+    icon: <BarChart2 className="h-5 w-5 flex-shrink-0" />,
+  },
   {
     label: "Performance",
     href: "/performance",
