@@ -1,0 +1,21 @@
+import { NextRequest, NextResponse } from "next/server"
+import { startZayloJob, type ZayloJob } from "@/lib/zaylo/control"
+
+const allowedJobs = new Set<ZayloJob>(["scrape-listings", "generate-week", "build-zaylo", "import-pdfs"])
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as { job?: string }
+    const job = body.job as ZayloJob | undefined
+
+    if (!job || !allowedJobs.has(job)) {
+      return NextResponse.json({ error: "Unsupported Zaylo job" }, { status: 400 })
+    }
+
+    const run = await startZayloJob(job)
+    return NextResponse.json({ run }, { status: 202 })
+  } catch (error) {
+    console.error("Failed to start Zaylo job", error)
+    return NextResponse.json({ error: "Failed to start Zaylo job" }, { status: 500 })
+  }
+}
