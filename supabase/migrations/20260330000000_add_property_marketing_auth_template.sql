@@ -1,0 +1,9 @@
+-- Add Property Marketing Authorization template
+insert into templates (name, type, content_json, variables) values
+(
+  'Property Marketing Authorization',
+  'property_marketing_auth',
+  '"Date: {{date}}\n\nProperty Consultant: {{consultant_name}} (BRN: {{consultant_brn}})\n\nOwner Name(s): {{owner_names}}\nProperty Address: {{property_address}}\nProperty Type: {{property_type}}\nListing Type: {{listing_type}}\nFurnished/Unfurnished: {{furnished_status}}\nListing Price: AED {{listing_price}}\nExclusivity: {{exclusivity_type}}\n\nI/We, the legal owner(s) of the above-mentioned property, hereby grant full authorization to DERRICK SIGNATURE PROPERTIES L.L.C, holding ORN: 1485248, and located at Office No. 605, Al Barsha Business Square, Al Barsha, Dubai, UAE, to market and promote the property on our behalf.\n\nThis document is issued for the sole purpose of marketing, listing, and promoting the property on approved real estate portals, the official company website, and social media platforms.\n\nOwner(s): {{owner_names}}\n\nSignature(s): _______________"',
+  '[{"key": "date", "label": "Date", "type": "date"}, {"key": "consultant_name", "label": "Property Consultant Name", "type": "text"}, {"key": "consultant_brn", "label": "Consultant BRN Number", "type": "text"}, {"key": "owner_names", "label": "Owner Name(s)", "type": "text"}, {"key": "property_address", "label": "Property Address", "type": "text"}, {"key": "property_type", "label": "Property Type (e.g. Apartment, Villa)", "type": "text"}, {"key": "listing_type", "label": "Listing Type (Rental/Sale)", "type": "text"}, {"key": "furnished_status", "label": "Furnished/Unfurnished", "type": "text"}, {"key": "listing_price", "label": "Listing Price (AED)", "type": "text"}, {"key": "exclusivity_type", "label": "Exclusivity (Exclusive/Non-Exclusive)", "type": "text"}]'
+)
+on conflict do nothing;

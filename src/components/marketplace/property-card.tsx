@@ -26,6 +26,7 @@ interface PropertyCardProps {
   property: MarketplaceProperty
   isSelected: boolean
   onClick: () => void
+  onSeeMore?: () => void
   index: number
 }
 
@@ -39,7 +40,7 @@ function formatPrice(price: number, transactionType: string): string {
   return `AED ${price.toLocaleString()}`
 }
 
-export function PropertyCard({ property, isSelected, onClick, index }: PropertyCardProps) {
+export function PropertyCard({ property, isSelected, onClick, onSeeMore, index }: PropertyCardProps) {
   const colors = categoryColors[property.category]
   const cardRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
@@ -237,21 +238,26 @@ export function PropertyCard({ property, isSelected, onClick, index }: PropertyC
             )}
           </div>
 
-          {/* Action buttons - Interested & Share */}
+          {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <button
+              onClick={(e) => { e.stopPropagation(); onSeeMore?.() }}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors border border-primary/20"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              See more
+            </button>
+            <button
               onClick={handleWhatsApp}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25d366] hover:bg-[#20bd5a] text-white text-[11px] font-semibold transition-colors"
             >
               <MessageCircle className="h-3.5 w-3.5" />
-              Interested
             </button>
             <button
               onClick={handleShare}
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 hover:bg-gray-200 dark:hover:bg-neutral-700 text-gray-700 dark:text-neutral-300 text-[11px] font-semibold transition-colors border border-gray-200 dark:border-neutral-700"
             >
               <Share2 className="h-3.5 w-3.5" />
-              Share
             </button>
           </div>
         </div>

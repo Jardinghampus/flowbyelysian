@@ -14,6 +14,7 @@ const DEMO_USER = {
   imageUrl: null as string | null,
   publicMetadata: {
     phone: "+971 50 123 4567",
+    brn: "00000",
     area: "tilal-al-ghaf",
     role: "admin",
   },

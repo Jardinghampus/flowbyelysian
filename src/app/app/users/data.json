@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "name": "Ahmad Al-Rashid",
+    "area": "Palm Jumeirah",
+    "role": "Sales",
+    "whatsapp": "+971501234567",
+    "title": "Senior Sales Consultant"
+  },
+  {
+    "id": 2,
+    "name": "Sarah Jensen",
+    "area": "Dubai Marina",
+    "role": "Leasing",
+    "whatsapp": "+971502345678",
+    "title": "Leasing Manager"
+  },
+  {
+    "id": 3,
+    "name": "Mohammed Hassan",
+    "area": "Downtown Dubai",
+    "role": "Sales",
+    "whatsapp": "+971503456789",
+    "title": "Property Consultant"
+  },
+  {
+    "id": 4,
+    "name": "Emma Lindqvist",
+    "area": "JBR",
+    "role": "Leasing",
+    "whatsapp": "+971504567890",
+    "title": "Leasing Specialist"
+  },
+  {
+    "id": 5,
+    "name": "Omar Khalil",
+    "area": "Business Bay",
+    "role": "Sales",
+    "whatsapp": "+971505678901",
+    "title": "Sales Executive"
+  },
+  {
+    "id": 6,
+    "name": "Lisa Andersson",
+    "area": "Arabian Ranches",
+    "role": "Sales",
+    "whatsapp": "+971506789012",
+    "title": "Senior Property Advisor"
+  },
+  {
+    "id": 7,
+    "name": "Fatima Al-Maktoum",
+    "area": "DIFC",
+    "role": "Leasing",
+    "whatsapp": "+971507890123",
+    "title": "Commercial Leasing Agent"
+  },
+  {
+    "id": 8,
+    "name": "Erik Svensson",
+    "area": "Jumeirah Golf Estates",
+    "role": "Sales",
+    "whatsapp": "+971508901234",
+    "title": "Luxury Property Specialist"
+  }
+]
