@@ -1,13 +1,16 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { AlertTriangle, Copy, Download, ExternalLink, Film, Sparkles } from "lucide-react"
+import { AlertTriangle, Copy, Download, ExternalLink, Film, LinkIcon, Plus, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { zayloAreaCatalog, zayloSourceLinks, type ZayloBedroom, type ZayloSourceKind, type ZayloSourceLink } from "@/lib/zaylo/market-catalog"
 import { formatAed, marketMetrics, socialDrafts, type MarketMetric } from "@/lib/zaylo/market-studio"
 import { toast } from "sonner"
 
@@ -17,12 +20,47 @@ function statusVariant(status: MarketMetric["status"]) {
 
 export function MarketStudio() {
   const [selectedId, setSelectedId] = useState(marketMetrics[0]?.id ?? "")
-  const selectedMetric = marketMetrics.find((metric) => metric.id === selectedId) ?? marketMetrics[0]
+  const [masterCommunity, setMasterCommunity] = useState("all")
+  const [bedroomFilter, setBedroomFilter] = useState<"all" | `${ZayloBedroom}`>("all")
+  const [customLinks, setCustomLinks] = useState<ZayloSourceLink[]>([])
+  const [newLink, setNewLink] = useState({
+    masterCommunity: "Mudon",
+    subCommunity: "Al Ranim",
+    kind: "manual" as ZayloSourceKind,
+    label: "DXB Interact transactions",
+    url: "",
+  })
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("zaylo.customSourceLinks")
+      if (stored) setCustomLinks(JSON.parse(stored) as ZayloSourceLink[])
+    } catch {
+      setCustomLinks([])
+    }
+  }, [])
+
+  const allSourceLinks = useMemo(() => [...zayloSourceLinks, ...customLinks], [customLinks])
+  const masterCommunities = useMemo(() => Array.from(new Set(zayloAreaCatalog.map((area) => area.masterCommunity))), [])
+  const filteredMetrics = useMemo(() => {
+    return marketMetrics.filter((metric) => {
+      const matchesCommunity = masterCommunity === "all" || metric.community === masterCommunity
+      const matchesBedroom = bedroomFilter === "all" || metric.beds === Number(bedroomFilter)
+      return matchesCommunity && matchesBedroom
+    })
+  }, [bedroomFilter, masterCommunity])
+
+  const selectedMetric = filteredMetrics.find((metric) => metric.id === selectedId) ?? filteredMetrics[0] ?? marketMetrics[0]
   const selectedDraft = socialDrafts.find((draft) => draft.metricId === selectedMetric?.id) ?? socialDrafts[0]
 
   const communities = useMemo(() => {
-    return Array.from(new Set(marketMetrics.map((metric) => `${metric.community}, ${metric.subCommunity}`)))
+    return Array.from(new Set(zayloAreaCatalog.map((area) => `${area.community}, ${area.subCommunity}`)))
   }, [])
+
+  const selectedArea = zayloAreaCatalog.find(
+    (area) => area.community === selectedMetric?.community && area.subCommunity === selectedMetric?.subCommunity
+  )
+  const selectedLinks = allSourceLinks.filter((link) => link.areaId === selectedArea?.id)
 
   async function copyCaption() {
     if (!selectedDraft) return
@@ -43,6 +81,43 @@ export function MarketStudio() {
     URL.revokeObjectURL(url)
   }
 
+  function addSourceLink() {
+    if (!newLink.url.trim()) {
+      toast.error("Paste a source URL first")
+      return
+    }
+
+    const existingArea =
+      zayloAreaCatalog.find(
+        (area) =>
+          area.masterCommunity === newLink.masterCommunity &&
+          area.subCommunity.toLowerCase() === newLink.subCommunity.trim().toLowerCase()
+      ) ?? zayloAreaCatalog.find((area) => area.masterCommunity === newLink.masterCommunity)
+
+    const sourceLink: ZayloSourceLink = {
+      id: `custom-${Date.now()}`,
+      areaId: existingArea?.id ?? `${newLink.masterCommunity}-${newLink.subCommunity}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      kind: newLink.kind,
+      label: newLink.label.trim() || "Manual source",
+      url: newLink.url.trim(),
+      active: true,
+      notes: existingArea ? "Temporary browser-saved link. Move to Supabase when persistence is enabled." : "Temporary custom area link.",
+    }
+
+    const next = [sourceLink, ...customLinks]
+    setCustomLinks(next)
+    window.localStorage.setItem("zaylo.customSourceLinks", JSON.stringify(next))
+    setNewLink((current) => ({ ...current, url: "" }))
+    toast.success("Source link saved in this browser")
+  }
+
+  function removeCustomLink(id: string) {
+    const next = customLinks.filter((link) => link.id !== id)
+    setCustomLinks(next)
+    window.localStorage.setItem("zaylo.customSourceLinks", JSON.stringify(next))
+    toast.success("Source link removed")
+  }
+
   if (!selectedMetric || !selectedDraft) return null
 
   return (
@@ -58,18 +133,32 @@ export function MarketStudio() {
             Turn verified villa-community numbers into trust-building posts and captions.
           </p>
         </div>
-        <Select value={selectedId} onValueChange={setSelectedId}>
-          <SelectTrigger className="w-full lg:w-[360px]">
-            <SelectValue placeholder="Select market segment" />
-          </SelectTrigger>
-          <SelectContent>
-            {marketMetrics.map((metric) => (
-              <SelectItem key={metric.id} value={metric.id}>
-                {metric.community}, {metric.subCommunity} · {metric.beds}BR {metric.propertyType}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="grid w-full gap-2 lg:w-[560px] lg:grid-cols-[1fr_120px]">
+          <Select value={masterCommunity} onValueChange={setMasterCommunity}>
+            <SelectTrigger>
+              <SelectValue placeholder="Master community" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All communities</SelectItem>
+              {masterCommunities.map((community) => (
+                <SelectItem key={community} value={community}>
+                  {community}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={bedroomFilter} onValueChange={(value) => setBedroomFilter(value as "all" | `${ZayloBedroom}`)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Beds" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All beds</SelectItem>
+              <SelectItem value="3">3BR</SelectItem>
+              <SelectItem value="4">4BR</SelectItem>
+              <SelectItem value="5">5BR</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
@@ -77,9 +166,24 @@ export function MarketStudio() {
           <Card>
             <CardHeader>
               <CardTitle>Market Number</CardTitle>
-              <CardDescription>{communities.length} communities prepared. Live refresh comes from Firecrawl/Supabase imports.</CardDescription>
+              <CardDescription>
+                {communities.length} communities, {filteredMetrics.length} visible 3BR/4BR/5BR segments.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Select value={selectedMetric.id} onValueChange={setSelectedId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select market segment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredMetrics.map((metric) => (
+                    <SelectItem key={metric.id} value={metric.id}>
+                      {metric.community}, {metric.subCommunity} · {metric.beds}BR {metric.propertyType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={statusVariant(selectedMetric.status)}>{selectedMetric.status.replace("_", " ")}</Badge>
                 <Badge variant="outline">{selectedMetric.beds}BR</Badge>
@@ -114,6 +218,95 @@ export function MarketStudio() {
                   </a>
                 </Button>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Source Links</CardTitle>
+              <CardDescription>Links prepared for the scraper/import job. Custom links are browser-saved until Supabase is enabled.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="max-h-64 space-y-2 overflow-auto pr-1">
+                {selectedLinks.map((link) => (
+                  <div key={link.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <LinkIcon className="h-3.5 w-3.5" />
+                        {link.label}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">{link.url}</div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Badge variant={link.active ? "default" : "outline"}>{link.kind.replaceAll("_", " ")}</Badge>
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href={link.url} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
+                      {link.id.startsWith("custom-") && (
+                        <Button variant="ghost" size="sm" onClick={() => removeCustomLink(link.id)}>
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-3 rounded-lg border bg-muted/30 p-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>Main area</Label>
+                    <Select value={newLink.masterCommunity} onValueChange={(value) => setNewLink((current) => ({ ...current, masterCommunity: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {masterCommunities.map((community) => (
+                          <SelectItem key={community} value={community}>
+                            {community}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Sub-area</Label>
+                    <Input value={newLink.subCommunity} onChange={(event) => setNewLink((current) => ({ ...current, subCommunity: event.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
+                  <div className="space-y-1.5">
+                    <Label>Source type</Label>
+                    <Select value={newLink.kind} onValueChange={(value) => setNewLink((current) => ({ ...current, kind: value as ZayloSourceKind }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="bayut_rent_listings">Bayut rent</SelectItem>
+                        <SelectItem value="bayut_sale_listings">Bayut sale</SelectItem>
+                        <SelectItem value="bayut_rent_transactions">Bayut rent tx</SelectItem>
+                        <SelectItem value="bayut_sale_transactions">Bayut sale tx</SelectItem>
+                        <SelectItem value="dxb_interact_transactions">DXB Interact</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Label</Label>
+                    <Input value={newLink.label} onChange={(event) => setNewLink((current) => ({ ...current, label: event.target.value }))} />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>URL</Label>
+                  <Input placeholder="https://..." value={newLink.url} onChange={(event) => setNewLink((current) => ({ ...current, url: event.target.value }))} />
+                </div>
+                <Button onClick={addSourceLink}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add source link
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

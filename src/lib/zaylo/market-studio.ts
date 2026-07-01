@@ -1,10 +1,12 @@
+import { zayloAreaCatalog, zayloSourceLinks, type ZayloBedroom } from "./market-catalog"
+
 export type MarketMetricStatus = "live" | "manual" | "draft" | "needs_data"
 
 export type MarketMetric = {
   id: string
   community: string
   subCommunity: string
-  beds: 3 | 4
+  beds: ZayloBedroom
   propertyType: "Villa" | "Townhouse"
   rentalAvgAed: number | null
   saleAvgAed: number | null
@@ -32,7 +34,7 @@ export type SocialPostDraft = {
 
 const generatedAt = "2026-06-30T00:00:00.000Z"
 
-export const marketMetrics: MarketMetric[] = [
+const planningBaselines: MarketMetric[] = [
   {
     id: "mudon-al-ranim-3br-townhouse",
     community: "Mudon",
@@ -100,6 +102,37 @@ export const marketMetrics: MarketMetric[] = [
     status: "needs_data",
   },
 ]
+
+const planningBaselineById = new Map(planningBaselines.map((metric) => [metric.id, metric]))
+
+export const marketMetrics: MarketMetric[] = zayloAreaCatalog.flatMap((area) =>
+  area.propertyTypes.flatMap((propertyType) =>
+    area.bedrooms.map((beds) => {
+      const id = `${area.id}-${beds}br-${propertyType.toLowerCase()}`
+      const baseline = planningBaselineById.get(id)
+
+      if (baseline) return baseline
+
+      return {
+        id,
+        community: area.community,
+        subCommunity: area.subCommunity,
+        beds,
+        propertyType,
+        rentalAvgAed: null,
+        saleAvgAed: null,
+        rentSampleSize: 0,
+        saleSampleSize: 0,
+        pricePerSqftAed: null,
+        sourceLabel: "Needs source import",
+        sourceUrl: zayloSourceLinks.find((link) => link.areaId === area.id && link.kind === "bayut_rent_transactions")?.url,
+        updatedAt: generatedAt,
+        status: "needs_data",
+        notes: "Waiting for Bayut Transactions, DXB Interact, Firecrawl, scraper, or manual import data.",
+      } satisfies MarketMetric
+    })
+  )
+)
 
 export function formatAed(value: number | null, compact = false): string {
   if (!value) return "Needs data"
