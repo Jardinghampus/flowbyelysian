@@ -78,10 +78,13 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching listings:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch listings" },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      listings: [],
+      total: 0,
+      limit: Number(new URL(request.url).searchParams.get("limit") || "50"),
+      offset: Number(new URL(request.url).searchParams.get("offset") || "0"),
+      warning: "Listings data source is not configured yet.",
+    })
   }
 }
 
