@@ -16,10 +16,13 @@ export async function GET(request: Request) {
 
   try {
     if (!NEWS_API_KEY) {
-      return NextResponse.json(
-        { success: false, error: 'News API not configured', articles: [], totalResults: 0 },
-        { status: 503 }
-      );
+      return NextResponse.json({
+        success: false,
+        configured: false,
+        error: 'News API not configured',
+        articles: [],
+        totalResults: 0,
+      });
     }
 
     const response = await fetch(
@@ -55,6 +58,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         success: false,
+        configured: Boolean(NEWS_API_KEY),
         error: 'Failed to fetch news articles',
         articles: [],
         totalResults: 0,

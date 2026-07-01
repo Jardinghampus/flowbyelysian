@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { auth, currentUser } from "@/lib/demo-auth"
 
+function isRecoverableListingsReadError(error: unknown) {
+  if (!error || typeof error !== "object") return false
+  const candidate = error as { code?: string; message?: string }
+  const message = candidate.message ?? ""
+
+  return (
+    candidate.code === "42P01" ||
+    candidate.code === "PGRST205" ||
+    /relation .*listings.* does not exist/i.test(message) ||
+    /could not find .*listings/i.test(message) ||
+    /supabase/i.test(message)
+  )
+}
+
 // GET /api/listings - List all listings with filters
 export async function GET(request: NextRequest) {
   try {
@@ -41,7 +55,20 @@ export async function GET(request: NextRequest) {
 
     const { data: listings, error, count } = await query
 
-    if (error) throw error
+    if (error) {
+      if (isRecoverableListingsReadError(error)) {
+        console.warn("Listings API returned an empty fallback:", error)
+        return NextResponse.json({
+          listings: [],
+          total: 0,
+          limit,
+          offset,
+          warning: "Listings data source is not configured yet.",
+        })
+      }
+
+      throw error
+    }
 
     return NextResponse.json({
       listings: listings || [],

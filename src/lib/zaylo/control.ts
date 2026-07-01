@@ -160,7 +160,7 @@ export async function getZayloState(): Promise<ZayloState> {
   const warnings: string[] = []
 
   if (!connected) {
-    warnings.push(`Zaylo root not found: ${zayloRoot}`)
+    warnings.push(`Legacy local Zaylo workspace is not connected: ${zayloRoot}. CRM-native Market Studio remains available.`)
   }
 
   const areas = await readJson<Area[]>(path.join(zayloRoot, "data", "sources", "areas.json"), [])
