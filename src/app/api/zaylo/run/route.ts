@@ -12,6 +12,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unsupported Zaylo job" }, { status: 400 })
     }
 
+    if (process.env.VERCEL === "1") {
+      return NextResponse.json(
+        {
+          error: "Zaylo jobs must run on the dedicated worker server, not inside Vercel.",
+          job,
+          workerRequired: true,
+        },
+        { status: 409 }
+      )
+    }
+
     const run = await startZayloJob(job)
     return NextResponse.json({ run }, { status: 202 })
   } catch (error) {

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { zayloAreaCatalog, zayloSourceLinks, type ZayloBedroom, type ZayloSourceKind, type ZayloSourceLink } from "@/lib/zaylo/market-catalog"
+import { zayloAreaCatalog, zayloSourceLinks, type ZayloAreaCatalogItem, type ZayloBedroom, type ZayloSourceKind, type ZayloSourceLink } from "@/lib/zaylo/market-catalog"
 import { formatAed, marketMetrics, socialDrafts, type MarketMetric } from "@/lib/zaylo/market-studio"
 import { toast } from "sonner"
 
@@ -22,7 +22,12 @@ export function MarketStudio() {
   const [selectedId, setSelectedId] = useState(marketMetrics[0]?.id ?? "")
   const [masterCommunity, setMasterCommunity] = useState("all")
   const [bedroomFilter, setBedroomFilter] = useState<"all" | `${ZayloBedroom}`>("all")
-  const [customLinks, setCustomLinks] = useState<ZayloSourceLink[]>([])
+  const [areas, setAreas] = useState<ZayloAreaCatalogItem[]>(zayloAreaCatalog)
+  const [sourceLinks, setSourceLinks] = useState<ZayloSourceLink[]>(zayloSourceLinks)
+  const [metrics, setMetrics] = useState<MarketMetric[]>(marketMetrics)
+  const [dataMode, setDataMode] = useState<"seed" | "supabase">("seed")
+  const [warnings, setWarnings] = useState<string[]>([])
+  const [isAddingSource, setIsAddingSource] = useState(false)
   const [newLink, setNewLink] = useState({
     masterCommunity: "Mudon",
     subCommunity: "Al Ranim",
@@ -32,35 +37,43 @@ export function MarketStudio() {
   })
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("zaylo.customSourceLinks")
-      if (stored) setCustomLinks(JSON.parse(stored) as ZayloSourceLink[])
-    } catch {
-      setCustomLinks([])
+    async function loadState() {
+      try {
+        const response = await fetch("/api/zaylo/market-studio", { cache: "no-store" })
+        const data = await response.json()
+        if (Array.isArray(data.areas)) setAreas(data.areas)
+        if (Array.isArray(data.sourceLinks)) setSourceLinks(data.sourceLinks)
+        if (Array.isArray(data.metrics)) setMetrics(data.metrics)
+        if (data.dataMode === "supabase" || data.dataMode === "seed") setDataMode(data.dataMode)
+        if (Array.isArray(data.warnings)) setWarnings(data.warnings)
+      } catch {
+        setWarnings(["Could not refresh Market Studio state. Using bundled seed catalog."])
+      }
     }
+
+    void loadState()
   }, [])
 
-  const allSourceLinks = useMemo(() => [...zayloSourceLinks, ...customLinks], [customLinks])
-  const masterCommunities = useMemo(() => Array.from(new Set(zayloAreaCatalog.map((area) => area.masterCommunity))), [])
+  const masterCommunities = useMemo(() => Array.from(new Set(areas.map((area) => area.masterCommunity))), [areas])
   const filteredMetrics = useMemo(() => {
-    return marketMetrics.filter((metric) => {
+    return metrics.filter((metric) => {
       const matchesCommunity = masterCommunity === "all" || metric.community === masterCommunity
       const matchesBedroom = bedroomFilter === "all" || metric.beds === Number(bedroomFilter)
       return matchesCommunity && matchesBedroom
     })
-  }, [bedroomFilter, masterCommunity])
+  }, [bedroomFilter, masterCommunity, metrics])
 
-  const selectedMetric = filteredMetrics.find((metric) => metric.id === selectedId) ?? filteredMetrics[0] ?? marketMetrics[0]
+  const selectedMetric = filteredMetrics.find((metric) => metric.id === selectedId) ?? filteredMetrics[0] ?? metrics[0]
   const selectedDraft = socialDrafts.find((draft) => draft.metricId === selectedMetric?.id) ?? socialDrafts[0]
 
   const communities = useMemo(() => {
-    return Array.from(new Set(zayloAreaCatalog.map((area) => `${area.community}, ${area.subCommunity}`)))
-  }, [])
+    return Array.from(new Set(areas.map((area) => `${area.community}, ${area.subCommunity}`)))
+  }, [areas])
 
-  const selectedArea = zayloAreaCatalog.find(
+  const selectedArea = areas.find(
     (area) => area.community === selectedMetric?.community && area.subCommunity === selectedMetric?.subCommunity
   )
-  const selectedLinks = allSourceLinks.filter((link) => link.areaId === selectedArea?.id)
+  const selectedLinks = sourceLinks.filter((link) => link.areaId === selectedArea?.id)
 
   async function copyCaption() {
     if (!selectedDraft) return
@@ -81,41 +94,47 @@ export function MarketStudio() {
     URL.revokeObjectURL(url)
   }
 
-  function addSourceLink() {
+  async function addSourceLink() {
     if (!newLink.url.trim()) {
       toast.error("Paste a source URL first")
       return
     }
 
     const existingArea =
-      zayloAreaCatalog.find(
+      areas.find(
         (area) =>
           area.masterCommunity === newLink.masterCommunity &&
           area.subCommunity.toLowerCase() === newLink.subCommunity.trim().toLowerCase()
-      ) ?? zayloAreaCatalog.find((area) => area.masterCommunity === newLink.masterCommunity)
+      ) ?? areas.find((area) => area.masterCommunity === newLink.masterCommunity)
 
-    const sourceLink: ZayloSourceLink = {
-      id: `custom-${Date.now()}`,
-      areaId: existingArea?.id ?? `${newLink.masterCommunity}-${newLink.subCommunity}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      kind: newLink.kind,
-      label: newLink.label.trim() || "Manual source",
-      url: newLink.url.trim(),
-      active: true,
-      notes: existingArea ? "Temporary browser-saved link. Move to Supabase when persistence is enabled." : "Temporary custom area link.",
+    if (!existingArea) {
+      toast.error("Add the area to Supabase first")
+      return
     }
 
-    const next = [sourceLink, ...customLinks]
-    setCustomLinks(next)
-    window.localStorage.setItem("zaylo.customSourceLinks", JSON.stringify(next))
-    setNewLink((current) => ({ ...current, url: "" }))
-    toast.success("Source link saved in this browser")
-  }
+    setIsAddingSource(true)
+    const response = await fetch("/api/zaylo/source-links", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        areaSlug: existingArea.id,
+        kind: newLink.kind,
+        label: newLink.label.trim() || "Manual source",
+        url: newLink.url.trim(),
+      }),
+    })
+    const data = await response.json().catch(() => ({}))
+    setIsAddingSource(false)
 
-  function removeCustomLink(id: string) {
-    const next = customLinks.filter((link) => link.id !== id)
-    setCustomLinks(next)
-    window.localStorage.setItem("zaylo.customSourceLinks", JSON.stringify(next))
-    toast.success("Source link removed")
+    if (!response.ok) {
+      toast.error(data.error ?? "Could not save source link")
+      return
+    }
+
+    if (data.sourceLink) setSourceLinks((current) => [data.sourceLink, ...current])
+    setNewLink((current) => ({ ...current, url: "" }))
+    setDataMode("supabase")
+    toast.success("Source link saved to Supabase")
   }
 
   if (!selectedMetric || !selectedDraft) return null
@@ -132,6 +151,12 @@ export function MarketStudio() {
           <p className="text-muted-foreground">
             Turn verified villa-community numbers into trust-building posts and captions.
           </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge variant={dataMode === "supabase" ? "default" : "secondary"}>{dataMode}</Badge>
+            {warnings.slice(0, 2).map((warning) => (
+              <Badge key={warning} variant="outline">{warning}</Badge>
+            ))}
+          </div>
         </div>
         <div className="grid w-full gap-2 lg:w-[560px] lg:grid-cols-[1fr_120px]">
           <Select value={masterCommunity} onValueChange={setMasterCommunity}>
@@ -224,7 +249,7 @@ export function MarketStudio() {
           <Card>
             <CardHeader>
               <CardTitle>Source Links</CardTitle>
-              <CardDescription>Links prepared for the scraper/import job. Custom links are browser-saved until Supabase is enabled.</CardDescription>
+              <CardDescription>Links prepared for the scraper/import job. New links save to Supabase when configured.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="max-h-64 space-y-2 overflow-auto pr-1">
@@ -244,11 +269,6 @@ export function MarketStudio() {
                           <ExternalLink className="h-4 w-4" />
                         </a>
                       </Button>
-                      {link.id.startsWith("custom-") && (
-                        <Button variant="ghost" size="sm" onClick={() => removeCustomLink(link.id)}>
-                          Remove
-                        </Button>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -302,9 +322,9 @@ export function MarketStudio() {
                   <Label>URL</Label>
                   <Input placeholder="https://..." value={newLink.url} onChange={(event) => setNewLink((current) => ({ ...current, url: event.target.value }))} />
                 </div>
-                <Button onClick={addSourceLink}>
+                <Button onClick={addSourceLink} disabled={isAddingSource}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add source link
+                  {isAddingSource ? "Saving..." : "Add source link"}
                 </Button>
               </div>
             </CardContent>

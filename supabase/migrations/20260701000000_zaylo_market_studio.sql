@@ -95,6 +95,13 @@ alter table public.zaylo_market_metrics enable row level security;
 alter table public.zaylo_import_runs enable row level security;
 alter table public.zaylo_social_posts enable row level security;
 
+grant usage on schema public to service_role;
+grant all on table public.zaylo_areas to service_role;
+grant all on table public.zaylo_source_links to service_role;
+grant all on table public.zaylo_market_metrics to service_role;
+grant all on table public.zaylo_import_runs to service_role;
+grant all on table public.zaylo_social_posts to service_role;
+
 create policy "zaylo service role areas"
   on public.zaylo_areas
   for all

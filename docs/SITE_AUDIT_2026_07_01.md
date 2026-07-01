@@ -22,14 +22,17 @@ The product should be tightened around one primary promise:
 ## What Is Needed
 
 1. **Authentication and roles**
-   - Current middleware is demo-open.
-   - Production needs Clerk/Supabase auth enforced for `/app`, `/user`, `/zaylo`, and private APIs.
+   - Middleware now supports `AUTH_MODE=clerk`.
+   - Demo remains the default until Clerk env vars are configured.
+   - Production should set both `AUTH_MODE=clerk` and `NEXT_PUBLIC_AUTH_MODE=clerk`.
+   - Clerk auth protects `/app`, `/user`, `/zaylo`, and private API families when enabled.
    - Public routes should stay public: homepage, communities, off-plan, opportunity, auth pages, document signing token route.
 
 2. **One canonical app route family**
    - Current navigation points mostly to `/app/...`.
    - A second legacy dashboard route family still exists under `/(dashboard)`.
    - Keep `/app/...` as the canonical CRM path.
+   - Common legacy root-dashboard routes now redirect to `/app/...`.
    - Gradually redirect or remove duplicated `/(dashboard)` pages after confirming no unique feature exists only there.
 
 3. **Database readiness**
@@ -39,7 +42,8 @@ The product should be tightened around one primary promise:
    - Make every data-heavy module show a clear empty/config-needed state.
 
 4. **Zaylo production pipeline**
-   - Store areas/source links in Supabase, not localStorage.
+   - Market Studio now reads through a server store that prefers Supabase and falls back to seed data.
+   - New source-link writes go through `/api/zaylo/source-links`; no browser localStorage is used as the source of truth.
    - Server job should run Firecrawl and Playwright scraping.
    - Vercel should remain dashboard/approval/export only.
    - Scraping must respect CAPTCHA, Cloudflare, 403, 429, and rate limits.
@@ -100,16 +104,16 @@ The product should be tightened around one primary promise:
 - `/api/zaylo/market-studio` returns `200` and the expected catalog.
 - `/api/news` previously returned `503` when `NEWS_API_KEY` was missing. It now returns `200` with `configured: false`.
 - `/api/listings` previously returned `500` when the listings data source was not ready. It now returns an empty configured-warning fallback for recoverable setup errors.
+- `/api/zaylo/run` now returns a worker-required response on Vercel instead of trying to spawn local jobs.
+- `/app/admin/system-health` provides browser-visible checks for core systems.
 
 ## Next Build Order
 
-1. Add Supabase-backed Area & Source Link CRUD for Zaylo.
-2. Add server job runner for Firecrawl/Playwright import runs.
-3. Replace Zaylo localStorage links with Supabase persistence.
-4. Add PNG export for 1350x1080 posts.
-5. Add auth enforcement and route gating.
-6. Consolidate duplicated route families.
-7. Build system-health/admin page.
+1. Apply Supabase migrations and seed `zaylo_areas` / `zaylo_source_links`.
+2. Implement the dedicated worker CLI under `workers/zaylo-import-worker`.
+3. Add PNG export for 1350x1080 posts.
+4. Enable `AUTH_MODE=clerk` in Vercel after Clerk routes/env are confirmed.
+5. Continue consolidating duplicated route families.
 
 ## Server Strategy
 

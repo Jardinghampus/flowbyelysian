@@ -1,11 +1,55 @@
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Demo mode: No authentication required
-// All routes are accessible for demonstration purposes
-export function middleware(request: NextRequest) {
-  // Allow all requests to pass through
+const isClerkAuthEnabled = process.env.AUTH_MODE === 'clerk'
+
+const isProtectedRoute = createRouteMatcher([
+  '/app(.*)',
+  '/user(.*)',
+  '/zaylo(.*)',
+  '/api/admin(.*)',
+  '/api/areas(.*)',
+  '/api/contacts(.*)',
+  '/api/daily-activity(.*)',
+  '/api/document-settings(.*)',
+  '/api/documents(.*)',
+  '/api/gmail(.*)',
+  '/api/lead-scoring(.*)',
+  '/api/listings(.*)',
+  '/api/notifications(.*)',
+  '/api/opportunities(.*)',
+  '/api/outreach-logs(.*)',
+  '/api/owner-intelligence(.*)',
+  '/api/owners(.*)',
+  '/api/pipeline-automations(.*)',
+  '/api/reports(.*)',
+  '/api/requests(.*)',
+  '/api/sentiment(.*)',
+  '/api/smart(.*)',
+  '/api/stats(.*)',
+  '/api/tasks(.*)',
+  '/api/templates(.*)',
+  '/api/title-deeds(.*)',
+  '/api/training(.*)',
+  '/api/user(.*)',
+  '/api/zaylo(.*)',
+])
+
+const clerkAuthMiddleware = clerkMiddleware(async (auth, request) => {
+  if (isProtectedRoute(request)) {
+    await auth.protect()
+  }
+
   return NextResponse.next()
+})
+
+export function middleware(request: NextRequest, event: Parameters<typeof clerkAuthMiddleware>[1]) {
+  if (!isClerkAuthEnabled) {
+    return NextResponse.next()
+  }
+
+  return clerkAuthMiddleware(request, event)
 }
 
 export const config = {

@@ -1,5 +1,6 @@
 // Demo authentication helpers for API routes
 // These replace Clerk's server-side auth functions
+import { isClerkAuthEnabled } from "@/lib/auth-mode"
 
 export const DEMO_USER_ID = "demo-user-001"
 
@@ -21,20 +22,32 @@ export const DEMO_USER = {
   lastActiveAt: Date.now(),
 }
 
-// Mock auth() function - always returns demo user
 export async function auth() {
+  if (isClerkAuthEnabled) {
+    const clerk = await import("@clerk/nextjs/server")
+    return clerk.auth()
+  }
+
   return {
     userId: DEMO_USER_ID,
   }
 }
 
-// Mock currentUser() function
 export async function currentUser() {
+  if (isClerkAuthEnabled) {
+    const clerk = await import("@clerk/nextjs/server")
+    return clerk.currentUser()
+  }
+
   return DEMO_USER
 }
 
-// Mock clerkClient for admin routes
 export async function clerkClient() {
+  if (isClerkAuthEnabled) {
+    const clerk = await import("@clerk/nextjs/server")
+    return clerk.clerkClient()
+  }
+
   return {
     users: {
       getUser: async (userId: string) => DEMO_USER,
