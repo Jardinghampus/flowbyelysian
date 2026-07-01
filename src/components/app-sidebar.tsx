@@ -32,6 +32,7 @@ import {
   MessageCircle,
   Database,
   RadioTower,
+  Activity,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -178,6 +179,7 @@ const navSections: NavSection[] = [
     roles: ["admin"],
     items: [
       { label: "Admin", href: "/app/admin", icon: <UserCog className={iconClass} />, roles: ["admin"] },
+      { label: "System Health", href: "/app/admin/system-health", icon: <Activity className={iconClass} />, roles: ["admin"] },
     ],
   },
 
