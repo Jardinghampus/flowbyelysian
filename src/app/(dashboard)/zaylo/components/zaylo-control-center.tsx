@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { MarketStudio } from "./market-studio"
 
 type ZayloState = {
   root: string
@@ -121,6 +122,8 @@ export function ZayloControlCenter({ initialState }: { initialState: ZayloState 
 
   return (
     <div className="space-y-6">
+      <MarketStudio />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Zaylo Intelligence</h1>
