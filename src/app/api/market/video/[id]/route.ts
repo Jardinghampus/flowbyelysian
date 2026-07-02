@@ -4,6 +4,7 @@ import { mkdir as mkdirAsync, access as accessAsync, stat as statAsync, readFile
 import { tmpdir } from "os"
 import path from "path"
 import { NextRequest, NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 
 const execAsync = promisify(exec)
 
@@ -141,6 +142,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireApiUser({ roles: ["admin", "manager", "operator"] })
+  if (!guard.ok) return guard.response
+
   const { id } = await params
   const entry = communities.find((c) => c.id === id)
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 })

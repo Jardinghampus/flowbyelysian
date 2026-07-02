@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 
 export interface NotifyRequest {
   type: "new_lead" | "message" | "alert"
@@ -35,6 +36,9 @@ const notifications: Array<{
  */
 export async function POST(request: Request): Promise<NextResponse<NotifyResponse>> {
   try {
+    const guard = await requireApiUser({ roles: ["admin", "manager", "operator"] })
+    if (!guard.ok) return guard.response as NextResponse<NotifyResponse>
+
     const body: NotifyRequest = await request.json()
 
     const notificationId = `notify-${Date.now()}`
@@ -109,6 +113,9 @@ export async function POST(request: Request): Promise<NextResponse<NotifyRespons
  * Get recent notifications (for debugging)
  */
 export async function GET(): Promise<NextResponse> {
+  const guard = await requireApiUser({ roles: ["admin", "manager", "operator"] })
+  if (!guard.ok) return guard.response
+
   return NextResponse.json({
     success: true,
     notifications: notifications.slice(-20), // Last 20 notifications

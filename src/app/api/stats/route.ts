@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { createServerClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const today = new Date().toISOString().split("T")[0]
     const now = new Date().toISOString()

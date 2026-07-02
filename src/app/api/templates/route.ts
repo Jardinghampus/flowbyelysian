@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireApiUser } from '@/lib/api/guards'
 import { createUntypedServerClient } from '@/lib/supabase/server-untyped'
 
 export async function GET() {
+  const guard = await requireApiUser()
+  if (!guard.ok) return guard.response
+
   const supabase = createUntypedServerClient()
 
   const { data, error } = await supabase
@@ -17,6 +21,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const guard = await requireApiUser({ roles: ['admin', 'manager'] })
+  if (!guard.ok) return guard.response
+
   const supabase = createUntypedServerClient()
   const body = await req.json()
 

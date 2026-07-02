@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { fetchOwnerStats } from "@/app/app/data/_lib/supabase-queries"
 
 export async function GET(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const { searchParams } = new URL(request.url)
     const stats = await fetchOwnerStats({
       area: searchParams.get("area") || undefined,

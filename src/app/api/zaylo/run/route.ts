@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { startZayloJob, type ZayloJob } from "@/lib/zaylo/control"
+import { requireApiUser } from "@/lib/api/guards"
 
 const allowedJobs = new Set<ZayloJob>(["scrape-listings", "generate-week", "build-zaylo", "import-pdfs"])
 
 export async function POST(request: NextRequest) {
   try {
+    const guard = await requireApiUser({ roles: ["admin", "manager", "operator"] })
+    if (!guard.ok) return guard.response
+
     const body = (await request.json()) as { job?: string }
     const job = body.job as ZayloJob | undefined
 

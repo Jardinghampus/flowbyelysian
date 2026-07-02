@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { createServerClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
+    const guard = await requireApiUser({ roles: ["admin"] })
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
 
     const tables: Record<string, boolean> = {}

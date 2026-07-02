@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { analyseConversation, quickSentiment, type ChatMessage } from "@/lib/sentiment-analysis"
 
 /**
@@ -11,6 +12,9 @@ import { analyseConversation, quickSentiment, type ChatMessage } from "@/lib/sen
  */
 export async function POST(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const body = await request.json()
 
     // Full conversation analysis

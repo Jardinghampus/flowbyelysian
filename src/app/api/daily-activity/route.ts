@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { createServerClient } from "@/lib/supabase/server"
 
 // GET - Fetch daily activity logs (supports ?date=YYYY-MM-DD and ?agent_id=xxx)
 export async function GET(request: Request) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const { searchParams } = new URL(request.url)
     const date = searchParams.get("date")
@@ -46,6 +50,9 @@ export async function GET(request: Request) {
 // POST - Create or update daily activity (upsert on agent_id + activity_date)
 export async function POST(request: Request) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const body = await request.json()
     const { agent_id, activity_date, calls_wa, leads, viewings, notes } = body

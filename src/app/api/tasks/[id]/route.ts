@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth } from "@/lib/demo-auth"
+import { requireApiUser } from "@/lib/api/guards"
 
 // PATCH /api/tasks/[id]
 export async function PATCH(
@@ -8,6 +8,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const { id } = await params
     const body = await request.json()
     const { title, status, priority, category, notes, due_date } = body
@@ -18,6 +21,7 @@ export async function PATCH(
       .from("tasks")
       .update({ title, status, priority, category, notes, due_date, updated_at: new Date().toISOString() })
       .eq("id", id)
+      .eq("owner_id", guard.context.userId)
       .select()
       .single()
 
@@ -36,6 +40,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const { id } = await params
     const supabase = createServerClient()
 
@@ -44,6 +51,7 @@ export async function DELETE(
       .from("tasks")
       .delete()
       .eq("id", id)
+      .eq("owner_id", guard.context.userId)
 
     if (error) throw error
 

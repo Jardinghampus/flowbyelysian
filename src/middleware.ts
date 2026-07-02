@@ -28,6 +28,7 @@ const isProtectedRoute = createRouteMatcher([
   '/api/sentiment(.*)',
   '/api/smart(.*)',
   '/api/stats(.*)',
+  '/api/system(.*)',
   '/api/tasks(.*)',
   '/api/templates(.*)',
   '/api/title-deeds(.*)',

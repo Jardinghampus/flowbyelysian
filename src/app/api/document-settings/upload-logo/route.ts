@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireApiUser } from '@/lib/api/guards'
 import { createUntypedServerClient } from '@/lib/supabase/server-untyped'
 
 export async function POST(req: NextRequest) {
+  const guard = await requireApiUser({ roles: ['admin', 'manager'] })
+  if (!guard.ok) return guard.response
+
   const supabase = createUntypedServerClient()
 
   const formData = await req.formData()

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { createServerClient } from "@/lib/supabase/server"
 import {
   scanPipeline,
@@ -16,6 +17,9 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const { searchParams } = new URL(request.url)
 

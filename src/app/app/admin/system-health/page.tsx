@@ -20,6 +20,12 @@ type HealthCheck = {
 
 const checks: Array<Omit<HealthCheck, "status" | "detail" | "updatedAt">> = [
   {
+    id: "system-health",
+    label: "Backend Guardrails",
+    description: "Auth mode, production demo lock, Supabase env, and worker boundary.",
+    endpoint: "/api/system/health",
+  },
+  {
     id: "zaylo-market",
     label: "Zaylo Market Studio",
     description: "Area catalog, source links, 3BR/4BR/5BR metrics and social frames.",
@@ -53,6 +59,22 @@ const checks: Array<Omit<HealthCheck, "status" | "detail" | "updatedAt">> = [
 
 function classify(endpoint: string, payload: unknown): Pick<HealthCheck, "status" | "detail"> {
   const data = payload as Record<string, unknown>
+
+  if (endpoint.includes("system/health")) {
+    const checks = Array.isArray(data.checks) ? data.checks : []
+    const errors = checks.filter((check) => (check as { status?: string }).status === "error").length
+    const configNeeded = checks.filter((check) => (check as { status?: string }).status === "config_needed").length
+
+    if (data.status === "error") {
+      return { status: "error", detail: `${errors} blocking guardrail check(s) need attention.` }
+    }
+
+    if (data.status === "config_needed") {
+      return { status: "config_needed", detail: `${configNeeded} production configuration check(s) still need attention.` }
+    }
+
+    return { status: "ready", detail: "Backend guardrails are ready." }
+  }
 
   if (endpoint.includes("market-studio")) {
     const metrics = Array.isArray(data.metrics) ? data.metrics.length : 0
@@ -118,10 +140,11 @@ export default function SystemHealthPage() {
           const payload = await response.json().catch(() => ({}))
 
           if (!response.ok) {
+            const detail = typeof payload.error === "string" ? payload.error : `HTTP ${response.status}`
             return {
               ...check,
               status: "error" as const,
-              detail: `HTTP ${response.status}`,
+              detail,
               updatedAt: new Date().toLocaleTimeString(),
             }
           }

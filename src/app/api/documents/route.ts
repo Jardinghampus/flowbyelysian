@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireApiUser } from '@/lib/api/guards'
 import { createUntypedServerClient } from '@/lib/supabase/server-untyped'
 
 export async function GET(req: NextRequest) {
+  const guard = await requireApiUser()
+  if (!guard.ok) return guard.response
+
   const supabase = createUntypedServerClient()
   const { searchParams } = new URL(req.url)
   const agentId = searchParams.get('agent_id')
@@ -30,6 +34,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const guard = await requireApiUser()
+  if (!guard.ok) return guard.response
+
   const supabase = createUntypedServerClient()
   const body = await req.json()
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { requireApiUser } from "@/lib/api/guards"
 import { createServerClient } from "@/lib/supabase/server"
 import { scoreLeadConversion, rankLeads, type LeadScoreInput } from "@/lib/lead-scoring"
 
@@ -13,6 +14,9 @@ import { scoreLeadConversion, rankLeads, type LeadScoreInput } from "@/lib/lead-
  */
 export async function GET(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const { searchParams } = new URL(request.url)
 
@@ -108,6 +112,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const body = await request.json()
 
     const input: LeadScoreInput = {
