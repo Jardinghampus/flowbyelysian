@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/demo-auth"
+import { emitActivityEvent, emitAuditLog } from "@/lib/audit/events"
+import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
 import {
   fetchOwnerById, updateOwner, deleteOwner, hideOwner, restoreOwner,
   fetchOutreachLogs, fetchLinkedListings,
 } from "@/app/app/data/_lib/supabase-queries"
 import { updateOwnerSchema } from "@/app/app/data/_lib/schemas"
+
+function asAuditData(value: unknown): Record<string, unknown> | null {
+  return value ? (value as Record<string, unknown>) : null
+}
 
 export async function GET(
   _request: NextRequest,
@@ -41,14 +47,48 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
+    const before = await fetchOwnerById(id).catch(() => null)
+    const auditClient = createUntypedServerClient()
 
     // Handle archive/restore actions
     if (body._action === "hide") {
       await hideOwner(id)
+      await emitActivityEvent(auditClient, {
+        actor: { userId },
+        entityType: "owner",
+        entityId: id,
+        eventType: "owner.hidden",
+        title: "Owner archived",
+        source: "api",
+      })
+      await emitAuditLog(auditClient, {
+        actor: { userId },
+        action: "owner.hide",
+        targetType: "owner",
+        targetId: id,
+        beforeData: asAuditData(before),
+        metadata: { route: "/api/owners/[id]" },
+      })
       return NextResponse.json({ success: true })
     }
     if (body._action === "restore") {
       await restoreOwner(id)
+      await emitActivityEvent(auditClient, {
+        actor: { userId },
+        entityType: "owner",
+        entityId: id,
+        eventType: "owner.restored",
+        title: "Owner restored",
+        source: "api",
+      })
+      await emitAuditLog(auditClient, {
+        actor: { userId },
+        action: "owner.restore",
+        targetType: "owner",
+        targetId: id,
+        beforeData: asAuditData(before),
+        metadata: { route: "/api/owners/[id]" },
+      })
       return NextResponse.json({ success: true })
     }
 
@@ -58,6 +98,24 @@ export async function PATCH(
     }
 
     const owner = await updateOwner(id, parsed.data as never)
+    await emitActivityEvent(auditClient, {
+      actor: { userId },
+      entityType: "owner",
+      entityId: id,
+      eventType: "owner.updated",
+      title: "Owner updated",
+      source: "api",
+      payload: { updatedFields: Object.keys(parsed.data) },
+    })
+    await emitAuditLog(auditClient, {
+      actor: { userId },
+      action: "owner.update",
+      targetType: "owner",
+      targetId: id,
+      beforeData: asAuditData(before),
+      afterData: asAuditData(owner),
+      metadata: { updatedFields: Object.keys(parsed.data) },
+    })
     return NextResponse.json({ owner })
   } catch (error) {
     console.error("Error updating owner:", error)
@@ -76,7 +134,25 @@ export async function DELETE(
     }
 
     const { id } = await params
+    const before = await fetchOwnerById(id).catch(() => null)
     await deleteOwner(id)
+    const auditClient = createUntypedServerClient()
+    await emitActivityEvent(auditClient, {
+      actor: { userId },
+      entityType: "owner",
+      entityId: id,
+      eventType: "owner.deleted",
+      title: "Owner deleted",
+      source: "api",
+    })
+    await emitAuditLog(auditClient, {
+      actor: { userId },
+      action: "owner.delete",
+      targetType: "owner",
+      targetId: id,
+      beforeData: asAuditData(before),
+      metadata: { route: "/api/owners/[id]" },
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting owner:", error)

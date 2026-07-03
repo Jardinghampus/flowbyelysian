@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import { auth } from "@clerk/nextjs/server";
-
-// Lazy initialization to avoid build-time errors when OPENAI_API_KEY is not set
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
+import { requireApiUser } from "@/lib/api/guards";
+import { runChatCompletion } from "@/lib/ai/gateway";
 
 export async function POST(req: NextRequest) {
-  // Require authentication to prevent unauthorized API usage
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const guard = await requireApiUser()
+  if (!guard.ok) return guard.response
 
-  const openai = getOpenAIClient();
   try {
     const {
       originalText,
@@ -76,19 +65,30 @@ INSTRUCTIONS:
 OUTPUT FORMAT:
 Provide only the optimized description text. No preamble, no explanations, no markdown formatting.`;
 
-    const completion = await openai.chat.completions.create({
+    const result = await runChatCompletion({
+      userId: guard.context.userId,
+      feature: "description_writer",
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
       temperature: 0.7,
-      max_tokens: 500,
+      maxTokens: 500,
+      metadata: {
+        targetAudience,
+        community,
+        features,
+        purpose,
+        tone,
+      },
     });
 
-    const optimizedText = completion.choices[0].message.content;
-
-    return NextResponse.json({ optimizedText });
+    return NextResponse.json({
+      optimizedText: result.content,
+      aiRunId: result.runId,
+      usage: result.usage,
+    });
   } catch (error) {
     console.error("Error generating text:", error);
     return NextResponse.json(

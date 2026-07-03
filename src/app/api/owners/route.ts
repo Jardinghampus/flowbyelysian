@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth, currentUser } from "@/lib/demo-auth"
+import { emitActivityEvent } from "@/lib/audit/events"
+import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
 import { fetchOwners, createOwner } from "@/app/app/data/_lib/supabase-queries"
 import { addOwnerSchema } from "@/app/app/data/_lib/schemas"
 
@@ -58,6 +60,22 @@ export async function POST(request: NextRequest) {
       bedrooms: ownerData.bedrooms || null,
       notes: ownerData.notes || null,
     } as never)
+
+    await emitActivityEvent(createUntypedServerClient(), {
+      actor: { userId, name: user?.fullName || "Unknown" },
+      entityType: "owner",
+      entityId: String((owner as { id?: string }).id),
+      eventType: "owner.created",
+      title: "Owner created",
+      body: `${ownerData.name} was added to the owner CRM.`,
+      source: "api",
+      payload: {
+        area: ownerData.area,
+        subArea: ownerData.sub_area || null,
+        status: ownerData.status || null,
+        assignedAgentId: ownerData.assigned_agent_id || userId,
+      },
+    })
 
     return NextResponse.json({ owner }, { status: 201 })
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireApiUser } from "@/lib/api/guards"
+import { emitActivityEvent, emitAuditLog } from "@/lib/audit/events"
 import { createServerClient } from "@/lib/supabase/server"
 import { villaCommunities } from "@/lib/data/villa-communities"
 import { scoreLeadConversion, type LeadScoreInput } from "@/lib/lead-scoring"
@@ -207,6 +208,24 @@ export async function POST(request: NextRequest) {
     }
     const leadScore = scoreLeadConversion(leadScoreInput)
 
+    await emitActivityEvent(supabase as any, {
+      entityType: "opportunity",
+      entityId: String(opportunity.id),
+      eventType: "opportunity.created",
+      title: `New ${body.type || "opportunity"} lead created`,
+      body: body.full_name ? `${body.full_name} submitted a new opportunity.` : "A new opportunity was submitted.",
+      source: "website",
+      payload: {
+        type: body.type,
+        area: body.area || null,
+        propertyType: body.property_type || null,
+        bedrooms: body.bedrooms || null,
+        price: effectivePrice || null,
+        leadScore: leadScore.score,
+        leadTier: leadScore.tier,
+      },
+    })
+
     return NextResponse.json(
       {
         opportunity,
@@ -245,6 +264,13 @@ export async function PATCH(request: NextRequest) {
     const supabase = createServerClient()
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: before } = await (supabase as any)
+      .from("opportunities")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: opportunity, error } = await (supabase as any)
       .from("opportunities")
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -253,6 +279,26 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (error) throw error
+
+    await emitActivityEvent(supabase as any, {
+      actor: { userId: guard.context.userId, role: guard.context.role },
+      entityType: "opportunity",
+      entityId: String(id),
+      eventType: "opportunity.updated",
+      title: "Opportunity updated",
+      source: "api",
+      payload: { updates },
+    })
+
+    await emitAuditLog(supabase as any, {
+      actor: { userId: guard.context.userId, role: guard.context.role },
+      action: "opportunity.update",
+      targetType: "opportunity",
+      targetId: String(id),
+      beforeData: before || null,
+      afterData: opportunity || null,
+      metadata: { updatedFields: Object.keys(updates) },
+    })
 
     return NextResponse.json({ opportunity })
   } catch (error) {
