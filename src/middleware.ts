@@ -27,6 +27,8 @@ const isProtectedRoute = createRouteMatcher([
   "/api/gmail(.*)",
   "/api/lead-scoring(.*)",
   "/api/listings(.*)",
+  "/api/market-listings(.*)",
+  "/api/performance(.*)",
   "/api/notifications(.*)",
   "/api/opportunities(.*)",
   "/api/outreach-logs(.*)",
@@ -53,6 +55,8 @@ const isPublicAuthRoute = createRouteMatcher([
   "/api/auth(.*)",
   "/api/webhooks(.*)",
   "/sign/(.*)",
+  "/share/(.*)",
+  "/api/listing-share/(.*)",
 ])
 
 const isSocialRoute = createRouteMatcher([

@@ -147,11 +147,21 @@ export function InventoryBrowser({ isOpen, onClose }: InventoryBrowserProps) {
     return result
   }, [listings, search, areaFilter, typeFilter, statusFilter, transactionFilter, sortBy])
 
-  const handleWhatsApp = (p: BrowseListing) => {
-    const message = `Listing: "${p.title}" in ${p.area} (${formatPrice(p.price, p.transactionType)}). Agent: ${p.ownerName}`
-    // No owner phone on inventory row — open WhatsApp share sheet with prefilled text
-    // (agent picks recipient). For CRM contacts with numbers, use /app/whatsapp.
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer")
+  const handleWhatsApp = async (p: BrowseListing) => {
+    try {
+      const res = await fetch(`/api/listings/${p.id}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expiresInDays: 30 }),
+      })
+      const share = await res.json()
+      if (!res.ok) throw new Error(share.error || "Share failed")
+      const message = `Listing from our inventory: "${p.title}" in ${p.area} (${formatPrice(p.price, p.transactionType)}).\nAgent: ${p.ownerName}\nPreview: ${share.url}\nPDF: ${share.pdfUrl}`
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer")
+    } catch {
+      const message = `Listing: "${p.title}" in ${p.area} (${formatPrice(p.price, p.transactionType)}). Agent: ${p.ownerName}`
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer")
+    }
   }
 
   return (

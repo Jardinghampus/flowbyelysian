@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { EditListingDialog } from "./edit-listing-dialog"
 import { ViewListingDialog } from "./view-listing-dialog"
+import { ListingShareMenuItems } from "@/components/listings/listing-share-actions"
 import type { Listing } from "../page"
 
 interface InventoryTableProps {
@@ -220,6 +221,8 @@ export function InventoryTable({
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
+                          <ListingShareMenuItems listingId={listing.id} title={listing.title} />
+                          <DropdownMenuSeparator />
                           {canModify(listing) && (
                             <DropdownMenuItem onClick={() => setEditListing(listing)}>
                               <Pencil className="mr-2 h-4 w-4" />

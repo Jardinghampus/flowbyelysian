@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { ListingShareButtons } from "@/components/listings/listing-share-actions"
 import type { Listing } from "../page"
 
 interface ViewListingDialogProps {
@@ -82,6 +83,13 @@ export function ViewListingDialog({
             )}
           </div>
         </DialogHeader>
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Share with colleague
+          </p>
+          <ListingShareButtons listingId={listing.id} title={listing.title} />
+        </div>
 
         {/* Images */}
         {listing.images.length > 0 && (
