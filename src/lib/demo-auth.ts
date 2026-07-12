@@ -1,6 +1,11 @@
-// Demo authentication helpers for API routes
-// These replace Clerk's server-side auth functions
-import { isClerkAuthEnabled } from "@/lib/auth-mode"
+// Auth helpers for API routes — supports local, Clerk, and demo modes.
+import { isClerkAuthEnabled, isLocalAuthEnabled } from "@/lib/auth-mode"
+import {
+  getVerifiedSessionUser,
+  listAppUsers,
+  toClerkShapedUser,
+  type LocalSessionUser,
+} from "@/lib/local-auth"
 
 export const DEMO_USER_ID = "demo-user-001"
 
@@ -15,6 +20,7 @@ export const DEMO_USER = {
     role: "admin",
     phone: "+971 50 123 4567",
     area: "tilal-al-ghaf",
+    canAccessSocial: true,
   },
   privateMetadata: {},
   imageUrl: null,
@@ -23,6 +29,11 @@ export const DEMO_USER = {
 }
 
 export async function auth() {
+  if (isLocalAuthEnabled) {
+    const user = await getVerifiedSessionUser()
+    return { userId: user?.id ?? null }
+  }
+
   if (isClerkAuthEnabled) {
     const clerk = await import("@clerk/nextjs/server")
     return clerk.auth()
@@ -34,6 +45,12 @@ export async function auth() {
 }
 
 export async function currentUser() {
+  if (isLocalAuthEnabled) {
+    const user = await getVerifiedSessionUser()
+    if (!user) return null
+    return toClerkShapedUser(user)
+  }
+
   if (isClerkAuthEnabled) {
     const clerk = await import("@clerk/nextjs/server")
     return clerk.currentUser()
@@ -42,7 +59,53 @@ export async function currentUser() {
   return DEMO_USER
 }
 
+export async function getLocalSession(): Promise<LocalSessionUser | null> {
+  if (!isLocalAuthEnabled) return null
+  return getVerifiedSessionUser()
+}
+
 export async function clerkClient() {
+  if (isLocalAuthEnabled) {
+    return {
+      users: {
+        getUser: async (userId: string) => {
+          const users = await listAppUsers()
+          const row = users.find((u) => u.id === userId)
+          if (!row) return null
+          return toClerkShapedUser({
+            id: row.id,
+            email: row.email,
+            fullName: row.full_name,
+            role: row.role,
+            canAccessSocial: row.can_access_social,
+          })
+        },
+        getUserList: async () => {
+          const users = await listAppUsers()
+          return {
+            data: users.map((row) =>
+              toClerkShapedUser({
+                id: row.id,
+                email: row.email,
+                fullName: row.full_name,
+                role: row.role,
+                canAccessSocial: row.can_access_social,
+              })
+            ),
+          }
+        },
+        updateUser: async () => {
+          throw new Error("Use /api/admin/users for local auth updates")
+        },
+      },
+      invitations: {
+        createInvitation: async () => {
+          throw new Error("Local auth creates users directly — password required")
+        },
+      },
+    }
+  }
+
   if (isClerkAuthEnabled) {
     const clerk = await import("@clerk/nextjs/server")
     return clerk.clerkClient()
@@ -50,7 +113,7 @@ export async function clerkClient() {
 
   return {
     users: {
-      getUser: async (userId: string) => DEMO_USER,
+      getUser: async () => DEMO_USER,
       getUserList: async () => ({
         data: [
           DEMO_USER,

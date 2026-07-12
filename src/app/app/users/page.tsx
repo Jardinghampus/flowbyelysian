@@ -9,8 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search } from "lucide-react"
 
-import initialUsersData from "./data.json"
-
 export interface User {
   id: number
   name: string
@@ -28,36 +26,19 @@ export interface UserFormValues {
   title: string
 }
 
-// Enrich base user data with CRM fields for card view
-function enrichContact(user: User, index: number): Contact {
-  const sampleEmails = [
-    "ahmad@zaylo.ae", "sarah@zaylo.ae", "mohammed@zaylo.ae",
-    "emma@zaylo.ae", "khalid@zaylo.ae", "lisa@zaylo.ae",
-  ]
-  const sampleNotes = [
-    "Top performer Q1 2026. Specializes in luxury villas.",
-    "Strong network in marina community. Manages 40+ units.",
-    "New joiner, excellent with off-plan projects.",
-    "",
-    "Corporate relocation specialist. Fluent in 4 languages.",
-    "Closing rate above 30%. Focus on high-net-worth buyers.",
-  ]
-  const sampleTags = [
-    ["VIP", "Luxury"], ["Residential"], ["Off-Plan", "New"],
-    ["Leasing"], ["Corporate"], ["HNW"],
-  ]
+function enrichContact(user: User): Contact {
   return {
     ...user,
-    email: sampleEmails[index % sampleEmails.length],
-    notes: sampleNotes[index % sampleNotes.length] || undefined,
-    tags: sampleTags[index % sampleTags.length],
-    lastContact: index < 3 ? "Today" : index < 6 ? "Yesterday" : "3 days ago",
-    dealCount: Math.floor(Math.random() * 20) + 1,
+    email: undefined,
+    notes: undefined,
+    tags: [],
+    lastContact: undefined,
+    dealCount: 0,
   }
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsersData as User[])
+  const [users, setUsers] = useState<User[]>([])
   const [view, setView] = useState<"table" | "cards">("table")
   const [cardSearch, setCardSearch] = useState("")
   const [cardRoleFilter, setCardRoleFilter] = useState<string>("all")
@@ -105,7 +86,7 @@ export default function UsersPage() {
   }
 
   // Filter contacts for card view
-  const contacts: Contact[] = users.map((u, i) => enrichContact(u, i))
+  const contacts: Contact[] = users.map((u) => enrichContact(u))
   const filteredContacts = contacts.filter((c) => {
     const matchesSearch = cardSearch === "" ||
       c.name.toLowerCase().includes(cardSearch.toLowerCase()) ||

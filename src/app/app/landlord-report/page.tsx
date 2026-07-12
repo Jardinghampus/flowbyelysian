@@ -44,6 +44,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { toast } from "sonner"
+import { useRole } from "@/contexts/role-context"
 import type { LandlordReportData, ViewingEntry, LeadEntry } from "@/lib/pdf/landlord-report"
 
 // Demo listings for selection
@@ -61,54 +62,6 @@ interface ListingOption {
   status: string
   ownerName: string
   createdAt: string
-}
-
-const demoListings: ListingOption[] = [
-  { id: "1", title: "Luxury Villa with Pool", area: "Emirates Hills", type: "villa", price: 15000000, transactionType: "sale", bedrooms: 5, bathrooms: 6, size: 8500, availability: "Immediate", status: "live", ownerName: "Ahmed Hassan", createdAt: "2026-01-15" },
-  { id: "2", title: "Modern Apartment Downtown", area: "Downtown Dubai", type: "apartment", price: 180000, transactionType: "rent", bedrooms: 2, bathrooms: 3, size: 1800, availability: "Q2 2026", status: "live", ownerName: "Sarah Miller", createdAt: "2026-01-10" },
-  { id: "3", title: "Family Villa in Murooj", area: "Al Murooj", type: "villa", price: 8500000, transactionType: "sale", bedrooms: 4, bathrooms: 5, size: 5200, availability: "Negotiable", status: "pocket", ownerName: "Ahmed Hassan", createdAt: "2026-01-08" },
-  { id: "4", title: "Penthouse Marina", area: "Dubai Marina", type: "penthouse", price: 450000, transactionType: "rent", bedrooms: 3, bathrooms: 4, size: 4200, availability: "March 2026", status: "live", ownerName: "Omar Khan", createdAt: "2026-01-12" },
-  { id: "5", title: "6BR Mansion — Palm Jumeirah", area: "Palm Jumeirah", type: "villa", price: 45000000, transactionType: "sale", bedrooms: 6, bathrooms: 8, size: 15000, availability: "Immediate", status: "live", ownerName: "Omar Khan", createdAt: "2026-01-05" },
-]
-
-// Demo viewings for each listing
-const demoViewings: Record<string, ViewingEntry[]> = {
-  "1": [
-    { date: "2026-03-25T10:00:00Z", viewerName: "John & Maria Williams", status: "completed", feedback: "Very impressed with the pool area and garden. Concerned about proximity to main road.", rating: 4 },
-    { date: "2026-03-20T14:00:00Z", viewerName: "Rashid Al Maktoum", status: "completed", feedback: "Loved the property. Will discuss with family.", rating: 5 },
-    { date: "2026-03-15T11:00:00Z", viewerName: "David Chen", status: "no_show", feedback: "", rating: null },
-    { date: "2026-04-02T09:00:00Z", viewerName: "Sophie Turner", status: "scheduled", feedback: "", rating: null },
-  ],
-  "2": [
-    { date: "2026-03-28T16:00:00Z", viewerName: "Alex Morgan", status: "completed", feedback: "Great view but small kitchen.", rating: 3 },
-    { date: "2026-03-22T10:00:00Z", viewerName: "Fatima Noor", status: "completed", feedback: "Perfect for a young couple. Interested.", rating: 4 },
-  ],
-  "5": [
-    { date: "2026-03-30T10:00:00Z", viewerName: "HNW Client (Private)", status: "completed", feedback: "Exceptional property. Second viewing requested.", rating: 5 },
-    { date: "2026-03-27T14:00:00Z", viewerName: "Investment Group LLC", status: "completed", feedback: "Reviewing for portfolio acquisition. Very interested.", rating: 5 },
-    { date: "2026-03-18T11:00:00Z", viewerName: "Royal Family Office", status: "completed", feedback: "Below expectations for this price point.", rating: 2 },
-  ],
-}
-
-// Demo leads
-const demoLeads: Record<string, LeadEntry[]> = {
-  "1": [
-    { name: "John Williams", source: "Property Finder", status: "viewing_scheduled", date: "2026-03-20", budget: 16000000 },
-    { name: "Rashid Al Maktoum", source: "Referral", status: "negotiating", date: "2026-03-18", budget: 14000000 },
-    { name: "David Chen", source: "Website", status: "contacted", date: "2026-03-14", budget: 15000000 },
-    { name: "Sophie Turner", source: "Social Media", status: "qualified", date: "2026-03-28", budget: 15500000 },
-    { name: "Anonymous Inquiry", source: "Bayut", status: "new", date: "2026-03-30", budget: null },
-  ],
-  "2": [
-    { name: "Alex Morgan", source: "Direct", status: "qualified", date: "2026-03-25", budget: 200000 },
-    { name: "Fatima Noor", source: "Property Finder", status: "offer_made", date: "2026-03-20", budget: 175000 },
-    { name: "Mike Ross", source: "Referral", status: "new", date: "2026-03-29", budget: 190000 },
-  ],
-  "5": [
-    { name: "HNW Client", source: "Referral", status: "negotiating", date: "2026-03-28", budget: 43000000 },
-    { name: "Investment Group LLC", source: "Direct", status: "qualified", date: "2026-03-25", budget: 45000000 },
-    { name: "Royal Family Office", source: "Referral", status: "closed_lost", date: "2026-03-15", budget: 40000000 },
-  ],
 }
 
 const LEAD_SOURCES = ["direct", "property_finder", "bayut", "dubizzle", "website", "referral", "social_media", "walk_in", "other"]
@@ -130,7 +83,48 @@ const statusColors: Record<string, string> = {
   no_show: "bg-neutral-100 text-neutral-600 dark:bg-neutral-500/20 dark:text-neutral-400",
 }
 
+function mapListing(raw: Record<string, unknown>): ListingOption {
+  return {
+    id: String(raw.id),
+    title: String(raw.title || "Untitled"),
+    area: String(raw.area_name || ""),
+    type: String(raw.type || "apartment"),
+    price: Number(raw.price) || 0,
+    transactionType: String(raw.transaction_type || "sale"),
+    bedrooms: Number(raw.bedrooms) || 0,
+    bathrooms: Number(raw.bathrooms) || 0,
+    size: Number(raw.size) || 0,
+    availability: String(raw.availability || ""),
+    status: String(raw.status || "live"),
+    ownerName: String(raw.owner_name || "Unknown"),
+    createdAt: String(raw.created_at || new Date().toISOString()),
+  }
+}
+
+function mapViewing(raw: Record<string, unknown>): ViewingEntry {
+  return {
+    date: String(raw.viewing_date || raw.date || ""),
+    viewerName: String(raw.viewer_name || raw.viewerName || ""),
+    status: String(raw.status || "scheduled"),
+    feedback: String(raw.feedback || ""),
+    rating: raw.rating == null ? null : Number(raw.rating),
+  }
+}
+
+function mapLead(raw: Record<string, unknown>): LeadEntry {
+  return {
+    name: String(raw.lead_name || raw.name || ""),
+    source: String(raw.source || "direct"),
+    status: String(raw.status || "new"),
+    date: String(raw.created_at || raw.date || "").slice(0, 10),
+    budget: raw.budget == null ? null : Number(raw.budget),
+  }
+}
+
 export default function LandlordReportPage() {
+  const { userName, userEmail } = useRole()
+  const [listings, setListings] = useState<ListingOption[]>([])
+  const [listingsLoading, setListingsLoading] = useState(true)
   const [selectedListingId, setSelectedListingId] = useState<string>("")
   const [viewings, setViewings] = useState<ViewingEntry[]>([])
   const [leads, setLeads] = useState<LeadEntry[]>([])
@@ -140,6 +134,7 @@ export default function LandlordReportPage() {
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false)
   const [viewingsOpen, setViewingsOpen] = useState(true)
   const [leadsOpen, setLeadsOpen] = useState(true)
+  const [ownerEmail, setOwnerEmail] = useState("")
 
   // Editable report fields
   const [reportTitle, setReportTitle] = useState("Landlord Property Report")
@@ -166,17 +161,50 @@ export default function LandlordReportPage() {
     date: new Date().toISOString().split("T")[0],
   })
 
-  const selectedListing = demoListings.find((l) => l.id === selectedListingId)
+  const selectedListing = listings.find((l) => l.id === selectedListingId)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadListings() {
+      try {
+        setListingsLoading(true)
+        const res = await fetch("/api/listings?limit=500&inquiryType=stock")
+        const data = await res.json()
+        if (cancelled) return
+        const mapped = (data.listings || []).map((row: Record<string, unknown>) => mapListing(row))
+        setListings(mapped)
+      } catch {
+        if (!cancelled) toast.error("Failed to load listings")
+      } finally {
+        if (!cancelled) setListingsLoading(false)
+      }
+    }
+    void loadListings()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Load data when listing changes
-  const loadListingData = useCallback((listingId: string) => {
-    const listing = demoListings.find((l) => l.id === listingId)
+  const loadListingData = useCallback(async (listingId: string) => {
+    const listing = listings.find((l) => l.id === listingId)
     if (!listing) return
 
-    setViewings(demoViewings[listingId] || [])
-    setLeads(demoLeads[listingId] || [])
+    try {
+      const [viewingsRes, leadsRes] = await Promise.all([
+        fetch(`/api/listings/${listingId}/viewings`),
+        fetch(`/api/listings/${listingId}/leads`),
+      ])
+      const viewingsData = await viewingsRes.json()
+      const leadsData = await leadsRes.json()
+      setViewings((viewingsData.viewings || []).map((row: Record<string, unknown>) => mapViewing(row)))
+      setLeads((leadsData.leads || []).map((row: Record<string, unknown>) => mapLead(row)))
+    } catch {
+      setViewings([])
+      setLeads([])
+      toast.error("Could not load viewings/leads for this listing")
+    }
 
-    // Set default pricing notes based on listing
     const pricePerSqft = listing.size > 0 ? Math.round(listing.price / listing.size) : 0
     setPricingNotes(
       listing.transactionType === "sale"
@@ -184,16 +212,16 @@ export default function LandlordReportPage() {
         : `Annual rent: AED ${listing.price.toLocaleString()} (AED ${Math.round(listing.price / 12).toLocaleString()}/month). In line with current market rates for ${listing.bedrooms}BR ${listing.type}s in ${listing.area}.`
     )
     setMarketSummary(
-      `The ${listing.area} market continues to show strong demand for ${listing.type} properties. Average days on market for similar listings is approximately 30–45 days. Buyer/tenant interest remains healthy with steady inquiry volumes.`
+      `The ${listing.area} market continues to show demand for ${listing.type} properties. Average days on market for similar listings is approximately 30–45 days.`
     )
     setRecommendations("")
     setAgentNotes("")
     setReportTitle("Landlord Property Report")
-  }, [])
+  }, [listings])
 
   useEffect(() => {
     if (selectedListingId) {
-      loadListingData(selectedListingId)
+      void loadListingData(selectedListingId)
     }
   }, [selectedListingId, loadListingData])
 
@@ -220,40 +248,59 @@ export default function LandlordReportPage() {
     return rated.reduce((sum, v) => sum + (v.rating || 0), 0) / rated.length
   }
 
-  const handleAddViewing = () => {
-    if (!newViewing.viewerName || !newViewing.viewingDate) {
+  const handleAddViewing = async () => {
+    if (!selectedListingId || !newViewing.viewerName || !newViewing.viewingDate) {
       toast.error("Please fill in viewer name and date")
       return
     }
-    const entry: ViewingEntry = {
-      viewerName: newViewing.viewerName,
-      date: new Date(newViewing.viewingDate).toISOString(),
-      status: newViewing.status,
-      feedback: newViewing.feedback,
-      rating: newViewing.rating ? parseInt(newViewing.rating) : null,
+    try {
+      const res = await fetch(`/api/listings/${selectedListingId}/viewings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          viewerName: newViewing.viewerName,
+          viewingDate: new Date(newViewing.viewingDate).toISOString(),
+          status: newViewing.status,
+          feedback: newViewing.feedback,
+          rating: newViewing.rating ? parseInt(newViewing.rating) : null,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to save viewing")
+      const data = await res.json()
+      setViewings([mapViewing(data.viewing), ...viewings])
+      setNewViewing({ viewerName: "", viewingDate: "", status: "scheduled", feedback: "", rating: "" })
+      setIsAddViewingOpen(false)
+      toast.success("Viewing saved")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add viewing")
     }
-    setViewings([entry, ...viewings])
-    setNewViewing({ viewerName: "", viewingDate: "", status: "scheduled", feedback: "", rating: "" })
-    setIsAddViewingOpen(false)
-    toast.success("Viewing added")
   }
 
-  const handleAddLead = () => {
-    if (!newLead.name) {
+  const handleAddLead = async () => {
+    if (!selectedListingId || !newLead.name) {
       toast.error("Please fill in lead name")
       return
     }
-    const entry: LeadEntry = {
-      name: newLead.name,
-      source: newLead.source.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      status: newLead.status,
-      budget: newLead.budget ? parseFloat(newLead.budget) : null,
-      date: newLead.date,
+    try {
+      const res = await fetch(`/api/listings/${selectedListingId}/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadName: newLead.name,
+          source: newLead.source,
+          status: newLead.status,
+          budget: newLead.budget ? parseFloat(newLead.budget) : null,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to save lead")
+      const data = await res.json()
+      setLeads([mapLead(data.lead), ...leads])
+      setNewLead({ name: "", source: "direct", status: "new", budget: "", date: new Date().toISOString().split("T")[0] })
+      setIsAddLeadOpen(false)
+      toast.success("Lead saved")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add lead")
     }
-    setLeads([entry, ...leads])
-    setNewLead({ name: "", source: "direct", status: "new", budget: "", date: new Date().toISOString().split("T")[0] })
-    setIsAddLeadOpen(false)
-    toast.success("Lead added")
   }
 
   const handleRemoveViewing = (index: number) => {
@@ -281,9 +328,9 @@ export default function LandlordReportPage() {
         availability: selectedListing.availability,
         listingStatus: selectedListing.status,
         daysOnMarket: getDaysOnMarket(selectedListing.createdAt),
-        agentName: "Ahmed Hassan",
-        agentPhone: "+971 50 123 4567",
-        agentEmail: "ahmed@zaylo.ae",
+        agentName: userName || "Agent",
+        agentPhone: "",
+        agentEmail: userEmail || "",
         reportDate: new Date().toISOString(),
         reportTitle,
         pricingNotes,
@@ -317,7 +364,15 @@ export default function LandlordReportPage() {
       a.remove()
       window.URL.revokeObjectURL(url)
 
-      toast.success("Report downloaded successfully")
+      if (ownerEmail.trim()) {
+        const subject = encodeURIComponent(`Property update: ${selectedListing.title}`)
+        const body = encodeURIComponent(
+          `Hi,\n\nPlease find the latest landlord report for ${selectedListing.title} attached / to follow.\n\nLeads: ${leads.length}\nViewings: ${viewings.length}\n\nBest regards,\n${userName || "Your agent"}`
+        )
+        window.open(`mailto:${ownerEmail.trim()}?subject=${subject}&body=${body}`, "_blank")
+      }
+
+      toast.success(ownerEmail.trim() ? "Report downloaded — email draft opened" : "Report downloaded successfully")
     } catch (error) {
       console.error("Error generating report:", error)
       toast.error("Failed to generate report")
@@ -355,18 +410,39 @@ export default function LandlordReportPage() {
               <SelectValue placeholder="Select a listing..." />
             </SelectTrigger>
             <SelectContent>
-              {demoListings.map((listing) => (
-                <SelectItem key={listing.id} value={listing.id}>
-                  <span className="flex items-center gap-2">
-                    {listing.title} — {listing.area} — {formatCurrency(listing.price)}
-                    <Badge variant="outline" className="ml-1 text-xs">
-                      {listing.transactionType === "sale" ? "Sale" : "Rent"}
-                    </Badge>
-                  </span>
-                </SelectItem>
-              ))}
+              {listingsLoading ? (
+                <SelectItem value="__loading" disabled>Loading listings…</SelectItem>
+              ) : listings.length === 0 ? (
+                <SelectItem value="__empty" disabled>No stock listings yet — add some in Inventory</SelectItem>
+              ) : (
+                listings.map((listing) => (
+                  <SelectItem key={listing.id} value={listing.id}>
+                    <span className="flex items-center gap-2">
+                      {listing.title} — {listing.area} — {formatCurrency(listing.price)}
+                      <Badge variant="outline" className="ml-1 text-xs">
+                        {listing.status}
+                      </Badge>
+                      <Badge variant="outline" className="ml-1 text-xs">
+                        {listing.transactionType === "sale" ? "Sale" : "Rent"}
+                      </Badge>
+                    </span>
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
+          {selectedListingId ? (
+            <div className="mt-4 grid gap-2">
+              <Label htmlFor="ownerEmail">Owner email (optional — opens share draft after download)</Label>
+              <Input
+                id="ownerEmail"
+                type="email"
+                placeholder="owner@email.com"
+                value={ownerEmail}
+                onChange={(e) => setOwnerEmail(e.target.value)}
+              />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 

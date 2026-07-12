@@ -5,10 +5,10 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   Home,
-  ArrowLeftRight,
   ClipboardList,
-  Kanban,
-  ImagePlus,
+  Database,
+  MessageCircle,
+  Building2,
   Settings,
 } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
@@ -25,13 +25,13 @@ export function MobileBottomTabs() {
   const { isInternal } = useRole()
 
   const tabIcon = "h-[22px] w-[22px]"
-  // Customers only see Opportunities + Settings (no marketplace, no search, no saved)
   const tabs: TabItem[] = isInternal
     ? [
         { href: "/app/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
-        { href: "/app/pipeline", label: "Pipeline", icon: <Kanban className={tabIcon} /> },
-        { href: "/app/exchange", label: "Exchange", icon: <ArrowLeftRight className={tabIcon} /> },
-        { href: "/app/my-listings", label: "Listings", icon: <ImagePlus className={tabIcon} /> },
+        { href: "/app/leads", label: "Leads", icon: <ClipboardList className={tabIcon} /> },
+        { href: "/app/data", label: "Follow-ups", icon: <Database className={tabIcon} /> },
+        { href: "/app/whatsapp", label: "WhatsApp", icon: <MessageCircle className={tabIcon} /> },
+        { href: "/app/inventory", label: "Listings", icon: <Building2 className={tabIcon} /> },
       ]
     : [
         { href: "/user/my-opportunities", label: "Opportunities", icon: <ClipboardList className={tabIcon} /> },
@@ -49,9 +49,7 @@ export function MobileBottomTabs() {
               href={tab.href}
               className={cn(
                 "relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 px-3 min-w-0 flex-1 transition-colors",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
               {isActive && (
@@ -61,15 +59,10 @@ export function MobileBottomTabs() {
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <motion.div
-                whileTap={{ scale: 0.85 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
+              <motion.div whileTap={{ scale: 0.85 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
                 {tab.icon}
               </motion.div>
-              <span className="text-[11px] font-medium leading-tight truncate">
-                {tab.label}
-              </span>
+              <span className="truncate text-[11px] font-medium leading-tight">{tab.label}</span>
             </Link>
           )
         })}

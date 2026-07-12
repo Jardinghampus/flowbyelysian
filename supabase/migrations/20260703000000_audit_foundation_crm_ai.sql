@@ -235,25 +235,6 @@ alter table if exists public.documents add column if not exists team_id uuid ref
 alter table if exists public.templates add column if not exists team_id uuid references public.teams(id) on delete set null;
 alter table if exists public.document_settings add column if not exists team_id uuid references public.teams(id) on delete set null;
 
--- Tighten broad/demo RLS policies. The server API uses service_role, so these
--- tables should not be directly open through anon/authenticated Data API.
-drop policy if exists "Allow all for listing_viewings" on public.listing_viewings;
-drop policy if exists "Allow all for listing_leads" on public.listing_leads;
-drop policy if exists "Allow all for landlord_reports" on public.landlord_reports;
-
-drop policy if exists "Owners are viewable by authenticated users" on public.owners;
-drop policy if exists "Users can insert owners" on public.owners;
-drop policy if exists "Users can update owners" on public.owners;
-drop policy if exists "Users can delete owners" on public.owners;
-
-drop policy if exists "Outreach logs are viewable by authenticated users" on public.outreach_logs;
-drop policy if exists "Users can insert outreach logs" on public.outreach_logs;
-drop policy if exists "Users can update outreach logs" on public.outreach_logs;
-
-drop policy if exists "Daily activity is viewable by authenticated users" on public.daily_activity_log;
-drop policy if exists "Users can insert their own daily activity" on public.daily_activity_log;
-drop policy if exists "Users can update their own daily activity" on public.daily_activity_log;
-
 alter table public.teams enable row level security;
 alter table public.user_profiles enable row level security;
 alter table public.team_members enable row level security;
@@ -290,12 +271,21 @@ grant all on table public.ai_recommendations to service_role;
 grant all on table public.ai_actions to service_role;
 grant all on table public.ai_entity_summaries to service_role;
 grant all on table public.ai_embeddings to service_role;
-grant all on table public.owners to service_role;
-grant all on table public.outreach_logs to service_role;
-grant all on table public.daily_activity_log to service_role;
-grant all on table public.listing_viewings to service_role;
-grant all on table public.listing_leads to service_role;
-grant all on table public.landlord_reports to service_role;
+
+drop policy if exists "service role all teams" on public.teams;
+drop policy if exists "service role all user profiles" on public.user_profiles;
+drop policy if exists "service role all team members" on public.team_members;
+drop policy if exists "service role all crm activity events" on public.crm_activity_events;
+drop policy if exists "service role all audit logs" on public.audit_logs;
+drop policy if exists "service role all job runs" on public.job_runs;
+drop policy if exists "service role all webhook events" on public.webhook_events;
+drop policy if exists "service role all ai prompt versions" on public.ai_prompt_versions;
+drop policy if exists "service role all ai runs" on public.ai_runs;
+drop policy if exists "service role all ai cost ledger" on public.ai_cost_ledger;
+drop policy if exists "service role all ai recommendations" on public.ai_recommendations;
+drop policy if exists "service role all ai actions" on public.ai_actions;
+drop policy if exists "service role all ai entity summaries" on public.ai_entity_summaries;
+drop policy if exists "service role all ai embeddings" on public.ai_embeddings;
 
 create policy "service role all teams" on public.teams for all to service_role using (true) with check (true);
 create policy "service role all user profiles" on public.user_profiles for all to service_role using (true) with check (true);
@@ -311,12 +301,63 @@ create policy "service role all ai recommendations" on public.ai_recommendations
 create policy "service role all ai actions" on public.ai_actions for all to service_role using (true) with check (true);
 create policy "service role all ai entity summaries" on public.ai_entity_summaries for all to service_role using (true) with check (true);
 create policy "service role all ai embeddings" on public.ai_embeddings for all to service_role using (true) with check (true);
-create policy "service role all owners" on public.owners for all to service_role using (true) with check (true);
-create policy "service role all outreach logs" on public.outreach_logs for all to service_role using (true) with check (true);
-create policy "service role all daily activity" on public.daily_activity_log for all to service_role using (true) with check (true);
-create policy "service role all listing viewings" on public.listing_viewings for all to service_role using (true) with check (true);
-create policy "service role all listing leads" on public.listing_leads for all to service_role using (true) with check (true);
-create policy "service role all landlord reports" on public.landlord_reports for all to service_role using (true) with check (true);
+
+-- Tighten broad/demo RLS policies only when the legacy tables exist in the
+-- target project. The production Supabase schema may lag behind local history.
+do $$
+begin
+  if to_regclass('public.owners') is not null then
+    execute 'drop policy if exists "Owners are viewable by authenticated users" on public.owners';
+    execute 'drop policy if exists "Users can insert owners" on public.owners';
+    execute 'drop policy if exists "Users can update owners" on public.owners';
+    execute 'drop policy if exists "Users can delete owners" on public.owners';
+    execute 'grant all on table public.owners to service_role';
+    execute 'drop policy if exists "service role all owners" on public.owners';
+    execute 'create policy "service role all owners" on public.owners for all to service_role using (true) with check (true)';
+    execute 'create index if not exists owners_team_id_idx on public.owners(team_id)';
+  end if;
+
+  if to_regclass('public.outreach_logs') is not null then
+    execute 'drop policy if exists "Outreach logs are viewable by authenticated users" on public.outreach_logs';
+    execute 'drop policy if exists "Users can insert outreach logs" on public.outreach_logs';
+    execute 'drop policy if exists "Users can update outreach logs" on public.outreach_logs';
+    execute 'grant all on table public.outreach_logs to service_role';
+    execute 'drop policy if exists "service role all outreach logs" on public.outreach_logs';
+    execute 'create policy "service role all outreach logs" on public.outreach_logs for all to service_role using (true) with check (true)';
+    execute 'create index if not exists outreach_logs_team_id_idx on public.outreach_logs(team_id)';
+  end if;
+
+  if to_regclass('public.daily_activity_log') is not null then
+    execute 'drop policy if exists "Daily activity is viewable by authenticated users" on public.daily_activity_log';
+    execute 'drop policy if exists "Users can insert their own daily activity" on public.daily_activity_log';
+    execute 'drop policy if exists "Users can update their own daily activity" on public.daily_activity_log';
+    execute 'grant all on table public.daily_activity_log to service_role';
+    execute 'drop policy if exists "service role all daily activity" on public.daily_activity_log';
+    execute 'create policy "service role all daily activity" on public.daily_activity_log for all to service_role using (true) with check (true)';
+    execute 'create index if not exists daily_activity_log_team_id_idx on public.daily_activity_log(team_id)';
+  end if;
+
+  if to_regclass('public.listing_viewings') is not null then
+    execute 'drop policy if exists "Allow all for listing_viewings" on public.listing_viewings';
+    execute 'grant all on table public.listing_viewings to service_role';
+    execute 'drop policy if exists "service role all listing viewings" on public.listing_viewings';
+    execute 'create policy "service role all listing viewings" on public.listing_viewings for all to service_role using (true) with check (true)';
+  end if;
+
+  if to_regclass('public.listing_leads') is not null then
+    execute 'drop policy if exists "Allow all for listing_leads" on public.listing_leads';
+    execute 'grant all on table public.listing_leads to service_role';
+    execute 'drop policy if exists "service role all listing leads" on public.listing_leads';
+    execute 'create policy "service role all listing leads" on public.listing_leads for all to service_role using (true) with check (true)';
+  end if;
+
+  if to_regclass('public.landlord_reports') is not null then
+    execute 'drop policy if exists "Allow all for landlord_reports" on public.landlord_reports';
+    execute 'grant all on table public.landlord_reports to service_role';
+    execute 'drop policy if exists "service role all landlord reports" on public.landlord_reports';
+    execute 'create policy "service role all landlord reports" on public.landlord_reports for all to service_role using (true) with check (true)';
+  end if;
+end $$;
 
 create index if not exists teams_slug_idx on public.teams(slug);
 create index if not exists user_profiles_clerk_user_id_idx on public.user_profiles(clerk_user_id);
@@ -331,33 +372,37 @@ create index if not exists ai_runs_feature_idx on public.ai_runs(feature, create
 create index if not exists ai_cost_ledger_team_idx on public.ai_cost_ledger(team_id, created_at desc);
 create index if not exists ai_recommendations_target_idx on public.ai_recommendations(target_entity_type, target_entity_id, status);
 create index if not exists ai_actions_status_idx on public.ai_actions(status, risk_level, created_at desc);
-create index if not exists owners_team_id_idx on public.owners(team_id);
-create index if not exists outreach_logs_team_id_idx on public.outreach_logs(team_id);
-create index if not exists daily_activity_log_team_id_idx on public.daily_activity_log(team_id);
-
 -- Make owner aggregate views respect underlying RLS on Postgres 15+.
-create or replace view public.owners_with_counts
-with (security_invoker = true)
-as
-select
-  o.*,
-  coalesce(counts.call_count, 0) as call_count,
-  coalesce(counts.whatsapp_count, 0) as whatsapp_count,
-  coalesce(counts.total_outreach, 0) as total_outreach
-from public.owners o
-left join lateral (
-  select
-    count(*) filter (where type = 'call') as call_count,
-    count(*) filter (where type = 'whatsapp') as whatsapp_count,
-    count(*) as total_outreach
-  from public.outreach_logs
-  where owner_id = o.id
-) counts on true;
+do $$
+begin
+  if to_regclass('public.owners') is not null and to_regclass('public.outreach_logs') is not null then
+    execute $view$
+      create or replace view public.owners_with_counts
+      with (security_invoker = true)
+      as
+      select
+        o.*,
+        coalesce(counts.call_count, 0) as call_count,
+        coalesce(counts.whatsapp_count, 0) as whatsapp_count,
+        coalesce(counts.total_outreach, 0) as total_outreach
+      from public.owners o
+      left join lateral (
+        select
+          count(*) filter (where type = 'call') as call_count,
+          count(*) filter (where type = 'whatsapp') as whatsapp_count,
+          count(*) as total_outreach
+        from public.outreach_logs
+        where owner_id = o.id
+      ) counts on true
+    $view$;
 
-create or replace view public.owners_active
-with (security_invoker = true)
-as
-select *
-from public.owners_with_counts
-where is_hidden = false;
-
+    execute $view$
+      create or replace view public.owners_active
+      with (security_invoker = true)
+      as
+      select *
+      from public.owners_with_counts
+      where is_hidden = false
+    $view$;
+  end if;
+end $$;

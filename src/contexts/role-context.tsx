@@ -1,6 +1,13 @@
 "use client"
 
-import { createContext, useContext, ReactNode, useState } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react"
 
 export type UserRole =
   | "admin"
@@ -10,12 +17,6 @@ export type UserRole =
   | "tenant"
   | "landlord"
   | "relocation_agent"
-
-// These emails always get admin access regardless of publicMetadata
-const ADMIN_EMAILS = [
-  "jardinghampus@gmail.com",
-  "admin@admin.com",
-]
 
 export function getRoleLabel(role: UserRole): string {
   switch (role) {
@@ -47,16 +48,56 @@ interface RoleContextType {
   isCustomer: boolean
   isSeller: boolean
   canCreateRequest: boolean
+  canAccessSocial: boolean
   userEmail: string | null
+  userId: string | null
+  userName: string | null
+  isLoaded: boolean
   canEditListing: (listingOwnerId: string, currentUserId: string) => boolean
   canDeleteListing: (listingOwnerId: string, currentUserId: string) => boolean
+  refresh: () => Promise<void>
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>("admin")
-  const userEmail = ADMIN_EMAILS[0] ?? null
+  const [role, setRole] = useState<UserRole>("agent")
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
+  const [canAccessSocial, setCanAccessSocial] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me")
+      if (!res.ok) {
+        setRole("agent")
+        setUserEmail(null)
+        setUserId(null)
+        setUserName(null)
+        setCanAccessSocial(false)
+        return
+      }
+
+      const data = await res.json()
+      const nextRole = data.user?.role === "admin" ? "admin" : "agent"
+      setRole(nextRole)
+      setUserEmail(data.user?.email || null)
+      setUserId(data.user?.id || null)
+      setUserName(data.user?.fullName || null)
+      setCanAccessSocial(Boolean(data.user?.canAccessSocial))
+    } catch {
+      setCanAccessSocial(false)
+    } finally {
+      setIsLoaded(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
+
   const isAdmin = role === "admin"
   const isAgent = role === "agent"
   const isInternal = isAdmin || isAgent
@@ -77,19 +118,26 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <RoleContext.Provider value={{
-      role,
-      setRole,
-      isAdmin,
-      isAgent,
-      isInternal,
-      isCustomer,
-      isSeller,
-      canCreateRequest,
-      userEmail,
-      canEditListing,
-      canDeleteListing,
-    }}>
+    <RoleContext.Provider
+      value={{
+        role,
+        setRole,
+        isAdmin,
+        isAgent,
+        isInternal,
+        isCustomer,
+        isSeller,
+        canCreateRequest,
+        canAccessSocial,
+        userEmail,
+        userId,
+        userName,
+        isLoaded,
+        canEditListing,
+        canDeleteListing,
+        refresh,
+      }}
+    >
       {children}
     </RoleContext.Provider>
   )

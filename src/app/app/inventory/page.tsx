@@ -151,8 +151,8 @@ export default function InventoryPage() {
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>(defaultFilters)
-  const [activeTab, setActiveTab] = useState("all")
   const { isAdmin } = useRole()
+  const [activeTab, setActiveTab] = useState(isAdmin ? "all" : "mine")
 
   const loadListings = useCallback(async () => {
     try {

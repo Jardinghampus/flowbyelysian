@@ -1,0 +1,25 @@
+{
+  "name": "zaylo-import-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bayut listing/transaction scraper → Supabase. No Google Sheets.",
+  "scripts": {
+    "scrape": "tsx src/index.ts --job import-market",
+    "import-market": "tsx src/index.ts --job import-market",
+    "generate-content": "tsx src/index.ts --job generate-content",
+    "zaylo:worker": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.7",
+    "playwright": "^1.49.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

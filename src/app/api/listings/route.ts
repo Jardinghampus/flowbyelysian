@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth, currentUser } from "@/lib/demo-auth"
+import { currentUser } from "@/lib/demo-auth"
+import { requireApiUser } from "@/lib/api/guards"
 
 function isRecoverableListingsReadError(error: unknown) {
   if (!error || typeof error !== "object") return false
@@ -19,6 +20,9 @@ function isRecoverableListingsReadError(error: unknown) {
 // GET /api/listings - List all listings with filters
 export async function GET(request: NextRequest) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const supabase = createServerClient()
     const { searchParams } = new URL(request.url)
 
@@ -35,12 +39,21 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50")
     const offset = parseInt(searchParams.get("offset") || "0")
 
+    const mineOnly = searchParams.get("mine") === "1"
+    const scope = searchParams.get("scope") // "mine" | "team" | null
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (supabase as any)
       .from("listings")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1)
+
+    // Team browse by default so agents can scroll live + pocket inventory.
+    // Use ?mine=1 or ?ownerId=… for "my listings" only.
+    if (ownerId || mineOnly || scope === "mine") {
+      query = query.eq("owner_id", ownerId || guard.context.userId)
+    }
 
     // Apply filters
     if (area) query = query.eq("area_name", area)
@@ -51,7 +64,6 @@ export async function GET(request: NextRequest) {
     if (minPrice) query = query.gte("price", parseInt(minPrice))
     if (maxPrice) query = query.lte("price", parseInt(maxPrice))
     if (bedrooms) query = query.eq("bedrooms", parseInt(bedrooms))
-    if (ownerId) query = query.eq("owner_id", ownerId)
 
     const { data: listings, error, count } = await query
 
@@ -91,10 +103,8 @@ export async function GET(request: NextRequest) {
 // POST /api/listings - Create new listing
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
 
     const user = await currentUser()
     const body = await request.json()
@@ -103,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     const listingData = {
       ...body,
-      owner_id: userId,
+      owner_id: guard.context.userId,
       owner_name: user?.fullName || user?.firstName || "Unknown",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

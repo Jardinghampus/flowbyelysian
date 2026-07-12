@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "types:generate": "supabase gen types typescript --linked > src/lib/types/database.types.ts"
+    "types:generate": "supabase gen types typescript --linked > src/lib/types/database.types.ts",
+    "zaylo:worker": "npm --prefix workers/zaylo-import-worker run zaylo:worker --",
+    "zaylo:scrape": "npm --prefix workers/zaylo-import-worker run import-market",
+    "zaylo:content": "npm --prefix workers/zaylo-import-worker run generate-content"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.25",

@@ -120,6 +120,7 @@ export default function AdminPage() {
     email: "",
     firstName: "",
     lastName: "",
+    password: "",
     role: "agent" as UserRole,
     area: "",
   })
@@ -179,6 +180,10 @@ export default function AdminPage() {
       toast.error("Email is required")
       return
     }
+    if (!newUser.password || newUser.password.length < 8) {
+      toast.error("Password is required (min 8 characters)")
+      return
+    }
 
     setIsInviting(true)
     try {
@@ -189,6 +194,7 @@ export default function AdminPage() {
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
+          password: newUser.password,
           role: newUser.role,
           area: newUser.area || null,
         }),
@@ -196,16 +202,16 @@ export default function AdminPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "Failed to invite user")
+        throw new Error(data.error || "Failed to create user")
       }
 
-      toast.success("Invitation sent successfully")
-      setNewUser({ email: "", firstName: "", lastName: "", role: "agent", area: "" })
+      toast.success("User created successfully")
+      setNewUser({ email: "", firstName: "", lastName: "", password: "", role: "agent", area: "" })
       setIsAddDialogOpen(false)
       fetchUsers()
     } catch (error) {
-      console.error("Error inviting user:", error)
-      toast.error(error instanceof Error ? error.message : "Failed to invite user")
+      console.error("Error creating user:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to create user")
     } finally {
       setIsInviting(false)
     }
@@ -375,14 +381,14 @@ export default function AdminPage() {
                     <DialogTrigger asChild>
                       <Button>
                         <Mail className="mr-2 h-4 w-4" />
-                        Invite User
+                        Add User
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Invite New User</DialogTitle>
+                        <DialogTitle>Add New User</DialogTitle>
                         <DialogDescription>
-                          Send an invitation email to add a new agent to your team.
+                          Create an agent or admin account with email and password.
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
@@ -396,6 +402,18 @@ export default function AdminPage() {
                               setNewUser({ ...newUser, email: e.target.value })
                             }
                             placeholder="agent@zaylo.ae"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="password">Password *</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            value={newUser.password}
+                            onChange={(e) =>
+                              setNewUser({ ...newUser, password: e.target.value })
+                            }
+                            placeholder="Min 8 characters"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -471,12 +489,12 @@ export default function AdminPage() {
                           {isInviting ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Sending...
+                              Creating...
                             </>
                           ) : (
                             <>
                               <Mail className="mr-2 h-4 w-4" />
-                              Send Invitation
+                              Create User
                             </>
                           )}
                         </Button>

@@ -1,20 +1,56 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth, clerkClient, DEMO_USER } from "@/lib/demo-auth"
+import { requireApiUser } from "@/lib/api/guards"
+import { isLocalAuthEnabled } from "@/lib/auth-mode"
+import {
+  deleteAppUser,
+  findUserById,
+  updateAppUser,
+  type LocalRole,
+} from "@/lib/local-auth"
+import { clerkClient } from "@/lib/demo-auth"
 
-// GET /api/admin/users/:id - Get single user
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const guard = await requireApiUser({ roles: ["admin"] })
+    if (!guard.ok) return guard.response
+
+    const { id } = await params
+
+    if (isLocalAuthEnabled) {
+      const user = await findUserById(id)
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        user: {
+          id: user.id,
+          name: user.full_name,
+          email: user.email,
+          role: user.role,
+          canAccessSocial: user.can_access_social,
+          status: user.status,
+          area: null,
+          createdAt: new Date(user.created_at).getTime(),
+          lastActiveAt: null,
+          imageUrl: null,
+        },
+      })
     }
 
-    // Demo mode: return demo user
-    const { id } = await params
-    const user = DEMO_USER
+    const clerk = await clerkClient()
+    const user = await clerk.users.getUser(id)
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const meta = (user.publicMetadata || {}) as {
+      role?: string
+      area?: string | null
+    }
 
     return NextResponse.json({
       user: {
@@ -23,8 +59,8 @@ export async function GET(
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.emailAddresses[0]?.emailAddress || "",
-        role: (user.publicMetadata?.role as string) || "agent",
-        area: (user.publicMetadata?.area as string) || null,
+        role: meta.role || "agent",
+        area: meta.area || null,
         createdAt: user.createdAt,
         lastActiveAt: user.lastActiveAt,
         imageUrl: user.imageUrl,
@@ -32,79 +68,107 @@ export async function GET(
     })
   } catch (error) {
     console.error("Error fetching user:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch user" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 })
   }
 }
 
-// PATCH /api/admin/users/:id - Update user role/metadata
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = await requireApiUser({ roles: ["admin"] })
+    if (!guard.ok) return guard.response
 
     const { id } = await params
     const body = await request.json()
-    const { role, area, firstName, lastName } = body
+    const role = body.role === "admin" || body.role === "agent" ? (body.role as LocalRole) : undefined
+    const fullName =
+      body.firstName || body.lastName
+        ? `${body.firstName || ""} ${body.lastName || ""}`.trim()
+        : body.fullName
 
-    // Demo mode: simulate update
-    console.log("Demo mode: User update simulated", { id, role, area, firstName, lastName })
+    if (isLocalAuthEnabled) {
+      const existing = await findUserById(id)
+      if (!existing) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
+
+      const updated = await updateAppUser(id, {
+        role,
+        full_name: fullName || undefined,
+        password: body.password || undefined,
+        status: body.status,
+        can_access_social:
+          existing.full_name.toLowerCase() === "hampus" ||
+          existing.email.startsWith("hampus@")
+            ? true
+            : false,
+      })
+
+      return NextResponse.json({
+        user: {
+          id: updated.id,
+          name: updated.full_name,
+          email: updated.email,
+          role: updated.role,
+          canAccessSocial: updated.can_access_social,
+        },
+      })
+    }
+
+    const clerk = await clerkClient()
+    const user = await clerk.users.updateUser(id, {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      publicMetadata: {
+        role: role || "agent",
+        area: body.area || null,
+      },
+    })
 
     return NextResponse.json({
       user: {
-        id,
-        name: `${firstName || DEMO_USER.firstName} ${lastName || DEMO_USER.lastName}`.trim(),
-        email: DEMO_USER.emailAddresses[0]?.emailAddress || "",
+        id: user.id,
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+        email: user.emailAddresses[0]?.emailAddress || "",
         role: role || "agent",
-        area: area || null,
+        area: body.area || null,
       },
     })
   } catch (error) {
     console.error("Error updating user:", error)
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
   }
 }
 
-// DELETE /api/admin/users/:id - Delete user
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = await requireApiUser({ roles: ["admin"] })
+    if (!guard.ok) return guard.response
 
     const { id } = await params
 
-    // Prevent self-deletion
-    if (id === userId) {
-      return NextResponse.json(
-        { error: "Cannot delete your own account" },
-        { status: 400 }
-      )
+    if (id === guard.context.userId) {
+      return NextResponse.json({ error: "Cannot delete your own account" }, { status: 400 })
     }
 
-    // Demo mode: simulate deletion
-    console.log("Demo mode: User deletion simulated", id)
+    if (isLocalAuthEnabled) {
+      await deleteAppUser(id)
+      return NextResponse.json({ success: true })
+    }
+
+    const clerk = await clerkClient()
+    await clerk.users.updateUser(id, {
+      publicMetadata: { status: "disabled" },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting user:", error)
-    return NextResponse.json(
-      { error: "Failed to delete user" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 })
   }
 }

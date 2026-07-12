@@ -1,75 +1,127 @@
 "use client"
 
-import { createContext, useContext, ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
-// Demo user data for demonstration purposes
-const DEMO_USER = {
-  id: "demo-user-001",
-  firstName: "Demo",
-  lastName: "User",
-  fullName: "Demo User",
-  primaryEmailAddress: {
-    emailAddress: "jardinghampus@gmail.com", // Admin email for full demo access
-  },
-  imageUrl: null as string | null,
+type LocalUser = {
+  id: string
+  firstName: string
+  lastName: string
+  fullName: string
+  primaryEmailAddress: { emailAddress: string }
+  imageUrl: string | null
   publicMetadata: {
-    phone: "+971 50 123 4567",
-    brn: "00000",
-    area: "tilal-al-ghaf",
-    role: "admin",
-  },
-  update: async (data: { firstName?: string; lastName?: string }) => {
-    // Mock update - in real app this would update the user
-    console.log("Demo mode: User update simulated", data)
-    return Promise.resolve()
-  },
+    phone?: string
+    brn?: string
+    area?: string
+    role: "admin" | "agent"
+    canAccessSocial?: boolean
+  }
+  update: (data: { firstName?: string; lastName?: string }) => Promise<void>
 }
 
-export type DemoUser = typeof DEMO_USER
-
-interface DemoUserContextType {
-  user: DemoUser | null
+interface LocalUserContextType {
+  user: LocalUser | null
   isLoaded: boolean
   isSignedIn: boolean
   signOut: (options?: { redirectUrl?: string }) => void
 }
 
-const DemoUserContext = createContext<DemoUserContextType | undefined>(undefined)
+const LocalUserContext = createContext<LocalUserContextType | undefined>(undefined)
+
+function toLocalUser(data: {
+  id: string
+  email: string
+  fullName: string
+  role: "admin" | "agent"
+  canAccessSocial?: boolean
+}): LocalUser {
+  const [firstName, ...rest] = data.fullName.split(" ")
+  return {
+    id: data.id,
+    firstName: firstName || data.fullName,
+    lastName: rest.join(" ") || "",
+    fullName: data.fullName,
+    primaryEmailAddress: { emailAddress: data.email },
+    imageUrl: null,
+    publicMetadata: {
+      role: data.role,
+      canAccessSocial: data.canAccessSocial,
+    },
+    update: async () => undefined,
+  }
+}
 
 export function DemoUserProvider({ children }: { children: ReactNode }) {
-  const signOut = (options?: { redirectUrl?: string }) => {
-    // For demo, just redirect to sign-in
-    if (typeof window !== "undefined") {
-      window.location.href = options?.redirectUrl || "/sign-in"
+  const [user, setUser] = useState<LocalUser | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      try {
+        const res = await fetch("/api/auth/me")
+        if (!res.ok) {
+          if (!cancelled) setUser(null)
+          return
+        }
+        const data = await res.json()
+        if (!cancelled && data.user) {
+          setUser(
+            toLocalUser({
+              id: data.user.id,
+              email: data.user.email,
+              fullName: data.user.fullName,
+              role: data.user.role === "admin" ? "admin" : "agent",
+              canAccessSocial: data.user.canAccessSocial,
+            })
+          )
+        }
+      } catch {
+        if (!cancelled) setUser(null)
+      } finally {
+        if (!cancelled) setIsLoaded(true)
+      }
     }
+
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const signOut = (options?: { redirectUrl?: string }) => {
+    void fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      if (typeof window !== "undefined") {
+        window.location.href = options?.redirectUrl || "/sign-in"
+      }
+    })
   }
 
   return (
-    <DemoUserContext.Provider
+    <LocalUserContext.Provider
       value={{
-        user: DEMO_USER,
-        isLoaded: true,
-        isSignedIn: true,
+        user,
+        isLoaded,
+        isSignedIn: Boolean(user),
         signOut,
       }}
     >
       {children}
-    </DemoUserContext.Provider>
+    </LocalUserContext.Provider>
   )
 }
 
-// Hook that mimics Clerk's useUser
 export function useDemoUser() {
-  const context = useContext(DemoUserContext)
+  const context = useContext(LocalUserContext)
   if (!context) {
     throw new Error("useDemoUser must be used within a DemoUserProvider")
   }
   return context
 }
 
-// Hook that mimics Clerk's useClerk
 export function useDemoClerk() {
-  const context = useContext(DemoUserContext)
+  const context = useContext(LocalUserContext)
   if (!context) {
     throw new Error("useDemoClerk must be used within a DemoUserProvider")
   }
@@ -78,5 +130,4 @@ export function useDemoClerk() {
   }
 }
 
-// Export the demo user ID for API routes
 export const DEMO_USER_ID = "demo-user-001"

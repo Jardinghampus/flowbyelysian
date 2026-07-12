@@ -26,6 +26,7 @@ import {
   ClipboardList,
   BarChart3,
   Kanban,
+  Handshake,
   CalendarDays,
   ImagePlus,
   CheckSquare,
@@ -100,80 +101,52 @@ interface NavSection {
 const ALL_CUSTOMERS: UserRole[] = ["buyer", "seller", "tenant", "landlord", "relocation_agent"]
 
 const navSections: NavSection[] = [
-  // ── INTERNAL: Apps ──
+  // Daily workstation (agents + admins)
   {
-    title: "Apps",
+    title: "Daily",
     roles: ["admin", "agent"],
     items: [
-      { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Core ── (/app/...)
-  {
-    title: "Core",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "Dashboard", href: "/app/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Pipeline", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Home", href: "/app/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Follow-ups", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Leads", href: "/app/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Inventory", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "My Listings", href: "/app/my-listings", icon: <ImagePlus className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Landlord Report", href: "/app/landlord-report", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Exchange", href: "/app/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Intelligence ──
-  {
-    title: "Intelligence",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "Data", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Zaylo", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Organize ──
-  {
-    title: "Organize",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Listings", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Active Listings", href: "/app/market-listings", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Sign", href: "/app/documents", icon: <PenLine className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Contacts", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Deals", href: "/app/deals", icon: <Handshake className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
-  // ── INTERNAL: Analytics ──
+  // Secondary tools
   {
-    title: "Analytics",
+    title: "More",
     roles: ["admin", "agent"],
     items: [
-      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Documents", href: "/app/documents", icon: <PenLine className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Landlord Report", href: "/app/landlord-report", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Exchange", href: "/app/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Team", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },
-  // ── INTERNAL: AI & Tools ──
+  // Admin only extras (kept out of agent daily path)
   {
-    title: "AI & Tools",
-    roles: ["admin", "agent"],
+    title: "Tools",
+    roles: ["admin"],
     items: [
-      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin"] },
+      { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin"] },
+      { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin"] },
+      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin"] },
+      { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin"] },
+      { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin"] },
+      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin"] },
+      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin"] },
+      { label: "Deal Board", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin"] },
     ],
   },
-  // ── INTERNAL: Resources ──
-  {
-    title: "Resources",
-    roles: ["admin", "agent"],
-    items: [
-      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"] },
-    ],
-  },
-  // ── INTERNAL: Admin ──
   {
     title: "System",
     roles: ["admin"],
@@ -182,10 +155,6 @@ const navSections: NavSection[] = [
       { label: "System Health", href: "/app/admin/system-health", icon: <Activity className={iconClass} />, roles: ["admin"] },
     ],
   },
-
-  // ── CUSTOMER: Portal ── (/user/...)
-  // Customers can ONLY see their opportunities and profile.
-  // They do NOT have access to the CRM app, marketplace browsing, or any other features.
   {
     title: "My Portal",
     roles: ALL_CUSTOMERS,
@@ -206,14 +175,14 @@ const bottomLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const { role, isInternal } = useRole()
+  const { role, isInternal, canAccessSocial } = useRole()
   const { isFullscreen } = useFullscreenContext()
   const { settings: docSettings } = useDocumentSettings()
   const [open, setOpen] = useState(false)
 
   const effectiveOpen = open
 
-  // Filter sections and items based on current role
+  // Filter sections and items based on current role + social access
   const visibleSections = useMemo(() => {
     return navSections
       .filter((section) => {
@@ -223,12 +192,13 @@ export function AppSidebar() {
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
+          if (item.href === "/zaylo" && !canAccessSocial) return false
           if (item.roles === "all") return true
           return item.roles.includes(role)
         }),
       }))
       .filter((section) => section.items.length > 0)
-  }, [role])
+  }, [role, canAccessSocial])
 
   return (
     <Sidebar open={open} setOpen={setOpen}>

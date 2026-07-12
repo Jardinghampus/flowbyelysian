@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import {
-  sampleRequests,
   requestTypeConfig,
   type ExchangeRequest,
   type RequestType,
@@ -108,7 +107,7 @@ const STORAGE_KEY = "exchange-user-requests"
 
 export default function ExchangePage() {
   const { isInternal } = useRole()
-  const [requests, setRequests] = useState<ExchangeRequest[]>(sampleRequests)
+  const [requests, setRequests] = useState<ExchangeRequest[]>([])
   const [typeFilter, setTypeFilter] = useState<RequestType | "all">("all")
   const [areaFilter, setAreaFilter] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -118,13 +117,13 @@ export default function ExchangePage() {
   const [isInquiryOpen, setIsInquiryOpen] = useState(false)
   const [popupRequest, setPopupRequest] = useState<ExchangeRequest | null>(null)
 
-  // Load user requests from localStorage
+  // Load user requests from localStorage (no demo seed)
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const userRequests: ExchangeRequest[] = JSON.parse(stored)
-        setRequests([...userRequests, ...sampleRequests])
+        setRequests(userRequests)
       }
     } catch {}
   }, [])

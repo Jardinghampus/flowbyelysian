@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { requireApiUser } from "@/lib/api/guards"
+import { requireSocialAccess } from "@/lib/api/guards"
 import { createZayloSourceLink } from "@/lib/zaylo/market-store"
 
 const sourceLinkSchema = z.object({
@@ -18,7 +18,7 @@ const sourceLinkSchema = z.object({
 })
 
 export async function POST(request: Request) {
-  const guard = await requireApiUser({ roles: ["admin", "manager", "operator"] })
+  const guard = await requireSocialAccess()
   if (!guard.ok) return guard.response
 
   const parsed = sourceLinkSchema.safeParse(await request.json().catch(() => null))

@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
-import { auth } from "@/lib/demo-auth"
+import { requireApiUser } from "@/lib/api/guards"
 
-// GET /api/listings/:id - Get single listing
+// GET /api/listings/:id - Get single listing (team can view)
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
+
     const { id } = await params
     const supabase = createServerClient()
 
@@ -25,10 +28,7 @@ export async function GET(
     return NextResponse.json({ listing })
   } catch (error) {
     console.error("Error fetching listing:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch listing" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to fetch listing" }, { status: 500 })
   }
 }
 
@@ -38,16 +38,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
 
     const { id } = await params
     const body = await request.json()
     const supabase = createServerClient()
 
-    // Check if listing exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("listings")
@@ -59,12 +56,21 @@ export async function PATCH(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    // Demo mode: allow all updates (admin access)
+    const isOwner = existing.owner_id === guard.context.userId
+    const isAdmin = guard.context.role === "admin"
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: "Only the listing agent or an admin can edit this listing" },
+        { status: 403 }
+      )
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: listing, error } = await (supabase as any)
       .from("listings")
       .update({
         ...body,
+        owner_id: existing.owner_id,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -76,28 +82,22 @@ export async function PATCH(
     return NextResponse.json({ listing })
   } catch (error) {
     console.error("Error updating listing:", error)
-    return NextResponse.json(
-      { error: "Failed to update listing" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to update listing" }, { status: 500 })
   }
 }
 
 // DELETE /api/listings/:id - Delete listing (owner or admin only)
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const guard = await requireApiUser()
+    if (!guard.ok) return guard.response
 
     const { id } = await params
     const supabase = createServerClient()
 
-    // Check if listing exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("listings")
@@ -109,7 +109,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    // Demo mode: allow all deletions (admin access)
+    const isOwner = existing.owner_id === guard.context.userId
+    const isAdmin = guard.context.role === "admin"
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: "Only the listing agent or an admin can delete this listing" },
+        { status: 403 }
+      )
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any).from("listings").delete().eq("id", id)
 
@@ -118,9 +126,6 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting listing:", error)
-    return NextResponse.json(
-      { error: "Failed to delete listing" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to delete listing" }, { status: 500 })
   }
 }

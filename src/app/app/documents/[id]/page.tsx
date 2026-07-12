@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/documents/StatusBadge"
 import { DocumentPreview } from "@/components/documents/DocumentPreview"
 import { ArrowLeft, Link2, Download, Copy, ExternalLink, Check } from "lucide-react"
+import { toast } from "sonner"
 import type { DocumentStatus } from "@/lib/documents/types"
 
 interface DocumentDetail {
@@ -51,17 +52,19 @@ export default function DocumentDetailPage({ params }: { params: Promise<{ id: s
     if (!doc) return
     setActivating(true)
     try {
-      await fetch(`/api/documents/${id}/send`, { method: "POST" })
-      // Refresh
+      const sendRes = await fetch(`/api/documents/${id}/send`, { method: "POST" })
+      const sendData = await sendRes.json()
+      if (!sendRes.ok) throw new Error(sendData.error || "Failed to activate link")
       const res = await fetch(`/api/documents/${id}`)
       setDoc(await res.json())
-      // Auto-copy the link
-      const signUrl = `${window.location.origin}/sign/${doc.sign_token}`
-      navigator.clipboard.writeText(signUrl)
+      const signUrl = sendData.signUrl || `${window.location.origin}/sign/${doc.sign_token}`
+      await navigator.clipboard.writeText(signUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+      toast.success("Signing link copied — share it via WhatsApp")
     } catch (err) {
       console.error("Failed to activate:", err)
+      toast.error("Failed to activate signing link")
     } finally {
       setActivating(false)
     }
@@ -168,6 +171,9 @@ export default function DocumentDetailPage({ params }: { params: Promise<{ id: s
         <div className="rounded-lg border border-border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Client / Signer</p>
           <p className="text-sm font-medium">{doc.signer_name || "—"}</p>
+          <p className="text-xs text-muted-foreground">
+            Share the sign link via WhatsApp — no email required
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Timeline</p>

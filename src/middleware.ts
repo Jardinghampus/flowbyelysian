@@ -1,42 +1,66 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { LOCAL_SESSION_COOKIE, parseSessionToken } from "@/lib/local-auth-edge"
 
-const isClerkAuthEnabled = process.env.AUTH_MODE === 'clerk'
+const authMode = (process.env.AUTH_MODE || "local").toLowerCase()
+const isClerkAuthEnabled = authMode === "clerk"
+const isLocalAuthEnabled = authMode !== "clerk" && authMode !== "demo"
 
 const isProtectedRoute = createRouteMatcher([
-  '/app(.*)',
-  '/user(.*)',
-  '/zaylo(.*)',
-  '/api/admin(.*)',
-  '/api/ai(.*)',
-  '/api/areas(.*)',
-  '/api/contacts(.*)',
-  '/api/crm(.*)',
-  '/api/daily-activity(.*)',
-  '/api/document-settings(.*)',
-  '/api/documents(.*)',
-  '/api/gmail(.*)',
-  '/api/lead-scoring(.*)',
-  '/api/listings(.*)',
-  '/api/notifications(.*)',
-  '/api/opportunities(.*)',
-  '/api/outreach-logs(.*)',
-  '/api/owner-intelligence(.*)',
-  '/api/owners(.*)',
-  '/api/pipeline-automations(.*)',
-  '/api/reports(.*)',
-  '/api/requests(.*)',
-  '/api/sentiment(.*)',
-  '/api/smart(.*)',
-  '/api/stats(.*)',
-  '/api/system(.*)',
-  '/api/tasks(.*)',
-  '/api/templates(.*)',
-  '/api/title-deeds(.*)',
-  '/api/training(.*)',
-  '/api/user(.*)',
-  '/api/zaylo(.*)',
+  "/app(.*)",
+  "/user(.*)",
+  "/dashboard(.*)",
+  "/zaylo(.*)",
+  "/inventory(.*)",
+  "/pipeline(.*)",
+  "/api/admin(.*)",
+  "/api/ai(.*)",
+  "/api/areas(.*)",
+  "/api/contacts(.*)",
+  "/api/crm(.*)",
+  "/api/daily-activity(.*)",
+  "/api/deals(.*)",
+  "/api/calendar(.*)",
+  "/api/document-settings(.*)",
+  "/api/documents(.*)",
+  "/api/gmail(.*)",
+  "/api/lead-scoring(.*)",
+  "/api/listings(.*)",
+  "/api/notifications(.*)",
+  "/api/opportunities(.*)",
+  "/api/outreach-logs(.*)",
+  "/api/owner-intelligence(.*)",
+  "/api/owners(.*)",
+  "/api/pipeline-automations(.*)",
+  "/api/reports(.*)",
+  "/api/requests(.*)",
+  "/api/sentiment(.*)",
+  "/api/smart(.*)",
+  "/api/stats(.*)",
+  "/api/system(.*)",
+  "/api/tasks(.*)",
+  "/api/templates(.*)",
+  "/api/title-deeds(.*)",
+  "/api/training(.*)",
+  "/api/user(.*)",
+  "/api/zaylo(.*)",
+])
+
+const isPublicAuthRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/auth(.*)",
+  "/api/webhooks(.*)",
+  "/sign/(.*)",
+])
+
+const isSocialRoute = createRouteMatcher([
+  "/zaylo(.*)",
+  "/api/zaylo(.*)",
+  "/app/settings/connections(.*)",
+  "/settings/connections(.*)",
+  "/user/settings/connections(.*)",
 ])
 
 const clerkAuthMiddleware = clerkMiddleware(async (auth, request) => {
@@ -47,7 +71,40 @@ const clerkAuthMiddleware = clerkMiddleware(async (auth, request) => {
   return NextResponse.next()
 })
 
-export function middleware(request: NextRequest, event: Parameters<typeof clerkAuthMiddleware>[1]) {
+async function localAuthMiddleware(request: NextRequest) {
+  if (isPublicAuthRoute(request)) {
+    return NextResponse.next()
+  }
+
+  if (!isProtectedRoute(request)) {
+    return NextResponse.next()
+  }
+
+  const token = request.cookies.get(LOCAL_SESSION_COOKIE)?.value
+  const session = await parseSessionToken(token)
+
+  if (!session) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/sign-in"
+    url.searchParams.set("next", request.nextUrl.pathname)
+    return NextResponse.redirect(url)
+  }
+
+  if (isSocialRoute(request) && !session.canAccessSocial) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/app/dashboard"
+    url.searchParams.set("error", "social-restricted")
+    return NextResponse.redirect(url)
+  }
+
+  return NextResponse.next()
+}
+
+export async function middleware(request: NextRequest, event: Parameters<typeof clerkAuthMiddleware>[1]) {
+  if (isLocalAuthEnabled) {
+    return localAuthMiddleware(request)
+  }
+
   if (!isClerkAuthEnabled) {
     return NextResponse.next()
   }
@@ -57,9 +114,7 @@ export function middleware(request: NextRequest, event: Parameters<typeof clerkA
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 }

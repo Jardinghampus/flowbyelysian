@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/demo-auth"
+import { auth, currentUser } from "@/lib/demo-auth"
 import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
+import { emitActivityEvent } from "@/lib/audit/events"
 
 // GET /api/listings/:id/viewings
 export async function GET(
@@ -45,10 +46,12 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const user = await currentUser()
     const { id: listingId } = await params
     const body = await request.json()
 
     const supabase = createUntypedServerClient()
+    const agentName = body.agentName || user?.fullName || "Agent"
 
     const { data, error } = await supabase
       .from("listing_viewings")
@@ -62,12 +65,26 @@ export async function POST(
         feedback: body.feedback || null,
         rating: body.rating || null,
         agent_id: userId,
-        agent_name: body.agentName || "Agent",
+        agent_name: agentName,
       })
       .select()
       .single()
 
     if (error) throw error
+
+    await emitActivityEvent(supabase, {
+      actor: { userId, name: agentName },
+      entityType: "listing",
+      entityId: listingId,
+      eventType: "viewing.scheduled",
+      title: `Viewing: ${body.viewerName}`,
+      body: String(body.viewingDate || ""),
+      payload: {
+        viewingId: data.id,
+        status: data.status,
+        viewerPhone: body.viewerPhone || null,
+      },
+    })
 
     return NextResponse.json({ viewing: data }, { status: 201 })
   } catch (error) {

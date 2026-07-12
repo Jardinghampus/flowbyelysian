@@ -5,9 +5,11 @@ import path from "node:path"
 
 const defaultZayloRoot = "C:\\Users\\jardi\\OneDrive\\Documents\\Zaylo-socials"
 const defaultPdfImportDir = "C:\\Users\\jardi\\OneDrive\\Documents\\New project\\pdf-import"
+const defaultWorkerRoot = path.join(process.cwd(), "workers", "zaylo-import-worker")
 
 export const zayloRoot = process.env.ZAYLO_SOCIALS_DIR || defaultZayloRoot
 export const zayloPdfImportDir = process.env.ZAYLO_PDF_IMPORT_DIR || defaultPdfImportDir
+export const zayloWorkerRoot = process.env.ZAYLO_WORKER_DIR || defaultWorkerRoot
 
 const runLogDir = path.join(process.cwd(), ".zaylo-runs")
 
@@ -156,11 +158,16 @@ function latestByArea(snapshots: Snapshot[]): Snapshot[] {
 }
 
 export async function getZayloState(): Promise<ZayloState> {
-  const connected = await fileExists(path.join(zayloRoot, "package.json"))
+  const connected = await fileExists(path.join(zayloWorkerRoot, "package.json"))
   const warnings: string[] = []
 
   if (!connected) {
-    warnings.push(`Legacy local Zaylo workspace is not connected: ${zayloRoot}. CRM-native Market Studio remains available.`)
+    warnings.push(`Bayut worker is missing at ${zayloWorkerRoot}. Run npm install inside workers/zaylo-import-worker.`)
+  }
+
+  const legacyConnected = await fileExists(path.join(zayloRoot, "package.json"))
+  if (!legacyConnected) {
+    warnings.push(`Legacy Zaylo-socials folder optional/not connected: ${zayloRoot}`)
   }
 
   const areas = await readJson<Area[]>(path.join(zayloRoot, "data", "sources", "areas.json"), [])
@@ -218,9 +225,18 @@ function commandForJob(job: ZayloJob): { command: string; args: string[]; cwd: s
 
   switch (job) {
     case "scrape-listings":
-      return { command: npmCommand, args: ["run", "scrape"], cwd: zayloRoot }
+      // Canonical path: worker scrapes Bayut → Supabase (no Google Sheets)
+      return {
+        command: npmCommand,
+        args: ["run", "import-market"],
+        cwd: zayloWorkerRoot,
+      }
     case "generate-week":
-      return { command: npmCommand, args: ["run", "content:week"], cwd: zayloRoot }
+      return {
+        command: npmCommand,
+        args: ["run", "generate-content"],
+        cwd: zayloWorkerRoot,
+      }
     case "build-zaylo":
       return { command: npmCommand, args: ["run", "build"], cwd: zayloRoot }
     case "import-pdfs":

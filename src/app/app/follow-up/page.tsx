@@ -37,37 +37,59 @@ const scenarios: { value: Scenario; label: string; desc: string }[] = [
   { value: "custom", label: "Custom", desc: "Write your own context" },
 ]
 
-const sampleMessages: Record<Channel, string> = {
-  whatsapp: `Hi Ahmed,
+function draftMessage(
+  channel: Channel,
+  ownerName: string,
+  propertyDesc: string,
+  area: string,
+  scenario: Scenario,
+  tone: MessageTone,
+  customContext: string
+): string {
+  const where = area ? ` in ${area}` : ""
+  const property = propertyDesc || "your property"
+  const greeting = ownerName ? `Hi ${ownerName}` : "Hi"
+  const toneHint =
+    tone === "friendly"
+      ? "Hope you're well!"
+      : tone === "urgent"
+        ? "Quick note — timing matters on this one."
+        : tone === "followup"
+          ? "Just following up on my earlier note."
+          : "I hope this finds you well."
 
-I'm Sarah from Elysian Properties. I came across your unit in Marina Gate Tower 2 — beautiful property!
+  const scenarioLine: Record<Scenario, string> = {
+    first_contact: `I'm reaching out about ${property}${where}. I'd love a short call to introduce myself and learn your plans for the unit.`,
+    buyer_match: `I have a qualified buyer looking for something that matches ${property}${where}. Would you be open to a brief discussion this week?`,
+    price_drop: `I've been reviewing comps for ${property}${where}. A small price adjustment could bring more serious interest — happy to walk you through the numbers.`,
+    new_listing: `We've just listed a related opportunity near ${property}${where}. Thought it might be useful context for your unit.`,
+    market_update: `Quick market note on ${area || "your area"} relevant to ${property}. I can share current demand and recent comps if helpful.`,
+    custom: customContext || `Regarding ${property}${where} — let me know a good time to connect.`,
+  }
 
-I have a pre-qualified buyer looking specifically for a 3BR in Dubai Marina with sea views, and your unit matches perfectly. They're ready to move quickly with a cash offer.
+  if (channel === "sms") {
+    return `${greeting}, ${scenarioLine[scenario]} Can we speak briefly?`.replace(/\s+/g, " ").trim()
+  }
 
-Would you be open to a brief call this week to discuss? I can share the current market valuation for your building — 3BRs in Marina Gate have appreciated 14% this quarter.
+  if (channel === "email") {
+    return `Subject: Regarding ${property}${where}
 
-Best regards,
-Sarah`,
-  email: `Subject: Qualified Buyer Interested in Your Marina Gate Unit
+Dear ${ownerName || "Owner"},
 
-Dear Ahmed,
+${toneHint}
 
-I hope this message finds you well. My name is Sarah from Elysian Properties, and I'm reaching out regarding your 3-bedroom unit in Marina Gate Tower 2, Dubai Marina.
+${scenarioLine[scenario]}
 
-I am currently representing a pre-qualified buyer who has expressed strong interest in properties matching your unit's specifications — specifically a 3-bedroom apartment with sea views in Dubai Marina. The buyer has been vetted financially and is prepared to proceed with a cash transaction.
+Best regards`
+  }
 
-Key market context for your consideration:
-• 3BR units in Marina Gate have seen a 14% price appreciation this quarter
-• Average days on market for comparable units: 23 days
-• Current demand-to-supply ratio in Marina: 3.2:1
+  return `${greeting},
 
-I would welcome the opportunity to arrange a brief call at your convenience to discuss how I might be of service.
+${toneHint}
 
-Warm regards,
-Sarah
-Elysian Properties
-+971 XX XXX XXXX`,
-  sms: `Hi Ahmed, this is Sarah from Elysian Properties. I have a cash buyer looking for a 3BR in Marina Gate — your unit is a perfect match. Can I call you briefly this week? 3BRs in your building are up 14% this quarter.`,
+${scenarioLine[scenario]}
+
+Best regards`
 }
 
 export default function FollowUpPage() {
@@ -89,8 +111,10 @@ export default function FollowUpPage() {
     }
 
     setGenerating(true)
-    await new Promise((r) => setTimeout(r, 2000))
-    setMessage(sampleMessages[channel])
+    await new Promise((r) => setTimeout(r, 400))
+    setMessage(
+      draftMessage(channel, ownerName, propertyDesc, area, scenario, tone, customContext)
+    )
     setGenerating(false)
     toast.success("Message drafted!")
   }
@@ -104,10 +128,17 @@ export default function FollowUpPage() {
   }
 
   const handleRegenerate = async () => {
+    if (!ownerName || !propertyDesc) {
+      toast.error("Owner name and property description are required")
+      return
+    }
     setGenerating(true)
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 300))
+    setMessage(
+      draftMessage(channel, ownerName, propertyDesc, area, scenario, tone, customContext)
+    )
     setGenerating(false)
-    toast.success("Regenerated with new variation")
+    toast.success("Regenerated")
   }
 
   return (
@@ -138,7 +169,7 @@ export default function FollowUpPage() {
                 <Input
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  placeholder="Ahmed Hassan"
+                  placeholder="Owner name"
                   className="text-sm"
                 />
               </div>
