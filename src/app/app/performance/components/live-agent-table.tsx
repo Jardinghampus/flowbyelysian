@@ -31,15 +31,19 @@ export function LiveAgentPerformanceTable({
 
   return (
     <CollapsibleCard
-      title="Agent performance"
-      description={
+      title={
         overview
-          ? `${overview.period.year}-${String(overview.period.month).padStart(2, "0")} · every active agent · sale vs rent`
-          : "Per-agent monthly performance"
+          ? `Agent performance · ${overview.period.year}-${String(overview.period.month).padStart(2, "0")}`
+          : "Agent performance"
       }
+      icon={<Trophy className="h-4 w-4 text-muted-foreground" />}
       defaultOpen
+      storageKey="live-agent-performance"
     >
       <CardContent>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Every active agent · sale vs rent · personal/company KPI progress
+        </p>
         {loading ? (
           <div className="flex h-24 items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
