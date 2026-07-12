@@ -1,12 +1,11 @@
 "use client"
 
-import * as React from "react"
-import { useState, useEffect } from "react"
-import { Save, Edit2, X, Check, Plus, Trash2 } from "lucide-react"
-
+import { useCallback, useEffect, useState } from "react"
+import { Loader2, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   Table,
   TableBody,
@@ -16,726 +15,351 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "sonner"
 
-type Agent = {
-  id: number
-  name: string
-  contacts: number
+type User = { id: string; fullName: string; email: string; role: string }
+type Actual = {
+  agent_id: string
+  agent_name: string
+  sale_deals: number
+  rent_deals: number
+  sale_commission_aed: number
+  rent_commission_aed: number
+  sale_revenue_aed: number
+  rent_revenue_aed: number
   listings: number
   viewings: number
-  commission: number
-  deals: number
-  targetPercent: number
-  points: number
-  rank: number
-  area: string
-  role: "Sales" | "Leasing"
-  target: number
+  include_deals_rollup: boolean
+  notes: string
 }
 
-// Initial data - in production this would come from a database
-const INITIAL_AGENTS: Agent[] = [
-  {
-    id: 1,
-    name: "Hampus Jarding",
-    contacts: 4,
-    listings: 65,
-    viewings: 54,
-    commission: 40000,
-    deals: 7,
-    targetPercent: 100,
-    points: 493,
-    rank: 4,
-    area: "Al Furjan",
-    role: "Leasing",
-    target: 40000,
-  },
-  {
-    id: 2,
-    name: "Paola Santos",
-    contacts: 6,
-    listings: 54,
-    viewings: 32,
-    commission: 32000,
-    deals: 10,
-    targetPercent: 80,
-    points: 693,
-    rank: 3,
-    area: "Tilal Al Ghaf",
-    role: "Leasing",
-    target: 40000,
-  },
-  {
-    id: 3,
-    name: "Madelon",
-    contacts: 10,
-    listings: 100,
-    viewings: 78,
-    commission: 65000,
-    deals: 12,
-    targetPercent: 87,
-    points: 894,
-    rank: 2,
-    area: "Tilal Al Ghaf",
-    role: "Sales",
-    target: 75000,
-  },
-  {
-    id: 4,
-    name: "Alex Scriven",
-    contacts: 23,
-    listings: 23,
-    viewings: 43,
-    commission: 95000,
-    deals: 5,
-    targetPercent: 127,
-    points: 912,
-    rank: 1,
-    area: "The Palm",
-    role: "Sales",
-    target: 75000,
-  },
-  {
-    id: 5,
-    name: "Jane Doe",
-    contacts: 23,
-    listings: 43,
-    viewings: 53,
-    commission: 2000,
-    deals: 3,
-    targetPercent: 44,
-    points: 430,
-    rank: 6,
-    area: "The Marina",
-    role: "Sales",
-    target: 4500,
-  },
-]
+type Company = {
+  target_deals: number
+  target_sale_deals: number
+  target_rent_deals: number
+  target_commission_aed: number
+  target_sale_commission_aed: number
+  target_rent_commission_aed: number
+  target_revenue_aed: number
+  target_listings: number
+  target_viewings: number
+  notes: string
+}
 
-const AREAS = [
-  "Al Furjan",
-  "Tilal Al Ghaf",
-  "The Palm",
-  "The Marina",
-  "Downtown Dubai",
-  "Dubai Hills",
-  "JBR",
-  "Business Bay",
-]
+const emptyCompany: Company = {
+  target_deals: 20,
+  target_sale_deals: 8,
+  target_rent_deals: 12,
+  target_commission_aed: 400000,
+  target_sale_commission_aed: 280000,
+  target_rent_commission_aed: 120000,
+  target_revenue_aed: 8000000,
+  target_listings: 40,
+  target_viewings: 80,
+  notes: "",
+}
 
 export function AgentPerformanceEditor() {
-  const [agents, setAgents] = useState<Agent[]>(INITIAL_AGENTS)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editedAgent, setEditedAgent] = useState<Agent | null>(null)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [newAgent, setNewAgent] = useState<Partial<Agent>>({
-    name: "",
-    contacts: 0,
-    listings: 0,
-    viewings: 0,
-    commission: 0,
-    deals: 0,
-    targetPercent: 0,
-    points: 0,
-    rank: agents.length + 1,
-    area: "Al Furjan",
-    role: "Sales",
-    target: 40000,
-  })
+  const now = new Date()
+  const [year, setYear] = useState(now.getFullYear())
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [users, setUsers] = useState<User[]>([])
+  const [actuals, setActuals] = useState<Record<string, Actual>>({})
+  const [company, setCompany] = useState<Company>(emptyCompany)
+  const [loading, setLoading] = useState(true)
+  const [savingId, setSavingId] = useState<string | null>(null)
 
-  const startEditing = (agent: Agent) => {
-    setEditingId(agent.id)
-    setEditedAgent({ ...agent })
-  }
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [uRes, aRes, tRes] = await Promise.all([
+        fetch("/api/admin/users"),
+        fetch(`/api/performance/actuals?year=${year}&month=${month}`),
+        fetch(`/api/performance/targets?year=${year}&month=${month}`),
+      ])
+      const uJson = await uRes.json()
+      const aJson = await aRes.json()
+      const tJson = await tRes.json()
 
-  const cancelEditing = () => {
-    setEditingId(null)
-    setEditedAgent(null)
-  }
+      const list: User[] = (uJson.users || []).map(
+        (u: { id: string; name?: string; fullName?: string; email: string; role: string }) => ({
+          id: u.id,
+          fullName: u.name || u.fullName || u.email,
+          email: u.email,
+          role: u.role,
+        })
+      )
+      setUsers(list)
 
-  const saveEditing = () => {
-    if (!editedAgent) return
+      const map: Record<string, Actual> = {}
+      for (const row of aJson.actuals || []) {
+        map[row.agent_id] = row
+      }
+      for (const u of list) {
+        if (!map[u.id]) {
+          map[u.id] = {
+            agent_id: u.id,
+            agent_name: u.fullName,
+            sale_deals: 0,
+            rent_deals: 0,
+            sale_commission_aed: 0,
+            rent_commission_aed: 0,
+            sale_revenue_aed: 0,
+            rent_revenue_aed: 0,
+            listings: 0,
+            viewings: 0,
+            include_deals_rollup: true,
+            notes: "",
+          }
+        }
+      }
+      setActuals(map)
 
-    setAgents(agents.map((a) => (a.id === editedAgent.id ? editedAgent : a)))
-    setEditingId(null)
-    setEditedAgent(null)
+      if (tJson.company) {
+        setCompany({
+          target_deals: Number(tJson.company.target_deals) || 0,
+          target_sale_deals: Number(tJson.company.target_sale_deals) || 0,
+          target_rent_deals: Number(tJson.company.target_rent_deals) || 0,
+          target_commission_aed: Number(tJson.company.target_commission_aed) || 0,
+          target_sale_commission_aed: Number(tJson.company.target_sale_commission_aed) || 0,
+          target_rent_commission_aed: Number(tJson.company.target_rent_commission_aed) || 0,
+          target_revenue_aed: Number(tJson.company.target_revenue_aed) || 0,
+          target_listings: Number(tJson.company.target_listings) || 0,
+          target_viewings: Number(tJson.company.target_viewings) || 0,
+          notes: tJson.company.notes || "",
+        })
+      }
+    } catch (e) {
+      console.error(e)
+      toast.error("Failed to load performance admin data")
+    } finally {
+      setLoading(false)
+    }
+  }, [year, month])
 
-    toast.success("Agent Updated", {
-      description: `${editedAgent.name}'s data has been saved.`,
-    })
-  }
+  useEffect(() => {
+    void load()
+  }, [load])
 
-  const handleAddAgent = () => {
-    if (!newAgent.name) {
-      toast.error("Error", {
-        description: "Please enter an agent name.",
+  const saveCompany = async () => {
+    setSavingId("company")
+    try {
+      const res = await fetch("/api/performance/targets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope: "company", year, month, ...company }),
       })
-      return
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || "Save failed")
+      toast.success("Company KPIs saved")
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed")
+    } finally {
+      setSavingId(null)
     }
-
-    const agent: Agent = {
-      id: Date.now(),
-      name: newAgent.name || "",
-      contacts: newAgent.contacts || 0,
-      listings: newAgent.listings || 0,
-      viewings: newAgent.viewings || 0,
-      commission: newAgent.commission || 0,
-      deals: newAgent.deals || 0,
-      targetPercent: newAgent.targetPercent || 0,
-      points: newAgent.points || 0,
-      rank: agents.length + 1,
-      area: newAgent.area || "Al Furjan",
-      role: newAgent.role || "Sales",
-      target: newAgent.target || 40000,
-    }
-
-    setAgents([...agents, agent])
-    setNewAgent({
-      name: "",
-      contacts: 0,
-      listings: 0,
-      viewings: 0,
-      commission: 0,
-      deals: 0,
-      targetPercent: 0,
-      points: 0,
-      rank: agents.length + 2,
-      area: "Al Furjan",
-      role: "Sales",
-      target: 40000,
-    })
-    setIsAddDialogOpen(false)
-
-    toast.success("Agent Added", {
-      description: `${agent.name} has been added to the system.`,
-    })
   }
 
-  const handleDeleteAgent = (id: number) => {
-    const agent = agents.find((a) => a.id === id)
-    setAgents(agents.filter((a) => a.id !== id))
-
-    toast.success("Agent Deleted", {
-      description: `${agent?.name} has been removed from the system.`,
-    })
+  const saveAgent = async (agentId: string) => {
+    setSavingId(agentId)
+    try {
+      const row = actuals[agentId]
+      const res = await fetch("/api/performance/actuals", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          year,
+          month,
+          agentId,
+          agentName: row.agent_name,
+          ...row,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || "Save failed")
+      toast.success(`Saved ${row.agent_name}`)
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed")
+    } finally {
+      setSavingId(null)
+    }
   }
 
-  const updateEditedField = (field: keyof Agent, value: string | number) => {
-    if (!editedAgent) return
-    setEditedAgent({ ...editedAgent, [field]: value })
+  const patch = (agentId: string, key: keyof Actual, value: string | number | boolean) => {
+    setActuals((prev) => ({
+      ...prev,
+      [agentId]: { ...prev[agentId], [key]: value },
+    }))
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: 12 }, (_, i) => (
+              <SelectItem key={i + 1} value={String(i + 1)}>
+                {new Date(2000, i, 1).toLocaleString("en", { month: "long" })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+          <SelectTrigger className="w-[100px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {[year - 1, year, year + 1].map((y) => (
+              <SelectItem key={y} value={String(y)}>
+                {y}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between gap-2">
           <div>
-            <CardTitle>Agent Performance Data</CardTitle>
-            <CardDescription>
-              Edit agent metrics, targets, and performance data
-            </CardDescription>
+            <CardTitle>Company KPI standards</CardTitle>
+            <CardDescription>Shared monthly targets for the brokerage</CardDescription>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Agent
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Add New Agent</DialogTitle>
-                <DialogDescription>
-                  Add a new agent to track their performance metrics.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-name">Name</Label>
-                    <Input
-                      id="new-name"
-                      value={newAgent.name}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, name: e.target.value })
-                      }
-                      placeholder="Agent Name"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-area">Area</Label>
-                    <Select
-                      value={newAgent.area}
-                      onValueChange={(value) =>
-                        setNewAgent({ ...newAgent, area: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {AREAS.map((area) => (
-                          <SelectItem key={area} value={area}>
-                            {area}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-role">Role</Label>
-                    <Select
-                      value={newAgent.role}
-                      onValueChange={(value: "Sales" | "Leasing") =>
-                        setNewAgent({ ...newAgent, role: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sales">Sales</SelectItem>
-                        <SelectItem value="Leasing">Leasing</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-target">Target (AED)</Label>
-                    <Input
-                      id="new-target"
-                      type="number"
-                      value={newAgent.target}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, target: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-contacts">Contacts</Label>
-                    <Input
-                      id="new-contacts"
-                      type="number"
-                      value={newAgent.contacts}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, contacts: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-listings">Listings</Label>
-                    <Input
-                      id="new-listings"
-                      type="number"
-                      value={newAgent.listings}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, listings: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-viewings">Viewings</Label>
-                    <Input
-                      id="new-viewings"
-                      type="number"
-                      value={newAgent.viewings}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, viewings: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-deals">Deals</Label>
-                    <Input
-                      id="new-deals"
-                      type="number"
-                      value={newAgent.deals}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, deals: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-commission">Commission</Label>
-                    <Input
-                      id="new-commission"
-                      type="number"
-                      value={newAgent.commission}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, commission: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-points">Points</Label>
-                    <Input
-                      id="new-points"
-                      type="number"
-                      value={newAgent.points}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, points: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-targetPercent">Target %</Label>
-                    <Input
-                      id="new-targetPercent"
-                      type="number"
-                      value={newAgent.targetPercent}
-                      onChange={(e) =>
-                        setNewAgent({ ...newAgent, targetPercent: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddAgent}>Add Agent</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* Desktop Table */}
-        <div className="hidden lg:block overflow-x-auto rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">Rank</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-right">Contacts</TableHead>
-                <TableHead className="text-right">Listings</TableHead>
-                <TableHead className="text-right">Viewings</TableHead>
-                <TableHead className="text-right">Deals</TableHead>
-                <TableHead className="text-right">Commission</TableHead>
-                <TableHead className="text-right">Target %</TableHead>
-                <TableHead className="text-right">Points</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {agents.map((agent) => (
-                <TableRow key={agent.id}>
-                  {editingId === agent.id && editedAgent ? (
-                    <>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.rank}
-                          onChange={(e) => updateEditedField("rank", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          value={editedAgent.name}
-                          onChange={(e) => updateEditedField("name", e.target.value)}
-                          className="w-32 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={editedAgent.area}
-                          onValueChange={(value) => updateEditedField("area", value)}
-                        >
-                          <SelectTrigger className="w-32 h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {AREAS.map((area) => (
-                              <SelectItem key={area} value={area}>
-                                {area}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={editedAgent.role}
-                          onValueChange={(value: "Sales" | "Leasing") =>
-                            updateEditedField("role", value)
-                          }
-                        >
-                          <SelectTrigger className="w-24 h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sales">Sales</SelectItem>
-                            <SelectItem value="Leasing">Leasing</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.contacts}
-                          onChange={(e) => updateEditedField("contacts", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.listings}
-                          onChange={(e) => updateEditedField("listings", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.viewings}
-                          onChange={(e) => updateEditedField("viewings", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.deals}
-                          onChange={(e) => updateEditedField("deals", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.commission}
-                          onChange={(e) => updateEditedField("commission", Number(e.target.value))}
-                          className="w-24 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.targetPercent}
-                          onChange={(e) => updateEditedField("targetPercent", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={editedAgent.points}
-                          onChange={(e) => updateEditedField("points", Number(e.target.value))}
-                          className="w-16 h-8"
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={saveEditing}>
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={cancelEditing}>
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell className="font-medium">#{agent.rank}</TableCell>
-                      <TableCell className="font-medium">{agent.name}</TableCell>
-                      <TableCell>{agent.area}</TableCell>
-                      <TableCell>
-                        <Badge variant={agent.role === "Sales" ? "default" : "secondary"}>
-                          {agent.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{agent.contacts}</TableCell>
-                      <TableCell className="text-right">{agent.listings}</TableCell>
-                      <TableCell className="text-right">{agent.viewings}</TableCell>
-                      <TableCell className="text-right font-medium">{agent.deals}</TableCell>
-                      <TableCell className="text-right font-medium">
-                        AED {agent.commission.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={
-                            agent.targetPercent >= 100
-                              ? "default"
-                              : agent.targetPercent >= 75
-                              ? "secondary"
-                              : "destructive"
-                          }
-                        >
-                          {agent.targetPercent}%
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">{agent.points}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
+          <Button size="sm" onClick={() => void saveCompany()} disabled={savingId === "company"}>
+            {savingId === "company" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Save company
+          </Button>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              ["target_revenue_aed", "Revenue target AED"],
+              ["target_commission_aed", "Commission target AED"],
+              ["target_deals", "Total deals"],
+              ["target_sale_deals", "Sale deals"],
+              ["target_rent_deals", "Rent deals"],
+              ["target_sale_commission_aed", "Sale commission AED"],
+              ["target_rent_commission_aed", "Rent commission AED"],
+              ["target_listings", "Listings"],
+              ["target_viewings", "Viewings"],
+            ] as const
+          ).map(([key, label]) => (
+            <div key={key} className="space-y-1">
+              <Label className="text-xs">{label}</Label>
+              <Input
+                type="number"
+                value={company[key]}
+                onChange={(e) => setCompany((c) => ({ ...c, [key]: Number(e.target.value) }))}
+              />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Agent monthly actuals</CardTitle>
+          <CardDescription>
+            Enter adjustments per agent. Leave “include deals rollup” on to add these on top of closed deals from the CRM.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex h-24 items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Agent</TableHead>
+                    <TableHead>Sale deals</TableHead>
+                    <TableHead>Rent deals</TableHead>
+                    <TableHead>Sale comm.</TableHead>
+                    <TableHead>Rent comm.</TableHead>
+                    <TableHead>+ deals?</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => {
+                    const row = actuals[u.id]
+                    if (!row) return null
+                    return (
+                      <TableRow key={u.id}>
+                        <TableCell className="font-medium whitespace-nowrap">{u.fullName}</TableCell>
+                        <TableCell>
+                          <Input
+                            className="w-20"
+                            type="number"
+                            value={row.sale_deals}
+                            onChange={(e) => patch(u.id, "sale_deals", Number(e.target.value))}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            className="w-20"
+                            type="number"
+                            value={row.rent_deals}
+                            onChange={(e) => patch(u.id, "rent_deals", Number(e.target.value))}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            className="w-28"
+                            type="number"
+                            value={row.sale_commission_aed}
+                            onChange={(e) => patch(u.id, "sale_commission_aed", Number(e.target.value))}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            className="w-28"
+                            type="number"
+                            value={row.rent_commission_aed}
+                            onChange={(e) => patch(u.id, "rent_commission_aed", Number(e.target.value))}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={row.include_deals_rollup}
+                            onCheckedChange={(v) => patch(u.id, "include_deals_rollup", v)}
+                          />
+                        </TableCell>
+                        <TableCell>
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={() => startEditing(agent)}
+                            variant="outline"
+                            onClick={() => void saveAgent(u.id)}
+                            disabled={savingId === u.id}
                           >
-                            <Edit2 className="h-4 w-4" />
+                            {savingId === u.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Agent</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete {agent.name}? This action
-                                  cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteAgent(agent.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="lg:hidden space-y-4">
-          {agents.map((agent) => (
-            <Card key={agent.id} className="relative">
-              <CardContent className="pt-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">#{agent.rank}</span>
-                      <span className="font-semibold">{agent.name}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{agent.area}</div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => startEditing(agent)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="ghost">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Agent</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete {agent.name}?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteAgent(agent.id)}
-                            className="bg-destructive"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-                  <div className="text-center p-2 bg-muted rounded">
-                    <div className="text-xs text-muted-foreground">Deals</div>
-                    <div className="font-bold">{agent.deals}</div>
-                  </div>
-                  <div className="text-center p-2 bg-muted rounded">
-                    <div className="text-xs text-muted-foreground">Target</div>
-                    <Badge
-                      variant={
-                        agent.targetPercent >= 100
-                          ? "default"
-                          : agent.targetPercent >= 75
-                          ? "secondary"
-                          : "destructive"
-                      }
-                      className="mt-1"
-                    >
-                      {agent.targetPercent}%
-                    </Badge>
-                  </div>
-                  <div className="text-center p-2 bg-muted rounded">
-                    <div className="text-xs text-muted-foreground">Points</div>
-                    <div className="font-bold">{agent.points}</div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <Badge variant={agent.role === "Sales" ? "default" : "secondary"}>
-                    {agent.role}
-                  </Badge>
-                  <span className="font-bold">AED {agent.commission.toLocaleString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
