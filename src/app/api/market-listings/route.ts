@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireApiUser } from "@/lib/api/guards"
+import { checkMarketRateLimit } from "@/lib/api/market-rate-limit"
 import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
 
 type ListingRow = {
@@ -115,6 +116,14 @@ export async function GET(request: NextRequest) {
     const guard = await requireApiUser()
     if (!guard.ok) return guard.response
 
+    const rate = checkMarketRateLimit(guard.context.userId)
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const community = searchParams.get("community")
     const subArea = searchParams.get("subArea")
@@ -125,16 +134,28 @@ export async function GET(request: NextRequest) {
     const q = searchParams.get("q")
     const sort = searchParams.get("sort") || "newest"
     const limit = Math.min(Number(searchParams.get("limit") || 200), 500)
+    const offset = Math.max(Number(searchParams.get("offset") || 0), 0)
 
     const supabase = createUntypedServerClient()
     const filters = { status, community, subArea, transactionType, beds, propertyType, q }
+
+    let countQuery = supabase.from("bayut_market_listings").select("id", { count: "exact", head: true })
+    countQuery = applyFilters(countQuery, filters)
+    const { count: totalCount, error: countError } = await countQuery
+    if (countError) {
+      console.error("market-listings count failed", countError)
+      return NextResponse.json(
+        { error: countError.message, listings: [], communities: [], stats: null },
+        { status: 500 }
+      )
+    }
 
     let query = supabase
       .from("bayut_market_listings")
       .select(
         "id, community, master_community, sub_area, listing_number, permit_number, title, price, currency, rent_period, location, beds, baths, size_sqft, built_up_sqft, plot_sqft, property_type, agency, agent_name, listing_url, transaction_type, status, last_seen, first_seen"
       )
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
     query = applyFilters(query, filters)
     query = applySort(query, sort)
@@ -151,9 +172,9 @@ export async function GET(request: NextRequest) {
     let statsQuery = supabase
       .from("bayut_market_listings")
       .select("price, transaction_type, status")
-      .limit(5000)
+      .limit(10000)
     statsQuery = applyFilters(statsQuery, filters)
-    const { data: statsRows } = await statsQuery
+    const { data: statsRows, count: statsCount } = await statsQuery
 
     const { data: communityRows } = await supabase
       .from("bayut_market_listings")
@@ -185,12 +206,20 @@ export async function GET(request: NextRequest) {
 
     const listings = (data || []) as ListingRow[]
     const stats = computeStats((statsRows || listings) as ListingRow[])
+    if (statsCount != null && statsCount > (statsRows?.length || 0)) {
+      stats.count = statsCount
+    } else if (totalCount != null) {
+      stats.count = totalCount
+    }
 
     return NextResponse.json({
       listings,
       communities,
       subAreas,
-      count: listings.length,
+      count: totalCount ?? listings.length,
+      offset,
+      limit,
+      hasMore: (totalCount ?? 0) > offset + listings.length,
       stats,
       sort,
     })

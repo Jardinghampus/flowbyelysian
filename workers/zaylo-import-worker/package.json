@@ -9,6 +9,8 @@
     "import-market": "tsx src/index.ts --job import-market",
     "import-transactions": "tsx src/index.ts --job import-transactions",
     "enrich-listings": "tsx src/index.ts --job enrich-listings",
+    "weekly:refresh": "tsx scripts/weekly-market-refresh.ts",
+    "run:all-phases": "tsx scripts/run-all-phases.ts",
     "generate-content": "tsx src/index.ts --job generate-content",
     "generate-urls": "tsx data/generate-urls.ts",
     "seed-urls": "tsx data/seed-curated-urls.ts",

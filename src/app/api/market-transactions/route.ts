@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireApiUser } from "@/lib/api/guards"
+import { checkMarketRateLimit } from "@/lib/api/market-rate-limit"
 import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
 
 type TxRow = {
@@ -58,10 +59,83 @@ function buildAnalysisLabel(opts: {
   return "All transactions (last 3 months)"
 }
 
+function applyFilters(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  opts: {
+    community: string | null
+    subArea: string | null
+    beds: string | null
+    propertyType: string | null
+    transactionType: string | null
+    q: string | null
+  }
+) {
+  if (opts.community && opts.community !== "all") {
+    const c = opts.community.replace(/["\\,()]/g, "").trim()
+    if (c) query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
+  }
+  if (opts.subArea && opts.subArea !== "all") query = query.eq("sub_area", opts.subArea)
+  if (opts.transactionType && opts.transactionType !== "all") {
+    query = query.eq("transaction_type", opts.transactionType)
+  }
+  if (opts.propertyType && opts.propertyType !== "all") query = query.eq("property_type", opts.propertyType)
+  if (opts.beds && opts.beds !== "all") query = query.eq("bedrooms", Number(opts.beds))
+  if (opts.q) {
+    const safe = opts.q.replace(/[%",]/g, "")
+    query = query.or(
+      `location.ilike.%${safe}%,sub_area.ilike.%${safe}%,community.ilike.%${safe}%,history.ilike.%${safe}%`
+    )
+  }
+  return query
+}
+
+function applySort(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  sort: string | null
+) {
+  if (sort === "price_asc") return query.order("price_aed", { ascending: true, nullsFirst: false })
+  if (sort === "price_desc") return query.order("price_aed", { ascending: false, nullsFirst: false })
+  if (sort === "beds_desc") return query.order("bedrooms", { ascending: false, nullsFirst: false })
+  return query.order("transaction_date", { ascending: false })
+}
+
+function computeAnalysis(rows: TxRow[], label: string) {
+  const prices = rows.map((r) => Number(r.price_aed)).filter((n) => n > 0)
+  const built = rows.map((r) => Number(r.built_up_sqft ?? r.size_sqft)).filter((n) => n > 0)
+  const plots = rows.map((r) => Number(r.plot_sqft)).filter((n) => n > 0)
+  const pps = rows.map((r) => Number(r.price_per_sqft_aed)).filter((n) => n > 0)
+  const bedValues = rows.map((r) => r.bedrooms).filter((n): n is number => n != null)
+
+  return {
+    label,
+    count: rows.length,
+    avgPrice: avg(prices),
+    medianPrice: median(prices),
+    minPrice: prices.length ? Math.min(...prices) : null,
+    maxPrice: prices.length ? Math.max(...prices) : null,
+    avgBuiltUp: avg(built),
+    avgPlot: avg(plots),
+    avgPricePerSqft: avg(pps),
+    avgBeds: bedValues.length
+      ? Math.round((bedValues.reduce((a, b) => a + b, 0) / bedValues.length) * 10) / 10
+      : null,
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const guard = await requireApiUser()
     if (!guard.ok) return guard.response
+
+    const rate = checkMarketRateLimit(guard.context.userId)
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Try again shortly." },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
+      )
+    }
 
     const { searchParams } = new URL(request.url)
     const community = searchParams.get("community")
@@ -69,30 +143,32 @@ export async function GET(request: NextRequest) {
     const beds = searchParams.get("beds")
     const propertyType = searchParams.get("propertyType")
     const transactionType = searchParams.get("transactionType")
+    const q = searchParams.get("q")
     const sort = searchParams.get("sort") || "newest"
     const limit = Math.min(Number(searchParams.get("limit") || 500), 1000)
+    const offset = Math.max(Number(searchParams.get("offset") || 0), 0)
 
     const supabase = createUntypedServerClient()
+    const filters = { community, subArea, beds, propertyType, transactionType, q }
+    const analysisLabel = buildAnalysisLabel({ community, subArea, beds, propertyType, transactionType })
+
+    let countQuery = supabase.from("bayut_transactions").select("id", { count: "exact", head: true })
+    countQuery = applyFilters(countQuery, filters)
+    const { count: totalCount, error: countError } = await countQuery
+    if (countError) {
+      console.error("market-transactions count failed", countError)
+      return NextResponse.json({ error: countError.message, transactions: [], analysis: null }, { status: 500 })
+    }
+
     let query = supabase
       .from("bayut_transactions")
       .select(
         "id, community, master_community, sub_area, location, bedrooms, property_type, transaction_type, price_aed, size_sqft, built_up_sqft, plot_sqft, price_per_sqft_aed, transaction_date, history, detail_url, source_url"
       )
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
-    if (community && community !== "all") {
-      const c = community.replace(/["\\,()]/g, "").trim()
-      if (c) query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
-    }
-    if (subArea && subArea !== "all") query = query.eq("sub_area", subArea)
-    if (transactionType && transactionType !== "all") query = query.eq("transaction_type", transactionType)
-    if (propertyType && propertyType !== "all") query = query.eq("property_type", propertyType)
-    if (beds && beds !== "all") query = query.eq("bedrooms", Number(beds))
-
-    if (sort === "price_asc") query = query.order("price_aed", { ascending: true, nullsFirst: false })
-    else if (sort === "price_desc") query = query.order("price_aed", { ascending: false, nullsFirst: false })
-    else if (sort === "beds_desc") query = query.order("bedrooms", { ascending: false, nullsFirst: false })
-    else query = query.order("transaction_date", { ascending: false })
+    query = applyFilters(query, filters)
+    query = applySort(query, sort)
 
     const { data, error } = await query
     if (error) {
@@ -101,6 +177,22 @@ export async function GET(request: NextRequest) {
     }
 
     const rows = (data || []) as TxRow[]
+
+    let analysisQuery = supabase
+      .from("bayut_transactions")
+      .select(
+        "price_aed, built_up_sqft, size_sqft, plot_sqft, price_per_sqft_aed, bedrooms"
+      )
+      .limit(10000)
+    analysisQuery = applyFilters(analysisQuery, filters)
+    const { data: analysisRows, count: analysisCount } = await analysisQuery
+
+    const analysis = computeAnalysis((analysisRows || rows) as TxRow[], analysisLabel)
+    if (analysisCount != null && analysisCount > (analysisRows?.length || 0)) {
+      analysis.count = analysisCount
+    } else if (totalCount != null) {
+      analysis.count = totalCount
+    }
 
     const { data: metaRows } = await supabase
       .from("bayut_transactions")
@@ -130,33 +222,15 @@ export async function GET(request: NextRequest) {
       )
     ).sort() as string[]
 
-    const prices = rows.map((r) => Number(r.price_aed)).filter((n) => n > 0)
-    const built = rows.map((r) => Number(r.built_up_sqft ?? r.size_sqft)).filter((n) => n > 0)
-    const plots = rows.map((r) => Number(r.plot_sqft)).filter((n) => n > 0)
-    const pps = rows.map((r) => Number(r.price_per_sqft_aed)).filter((n) => n > 0)
-    const bedValues = rows.map((r) => r.bedrooms).filter((n): n is number => n != null)
-
-    const analysis = {
-      label: buildAnalysisLabel({ community, subArea, beds, propertyType, transactionType }),
-      count: rows.length,
-      avgPrice: avg(prices),
-      medianPrice: median(prices),
-      minPrice: prices.length ? Math.min(...prices) : null,
-      maxPrice: prices.length ? Math.max(...prices) : null,
-      avgBuiltUp: avg(built),
-      avgPlot: avg(plots),
-      avgPricePerSqft: avg(pps),
-      avgBeds: bedValues.length
-        ? Math.round((bedValues.reduce((a, b) => a + b, 0) / bedValues.length) * 10) / 10
-        : null,
-    }
-
     return NextResponse.json({
       transactions: rows,
       communities,
       subAreas,
       analysis,
-      count: rows.length,
+      count: totalCount ?? rows.length,
+      offset,
+      limit,
+      hasMore: (totalCount ?? 0) > offset + rows.length,
       sort,
     })
   } catch (error) {

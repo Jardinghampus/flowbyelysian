@@ -15,23 +15,31 @@ const InputLinkSchema = z.object({
 
 const workerRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 
+/** Bayut uses /for-rent/ and /to-rent/ interchangeably — normalize to for-rent. */
+function normalizeListingUrl(url: string): string {
+  return url.replace(/\/to-rent\//i, "/for-rent/")
+}
+
 export async function resolveInputLinks(): Promise<InputLink[]> {
   let links: InputLink[] = []
+  const forceCsv = process.env.USE_CSV_SOURCES === "true" || process.env.FULL_MARKET_SCRAPE === "true"
 
-  try {
-    const fromDb = await loadActiveSourceLinks()
-    const listingLinks = fromDb.filter((l) => l.kind.includes("listings") || l.kind.includes("transactions"))
-    if (listingLinks.length > 0) {
-      links = listingLinks.map((l) => ({
-        community: l.community,
-        url: l.url,
-        kind: l.kind,
-        areaId: l.areaId,
-        masterCommunity: l.masterCommunity,
-      }))
+  if (!forceCsv) {
+    try {
+      const fromDb = await loadActiveSourceLinks()
+      const listingLinks = fromDb.filter((l) => l.kind.includes("listings") || l.kind.includes("transactions"))
+      if (listingLinks.length > 0) {
+        links = listingLinks.map((l) => ({
+          community: l.community,
+          url: normalizeListingUrl(l.url),
+          kind: l.kind,
+          areaId: l.areaId,
+          masterCommunity: l.masterCommunity,
+        }))
+      }
+    } catch (error) {
+      console.warn("Could not load source links from Supabase, falling back to CSV:", error)
     }
-  } catch (error) {
-    console.warn("Could not load source links from Supabase, falling back to CSV:", error)
   }
 
   if (links.length === 0) {
@@ -46,6 +54,7 @@ export async function resolveInputLinks(): Promise<InputLink[]> {
       if (!parsed.success) throw new Error(`Invalid input_links.csv row ${index + 2}: ${parsed.error.message}`)
       return {
         ...parsed.data,
+        url: normalizeListingUrl(parsed.data.url),
         kind: inferTransactionType(parsed.data.url) === "sale" ? "bayut_sale_listings" : "bayut_rent_listings",
         masterCommunity: masterFromCommunity(parsed.data.community),
       }

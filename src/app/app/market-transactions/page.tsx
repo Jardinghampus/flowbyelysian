@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -101,18 +102,28 @@ export default function MarketTransactionsPage() {
   const [propertyType, setPropertyType] = useState("all")
   const [transactionType, setTransactionType] = useState("sale")
   const [sort, setSort] = useState("newest")
+  const [q, setQ] = useState("")
+  const [offset, setOffset] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const pageSize = 200
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams({ limit: "500", sort })
+      const params = new URLSearchParams({
+        limit: String(pageSize),
+        offset: String(offset),
+        sort,
+      })
       if (community !== "all") params.set("community", community)
       if (subArea !== "all") params.set("subArea", subArea)
       if (beds !== "all") params.set("beds", beds)
       if (propertyType !== "all") params.set("propertyType", propertyType)
       if (transactionType !== "all") params.set("transactionType", transactionType)
+      if (q.trim()) params.set("q", q.trim())
 
       const res = await fetch(`/api/market-transactions?${params.toString()}`)
       const data = await res.json()
@@ -121,6 +132,8 @@ export default function MarketTransactionsPage() {
       setCommunities(data.communities || [])
       setSubAreas(data.subAreas || [])
       setAnalysis(data.analysis || null)
+      setTotalCount(data.count ?? (data.transactions?.length || 0))
+      setHasMore(Boolean(data.hasMore))
     } catch (err) {
       console.error(err)
       setRows([])
@@ -129,7 +142,11 @@ export default function MarketTransactionsPage() {
     } finally {
       setLoading(false)
     }
-  }, [community, subArea, beds, propertyType, transactionType, sort])
+  }, [community, subArea, beds, propertyType, transactionType, sort, q, offset])
+
+  useEffect(() => {
+    setOffset(0)
+  }, [community, subArea, beds, propertyType, transactionType, sort, q])
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -215,7 +232,7 @@ export default function MarketTransactionsPage() {
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
         <Select value={community} onValueChange={setCommunity}>
           <SelectTrigger>
             <SelectValue placeholder="Area" />
@@ -291,6 +308,12 @@ export default function MarketTransactionsPage() {
             <SelectItem value="beds_desc">Beds: high → low</SelectItem>
           </SelectContent>
         </Select>
+
+        <Input
+          placeholder="Search location / history"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
       </div>
 
       <div className="hidden md:block overflow-x-auto rounded-lg border">
@@ -409,6 +432,30 @@ export default function MarketTransactionsPage() {
             )
           })
         )}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          {totalCount} transactions in filter · showing {offset + 1}–{offset + rows.length}
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || offset === 0}
+            onClick={() => setOffset((o) => Math.max(0, o - pageSize))}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || !hasMore}
+            onClick={() => setOffset((o) => o + pageSize)}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )

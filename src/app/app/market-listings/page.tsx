@@ -105,15 +105,25 @@ export default function MarketListingsPage() {
   const [beds, setBeds] = useState("all")
   const [propertyType, setPropertyType] = useState("all")
   const [transactionType, setTransactionType] = useState("all")
+  const [status, setStatus] = useState("active")
   const [sort, setSort] = useState("newest")
   const [q, setQ] = useState("")
+  const [offset, setOffset] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const pageSize = 200
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams({ status: "active", limit: "500", sort })
+      const params = new URLSearchParams({
+        status,
+        limit: String(pageSize),
+        offset: String(offset),
+        sort,
+      })
       if (community !== "all") params.set("community", community)
       if (subArea !== "all") params.set("subArea", subArea)
       if (beds !== "all") params.set("beds", beds)
@@ -128,6 +138,8 @@ export default function MarketListingsPage() {
       setCommunities(data.communities || [])
       setSubAreas(data.subAreas || [])
       setStats(data.stats || null)
+      setTotalCount(data.count ?? (data.listings?.length || 0))
+      setHasMore(Boolean(data.hasMore))
     } catch (err) {
       console.error(err)
       setListings([])
@@ -136,7 +148,11 @@ export default function MarketListingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [community, subArea, beds, propertyType, transactionType, sort, q])
+  }, [community, subArea, beds, propertyType, transactionType, status, sort, q, offset])
+
+  useEffect(() => {
+    setOffset(0)
+  }, [community, subArea, beds, propertyType, transactionType, status, sort, q])
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -206,7 +222,7 @@ export default function MarketListingsPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
         <Select value={community} onValueChange={setCommunity}>
           <SelectTrigger>
             <SelectValue placeholder="Area" />
@@ -271,6 +287,17 @@ export default function MarketListingsPage() {
           </SelectContent>
         </Select>
 
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="not_seen">Not seen (stale)</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={sort} onValueChange={setSort}>
           <SelectTrigger>
             <SelectValue placeholder="Sort" />
@@ -322,6 +349,11 @@ export default function MarketListingsPage() {
                     {listing.transaction_type}
                   </Badge>
                 </div>
+                {listing.status === "not_seen" ? (
+                  <Badge variant="outline" className="mt-2">
+                    Stale — not seen in last scrape
+                  </Badge>
+                ) : null}
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Type</p>
@@ -365,19 +397,20 @@ export default function MarketListingsPage() {
               <TableHead>Beds</TableHead>
               <TableHead>Permit</TableHead>
               <TableHead>Agency</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Link</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                   No active listings yet. Seed URLs then run{" "}
                   <code className="text-xs">pnpm zaylo:worker --job import-market</code>
                 </TableCell>
@@ -409,6 +442,14 @@ export default function MarketListingsPage() {
                       <span className="line-clamp-2 text-sm">{listing.agency || "—"}</span>
                     </TableCell>
                     <TableCell>
+                      <Badge
+                        variant={listing.status === "active" ? "secondary" : "outline"}
+                        className="capitalize"
+                      >
+                        {listing.status === "not_seen" ? "stale" : listing.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                       <BayutLink link={link} />
                     </TableCell>
                   </TableRow>
@@ -419,9 +460,30 @@ export default function MarketListingsPage() {
         </Table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        {stats?.count ?? listings.length} listings in filter · avg updates with beds/area/type
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          {totalCount} listings in filter · showing {offset + 1}–{offset + listings.length}
+          {status === "not_seen" ? " · stale = not seen in last full scrape" : ""}
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || offset === 0}
+            onClick={() => setOffset((o) => Math.max(0, o - pageSize))}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={loading || !hasMore}
+            onClick={() => setOffset((o) => o + pageSize)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
