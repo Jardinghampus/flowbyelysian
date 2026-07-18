@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ListingShareButtons } from "@/components/listings/listing-share-actions"
+import { ListingContactButton } from "@/components/listings/listing-contact-button"
 import type { Listing } from "../page"
 
 interface ViewListingDialogProps {
@@ -75,12 +76,20 @@ export function ViewListingDialog({
                 </Badge>
               </div>
             </div>
-            {canEdit && (
-              <Button variant="outline" size="sm" onClick={onEdit}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <ListingContactButton
+                phone={listing.contactPhone}
+                contactName={listing.contactName}
+                propertyTitle={listing.title}
+                agentName={listing.ownerName}
+              />
+              {canEdit && (
+                <Button variant="outline" size="sm" onClick={onEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </div>
         </DialogHeader>
 
@@ -169,12 +178,21 @@ export function ViewListingDialog({
             <p className="text-xs text-muted-foreground">Listed by</p>
             <p className="font-medium">{listing.ownerName}</p>
           </div>
+          {listing.contactName || listing.contactPhone ? (
+            <div className="text-right mr-2">
+              <p className="text-xs text-muted-foreground">Owner contact</p>
+              <p className="text-sm font-medium">{listing.contactName || "—"}</p>
+              {listing.contactPhone && (
+                <p className="text-xs text-muted-foreground">{listing.contactPhone}</p>
+              )}
+            </div>
+          ) : null}
           {listing.ownerContactId && (
             <a
               href="/app/data"
               className="text-xs text-[#C9A84C] hover:underline flex items-center gap-1"
             >
-              Owner linked
+              In Contacts
             </a>
           )}
         </div>

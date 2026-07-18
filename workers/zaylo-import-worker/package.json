@@ -8,6 +8,8 @@
     "scrape": "tsx src/index.ts --job import-market",
     "import-market": "tsx src/index.ts --job import-market",
     "generate-content": "tsx src/index.ts --job generate-content",
+    "generate-urls": "tsx data/generate-urls.ts",
+    "seed-urls": "tsx data/seed-curated-urls.ts",
     "zaylo:worker": "tsx src/index.ts"
   },
   "dependencies": {

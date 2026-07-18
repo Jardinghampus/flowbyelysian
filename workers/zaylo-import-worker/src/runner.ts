@@ -21,7 +21,12 @@ async function enrichMissingDetail(
   summary: RunSummary,
   detailIndex?: { current: number; total: number }
 ): Promise<Listing> {
-  if (listing.listing_number || listing.permit_number || !listing.listing_url) return listing
+  const needsDetail =
+    !listing.listing_number ||
+    !listing.permit_number ||
+    !listing.agency ||
+    !listing.agent_name
+  if (!needsDetail || !listing.listing_url) return listing
 
   const progress = detailIndex ? ` (${detailIndex.current}/${detailIndex.total})` : ""
   console.log(`Opening detail page${progress}: ${listing.listing_url}`)
@@ -39,6 +44,8 @@ async function enrichMissingDetail(
     ...listing,
     listing_number: detail.listing_number || listing.listing_number,
     permit_number: detail.permit_number || listing.permit_number,
+    agency: detail.agency || listing.agency,
+    agent_name: detail.agent_name || listing.agent_name,
   })
 }
 

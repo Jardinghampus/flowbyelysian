@@ -4,6 +4,7 @@ import { currentUser } from "@/lib/demo-auth"
 import { requireApiUser } from "@/lib/api/guards"
 import { sanitizeListingsForViewer } from "@/lib/listings/privacy"
 import { emitTeamFeedEvent } from "@/lib/listings/feed"
+import { loadContactsForListings, syncListingContact } from "@/lib/listings/contact-sync"
 
 function isRecoverableListingsReadError(error: unknown) {
   if (!error || typeof error !== "object") return false
@@ -19,6 +20,38 @@ function isRecoverableListingsReadError(error: unknown) {
   )
 }
 
+function stripContactFields(body: Record<string, unknown>) {
+  const next = { ...body }
+  delete next.contact_name
+  delete next.contact_phone
+  delete next.contactName
+  delete next.contactPhone
+  return next
+}
+
+async function withOwnerContacts(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  listings: Record<string, unknown>[],
+  viewerId: string
+) {
+  const contacts = await loadContactsForListings(
+    supabase,
+    listings as Array<{ id: string; owner_id?: string | null; owner_contact_id?: string | null }>,
+    viewerId
+  )
+  return listings.map((row) => {
+    const contact = contacts.get(String(row.id))
+    if (!contact) return row
+    return {
+      ...row,
+      owner_contact_id: contact.id,
+      contact_name: contact.name,
+      contact_phone: contact.phone,
+    }
+  })
+}
+
 // GET /api/listings - List all listings with filters
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +61,6 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient()
     const { searchParams } = new URL(request.url)
 
-    // Parse filter params
     const area = searchParams.get("area")
     const type = searchParams.get("type")
     const status = searchParams.get("status")
@@ -42,7 +74,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0")
 
     const mineOnly = searchParams.get("mine") === "1"
-    const scope = searchParams.get("scope") // "mine" | "team" | null
+    const scope = searchParams.get("scope")
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (supabase as any)
@@ -51,13 +83,10 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1)
 
-    // Team browse by default so agents can scroll live + pocket inventory.
-    // Use ?mine=1 or ?ownerId=… for "my listings" only.
     if (ownerId || mineOnly || scope === "mine") {
       query = query.eq("owner_id", ownerId || guard.context.userId)
     }
 
-    // Apply filters
     if (area) query = query.eq("area_name", area)
     if (type) query = query.eq("type", type)
     if (status) query = query.eq("status", status)
@@ -84,10 +113,13 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
+    const sanitized = sanitizeListingsForViewer(listings || [], guard.context.userId, {
+      isAdmin: guard.context.role === "admin",
+    })
+    const enriched = await withOwnerContacts(supabase, sanitized, guard.context.userId)
+
     return NextResponse.json({
-      listings: sanitizeListingsForViewer(listings || [], guard.context.userId, {
-        isAdmin: guard.context.role === "admin",
-      }),
+      listings: enriched,
       total: count || 0,
       limit,
       offset,
@@ -112,13 +144,27 @@ export async function POST(request: NextRequest) {
 
     const user = await currentUser()
     const body = await request.json()
-
     const supabase = createServerClient()
 
+    const agentName = user?.fullName || user?.firstName || guard.context.fullName || "Unknown"
+    const contactName = body.contact_name || body.contactName || null
+    const contactPhone = body.contact_phone || body.contactPhone || null
+
+    const ownerContactId = await syncListingContact(supabase, {
+      agentId: guard.context.userId,
+      agentName,
+      contactName,
+      contactPhone,
+      area: body.area_name || body.area || null,
+      subArea: body.sub_area || body.subArea || null,
+      bedrooms: body.bedrooms ?? null,
+    })
+
     const listingData = {
-      ...body,
+      ...stripContactFields(body),
       owner_id: guard.context.userId,
-      owner_name: user?.fullName || user?.firstName || "Unknown",
+      owner_name: agentName,
+      owner_contact_id: ownerContactId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -138,12 +184,15 @@ export async function POST(request: NextRequest) {
       console.warn("team feed emit failed", feedError)
     }
 
-    return NextResponse.json({ listing }, { status: 201 })
+    const enriched = {
+      ...listing,
+      contact_name: contactName,
+      contact_phone: contactPhone,
+    }
+
+    return NextResponse.json({ listing: enriched }, { status: 201 })
   } catch (error) {
     console.error("Error creating listing:", error)
-    return NextResponse.json(
-      { error: "Failed to create listing" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Failed to create listing" }, { status: 500 })
   }
 }

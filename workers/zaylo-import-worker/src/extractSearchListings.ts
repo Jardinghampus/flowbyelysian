@@ -16,6 +16,41 @@ import {
 interface ExtractedCard {
   text: string
   href: string
+  agency: string
+  agentName: string
+}
+
+function extractAgencyFromText(text: string): string {
+  const lines = text.split("\n").map(compactWhitespace).filter(Boolean)
+  // Bayut cards often end with agency name after beds/bath/size
+  const skip =
+    /AED|Yearly|Monthly|Weekly|Daily|bed|bath|sq\.?\s*ft|verified|trucheck|call|email|whatsapp|listed|superagent|premium|studio|\d+\s*BR/i
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    const line = lines[i]
+    if (line.length < 3 || line.length > 80) continue
+    if (skip.test(line)) continue
+    if (/^dubai$/i.test(line)) continue
+    if (/Mudon|Ranches|Hills|Lagoons|Villanova|Town Square|Oasis|Arabella|Ranim/i.test(line) && /,/.test(line)) {
+      continue
+    }
+    // Prefer lines that look like company names
+    if (/realty|properties|estate|broker|group|homes|living|partners|agency|real estate/i.test(line)) {
+      return line
+    }
+  }
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    const line = lines[i]
+    if (line.length < 3 || line.length > 60) continue
+    if (skip.test(line)) continue
+    if (/^[\d.,\s]+$/.test(line)) continue
+    return line
+  }
+  return ""
+}
+
+function extractAgentFromText(text: string): string {
+  const match = text.match(/(?:Agent|Listed by|Contact)\s*[:\-]?\s*([A-Z][A-Za-z.'\-]+(?:\s+[A-Z][A-Za-z.'\-]+){0,3})/)
+  return match?.[1]?.trim() || ""
 }
 
 function extractRentPeriod(text: string): string {
@@ -95,6 +130,8 @@ function normalizeCard(card: ExtractedCard, community: string, pageUrl: string):
     beds_text: text.match(/\b(?:Studio|\d+(?:\.\d+)?)\s*(?:Beds?|Bedrooms?|BR)\b/i)?.[0] ?? "",
     baths_text: text.match(/\b\d+(?:\.\d+)?\s*(?:Baths?|Bathrooms?)\b/i)?.[0] ?? "",
     size_text: text.match(/[\d,]+\s*(?:sq\.?\s*ft|sqft|square feet)\b/i)?.[0] ?? "",
+    agency: card.agency || extractAgencyFromText(text),
+    agent_name: card.agentName || extractAgentFromText(text),
   }
 
   return ListingSchema.parse({
@@ -114,8 +151,8 @@ function normalizeCard(card: ExtractedCard, community: string, pageUrl: string):
     plot_sqft: extractPlot(text),
     sub_area: rawSummary.location || community,
     property_type: extractPropertyType(text),
-    agency: "",
-    agent_name: "",
+    agency: card.agency || extractAgencyFromText(text),
+    agent_name: card.agentName || extractAgentFromText(text),
     listing_url: normalizedUrl,
     page_url: pageUrl,
     transaction_type: inferTransactionType(pageUrl),
@@ -129,7 +166,7 @@ async function extractVisibleCards(page: Page, community: string): Promise<Listi
     const anchors = Array.from(
       document.querySelectorAll<HTMLAnchorElement>("a[href*='/property/details-'], a[href*='/to-rent/'], a[href*='/for-sale/']")
     )
-    const results: ExtractedCard[] = []
+    const results: Array<{ text: string; href: string; agency: string; agentName: string }> = []
     const seen = new Set<string>()
 
     for (const anchor of anchors) {
@@ -142,8 +179,27 @@ async function extractVisibleCards(page: Page, community: string): Promise<Listi
       const text = (container?.innerText || anchor.innerText || "").trim()
       if (!text || seen.has(href)) continue
 
+      const agencyFromLink =
+        container
+          ?.querySelector<HTMLAnchorElement>("a[href*='/companies/'], a[href*='/brokers/'], a[href*='/agency/']")
+          ?.textContent?.trim() || ""
+      const agencyFromImg =
+        container
+          ?.querySelector<HTMLImageElement>("img[alt]")
+          ?.getAttribute("alt")
+          ?.trim() || ""
+      const agency =
+        agencyFromLink ||
+        (agencyFromImg && !/property|listing|photo|image|bed|bath/i.test(agencyFromImg) ? agencyFromImg : "") ||
+        ""
+
+      const agentName =
+        container
+          ?.querySelector<HTMLElement>("[aria-label*='Agent'], [data-testid*='agent'], [class*='agent']")
+          ?.textContent?.trim() || ""
+
       seen.add(href)
-      results.push({ href, text })
+      results.push({ href, text, agency, agentName })
     }
 
     return results

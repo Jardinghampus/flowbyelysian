@@ -74,6 +74,8 @@ export function EditListingDialog({
   const [bedrooms, setBedrooms] = useState(listing.bedrooms?.toString() || "")
   const [bathrooms, setBathrooms] = useState(listing.bathrooms?.toString() || "")
   const [availability, setAvailability] = useState(listing.availability || "")
+  const [contactName, setContactName] = useState(listing.contactName || "")
+  const [contactPhone, setContactPhone] = useState(listing.contactPhone || "")
 
   useEffect(() => {
     setTitle(listing.title)
@@ -93,6 +95,8 @@ export function EditListingDialog({
     setBedrooms(listing.bedrooms?.toString() || "")
     setBathrooms(listing.bathrooms?.toString() || "")
     setAvailability(listing.availability || "")
+    setContactName(listing.contactName || "")
+    setContactPhone(listing.contactPhone || "")
   }, [listing])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,6 +120,8 @@ export function EditListingDialog({
       bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
       bathrooms: bathrooms ? parseInt(bathrooms) : undefined,
       availability: availability || undefined,
+      contactName: contactName.trim() || undefined,
+      contactPhone: contactPhone.trim() || undefined,
     })
   }
 
@@ -313,6 +319,37 @@ export function EditListingDialog({
                   <SelectItem value="request">Request (Buyer/Tenant)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* Owner / contact — synced to Data → Contacts */}
+          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+            <div>
+              <Label className="text-sm font-medium">Owner contact</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Saves to your Contacts and unlocks the WhatsApp Contact button on this listing.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="editContactName">Name</Label>
+                <Input
+                  id="editContactName"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  placeholder="Owner / landlord name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editContactPhone">WhatsApp phone</Label>
+                <Input
+                  id="editContactPhone"
+                  type="tel"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder="+971 50 123 4567"
+                />
+              </div>
             </div>
           </div>
 

@@ -80,8 +80,28 @@ export function compactJson(value: unknown): string {
 }
 
 export function masterFromCommunity(community: string): string {
-  if (/mudon|arabella|ranim|rahat/i.test(community)) return "Mudon"
+  if (/villanova|amaranta|la rosa|la quinta|la tilia|la violeta|aldea/i.test(community)) {
+    return "Villanova"
+  }
+  if (/lagoons|costa brava|ibiza|malta|marbella|monte carlo|morocco|portofino|santorini|venice/i.test(community)) {
+    return "DAMAC Lagoons"
+  }
+  if (/damac hills|akoya|brookfield|calero|trump estates|picadilly|queens meadows/i.test(community)) {
+    return "DAMAC Hills"
+  }
+  if (/town square|hayat|maha|naseem townhouses|noor|safi|sama|shams|zahra|kaya/i.test(community)) {
+    return "Town Square"
+  }
+  if (/arabian ranches 3|anya|bliss|caya|elie saab|raya|ruba/i.test(community)) {
+    return "Arabian Ranches 3"
+  }
+  if (/arabian ranches 2|azalea|camelia|casa|lila|palma|rasha|samara|yasmin/i.test(community)) {
+    return "Arabian Ranches 2"
+  }
+  if (/arabian ranches|al reem|alvorada|alma|aseel|hattan|avenida|mirador|palmera|saheel|savannah|terra nova|polo homes|al mahra/i.test(community)) {
+    return "Arabian Ranches"
+  }
+  if (/mudon|arabella|ranim|rahat|al salam|naseem/i.test(community)) return "Mudon"
   if (/mira|reem/i.test(community)) return "Reem"
-  if (/ranches/i.test(community)) return "Arabian Ranches"
-  return community.split(" ")[0] || community
+  return community
 }

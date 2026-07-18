@@ -11,6 +11,7 @@ import {
   User,
   Map,
   Link2,
+  MessageCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +43,8 @@ import {
 import { EditListingDialog } from "./edit-listing-dialog"
 import { ViewListingDialog } from "./view-listing-dialog"
 import { ListingShareMenuItems } from "@/components/listings/listing-share-actions"
+import { ListingContactButton } from "@/components/listings/listing-contact-button"
+import { defaultOutreachMessage, openWhatsApp } from "@/lib/whatsapp"
 import type { Listing } from "../page"
 
 interface InventoryTableProps {
@@ -116,6 +119,7 @@ export function InventoryTable({
               <TableHead>For</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Agent</TableHead>
+              <TableHead className="w-[110px]">Contact</TableHead>
               {isAdmin && <TableHead className="max-w-[200px]">Notes</TableHead>}
               <TableHead className="w-12"></TableHead>
             </TableRow>
@@ -123,7 +127,7 @@ export function InventoryTable({
           <TableBody>
             {listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 10 : 9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={isAdmin ? 11 : 10} className="text-center py-8 text-muted-foreground">
                   No listings found. Add your first listing to get started.
                 </TableCell>
               </TableRow>
@@ -200,6 +204,15 @@ export function InventoryTable({
                         )}
                       </div>
                     </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <ListingContactButton
+                        phone={listing.contactPhone}
+                        contactName={listing.contactName}
+                        propertyTitle={listing.title}
+                        agentName={isOwner ? currentUserName : listing.ownerName}
+                        size="sm"
+                      />
+                    </TableCell>
                     {isAdmin && (
                       <TableCell className="max-w-[200px]">
                         {listing.notes ? (
@@ -221,6 +234,23 @@ export function InventoryTable({
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
+                          {listing.contactPhone && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                openWhatsApp({
+                                  phone: listing.contactPhone,
+                                  message: defaultOutreachMessage({
+                                    contactName: listing.contactName,
+                                    propertyTitle: listing.title,
+                                    agentName: isOwner ? currentUserName : listing.ownerName,
+                                  }),
+                                })
+                              }}
+                            >
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              WhatsApp contact
+                            </DropdownMenuItem>
+                          )}
                           <ListingShareMenuItems listingId={listing.id} title={listing.title} />
                           <DropdownMenuSeparator />
                           {canModify(listing) && (

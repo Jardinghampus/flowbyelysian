@@ -31,6 +31,10 @@ type Overview = {
       revenue: number
       commission: number
       deals: number
+      saleCommission: number
+      rentCommission: number
+      saleDeals: number
+      rentDeals: number
     }
     delta: {
       revenue: number
@@ -196,6 +200,11 @@ export function CompanyRevenueOverview({
               <CardContent className="space-y-2 text-xs text-muted-foreground">
                 <Delta value={data.company.delta.commission} />
                 <div>Sale {aed(t.saleCommission)} · Rent {aed(t.rentCommission)}</div>
+                <div>
+                  Last month: {aed(data.company.lastMonth.commission)} (S{" "}
+                  {aed(data.company.lastMonth.saleCommission)} · R{" "}
+                  {aed(data.company.lastMonth.rentCommission)})
+                </div>
                 {vs?.commissionPct != null && (
                   <div className="space-y-1 pt-1">
                     <div className="flex justify-between">

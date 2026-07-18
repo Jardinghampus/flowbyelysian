@@ -3,6 +3,16 @@ import { createServerClient } from "@/lib/supabase/server"
 import { requireApiUser } from "@/lib/api/guards"
 import { sanitizeListingForViewer } from "@/lib/listings/privacy"
 import { emitTeamFeedEvent } from "@/lib/listings/feed"
+import { loadContactsForListings, syncListingContact } from "@/lib/listings/contact-sync"
+
+function stripContactFields(body: Record<string, unknown>) {
+  const next = { ...body }
+  delete next.contact_name
+  delete next.contact_phone
+  delete next.contactName
+  delete next.contactPhone
+  return next
+}
 
 // GET /api/listings/:id - Get single listing (team can view)
 export async function GET(
@@ -27,11 +37,22 @@ export async function GET(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    return NextResponse.json({
-      listing: sanitizeListingForViewer(listing, guard.context.userId, {
-        isAdmin: guard.context.role === "admin",
-      }),
+    const sanitized = sanitizeListingForViewer(listing, guard.context.userId, {
+      isAdmin: guard.context.role === "admin",
     })
+
+    const contacts = await loadContactsForListings(supabase, [listing], guard.context.userId)
+    const contact = contacts.get(String(listing.id))
+    const enriched = contact
+      ? {
+          ...sanitized,
+          owner_contact_id: contact.id,
+          contact_name: contact.name,
+          contact_phone: contact.phone,
+        }
+      : sanitized
+
+    return NextResponse.json({ listing: enriched })
   } catch (error) {
     console.error("Error fetching listing:", error)
     return NextResponse.json({ error: "Failed to fetch listing" }, { status: 500 })
@@ -54,7 +75,7 @@ export async function PATCH(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing } = await (supabase as any)
       .from("listings")
-      .select("owner_id")
+      .select("owner_id, owner_contact_id, area_name, sub_area, bedrooms")
       .eq("id", id)
       .single()
 
@@ -71,12 +92,30 @@ export async function PATCH(
       )
     }
 
+    const contactName = body.contact_name || body.contactName
+    const contactPhone = body.contact_phone || body.contactPhone
+    let ownerContactId = existing.owner_contact_id as string | null
+
+    if (contactName !== undefined || contactPhone !== undefined) {
+      ownerContactId = await syncListingContact(supabase, {
+        agentId: existing.owner_id,
+        agentName: guard.context.fullName || "Agent",
+        contactName: contactName ?? null,
+        contactPhone: contactPhone ?? null,
+        area: body.area_name || existing.area_name || null,
+        subArea: body.sub_area ?? existing.sub_area ?? null,
+        bedrooms: body.bedrooms ?? existing.bedrooms ?? null,
+        existingOwnerId: existing.owner_contact_id,
+      })
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: listing, error } = await (supabase as any)
       .from("listings")
       .update({
-        ...body,
+        ...stripContactFields(body),
         owner_id: existing.owner_id,
+        owner_contact_id: ownerContactId,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -85,7 +124,6 @@ export async function PATCH(
 
     if (error) throw error
 
-    // Emit feed when status / inquiry type meaningfully changes visibility to team
     if (body.status || body.inquiry_type || body.title || body.price) {
       try {
         await emitTeamFeedEvent(supabase, listing, "listing_updated")
@@ -94,10 +132,22 @@ export async function PATCH(
       }
     }
 
+    const sanitized = sanitizeListingForViewer(listing, guard.context.userId, {
+      isAdmin: guard.context.role === "admin",
+    })
+    // Load against listing owner so editors (incl. admin) get contact fields back after save
+    const contacts = await loadContactsForListings(supabase, [listing], String(listing.owner_id))
+    const contact = contacts.get(String(listing.id))
+
     return NextResponse.json({
-      listing: sanitizeListingForViewer(listing, guard.context.userId, {
-        isAdmin: guard.context.role === "admin",
-      }),
+      listing: contact
+        ? {
+            ...sanitized,
+            owner_contact_id: contact.id,
+            contact_name: contact.name,
+            contact_phone: contact.phone,
+          }
+        : sanitized,
     })
   } catch (error) {
     console.error("Error updating listing:", error)

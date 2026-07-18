@@ -42,7 +42,7 @@ export function LiveAgentPerformanceTable({
     >
       <CardContent>
         <p className="mb-4 text-sm text-muted-foreground">
-          Every active agent · sale vs rent · personal/company KPI progress
+          Registered team only · sale vs rental commission · no Sales/Leasing roles
         </p>
         {loading ? (
           <div className="flex h-24 items-center justify-center">

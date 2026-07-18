@@ -8,7 +8,7 @@ import { ThemeCustomizer, ThemeCustomizerTrigger } from "@/components/theme-cust
 import { RoleProvider, useRole } from "@/contexts/role-context"
 import { FullscreenProvider } from "@/contexts/fullscreen-context"
 import { MobileBottomTabs } from "@/components/mobile-bottom-tabs"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Lock } from "lucide-react"
 
 function CrmGuard({ children }: { children: React.ReactNode }) {
@@ -44,40 +44,42 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   const [themeCustomizerOpen, setThemeCustomizerOpen] = React.useState(false)
+  const pathname = usePathname()
+  const isLiveBoard = pathname?.startsWith("/app/performance/live")
 
   return (
     <RoleProvider>
       <FullscreenProvider>
         <CrmGuard>
-          <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-neutral-50 dark:bg-black w-full max-w-full">
-            {/* Aceternity Sidebar */}
-            <AppSidebar />
+          {isLiveBoard ? (
+            <div className="h-screen w-full overflow-auto bg-[#0c0b09]">{children}</div>
+          ) : (
+            <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-neutral-50 dark:bg-black w-full max-w-full">
+              <AppSidebar />
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
-              <SiteHeader />
-              <div className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth [-webkit-overflow-scrolling:touch]">
-                <div className="@container/main flex flex-col w-full max-w-full">
-                  <div className="flex flex-col gap-3 px-3 py-3 md:gap-4 md:px-5 md:py-4 pb-24 md:pb-4 w-full max-w-[1920px] mx-auto animate-page-in">
-                    {children}
+              <main className="flex-1 flex flex-col overflow-hidden w-full min-w-0">
+                <SiteHeader />
+                <div className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth [-webkit-overflow-scrolling:touch]">
+                  <div className="@container/main flex flex-col w-full max-w-full">
+                    <div className="flex flex-col gap-3 px-3 py-3 md:gap-4 md:px-5 md:py-4 pb-24 md:pb-4 w-full max-w-[1920px] mx-auto animate-page-in">
+                      {children}
+                    </div>
                   </div>
+                  <SiteFooter />
                 </div>
-                <SiteFooter />
+              </main>
+
+              <MobileBottomTabs />
+
+              <div className="hidden md:block">
+                <ThemeCustomizerTrigger onClick={() => setThemeCustomizerOpen(true)} />
               </div>
-            </main>
-
-            {/* Mobile Bottom Tab Navigation */}
-            <MobileBottomTabs />
-
-            {/* Theme Customizer - Hidden on Mobile */}
-            <div className="hidden md:block">
-              <ThemeCustomizerTrigger onClick={() => setThemeCustomizerOpen(true)} />
+              <ThemeCustomizer
+                open={themeCustomizerOpen}
+                onOpenChange={setThemeCustomizerOpen}
+              />
             </div>
-            <ThemeCustomizer
-              open={themeCustomizerOpen}
-              onOpenChange={setThemeCustomizerOpen}
-            />
-          </div>
+          )}
         </CrmGuard>
       </FullscreenProvider>
     </RoleProvider>

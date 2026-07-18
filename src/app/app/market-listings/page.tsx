@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { ExternalLink, Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,10 +37,21 @@ type MarketListing = {
   built_up_sqft: number | null
   plot_sqft: number | null
   property_type: string
+  agency: string | null
+  agent_name: string | null
   listing_url: string
   transaction_type: "rent" | "sale"
   status: string
   last_seen: string
+}
+
+type Stats = {
+  count: number
+  avgPrice: number | null
+  rentCount: number
+  saleCount: number
+  avgRentPrice: number | null
+  avgSalePrice: number | null
 }
 
 const BED_OPTIONS = [
@@ -54,7 +65,7 @@ const BED_OPTIONS = [
   { value: "6", label: "6" },
 ]
 
-function formatPrice(price: number | null, currency: string, rentPeriod: string) {
+function formatPrice(price: number | null, currency = "AED", rentPeriod = "") {
   if (price == null) return "—"
   const formatted = `${currency || "AED"} ${Math.round(price).toLocaleString("en-AE")}`
   return rentPeriod ? `${formatted} / ${rentPeriod}` : formatted
@@ -82,8 +93,11 @@ function subAreaLabel(listing: MarketListing) {
 export default function MarketListingsPage() {
   const [listings, setListings] = useState<MarketListing[]>([])
   const [communities, setCommunities] = useState<string[]>([])
+  const [subAreas, setSubAreas] = useState<string[]>([])
+  const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [community, setCommunity] = useState("all")
+  const [subArea, setSubArea] = useState("all")
   const [beds, setBeds] = useState("all")
   const [transactionType, setTransactionType] = useState("all")
   const [q, setQ] = useState("")
@@ -91,8 +105,9 @@ export default function MarketListingsPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ status: "active" })
+      const params = new URLSearchParams({ status: "active", limit: "500" })
       if (community !== "all") params.set("community", community)
+      if (subArea !== "all") params.set("subArea", subArea)
       if (beds !== "all") params.set("beds", beds)
       if (transactionType !== "all") params.set("transactionType", transactionType)
       if (q.trim()) params.set("q", q.trim())
@@ -101,13 +116,16 @@ export default function MarketListingsPage() {
       const data = await res.json()
       setListings(data.listings || [])
       setCommunities(data.communities || [])
+      setSubAreas(data.subAreas || [])
+      setStats(data.stats || null)
     } catch (error) {
       console.error(error)
       setListings([])
+      setStats(null)
     } finally {
       setLoading(false)
     }
-  }, [community, beds, transactionType, q])
+  }, [community, subArea, beds, transactionType, q])
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -116,13 +134,19 @@ export default function MarketListingsPage() {
     return () => clearTimeout(t)
   }, [load])
 
+  useEffect(() => {
+    setSubArea("all")
+  }, [community])
+
+  const filteredSubAreas = useMemo(() => subAreas, [subAreas])
+
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Active Listings</h1>
           <p className="text-sm text-muted-foreground">
-            Live Bayut scrape — gone from portal disappears here after the next import.
+            Bayut live scrape — Town Square, DAMAC Hills, Arabian Ranches 1–3, Mudon, DAMAC Lagoons, Villanova
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -132,6 +156,37 @@ export default function MarketListingsPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Listings</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums">{stats?.count ?? "—"}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg price</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums">
+            {formatPrice(stats?.avgPrice ?? null)}
+          </p>
+        </div>
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg rent</p>
+          <p className="mt-1 text-lg font-semibold tabular-nums">
+            {formatPrice(stats?.avgRentPrice ?? null)}
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              ({stats?.rentCount ?? 0})
+            </span>
+          </p>
+        </div>
+        <div className="rounded-xl border bg-card p-4">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg sale</p>
+          <p className="mt-1 text-lg font-semibold tabular-nums">
+            {formatPrice(stats?.avgSalePrice ?? null)}
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              ({stats?.saleCount ?? 0})
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Select value={community} onValueChange={setCommunity}>
           <SelectTrigger>
             <SelectValue placeholder="Area" />
@@ -141,6 +196,20 @@ export default function MarketListingsPage() {
             {communities.map((c) => (
               <SelectItem key={c} value={c}>
                 {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={subArea} onValueChange={setSubArea}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sub-area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All sub-areas</SelectItem>
+            {filteredSubAreas.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
               </SelectItem>
             ))}
           </SelectContent>
@@ -171,13 +240,12 @@ export default function MarketListingsPage() {
         </Select>
 
         <Input
-          placeholder="Search title / listing # / location"
+          placeholder="Search title / agent / agency"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
-      {/* Mobile cards */}
       <div className="space-y-3 md:hidden">
         {loading ? (
           <div className="flex h-24 items-center justify-center text-muted-foreground">
@@ -194,7 +262,7 @@ export default function MarketListingsPage() {
               href={listing.listing_url || undefined}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-xl border bg-card p-4 shadow-sm active:scale-[0.99] transition-transform"
+              className="block rounded-xl border bg-card p-4 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -218,25 +286,19 @@ export default function MarketListingsPage() {
                   <p className="font-medium">{bedsLabel(listing.beds)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Built-up</p>
-                  <p className="font-medium">{formatSqft(listing.built_up_sqft ?? listing.size_sqft)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Agent</p>
+                  <p className="font-medium line-clamp-1">{listing.agent_name || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Plot</p>
-                  <p className="font-medium">{formatSqft(listing.plot_sqft)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Agency</p>
+                  <p className="font-medium line-clamp-1">{listing.agency || "—"}</p>
                 </div>
               </div>
-              {listing.listing_url ? (
-                <p className="mt-3 inline-flex items-center gap-1 text-sm text-primary">
-                  Open listing <ExternalLink className="h-3.5 w-3.5" />
-                </p>
-              ) : null}
             </a>
           ))
         )}
       </div>
 
-      {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
@@ -245,9 +307,9 @@ export default function MarketListingsPage() {
               <TableHead>Area</TableHead>
               <TableHead>Sub-area</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead>Built-up</TableHead>
-              <TableHead>Plot</TableHead>
               <TableHead>Beds</TableHead>
+              <TableHead>Agent</TableHead>
+              <TableHead>Agency</TableHead>
               <TableHead>Link</TableHead>
             </TableRow>
           </TableHeader>
@@ -261,27 +323,31 @@ export default function MarketListingsPage() {
             ) : listings.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                  No active listings yet. Run the worker:{" "}
+                  No active listings yet. Seed URLs then run{" "}
                   <code className="text-xs">pnpm zaylo:worker --job import-market</code>
                 </TableCell>
               </TableRow>
             ) : (
               listings.map((listing) => (
                 <TableRow key={listing.id}>
-                  <TableCell className="max-w-[220px]">
+                  <TableCell className="max-w-[200px]">
                     <div className="font-medium line-clamp-2">{listing.title || "—"}</div>
                     <div className="text-xs text-muted-foreground font-mono">
                       {listing.listing_number || "—"}
                     </div>
                   </TableCell>
                   <TableCell>{areaLabel(listing)}</TableCell>
-                  <TableCell className="max-w-[160px]">
+                  <TableCell className="max-w-[140px]">
                     <span className="line-clamp-2">{subAreaLabel(listing)}</span>
                   </TableCell>
                   <TableCell>{formatPrice(listing.price, listing.currency, listing.rent_period)}</TableCell>
-                  <TableCell>{formatSqft(listing.built_up_sqft ?? listing.size_sqft)}</TableCell>
-                  <TableCell>{formatSqft(listing.plot_sqft)}</TableCell>
                   <TableCell>{bedsLabel(listing.beds)}</TableCell>
+                  <TableCell className="max-w-[120px]">
+                    <span className="line-clamp-2 text-sm">{listing.agent_name || "—"}</span>
+                  </TableCell>
+                  <TableCell className="max-w-[140px]">
+                    <span className="line-clamp-2 text-sm">{listing.agency || "—"}</span>
+                  </TableCell>
                   <TableCell>
                     {listing.listing_url ? (
                       <a
@@ -303,7 +369,9 @@ export default function MarketListingsPage() {
         </Table>
       </div>
 
-      <p className="text-xs text-muted-foreground">{listings.length} listings shown</p>
+      <p className="text-xs text-muted-foreground">
+        {stats?.count ?? listings.length} listings in filter · avg updates with beds/area/type
+      </p>
     </div>
   )
 }

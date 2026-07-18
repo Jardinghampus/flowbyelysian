@@ -272,9 +272,10 @@ export function AgentPerformanceEditor() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Agent monthly actuals</CardTitle>
+          <CardTitle>Agent monthly commission</CardTitle>
           <CardDescription>
-            Enter adjustments per agent. Leave “include deals rollup” on to add these on top of closed deals from the CRM.
+            Enter actual sales vs rental commission per agent for the selected month.
+            Turn off “+ deals?” to replace CRM closed deals entirely with these numbers.
           </CardDescription>
         </CardHeader>
         <CardContent>

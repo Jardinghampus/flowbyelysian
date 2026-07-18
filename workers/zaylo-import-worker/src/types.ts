@@ -55,6 +55,8 @@ export interface RunSummary {
 export interface DetailExtractionResult {
   listing_number: string
   permit_number: string
+  agency: string
+  agent_name: string
   blocked: boolean
 }
 

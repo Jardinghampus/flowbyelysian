@@ -57,6 +57,8 @@ export interface Listing {
   ownerId: string
   ownerName: string
   ownerContactId?: string
+  contactName?: string
+  contactPhone?: string
   createdAt: string
   updatedAt: string
 }
@@ -84,6 +86,8 @@ function mapDbToListing(row: any): Listing {
     ownerId: row.owner_id,
     ownerName: row.owner_name || "Unknown",
     ownerContactId: row.owner_contact_id || undefined,
+    contactName: row.contact_name || undefined,
+    contactPhone: row.contact_phone || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -107,6 +111,8 @@ function mapListingToDb(listing: Omit<Listing, "id" | "createdAt" | "updatedAt" 
     bedrooms: listing.bedrooms || null,
     bathrooms: listing.bathrooms || null,
     availability: listing.availability || null,
+    contact_name: listing.contactName || null,
+    contact_phone: listing.contactPhone || null,
   }
 }
 
@@ -271,6 +277,8 @@ export default function InventoryPage() {
           bedrooms: updatedListing.bedrooms || null,
           bathrooms: updatedListing.bathrooms || null,
           availability: updatedListing.availability || null,
+          contact_name: updatedListing.contactName || null,
+          contact_phone: updatedListing.contactPhone || null,
         }),
       })
       if (!res.ok) throw new Error("Failed to update")

@@ -66,31 +66,12 @@ interface AgencyListing {
   area: string
   propertyType: string
   transactionType: "sale" | "rent"
-  status: "live" | "pocket" | "draft"
+  status: string
   price: number
   bedrooms: number
-  bathrooms: number
   size: number
   agent: string
-  views: number
-  inquiries: number
   createdAt: string
-}
-
-const demoAgencyListings: AgencyListing[] = [
-  { id: "al-1", title: "5BR Villa — Emirates Hills", area: "Emirates Hills", propertyType: "Villa", transactionType: "sale", status: "live", price: 15000000, bedrooms: 5, bathrooms: 6, size: 8500, agent: "Ahmed Hassan", views: 342, inquiries: 8, createdAt: "2026-01-15" },
-  { id: "al-2", title: "4BR Townhouse — Arabian Ranches III", area: "Arabian Ranches", propertyType: "Townhouse", transactionType: "sale", status: "live", price: 5200000, bedrooms: 4, bathrooms: 4, size: 3800, agent: "Sara Al-Mahmoud", views: 187, inquiries: 4, createdAt: "2026-02-10" },
-  { id: "al-3", title: "2BR Apartment — Marina View", area: "Dubai Marina", propertyType: "Apartment", transactionType: "rent", status: "pocket", price: 130000, bedrooms: 2, bathrooms: 2, size: 1400, agent: "Ahmed Hassan", views: 56, inquiries: 1, createdAt: "2026-02-20" },
-  { id: "al-4", title: "3BR Penthouse — DIFC", area: "DIFC", propertyType: "Penthouse", transactionType: "sale", status: "live", price: 8500000, bedrooms: 3, bathrooms: 4, size: 4200, agent: "Omar Khalil", views: 220, inquiries: 6, createdAt: "2026-01-28" },
-  { id: "al-5", title: "Studio — Business Bay", area: "Business Bay", propertyType: "Apartment", transactionType: "rent", status: "draft", price: 55000, bedrooms: 0, bathrooms: 1, size: 450, agent: "Sara Al-Mahmoud", views: 0, inquiries: 0, createdAt: "2026-03-01" },
-  { id: "al-6", title: "6BR Mansion — Palm Jumeirah", area: "Palm Jumeirah", propertyType: "Villa", transactionType: "sale", status: "live", price: 45000000, bedrooms: 6, bathrooms: 8, size: 15000, agent: "Omar Khalil", views: 510, inquiries: 12, createdAt: "2026-01-05" },
-  { id: "al-7", title: "1BR Apartment — Downtown", area: "Downtown Dubai", propertyType: "Apartment", transactionType: "rent", status: "live", price: 95000, bedrooms: 1, bathrooms: 1, size: 850, agent: "Ahmed Hassan", views: 130, inquiries: 3, createdAt: "2026-02-15" },
-]
-
-const listingStatusColors: Record<string, { bg: string; text: string }> = {
-  live: { bg: "bg-green-100 dark:bg-green-500/20", text: "text-green-700 dark:text-green-400" },
-  pocket: { bg: "bg-amber-100 dark:bg-amber-500/20", text: "text-amber-700 dark:text-amber-400" },
-  draft: { bg: "bg-neutral-100 dark:bg-neutral-500/20", text: "text-neutral-600 dark:text-neutral-400" },
 }
 
 type UserRole = "admin" | "agent"
@@ -111,6 +92,8 @@ export default function AdminPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("users")
   const [users, setUsers] = useState<ManagedUser[]>([])
+  const [agencyListings, setAgencyListings] = useState<AgencyListing[]>([])
+  const [listingsLoading, setListingsLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<"all" | UserRole>("all")
@@ -151,6 +134,42 @@ export default function AdminPage() {
       fetchUsers()
     }
   }, [isAdmin, fetchUsers])
+
+  useEffect(() => {
+    if (activeTab !== "listings" || !isAdmin) return
+    let cancelled = false
+    ;(async () => {
+      setListingsLoading(true)
+      try {
+        const res = await fetch("/api/listings?limit=200")
+        const json = await res.json()
+        if (cancelled || !res.ok) return
+        const rows = (json.listings || []).map(
+          (row: Record<string, unknown>) => ({
+            id: String(row.id),
+            title: String(row.title || "Untitled"),
+            area: String(row.area_name || "—"),
+            propertyType: String(row.type || "—"),
+            transactionType: (row.transaction_type === "rent" ? "rent" : "sale") as "sale" | "rent",
+            status: String(row.status || "—"),
+            price: Number(row.price) || 0,
+            bedrooms: Number(row.bedrooms) || 0,
+            size: Number(row.size) || 0,
+            agent: String(row.owner_name || "—"),
+            createdAt: row.created_at ? String(row.created_at).slice(0, 10) : "—",
+          })
+        )
+        setAgencyListings(rows)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        if (!cancelled) setListingsLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, isAdmin])
 
   // Redirect non-admins
   useEffect(() => {
@@ -640,15 +659,14 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="listings" className="space-y-6">
-            {/* Listing Stats */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Listings</CardTitle>
+                  <CardTitle className="text-sm font-medium">Total listings</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{demoAgencyListings.length}</div>
+                  <div className="text-2xl font-bold">{agencyListings.length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -657,7 +675,9 @@ export default function AdminPage() {
                   <Eye className="h-4 w-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{demoAgencyListings.filter(l => l.status === "live").length}</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {agencyListings.filter((l) => l.status === "live").length}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
@@ -666,82 +686,87 @@ export default function AdminPage() {
                   <Tag className="h-4 w-4 text-amber-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-amber-600">{demoAgencyListings.filter(l => l.status === "pocket").length}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{demoAgencyListings.reduce((sum, l) => sum + l.views, 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-amber-600">
+                    {agencyListings.filter((l) => l.status === "pocket").length}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Listings Table */}
             <Card>
-              <CardHeader>
-                <CardTitle>All Agency Listings</CardTitle>
-                <CardDescription>Overview of all property listings across the team</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Agency listings</CardTitle>
+                  <CardDescription>Live inventory from registered agents</CardDescription>
+                </div>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/app/inventory">Open inventory</Link>
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Property</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Agent</TableHead>
-                        <TableHead>Views</TableHead>
-                        <TableHead>Inquiries</TableHead>
-                        <TableHead>Listed</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {demoAgencyListings.map((listing) => {
-                        const sc = listingStatusColors[listing.status]
-                        return (
-                          <TableRow key={listing.id}>
-                            <TableCell>
-                              <div>
-                                <p className="font-medium text-sm">{listing.title}</p>
-                                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" /> {listing.area}
-                                </p>
-                              </div>
+                {listingsLoading ? (
+                  <div className="flex h-24 items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Property</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Price</TableHead>
+                          <TableHead>Agent</TableHead>
+                          <TableHead>Listed</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agencyListings.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                              No listings yet
                             </TableCell>
-                            <TableCell>
-                              <div className="text-xs">
-                                <p>{listing.propertyType}</p>
-                                <p className="text-muted-foreground flex items-center gap-2">
-                                  {listing.bedrooms > 0 && <span className="flex items-center gap-0.5"><Bed className="h-3 w-3" />{listing.bedrooms}</span>}
-                                  <span className="flex items-center gap-0.5"><Maximize2 className="h-3 w-3" />{listing.size.toLocaleString()}</span>
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={`text-[10px] ${sc.bg} ${sc.text} border-0`}>
-                                {listing.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              AED {listing.price >= 1000000 ? `${(listing.price / 1000000).toFixed(1)}M` : listing.price.toLocaleString()}
-                              {listing.transactionType === "rent" ? "/yr" : ""}
-                            </TableCell>
-                            <TableCell className="text-sm">{listing.agent}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{listing.views}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{listing.inquiries}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{listing.createdAt}</TableCell>
                           </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
+                        ) : (
+                          agencyListings.map((listing) => (
+                            <TableRow key={listing.id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm">{listing.title}</p>
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" /> {listing.area}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-xs">
+                                  <p className="capitalize">{listing.propertyType}</p>
+                                  <p className="text-muted-foreground">
+                                    {listing.bedrooms > 0 ? `${listing.bedrooms} BR · ` : ""}
+                                    {listing.size.toLocaleString()} sqft
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="capitalize text-sm">{listing.status}</TableCell>
+                              <TableCell className="font-medium">
+                                AED{" "}
+                                {listing.price >= 1000000
+                                  ? `${(listing.price / 1000000).toFixed(1)}M`
+                                  : listing.price.toLocaleString()}
+                                {listing.transactionType === "rent" ? "/yr" : ""}
+                              </TableCell>
+                              <TableCell className="text-sm">{listing.agent}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {listing.createdAt}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

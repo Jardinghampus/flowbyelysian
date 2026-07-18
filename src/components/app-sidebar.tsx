@@ -35,6 +35,7 @@ import {
   RadioTower,
   Activity,
   Rss,
+  Monitor,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -126,10 +127,9 @@ const navSections: NavSection[] = [
       { label: "Documents", href: "/app/documents", icon: <PenLine className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Landlord Report", href: "/app/landlord-report", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Exchange", href: "/app/exchange", icon: <ArrowLeftRight className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Tasks", href: "/app/tasks", icon: <CheckSquare className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Team", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"] },
     ],
   },

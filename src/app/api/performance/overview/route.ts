@@ -19,16 +19,6 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createUntypedServerClient()
     const overview = await buildPerformanceOverview(supabase, { year, month })
-
-    // Agents only see their row in detail, but company totals stay visible
-    if (guard.context.role === "agent") {
-      return NextResponse.json({
-        ...overview,
-        agents: overview.agents.filter((a) => a.agentId === guard.context.userId),
-        allAgentCount: overview.agents.length,
-      })
-    }
-
     return NextResponse.json(overview)
   } catch (error) {
     console.error("performance overview", error)
