@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         fullName: sessionUser.fullName,
         role: sessionUser.role,
         canAccessSocial: sessionUser.canAccessSocial,
+        mustChangePassword: Boolean(sessionUser.mustChangePassword),
       },
     })
 

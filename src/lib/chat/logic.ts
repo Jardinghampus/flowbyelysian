@@ -114,7 +114,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
       } else {
         // Greeting or unclear intent
         response =
-          "Hello! Welcome to Flow by Elysian Real Estate. I can help you find properties in Dubai.\n\n" +
+          "Hello! Welcome to Zaylo. I can help you find properties in Dubai.\n\n" +
           "Tell me what you're looking for - for example:\n" +
           "• '3 bedroom villa in Palm Jumeirah'\n" +
           "• 'Apartment in Dubai Marina under 3M'\n" +
@@ -241,7 +241,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
  */
 export function getWelcomeMessage(): string {
   return (
-    "Hello! Welcome to Flow by Elysian Real Estate.\n\n" +
+    "Hello! Welcome to Zaylo.\n\n" +
     "I can help you find your perfect property in Dubai. Just tell me what you're looking for:\n\n" +
     "• Location (Palm Jumeirah, Dubai Marina, Downtown, etc.)\n" +
     "• Number of bedrooms\n" +

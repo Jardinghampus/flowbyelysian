@@ -52,11 +52,13 @@ const isProtectedRoute = createRouteMatcher([
 const isPublicAuthRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/change-password(.*)",
   "/api/auth(.*)",
   "/api/webhooks(.*)",
   "/sign/(.*)",
   "/share/(.*)",
   "/api/listing-share/(.*)",
+  "/api/cron/(.*)",
 ])
 
 const isSocialRoute = createRouteMatcher([

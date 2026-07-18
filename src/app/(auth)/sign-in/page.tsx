@@ -34,6 +34,12 @@ function SignInForm() {
         throw new Error(data.error || "Sign in failed")
       }
 
+      if (data.user?.mustChangePassword) {
+        router.push("/change-password")
+        router.refresh()
+        return
+      }
+
       const next = searchParams.get("next") || "/app/dashboard"
       router.push(next)
       router.refresh()
@@ -50,7 +56,7 @@ function SignInForm() {
         <div className="mb-4 flex justify-center">
           <Logo size={48} />
         </div>
-        <CardTitle className="text-2xl">Welcome to Flow</CardTitle>
+        <CardTitle className="text-2xl">Welcome to Zaylo</CardTitle>
         <CardDescription>Sign in with your email and password</CardDescription>
       </CardHeader>
       <CardContent>

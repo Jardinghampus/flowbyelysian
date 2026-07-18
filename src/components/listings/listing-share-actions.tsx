@@ -1,7 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
-import { FileDown, Link2, Loader2, MessageCircle } from "lucide-react"
+import { FileDown, Link2, Loader2, MessageCircle, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
@@ -25,7 +26,7 @@ export function useListingShare() {
     try {
       const share = await createShare(listingId)
       await navigator.clipboard.writeText(share.url)
-      toast.success("Preview link copied — send to your colleague")
+      toast.success("Flyer link copied")
       return share
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not create link")
@@ -40,7 +41,7 @@ export function useListingShare() {
     try {
       const share = await createShare(listingId)
       window.open(share.pdfUrl, "_blank", "noopener,noreferrer")
-      toast.success("Opening PDF preview")
+      toast.success("Opening PDF flyer")
       return share
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not create PDF")
@@ -54,7 +55,7 @@ export function useListingShare() {
     setBusyId(listingId)
     try {
       const share = await createShare(listingId)
-      const text = `Listing preview: ${title}\n${share.url}\nPDF: ${share.pdfUrl}`
+      const text = `Zaylo listing flyer: ${title}\n${share.url}\nPDF: ${share.pdfUrl}`
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer")
       return share
     } catch (e) {
@@ -80,6 +81,12 @@ export function ListingShareMenuItems({
 
   return (
     <>
+      <DropdownMenuItem asChild>
+        <Link href={`/app/inventory/${listingId}/flyer`} onClick={(e) => e.stopPropagation()}>
+          <Sparkles className="mr-2 h-4 w-4" />
+          Open flyer page
+        </Link>
+      </DropdownMenuItem>
       <DropdownMenuItem
         disabled={busy}
         onClick={(e) => {
@@ -88,7 +95,7 @@ export function ListingShareMenuItems({
         }}
       >
         {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}
-        Copy colleague link
+        Copy flyer link
       </DropdownMenuItem>
       <DropdownMenuItem
         disabled={busy}
@@ -98,7 +105,7 @@ export function ListingShareMenuItems({
         }}
       >
         <FileDown className="mr-2 h-4 w-4" />
-        Download PDF preview
+        Download PDF flyer
       </DropdownMenuItem>
       <DropdownMenuItem
         disabled={busy}
@@ -108,7 +115,7 @@ export function ListingShareMenuItems({
         }}
       >
         <MessageCircle className="mr-2 h-4 w-4" />
-        WhatsApp link + PDF
+        WhatsApp flyer
       </DropdownMenuItem>
     </>
   )
@@ -126,6 +133,12 @@ export function ListingShareButtons({
 
   return (
     <div className="flex flex-wrap gap-2">
+      <Button size="sm" variant="default" asChild>
+        <Link href={`/app/inventory/${listingId}/flyer`}>
+          <Sparkles className="mr-2 h-4 w-4" />
+          Flyer
+        </Link>
+      </Button>
       <Button
         size="sm"
         variant="outline"

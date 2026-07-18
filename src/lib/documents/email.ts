@@ -8,7 +8,7 @@ function getResendClient() {
   return new Resend(process.env.RESEND_API_KEY)
 }
 
-const FROM_EMAIL = 'ZFlow <contracts@zflow.ae>'
+const FROM_EMAIL = 'Zaylo <contracts@zaylo.ae>'
 
 export async function sendSigningRequest({
   signerEmail,
@@ -26,7 +26,7 @@ export async function sendSigningRequest({
     html: `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #fafafa; padding: 40px; border-radius: 12px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 24px; font-weight: 600; margin: 0; color: #fafafa;">ZFlow</h1>
+          <h1 style="font-size: 24px; font-weight: 600; margin: 0; color: #fafafa;">Zaylo</h1>
           <p style="color: #a3a3a3; font-size: 13px; margin-top: 4px;">Document Signing</p>
         </div>
 
@@ -48,7 +48,7 @@ export async function sendSigningRequest({
 
         <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 32px 0;" />
         <p style="color: #525252; font-size: 12px; text-align: center;">
-          Powered by ZFlow — Dubai Real Estate CRM
+          Powered by Zaylo — Dubai Real Estate CRM
         </p>
       </div>
     `,
@@ -75,7 +75,7 @@ export async function sendSignedConfirmation({
     html: `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #fafafa; padding: 40px; border-radius: 12px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 24px; font-weight: 600; margin: 0; color: #fafafa;">ZFlow</h1>
+          <h1 style="font-size: 24px; font-weight: 600; margin: 0; color: #fafafa;">Zaylo</h1>
           <p style="color: #a3a3a3; font-size: 13px; margin-top: 4px;">Document Signed</p>
         </div>
 
@@ -95,7 +95,7 @@ export async function sendSignedConfirmation({
 
         <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 32px 0;" />
         <p style="color: #525252; font-size: 12px; text-align: center;">
-          Powered by ZFlow — Dubai Real Estate CRM
+          Powered by Zaylo — Dubai Real Estate CRM
         </p>
       </div>
     `,

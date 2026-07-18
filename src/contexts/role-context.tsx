@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
+import { restoreSwitchedRole } from "@/components/role-switcher"
 
 export type UserRole =
   | "admin"
@@ -42,6 +43,8 @@ export function getRoleLabel(role: UserRole): string {
 interface RoleContextType {
   role: UserRole
   setRole: (role: UserRole) => void
+  baseRole: UserRole
+  mustChangePassword: boolean
   isAdmin: boolean
   isAgent: boolean
   isInternal: boolean
@@ -62,6 +65,8 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined)
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>("agent")
+  const [baseRole, setBaseRole] = useState<UserRole>("agent")
+  const [mustChangePassword, setMustChangePassword] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [userName, setUserName] = useState<string | null>(null)
@@ -73,6 +78,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/me")
       if (!res.ok) {
         setRole("agent")
+        setBaseRole("agent")
+        setMustChangePassword(false)
         setUserEmail(null)
         setUserId(null)
         setUserName(null)
@@ -81,9 +88,12 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await res.json()
-      const nextRole = data.user?.role === "admin" ? "admin" : "agent"
-      setRole(nextRole)
-      setUserEmail(data.user?.email || null)
+      const nextBase: UserRole = data.user?.role === "admin" ? "admin" : "agent"
+      const email = data.user?.email || null
+      setBaseRole(nextBase)
+      setRole(restoreSwitchedRole(email, nextBase))
+      setMustChangePassword(Boolean(data.user?.mustChangePassword))
+      setUserEmail(email)
       setUserId(data.user?.id || null)
       setUserName(data.user?.fullName || null)
       setCanAccessSocial(Boolean(data.user?.canAccessSocial))
@@ -106,13 +116,13 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const canCreateRequest = true
 
   const canEditListing = (listingOwnerId: string, currentUserId: string): boolean => {
-    if (isAdmin) return true
+    if (isAdmin || baseRole === "admin") return true
     if (isAgent) return listingOwnerId === currentUserId
     return false
   }
 
   const canDeleteListing = (listingOwnerId: string, currentUserId: string): boolean => {
-    if (isAdmin) return true
+    if (isAdmin || baseRole === "admin") return true
     if (isAgent) return listingOwnerId === currentUserId
     return false
   }
@@ -122,6 +132,8 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       value={{
         role,
         setRole,
+        baseRole,
+        mustChangePassword,
         isAdmin,
         isAgent,
         isInternal,

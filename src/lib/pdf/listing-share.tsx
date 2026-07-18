@@ -1,99 +1,159 @@
 import React from "react"
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer"
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer"
 import type { ShareableListing } from "@/lib/listings/share"
 import { formatListingPrice } from "@/lib/listings/share"
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    backgroundColor: "#0c0c0d",
+    color: "#ffffff",
     fontFamily: "Helvetica",
-    backgroundColor: "#ffffff",
-    color: "#111111",
   },
-  header: {
-    marginBottom: 20,
-    borderBottomWidth: 2,
-    borderBottomColor: "#111111",
-    paddingBottom: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
+  heroWrap: {
+    height: 320,
+    position: "relative",
+  },
+  heroImage: {
+    width: "100%",
+    height: 320,
+    objectFit: "cover",
+  },
+  heroFallback: {
+    width: "100%",
+    height: 320,
+    backgroundColor: "#1a1a1c",
+  },
+  heroOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 36,
+    paddingBottom: 28,
+    paddingTop: 80,
+    backgroundColor: "rgba(12,12,13,0.55)",
   },
   brand: {
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 1.5,
-  },
-  meta: {
-    fontSize: 9,
-    color: "#666666",
-    textAlign: "right",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  subtitle: {
+    position: "absolute",
+    top: 24,
+    left: 36,
     fontSize: 11,
-    color: "#444444",
-    marginBottom: 18,
+    letterSpacing: 3,
+    fontWeight: "bold",
+    color: "#ffffff",
   },
   badgeRow: {
     flexDirection: "row",
-    gap: 8,
-    marginBottom: 18,
+    gap: 6,
+    marginBottom: 10,
   },
   badge: {
-    fontSize: 9,
-    borderWidth: 1,
-    borderColor: "#111111",
+    fontSize: 8,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: "#ffffff",
+    backgroundColor: "rgba(255,255,255,0.16)",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    textTransform: "uppercase",
+    borderRadius: 10,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 6,
+    maxWidth: 480,
+  },
+  location: {
+    fontSize: 11,
+    color: "#d4d4d8",
+    marginBottom: 8,
+  },
+  price: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  body: {
+    paddingHorizontal: 36,
+    paddingTop: 22,
+    paddingBottom: 40,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 16,
+    gap: 10,
+    marginBottom: 18,
   },
   cell: {
-    width: "50%",
-    marginBottom: 12,
+    width: "48%",
+    backgroundColor: "#17171a",
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a2e",
   },
   label: {
     fontSize: 8,
-    color: "#666666",
+    color: "#a1a1aa",
     textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 2,
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   value: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "bold",
-  },
-  section: {
-    marginTop: 8,
-    marginBottom: 14,
   },
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: "bold",
+    fontSize: 9,
+    color: "#a1a1aa",
     textTransform: "uppercase",
+    letterSpacing: 1.2,
     marginBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#dddddd",
-    paddingBottom: 4,
+    marginTop: 6,
+  },
+  gallery: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 16,
+  },
+  galleryImage: {
+    width: "48%",
+    height: 110,
+    objectFit: "cover",
+    borderRadius: 8,
+  },
+  agentCard: {
+    marginTop: 8,
+    backgroundColor: "#17171a",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#2a2a2e",
+  },
+  agentName: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  agentMeta: {
+    fontSize: 9,
+    color: "#a1a1aa",
+  },
+  note: {
+    marginTop: 8,
+    fontSize: 10,
+    lineHeight: 1.45,
+    color: "#e4e4e7",
   },
   footer: {
     position: "absolute",
-    bottom: 32,
-    left: 40,
-    right: 40,
+    bottom: 22,
+    left: 36,
+    right: 36,
     fontSize: 8,
-    color: "#888888",
+    color: "#71717a",
     borderTopWidth: 1,
-    borderTopColor: "#eeeeee",
+    borderTopColor: "#27272a",
     paddingTop: 8,
   },
 })
@@ -106,74 +166,92 @@ export type ListingSharePdfProps = {
 }
 
 export function ListingSharePdf({ listing, sharedBy, sharedAt, note }: ListingSharePdfProps) {
+  const hero = listing.images[0]
+  const gallery = listing.images.slice(1, 5)
+  const location = [listing.area, listing.subArea].filter(Boolean).join(" · ") || "Dubai"
+  const beds =
+    listing.bedrooms === 0 ? "Studio" : listing.bedrooms != null ? String(listing.bedrooms) : "—"
+  const baths = listing.bathrooms != null ? String(listing.bathrooms) : "—"
+  const size = listing.size != null ? `${listing.size.toLocaleString()} sqft` : "—"
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.brand}>FLOW</Text>
-          <View>
-            <Text style={styles.meta}>Listing preview for colleagues</Text>
-            <Text style={styles.meta}>{sharedAt}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.title}>{listing.title}</Text>
-        <Text style={styles.subtitle}>
-          {[listing.area, listing.subArea].filter(Boolean).join(" · ")}
-        </Text>
-
-        <View style={styles.badgeRow}>
-          <Text style={styles.badge}>{listing.transactionType}</Text>
-          <Text style={styles.badge}>{listing.type}</Text>
-          <Text style={styles.badge}>{listing.status}</Text>
-        </View>
-
-        <View style={styles.grid}>
-          <View style={styles.cell}>
-            <Text style={styles.label}>Price</Text>
-            <Text style={styles.value}>
+        <View style={styles.heroWrap}>
+          {hero ? (
+            // eslint-disable-next-line jsx-a11y/alt-text
+            <Image src={hero} style={styles.heroImage} />
+          ) : (
+            <View style={styles.heroFallback} />
+          )}
+          <Text style={styles.brand}>ZAYLO</Text>
+          <View style={styles.heroOverlay}>
+            <View style={styles.badgeRow}>
+              <Text style={styles.badge}>{listing.transactionType}</Text>
+              <Text style={styles.badge}>{listing.type}</Text>
+              <Text style={styles.badge}>{listing.status}</Text>
+            </View>
+            <Text style={styles.title}>{listing.title}</Text>
+            <Text style={styles.location}>{location}</Text>
+            <Text style={styles.price}>
               {formatListingPrice(listing.price, listing.transactionType)}
             </Text>
           </View>
-          <View style={styles.cell}>
-            <Text style={styles.label}>Size</Text>
-            <Text style={styles.value}>
-              {listing.size != null ? `${listing.size.toLocaleString()} sqft` : "—"}
-            </Text>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.grid}>
+            <View style={styles.cell}>
+              <Text style={styles.label}>Bedrooms</Text>
+              <Text style={styles.value}>{beds}</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.label}>Bathrooms</Text>
+              <Text style={styles.value}>{baths}</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.label}>Built-up</Text>
+              <Text style={styles.value}>{size}</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.label}>Listing agent</Text>
+              <Text style={styles.value}>{listing.agentName || "Agent"}</Text>
+            </View>
           </View>
-          <View style={styles.cell}>
-            <Text style={styles.label}>Beds / Baths</Text>
-            <Text style={styles.value}>
-              {listing.bedrooms ?? "—"} / {listing.bathrooms ?? "—"}
+
+          {listing.availability ? (
+            <View>
+              <Text style={styles.sectionTitle}>Availability</Text>
+              <Text style={{ fontSize: 10, color: "#e4e4e7", marginBottom: 12 }}>
+                {listing.availability}
+              </Text>
+            </View>
+          ) : null}
+
+          {gallery.length > 0 ? (
+            <View>
+              <Text style={styles.sectionTitle}>Gallery</Text>
+              <View style={styles.gallery}>
+                {gallery.map((src) => (
+                  // eslint-disable-next-line jsx-a11y/alt-text
+                  <Image key={src} src={src} style={styles.galleryImage} />
+                ))}
+              </View>
+            </View>
+          ) : null}
+
+          <View style={styles.agentCard}>
+            <Text style={styles.sectionTitle}>Presented by</Text>
+            <Text style={styles.agentName}>{listing.agentName}</Text>
+            <Text style={styles.agentMeta}>
+              Shared via Zaylo by {sharedBy} · {sharedAt}
             </Text>
-          </View>
-          <View style={styles.cell}>
-            <Text style={styles.label}>Listing agent</Text>
-            <Text style={styles.value}>{listing.agentName}</Text>
+            {note ? <Text style={styles.note}>{note}</Text> : null}
           </View>
         </View>
 
-        {(listing.propertyFinderUrl || listing.googleMapsUrl) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Links</Text>
-            {listing.propertyFinderUrl ? (
-              <Text style={{ fontSize: 9, marginBottom: 4 }}>PF: {listing.propertyFinderUrl}</Text>
-            ) : null}
-            {listing.googleMapsUrl ? (
-              <Text style={{ fontSize: 9 }}>Maps: {listing.googleMapsUrl}</Text>
-            ) : null}
-          </View>
-        )}
-
-        {note ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Note from colleague</Text>
-            <Text style={{ fontSize: 10, lineHeight: 1.4 }}>{note}</Text>
-          </View>
-        ) : null}
-
         <Text style={styles.footer}>
-          Shared by {sharedBy} via Flow · Internal preview — not a public marketing brochure
+          Zaylo listing flyer · Property facts only — owner contacts are not included
         </Text>
       </Page>
     </Document>

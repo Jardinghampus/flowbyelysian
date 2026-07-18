@@ -1,5 +1,11 @@
 {
   "framework": "nextjs",
   "buildCommand": "pnpm run build",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/cron/match-listings",
+      "schedule": "0 5,9,14 * * *"
+    }
+  ]
 }

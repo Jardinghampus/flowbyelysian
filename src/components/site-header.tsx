@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CommandSearch, SearchTrigger } from "@/components/command-search"
 import { NotificationBell } from "@/components/notification-bell"
+import { RoleSwitcher } from "@/components/role-switcher"
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false)
@@ -27,6 +28,7 @@ export function SiteHeader() {
             <SearchTrigger onClick={() => setSearchOpen(true)} />
           </div>
           <div className="flex items-center gap-2">
+            <RoleSwitcher />
             <NotificationBell />
           </div>
         </div>

@@ -78,9 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (isLocalAuthEnabled) {
-      if (!password || password.length < 8) {
+      if (!password || password.length < 4) {
         return NextResponse.json(
-          { error: "Password is required (min 8 characters)" },
+          { error: "Password is required (min 4 characters for temp invites)" },
           { status: 400 }
         )
       }
@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
         fullName,
         role,
         canAccessSocial: social,
+        mustChangePassword: true,
       })
 
       return NextResponse.json(

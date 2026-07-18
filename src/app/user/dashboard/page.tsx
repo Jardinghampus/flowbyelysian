@@ -60,7 +60,7 @@ export default function Page() {
         className="text-center py-3"
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-          Welcome to <ColourfulText text="ZFlow" />
+          Welcome to <ColourfulText text="Zaylo" />
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
           Your real estate dashboard powered by Zaylo

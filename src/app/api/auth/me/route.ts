@@ -17,6 +17,7 @@ export async function GET() {
         fullName: user.fullName,
         role: user.role,
         canAccessSocial: user.canAccessSocial,
+        mustChangePassword: Boolean(user.mustChangePassword),
       },
     })
   }

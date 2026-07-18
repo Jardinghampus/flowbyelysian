@@ -15,7 +15,7 @@ export interface DocumentSettings {
 
 const DEFAULTS: DocumentSettings = {
   header_logo_url: null,
-  header_display_name: "ZFLOW",
+  header_display_name: "Zaylo",
   company_name: "DERRICK SIGNATURE PROPERTIES L.L.C",
   company_phone: "+ 971 (0) 4 295 5397",
   company_email: "info@derricksignatureproperties.ae",

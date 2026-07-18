@@ -109,7 +109,7 @@ export function AgencyInquiry({ isOpen, onClose }: AgencyInquiryProps) {
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">List with ZFlow by Zaylo</h2>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">List with Zaylo</h2>
                   <p className="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">
                     Professional agency listing — maximize your property&apos;s potential
                   </p>

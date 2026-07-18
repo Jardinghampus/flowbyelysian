@@ -155,7 +155,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
       <header className="border-b border-neutral-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-neutral-900">ZFlow</span>
+            <span className="text-lg font-semibold text-neutral-900">Zaylo</span>
             <span className="text-xs text-neutral-400">Document Signing</span>
           </div>
         </div>
@@ -218,7 +218,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
 
         {/* Footer */}
         <p className="text-center text-xs text-neutral-400">
-          Powered by ZFlow — Secure document signing
+          Powered by Zaylo — Secure document signing
         </p>
       </main>
     </div>

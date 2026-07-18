@@ -123,7 +123,10 @@ export async function upsertListing(listing: Listing, importRunId: string): Prom
     location: listing.location || "",
     beds: listing.beds,
     baths: listing.baths,
-    size_sqft: listing.size_sqft,
+    size_sqft: listing.built_up_sqft ?? listing.size_sqft,
+    built_up_sqft: listing.built_up_sqft ?? listing.size_sqft,
+    plot_sqft: listing.plot_sqft,
+    sub_area: listing.sub_area || listing.location || listing.community,
     property_type: listing.property_type || "",
     agency: listing.agency || "",
     agent_name: listing.agent_name || "",
@@ -164,12 +167,14 @@ export async function markNotSeen(
   community: string,
   seenUrls: Set<string>,
   now: string,
-  importRunId: string
+  importRunId: string,
+  transactionType?: "rent" | "sale"
 ): Promise<number> {
   const rows = await loadCommunityListings(community)
   let count = 0
   for (const row of rows) {
     if (row.status !== "active") continue
+    if (transactionType && row.transaction_type !== transactionType) continue
     if (seenUrls.has(row.listing_url)) continue
 
     const { error } = await getDb()

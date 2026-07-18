@@ -122,7 +122,7 @@ export default function DemoPage() {
         <div className="relative max-w-6xl mx-auto px-6 py-20">
           <div className="flex items-center gap-3 mb-8">
             <Logo size={40} />
-            <span className="text-2xl font-semibold tracking-tight">ZFlow by Zaylo</span>
+            <span className="text-2xl font-semibold tracking-tight">Zaylo</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
@@ -292,7 +292,7 @@ export default function DemoPage() {
       </section>
 
       <footer className="border-t border-zinc-800 py-8 text-center text-sm text-zinc-500">
-        ZFlow by Zaylo — Confidential Proposal
+        Zaylo — Confidential Proposal
       </footer>
     </div>
   )

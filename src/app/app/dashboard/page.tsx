@@ -85,7 +85,7 @@ export default function Page() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold tracking-tight">Dashboard</h1>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">ZFlow Command Center</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Zaylo Command Center</p>
         </div>
         <div className="flex items-center gap-2">
           {quickLinks.map((link) => (

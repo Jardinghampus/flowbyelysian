@@ -88,7 +88,7 @@ export default function DealPage() {
 
         <div className="flex items-center gap-3 mb-8">
           <Logo size={32} />
-          <span className="text-lg font-semibold tracking-tight text-zinc-400">ZFlow by Zaylo</span>
+          <span className="text-lg font-semibold tracking-tight text-zinc-400">Zaylo</span>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Deal Terms</h1>
@@ -220,7 +220,7 @@ export default function DealPage() {
       </section>
 
       <footer className="border-t border-zinc-800 py-8 text-center text-sm text-zinc-500">
-        ZFlow by Zaylo — Confidential Proposal &middot; {new Date().getFullYear()}
+        Zaylo — Confidential Proposal &middot; {new Date().getFullYear()}
       </footer>
     </div>
   )

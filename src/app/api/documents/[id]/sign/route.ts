@@ -129,5 +129,20 @@ export async function POST(
       signer_ip: signerIp,
     })
 
+  // Notify the agent that the document was signed
+  if (doc.agent_id) {
+    const templateName =
+      (doc as { templates?: { name?: string } | null }).templates?.name || "Document"
+    await supabase.from("notifications").insert({
+      user_id: doc.agent_id,
+      type: "document_signed",
+      title: "Document signed",
+      message: `${signerName || doc.signer_name || "Client"} signed "${templateName}"`,
+      link: `/app/documents/${id}`,
+      read: false,
+      created_at: new Date().toISOString(),
+    })
+  }
+
   return NextResponse.json({ success: true, pdfUrl })
 }

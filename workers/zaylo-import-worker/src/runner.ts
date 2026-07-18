@@ -133,7 +133,15 @@ export async function runImportMarket(): Promise<RunSummary> {
       }
 
       if (!searchResult.blocked) {
-        summary.not_seen_count += await markNotSeen(inputLink.community, seenUrls, now, importRunId)
+        // Scope by rent/sale so a rent scrape cannot soft-hide sale listings (and vice versa).
+        const txType = inferTransactionType(inputLink.url)
+        summary.not_seen_count += await markNotSeen(
+          inputLink.community,
+          seenUrls,
+          now,
+          importRunId,
+          txType
+        )
         await markSourceStatus(inputLink.url, searchResult.listings.length > 0 ? "ready" : "empty")
       }
     }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { currentUser } from "@/lib/demo-auth"
 import { requireApiUser } from "@/lib/api/guards"
+import { sanitizeListingsForViewer } from "@/lib/listings/privacy"
+import { emitTeamFeedEvent } from "@/lib/listings/feed"
 
 function isRecoverableListingsReadError(error: unknown) {
   if (!error || typeof error !== "object") return false
@@ -83,7 +85,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      listings: listings || [],
+      listings: sanitizeListingsForViewer(listings || [], guard.context.userId, {
+        isAdmin: guard.context.role === "admin",
+      }),
       total: count || 0,
       limit,
       offset,
@@ -127,6 +131,12 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) throw error
+
+    try {
+      await emitTeamFeedEvent(supabase, listing)
+    } catch (feedError) {
+      console.warn("team feed emit failed", feedError)
+    }
 
     return NextResponse.json({ listing }, { status: 201 })
   } catch (error) {

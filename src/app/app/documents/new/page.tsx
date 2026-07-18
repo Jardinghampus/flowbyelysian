@@ -54,7 +54,7 @@ export default function NewDocumentPage() {
       const initial: Record<string, string> = {}
       const vars = Array.isArray(template.variables) ? template.variables : JSON.parse(template.variables as unknown as string)
       const agentName = user?.fullName || "Demo Agent"
-      const agentEmail = user?.primaryEmailAddress?.emailAddress || "agent@zflow.ae"
+      const agentEmail = user?.primaryEmailAddress?.emailAddress || "agent@zaylo.ae"
       const agentBrn =
         (user?.publicMetadata as { brn?: string } | undefined)?.brn || ""
       for (const v of vars) {
@@ -97,7 +97,7 @@ export default function NewDocumentPage() {
         body: JSON.stringify({
           template_id: selectedTemplate.id,
           agent_id: user?.id || "demo-agent-id",
-          agent_email: user?.primaryEmailAddress?.emailAddress || "agent@zflow.ae",
+          agent_email: user?.primaryEmailAddress?.emailAddress || "agent@zaylo.ae",
           agent_name: fieldValues.agent_name || fieldValues.consultant_name || user?.fullName || "Demo Agent",
           status: sendImmediately ? "sent" : "draft",
           signer_email: signerEmail,

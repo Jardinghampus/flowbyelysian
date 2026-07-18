@@ -37,6 +37,20 @@ function extractSize(text: string): number | null {
   return parseNumber(match?.[1])
 }
 
+function extractBuiltUp(text: string): number | null {
+  const match = text.match(
+    /(?:built[\s-]?up|BUA|internal area)\s*[:\-]?\s*([\d,]+)\s*(?:sq\.?\s*ft|sqft)?/i
+  )
+  return parseNumber(match?.[1]) ?? extractSize(text)
+}
+
+function extractPlot(text: string): number | null {
+  const match = text.match(
+    /(?:plot(?:\s*size)?|land size)\s*[:\-]?\s*([\d,]+)\s*(?:sq\.?\s*ft|sqft)?/i
+  )
+  return parseNumber(match?.[1])
+}
+
 function extractBeds(text: string): number | null {
   const match = text.match(/\b(Studio|\d+(?:\.\d+)?)\s*(?:Beds?|Bedrooms?|BR)\b/i)
   return parseBeds(match?.[1])
@@ -95,7 +109,10 @@ function normalizeCard(card: ExtractedCard, community: string, pageUrl: string):
     location: rawSummary.location,
     beds: extractBeds(text),
     baths: extractBaths(text),
-    size_sqft: extractSize(text),
+    size_sqft: extractBuiltUp(text),
+    built_up_sqft: extractBuiltUp(text),
+    plot_sqft: extractPlot(text),
+    sub_area: rawSummary.location || community,
     property_type: extractPropertyType(text),
     agency: "",
     agent_name: "",

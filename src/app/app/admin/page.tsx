@@ -180,7 +180,7 @@ export default function AdminPage() {
       toast.error("Email is required")
       return
     }
-    if (!newUser.password || newUser.password.length < 8) {
+    if (!newUser.password || newUser.password.length < 4) {
       toast.error("Password is required (min 8 characters)")
       return
     }

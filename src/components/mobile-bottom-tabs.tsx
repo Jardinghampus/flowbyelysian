@@ -6,10 +6,10 @@ import { motion } from "framer-motion"
 import {
   Home,
   ClipboardList,
-  Database,
-  MessageCircle,
   Building2,
+  MessageCircle,
   Settings,
+  Rss,
 } from "lucide-react"
 import { useRole } from "@/contexts/role-context"
 import { cn } from "@/lib/utils"
@@ -28,10 +28,10 @@ export function MobileBottomTabs() {
   const tabs: TabItem[] = isInternal
     ? [
         { href: "/app/dashboard", label: "Home", icon: <Home className={tabIcon} /> },
+        { href: "/app/feed", label: "Feed", icon: <Rss className={tabIcon} /> },
         { href: "/app/leads", label: "Leads", icon: <ClipboardList className={tabIcon} /> },
-        { href: "/app/data", label: "Follow-ups", icon: <Database className={tabIcon} /> },
-        { href: "/app/whatsapp", label: "WhatsApp", icon: <MessageCircle className={tabIcon} /> },
         { href: "/app/inventory", label: "Listings", icon: <Building2 className={tabIcon} /> },
+        { href: "/app/whatsapp", label: "WhatsApp", icon: <MessageCircle className={tabIcon} /> },
       ]
     : [
         { href: "/user/my-opportunities", label: "Opportunities", icon: <ClipboardList className={tabIcon} /> },

@@ -34,6 +34,7 @@ import {
   Database,
   RadioTower,
   Activity,
+  Rss,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -110,6 +111,7 @@ const navSections: NavSection[] = [
       { label: "Follow-ups", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Leads", href: "/app/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Listings", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Team Feed", href: "/app/feed", icon: <Rss className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Active Listings", href: "/app/market-listings", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
       { label: "WhatsApp", href: "/app/whatsapp", icon: <MessageCircle className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
@@ -313,7 +315,7 @@ const LogoFull = ({ homeHref = "/user/dashboard", logoUrl, displayName }: { home
         animate={{ opacity: 1 }}
         className="font-bold text-xl whitespace-pre tracking-tight"
       >
-        {displayName || "ZFLOW"}
+        {displayName || "Zaylo"}
       </motion.span>
     </Link>
   )

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 import { requireApiUser } from "@/lib/api/guards"
+import { sanitizeListingForViewer } from "@/lib/listings/privacy"
+import { emitTeamFeedEvent } from "@/lib/listings/feed"
 
 // GET /api/listings/:id - Get single listing (team can view)
 export async function GET(
@@ -25,7 +27,11 @@ export async function GET(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ listing })
+    return NextResponse.json({
+      listing: sanitizeListingForViewer(listing, guard.context.userId, {
+        isAdmin: guard.context.role === "admin",
+      }),
+    })
   } catch (error) {
     console.error("Error fetching listing:", error)
     return NextResponse.json({ error: "Failed to fetch listing" }, { status: 500 })
@@ -79,7 +85,20 @@ export async function PATCH(
 
     if (error) throw error
 
-    return NextResponse.json({ listing })
+    // Emit feed when status / inquiry type meaningfully changes visibility to team
+    if (body.status || body.inquiry_type || body.title || body.price) {
+      try {
+        await emitTeamFeedEvent(supabase, listing, "listing_updated")
+      } catch (feedError) {
+        console.warn("team feed emit failed", feedError)
+      }
+    }
+
+    return NextResponse.json({
+      listing: sanitizeListingForViewer(listing, guard.context.userId, {
+        isAdmin: guard.context.role === "admin",
+      }),
+    })
   } catch (error) {
     console.error("Error updating listing:", error)
     return NextResponse.json({ error: "Failed to update listing" }, { status: 500 })

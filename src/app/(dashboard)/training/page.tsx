@@ -186,9 +186,9 @@ Stand out in a competitive market with strong personal branding.
   {
     id: "5",
     title: "Getting Started with Flow",
-    description: "Learn the basics of using Flow by Elysian. This module covers navigation, key features, and best practices.",
+    description: "Learn the basics of using Zaylo. This module covers navigation, key features, and best practices.",
     category: "way-of-work",
-    content: `## Welcome to Flow by Elysian
+    content: `## Welcome to Zaylo
 
 This comprehensive training module will guide you through the essential features of our platform.
 

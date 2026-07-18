@@ -7,8 +7,8 @@ import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Flow by Elysian",
-  description: "Modern dashboard and workflow management by Elysian",
+  title: "Zaylo",
+  description: "Zaylo — Dubai brokerage CRM and market intelligence",
   viewport: {
     width: "device-width",
     initialScale: 1,

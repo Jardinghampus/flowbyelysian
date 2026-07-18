@@ -25,6 +25,7 @@ type MarketListing = {
   id: string
   community: string
   master_community: string | null
+  sub_area: string | null
   listing_number: string
   title: string
   price: number | null
@@ -33,6 +34,8 @@ type MarketListing = {
   location: string
   beds: number | null
   size_sqft: number | null
+  built_up_sqft: number | null
+  plot_sqft: number | null
   property_type: string
   listing_url: string
   transaction_type: "rent" | "sale"
@@ -57,10 +60,23 @@ function formatPrice(price: number | null, currency: string, rentPeriod: string)
   return rentPeriod ? `${formatted} / ${rentPeriod}` : formatted
 }
 
+function formatSqft(value: number | null | undefined) {
+  if (value == null) return "—"
+  return `${Math.round(Number(value)).toLocaleString("en-AE")} sqft`
+}
+
 function bedsLabel(beds: number | null) {
   if (beds === null || beds === undefined) return "—"
   if (beds === 0) return "Studio"
   return String(beds)
+}
+
+function areaLabel(listing: MarketListing) {
+  return listing.master_community || listing.community || "—"
+}
+
+function subAreaLabel(listing: MarketListing) {
+  return listing.sub_area || listing.community || listing.location || "—"
 }
 
 export default function MarketListingsPage() {
@@ -106,7 +122,7 @@ export default function MarketListingsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Active Listings</h1>
           <p className="text-sm text-muted-foreground">
-            Live Bayut scrape in Supabase — filter by area and beds. No Google Sheets.
+            Live Bayut scrape — gone from portal disappears here after the next import.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -161,29 +177,90 @@ export default function MarketListingsPage() {
         />
       </div>
 
-      <div className="rounded-lg border">
+      {/* Mobile cards */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <div className="flex h-24 items-center justify-center text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : listings.length === 0 ? (
+          <p className="rounded-lg border p-6 text-center text-sm text-muted-foreground">
+            No active listings yet.
+          </p>
+        ) : (
+          listings.map((listing) => (
+            <a
+              key={listing.id}
+              href={listing.listing_url || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-xl border bg-card p-4 shadow-sm active:scale-[0.99] transition-transform"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold leading-snug line-clamp-2">{listing.title || "Untitled"}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {areaLabel(listing)}
+                    {subAreaLabel(listing) !== areaLabel(listing) ? ` · ${subAreaLabel(listing)}` : ""}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="capitalize shrink-0">
+                  {listing.transaction_type}
+                </Badge>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Price</p>
+                  <p className="font-medium">{formatPrice(listing.price, listing.currency, listing.rent_period)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Beds</p>
+                  <p className="font-medium">{bedsLabel(listing.beds)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Built-up</p>
+                  <p className="font-medium">{formatSqft(listing.built_up_sqft ?? listing.size_sqft)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Plot</p>
+                  <p className="font-medium">{formatSqft(listing.plot_sqft)}</p>
+                </div>
+              </div>
+              {listing.listing_url ? (
+                <p className="mt-3 inline-flex items-center gap-1 text-sm text-primary">
+                  Open listing <ExternalLink className="h-3.5 w-3.5" />
+                </p>
+              ) : null}
+            </a>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Header</TableHead>
               <TableHead>Area</TableHead>
-              <TableHead>Beds</TableHead>
+              <TableHead>Sub-area</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Listing #</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>Built-up</TableHead>
+              <TableHead>Plot</TableHead>
+              <TableHead>Beds</TableHead>
               <TableHead>Link</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   No active listings yet. Run the worker:{" "}
                   <code className="text-xs">pnpm zaylo:worker --job import-market</code>
                 </TableCell>
@@ -191,27 +268,20 @@ export default function MarketListingsPage() {
             ) : (
               listings.map((listing) => (
                 <TableRow key={listing.id}>
-                  <TableCell>
-                    <div className="font-medium">{listing.community}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-1">
-                      {listing.title || listing.location}
+                  <TableCell className="max-w-[220px]">
+                    <div className="font-medium line-clamp-2">{listing.title || "—"}</div>
+                    <div className="text-xs text-muted-foreground font-mono">
+                      {listing.listing_number || "—"}
                     </div>
                   </TableCell>
-                  <TableCell>{bedsLabel(listing.beds)}</TableCell>
+                  <TableCell>{areaLabel(listing)}</TableCell>
+                  <TableCell className="max-w-[160px]">
+                    <span className="line-clamp-2">{subAreaLabel(listing)}</span>
+                  </TableCell>
                   <TableCell>{formatPrice(listing.price, listing.currency, listing.rent_period)}</TableCell>
-                  <TableCell>
-                    {listing.size_sqft != null
-                      ? `${Math.round(Number(listing.size_sqft)).toLocaleString("en-AE")} sqft`
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {listing.listing_number || "—"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="capitalize">
-                      {listing.transaction_type}
-                    </Badge>
-                  </TableCell>
+                  <TableCell>{formatSqft(listing.built_up_sqft ?? listing.size_sqft)}</TableCell>
+                  <TableCell>{formatSqft(listing.plot_sqft)}</TableCell>
+                  <TableCell>{bedsLabel(listing.beds)}</TableCell>
                   <TableCell>
                     {listing.listing_url ? (
                       <a

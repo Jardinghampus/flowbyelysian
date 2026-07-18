@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("bayut_market_listings")
       .select(
-        "id, community, master_community, listing_number, permit_number, title, price, currency, rent_period, location, beds, baths, size_sqft, property_type, agency, listing_url, transaction_type, status, last_seen, first_seen"
+        "id, community, master_community, sub_area, listing_number, permit_number, title, price, currency, rent_period, location, beds, baths, size_sqft, built_up_sqft, plot_sqft, property_type, agency, listing_url, transaction_type, status, last_seen, first_seen"
       )
       .order("last_seen", { ascending: false })
       .limit(limit)

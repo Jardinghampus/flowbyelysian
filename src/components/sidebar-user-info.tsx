@@ -33,7 +33,7 @@ export function SidebarUserInfo({ open }: { open: boolean }) {
           )}
           <div className="flex flex-col min-w-0">
             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200 truncate">
-              {user?.fullName || "Flow User"}
+              {user?.fullName || "Zaylo User"}
             </span>
             <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
               Real Estate Agent

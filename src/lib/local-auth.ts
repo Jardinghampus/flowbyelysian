@@ -15,6 +15,7 @@ export type AppUserRow = {
   role: LocalRole
   can_access_social: boolean
   status: "active" | "disabled"
+  must_change_password?: boolean
   created_at: string
   updated_at: string
 }
@@ -25,6 +26,7 @@ export type LocalSessionUser = {
   fullName: string
   role: LocalRole
   canAccessSocial: boolean
+  mustChangePassword?: boolean
 }
 
 type SessionPayload = {
@@ -127,6 +129,7 @@ export function toSessionUser(row: AppUserRow): LocalSessionUser {
     fullName: row.full_name,
     role: row.role,
     canAccessSocial: row.can_access_social,
+    mustChangePassword: Boolean(row.must_change_password),
   }
 }
 
@@ -197,6 +200,7 @@ export async function createAppUser(input: {
   fullName: string
   role: LocalRole
   canAccessSocial?: boolean
+  mustChangePassword?: boolean
 }) {
   const table = await appUsersTable()
   const row = {
@@ -206,6 +210,7 @@ export async function createAppUser(input: {
     role: input.role,
     can_access_social: Boolean(input.canAccessSocial),
     status: "active",
+    must_change_password: input.mustChangePassword !== false,
     updated_at: new Date().toISOString(),
   }
 
@@ -228,6 +233,7 @@ export async function updateAppUser(
     can_access_social: boolean
     status: "active" | "disabled"
     password: string
+    must_change_password: boolean
   }>
 ) {
   const table = await appUsersTable()
@@ -239,7 +245,11 @@ export async function updateAppUser(
   if (patch.role !== undefined) update.role = patch.role
   if (patch.can_access_social !== undefined) update.can_access_social = patch.can_access_social
   if (patch.status !== undefined) update.status = patch.status
-  if (patch.password) update.password_hash = hashPassword(patch.password)
+  if (patch.must_change_password !== undefined) update.must_change_password = patch.must_change_password
+  if (patch.password) {
+    update.password_hash = hashPassword(patch.password)
+    update.must_change_password = patch.must_change_password ?? false
+  }
 
   const { data, error } = await table.update(update).eq("id", id).select("*").single()
   if (error) throw error
@@ -300,8 +310,8 @@ export async function bootstrapAdminIfEmpty(email: string, password: string) {
     throw new Error("First setup: sign in as Hampus to create the admin account.")
   }
 
-  if (password.length < 8) {
-    throw new Error("Password must be at least 8 characters.")
+  if (password.length < 4) {
+    throw new Error("Password must be at least 4 characters.")
   }
 
   return createAppUser({
