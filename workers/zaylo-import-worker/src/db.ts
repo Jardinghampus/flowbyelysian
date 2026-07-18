@@ -150,10 +150,21 @@ export async function upsertListing(listing: Listing, importRunId: string): Prom
     .maybeSingle()
 
   if (existing) {
-    const { error } = await getDb()
+    // Don't wipe Regulatory Information filled by detail enrich
+    const { data: prev } = await getDb()
       .from("bayut_market_listings")
-      .update({ ...payload, first_seen: existing.first_seen })
+      .select("permit_number, agency")
       .eq("id", existing.id)
+      .maybeSingle()
+
+    const merged = {
+      ...payload,
+      first_seen: existing.first_seen,
+      permit_number: payload.permit_number || prev?.permit_number || "",
+      agency: payload.agency || prev?.agency || "",
+    }
+
+    const { error } = await getDb().from("bayut_market_listings").update(merged).eq("id", existing.id)
     if (error) throw new Error(`Failed to update listing: ${error.message}`)
     return "updated"
   }
@@ -192,6 +203,87 @@ export async function markNotSeen(
   return count
 }
 
+export async function upsertTransactions(
+  rows: Array<{
+    community: string
+    master_community: string
+    sub_area?: string
+    location?: string
+    bedrooms: number | null
+    property_type: string
+    transaction_type: "rent" | "sale"
+    price_aed: number | null
+    size_sqft: number | null
+    built_up_sqft?: number | null
+    plot_sqft?: number | null
+    price_per_sqft_aed: number | null
+    transaction_date: string | null
+    history?: string
+    fingerprint?: string
+    detail_url?: string
+    source_url: string
+    raw: Record<string, unknown>
+  }>,
+  importRunId: string
+): Promise<number> {
+  if (rows.length === 0) return 0
+  let saved = 0
+  for (const row of rows) {
+    const fingerprint =
+      row.fingerprint ||
+      String(row.raw.fingerprint || "") ||
+      [
+        row.transaction_date || "",
+        row.price_aed ?? "",
+        row.bedrooms ?? "",
+        row.built_up_sqft ?? row.size_sqft ?? "",
+        row.plot_sqft ?? "",
+        (row.location || "").toLowerCase(),
+        row.transaction_type,
+      ].join("|")
+
+    const payload = {
+      community: row.community,
+      master_community: row.master_community,
+      sub_area: row.sub_area || "",
+      location: row.location || "",
+      bedrooms: row.bedrooms,
+      property_type: row.property_type,
+      transaction_type: row.transaction_type,
+      price_aed: row.price_aed,
+      size_sqft: row.size_sqft,
+      built_up_sqft: row.built_up_sqft ?? row.size_sqft,
+      plot_sqft: row.plot_sqft ?? null,
+      price_per_sqft_aed: row.price_per_sqft_aed,
+      transaction_date: row.transaction_date,
+      history: row.history || "",
+      detail_url: row.detail_url || "",
+      fingerprint,
+      source_url: row.source_url,
+      import_run_id: importRunId,
+      raw: row.raw,
+    }
+
+    const { data: existing } = await getDb()
+      .from("bayut_transactions")
+      .select("id")
+      .eq("fingerprint", fingerprint)
+      .maybeSingle()
+
+    if (existing?.id) {
+      const { error } = await getDb().from("bayut_transactions").update(payload).eq("id", existing.id)
+      if (!error) saved += 1
+      else console.error("tx update failed", error.message)
+    } else {
+      const { error } = await getDb().from("bayut_transactions").insert(payload)
+      if (!error) saved += 1
+      else console.error("tx insert failed", error.message)
+    }
+  }
+  return saved
+}
+
+/** @deprecated prefer upsertTransactions */
 export async function insertTransactions(
   rows: Array<{
     community: string
@@ -208,11 +300,7 @@ export async function insertTransactions(
   }>,
   importRunId: string
 ): Promise<number> {
-  if (rows.length === 0) return 0
-  const payload = rows.map((row) => ({ ...row, import_run_id: importRunId }))
-  const { error } = await getDb().from("bayut_transactions").insert(payload)
-  if (error) throw new Error(`Failed to insert transactions: ${error.message}`)
-  return rows.length
+  return upsertTransactions(rows, importRunId)
 }
 
 export async function loadActiveListingsForMetrics() {

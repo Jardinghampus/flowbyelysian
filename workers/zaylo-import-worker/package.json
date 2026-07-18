@@ -7,6 +7,8 @@
   "scripts": {
     "scrape": "tsx src/index.ts --job import-market",
     "import-market": "tsx src/index.ts --job import-market",
+    "import-transactions": "tsx src/index.ts --job import-transactions",
+    "enrich-listings": "tsx src/index.ts --job enrich-listings",
     "generate-content": "tsx src/index.ts --job generate-content",
     "generate-urls": "tsx data/generate-urls.ts",
     "seed-urls": "tsx data/seed-curated-urls.ts",

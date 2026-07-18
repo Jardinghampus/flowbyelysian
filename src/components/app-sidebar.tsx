@@ -113,6 +113,7 @@ const navSections: NavSection[] = [
       { label: "Listings", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Team Feed", href: "/app/feed", icon: <Rss className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Active Listings", href: "/app/market-listings", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Transactions", href: "/app/market-transactions", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Deals", href: "/app/deals", icon: <Handshake className={iconClass} />, roles: ["admin", "agent"] },
     ],

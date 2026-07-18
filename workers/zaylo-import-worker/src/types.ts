@@ -57,6 +57,8 @@ export interface DetailExtractionResult {
   permit_number: string
   agency: string
   agent_name: string
+  property_type: string
+  beds?: number | null
   blocked: boolean
 }
 

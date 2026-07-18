@@ -1,4 +1,6 @@
 import { generateVillaExpertContent } from "./content.js"
+import { runEnrichListingDetails } from "./enrichListingDetails.js"
+import { runImportTransactions } from "./importTransactions.js"
 import { recomputeMetricsFromListings } from "./metrics.js"
 import { runImportMarket } from "./runner.js"
 
@@ -18,13 +20,25 @@ async function main() {
     return
   }
 
+  if (job === "import-transactions" || job === "scrape-transactions") {
+    await runImportTransactions()
+    return
+  }
+
+  if (job === "enrich-listings" || job === "enrich-permits") {
+    await runEnrichListingDetails()
+    return
+  }
+
   if (job === "generate-content" || job === "generate-week") {
     await recomputeMetricsFromListings()
     await generateVillaExpertContent()
     return
   }
 
-  throw new Error(`Unknown job: ${job}. Use import-market | generate-content`)
+  throw new Error(
+    `Unknown job: ${job}. Use import-market | import-transactions | enrich-listings | generate-content`
+  )
 }
 
 main().catch((error) => {

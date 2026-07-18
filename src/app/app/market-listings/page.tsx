@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { ExternalLink, Loader2, RefreshCw } from "lucide-react"
+import { Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,6 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { BayutLink, BayutTitleLink } from "@/components/zaylo/bayut-link"
+import { listingLink, normalizeBayutUrl } from "@/lib/zaylo/bayut-links"
 
 type MarketListing = {
   id: string
@@ -27,6 +29,7 @@ type MarketListing = {
   master_community: string | null
   sub_area: string | null
   listing_number: string
+  permit_number?: string | null
   title: string
   price: number | null
   currency: string
@@ -99,16 +102,19 @@ export default function MarketListingsPage() {
   const [community, setCommunity] = useState("all")
   const [subArea, setSubArea] = useState("all")
   const [beds, setBeds] = useState("all")
+  const [propertyType, setPropertyType] = useState("all")
   const [transactionType, setTransactionType] = useState("all")
+  const [sort, setSort] = useState("newest")
   const [q, setQ] = useState("")
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ status: "active", limit: "500" })
+      const params = new URLSearchParams({ status: "active", limit: "500", sort })
       if (community !== "all") params.set("community", community)
       if (subArea !== "all") params.set("subArea", subArea)
       if (beds !== "all") params.set("beds", beds)
+      if (propertyType !== "all") params.set("propertyType", propertyType)
       if (transactionType !== "all") params.set("transactionType", transactionType)
       if (q.trim()) params.set("q", q.trim())
 
@@ -125,7 +131,7 @@ export default function MarketListingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [community, subArea, beds, transactionType, q])
+  }, [community, subArea, beds, propertyType, transactionType, sort, q])
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -186,7 +192,7 @@ export default function MarketListingsPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
         <Select value={community} onValueChange={setCommunity}>
           <SelectTrigger>
             <SelectValue placeholder="Area" />
@@ -215,6 +221,18 @@ export default function MarketListingsPage() {
           </SelectContent>
         </Select>
 
+        <Select value={propertyType} onValueChange={setPropertyType}>
+          <SelectTrigger>
+            <SelectValue placeholder="Property" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="Villa">Villa</SelectItem>
+            <SelectItem value="Townhouse">Townhouse</SelectItem>
+            <SelectItem value="Apartment">Apartment</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={beds} onValueChange={setBeds}>
           <SelectTrigger>
             <SelectValue placeholder="Beds" />
@@ -230,7 +248,7 @@ export default function MarketListingsPage() {
 
         <Select value={transactionType} onValueChange={setTransactionType}>
           <SelectTrigger>
-            <SelectValue placeholder="Type" />
+            <SelectValue placeholder="Deal" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Rent + Sale</SelectItem>
@@ -239,8 +257,21 @@ export default function MarketListingsPage() {
           </SelectContent>
         </Select>
 
+        <Select value={sort} onValueChange={setSort}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest seen</SelectItem>
+            <SelectItem value="price_desc">Price: high → low</SelectItem>
+            <SelectItem value="price_asc">Price: low → high</SelectItem>
+            <SelectItem value="beds_desc">Beds: high → low</SelectItem>
+            <SelectItem value="beds_asc">Beds: low → high</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Input
-          placeholder="Search title / agent / agency"
+          placeholder="Search title / agency / permit"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -256,27 +287,32 @@ export default function MarketListingsPage() {
             No active listings yet.
           </p>
         ) : (
-          listings.map((listing) => (
-            <a
-              key={listing.id}
-              href={listing.listing_url || undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-xl border bg-card p-4 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-semibold leading-snug line-clamp-2">{listing.title || "Untitled"}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {areaLabel(listing)}
-                    {subAreaLabel(listing) !== areaLabel(listing) ? ` · ${subAreaLabel(listing)}` : ""}
-                  </p>
+          listings.map((listing) => {
+            const href = normalizeBayutUrl(listing.listing_url)
+            const link = listingLink(listing.listing_url)
+            return (
+              <div key={listing.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <BayutTitleLink
+                    href={href}
+                    title={listing.title || "Untitled"}
+                    subtitle={
+                      areaLabel(listing) +
+                      (subAreaLabel(listing) !== areaLabel(listing)
+                        ? ` · ${subAreaLabel(listing)}`
+                        : "")
+                    }
+                    className="min-w-0 max-w-none"
+                  />
+                  <Badge variant="secondary" className="capitalize shrink-0">
+                    {listing.transaction_type}
+                  </Badge>
                 </div>
-                <Badge variant="secondary" className="capitalize shrink-0">
-                  {listing.transaction_type}
-                </Badge>
-              </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Type</p>
+                  <p className="font-medium">{listing.property_type || "—"}</p>
+                </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Price</p>
                   <p className="font-medium">{formatPrice(listing.price, listing.currency, listing.rent_period)}</p>
@@ -286,16 +322,20 @@ export default function MarketListingsPage() {
                   <p className="font-medium">{bedsLabel(listing.beds)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Agent</p>
-                  <p className="font-medium line-clamp-1">{listing.agent_name || "—"}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Permit</p>
+                  <p className="font-medium font-mono text-xs">{listing.permit_number || "—"}</p>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Agency</p>
                   <p className="font-medium line-clamp-1">{listing.agency || "—"}</p>
                 </div>
               </div>
-            </a>
-          ))
+              <div className="mt-3">
+                <BayutLink link={link} variant="inline" />
+              </div>
+              </div>
+            )
+          })
         )}
       </div>
 
@@ -306,9 +346,10 @@ export default function MarketListingsPage() {
               <TableHead>Header</TableHead>
               <TableHead>Area</TableHead>
               <TableHead>Sub-area</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Beds</TableHead>
-              <TableHead>Agent</TableHead>
+              <TableHead>Permit</TableHead>
               <TableHead>Agency</TableHead>
               <TableHead>Link</TableHead>
             </TableRow>
@@ -316,54 +357,49 @@ export default function MarketListingsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : listings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                   No active listings yet. Seed URLs then run{" "}
                   <code className="text-xs">pnpm zaylo:worker --job import-market</code>
                 </TableCell>
               </TableRow>
             ) : (
-              listings.map((listing) => (
-                <TableRow key={listing.id}>
-                  <TableCell className="max-w-[200px]">
-                    <div className="font-medium line-clamp-2">{listing.title || "—"}</div>
-                    <div className="text-xs text-muted-foreground font-mono">
-                      {listing.listing_number || "—"}
-                    </div>
-                  </TableCell>
-                  <TableCell>{areaLabel(listing)}</TableCell>
-                  <TableCell className="max-w-[140px]">
-                    <span className="line-clamp-2">{subAreaLabel(listing)}</span>
-                  </TableCell>
-                  <TableCell>{formatPrice(listing.price, listing.currency, listing.rent_period)}</TableCell>
-                  <TableCell>{bedsLabel(listing.beds)}</TableCell>
-                  <TableCell className="max-w-[120px]">
-                    <span className="line-clamp-2 text-sm">{listing.agent_name || "—"}</span>
-                  </TableCell>
-                  <TableCell className="max-w-[140px]">
-                    <span className="line-clamp-2 text-sm">{listing.agency || "—"}</span>
-                  </TableCell>
-                  <TableCell>
-                    {listing.listing_url ? (
-                      <a
-                        href={listing.listing_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                      >
-                        Open <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+              listings.map((listing) => {
+                const href = normalizeBayutUrl(listing.listing_url)
+                const link = listingLink(listing.listing_url)
+                return (
+                  <TableRow key={listing.id}>
+                    <TableCell>
+                      <BayutTitleLink
+                        href={href}
+                        title={listing.title || "—"}
+                        subtitle={listing.listing_number || null}
+                      />
+                    </TableCell>
+                    <TableCell>{areaLabel(listing)}</TableCell>
+                    <TableCell className="max-w-[140px]">
+                      <span className="line-clamp-2">{subAreaLabel(listing)}</span>
+                    </TableCell>
+                    <TableCell>{listing.property_type || "—"}</TableCell>
+                    <TableCell>{formatPrice(listing.price, listing.currency, listing.rent_period)}</TableCell>
+                    <TableCell>{bedsLabel(listing.beds)}</TableCell>
+                    <TableCell className="font-mono text-xs whitespace-nowrap">
+                      {listing.permit_number || "—"}
+                    </TableCell>
+                    <TableCell className="max-w-[180px]">
+                      <span className="line-clamp-2 text-sm">{listing.agency || "—"}</span>
+                    </TableCell>
+                    <TableCell>
+                      <BayutLink link={link} />
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

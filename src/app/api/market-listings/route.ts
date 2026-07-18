@@ -38,6 +38,7 @@ function applyFilters(
     subArea: string | null
     transactionType: string | null
     beds: string | null
+    propertyType: string | null
     q: string | null
   }
 ) {
@@ -50,15 +51,39 @@ function applyFilters(
   if (opts.transactionType && opts.transactionType !== "all") {
     query = query.eq("transaction_type", opts.transactionType)
   }
+  if (opts.propertyType && opts.propertyType !== "all") {
+    query = query.eq("property_type", opts.propertyType)
+  }
   if (opts.beds !== null && opts.beds !== undefined && opts.beds !== "" && opts.beds !== "all") {
     query = query.eq("beds", Number(opts.beds))
   }
   if (opts.q) {
+    const safe = opts.q.replace(/[%",]/g, "")
     query = query.or(
-      `title.ilike.%${opts.q}%,listing_number.ilike.%${opts.q}%,location.ilike.%${opts.q}%,agency.ilike.%${opts.q}%,agent_name.ilike.%${opts.q}%`
+      `title.ilike.%${safe}%,listing_number.ilike.%${safe}%,location.ilike.%${safe}%,agency.ilike.%${safe}%,permit_number.ilike.%${safe}%`
     )
   }
   return query
+}
+
+function applySort(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  sort: string | null
+) {
+  switch (sort) {
+    case "price_asc":
+      return query.order("price", { ascending: true, nullsFirst: false })
+    case "price_desc":
+      return query.order("price", { ascending: false, nullsFirst: false })
+    case "beds_desc":
+      return query.order("beds", { ascending: false, nullsFirst: false })
+    case "beds_asc":
+      return query.order("beds", { ascending: true, nullsFirst: false })
+    case "newest":
+    default:
+      return query.order("last_seen", { ascending: false })
+  }
 }
 
 function computeStats(rows: ListingRow[]) {
@@ -94,23 +119,25 @@ export async function GET(request: NextRequest) {
     const community = searchParams.get("community")
     const subArea = searchParams.get("subArea")
     const beds = searchParams.get("beds")
+    const propertyType = searchParams.get("propertyType")
     const transactionType = searchParams.get("transactionType")
     const status = searchParams.get("status") || "active"
     const q = searchParams.get("q")
+    const sort = searchParams.get("sort") || "newest"
     const limit = Math.min(Number(searchParams.get("limit") || 200), 500)
 
     const supabase = createUntypedServerClient()
-    const filters = { status, community, subArea, transactionType, beds, q }
+    const filters = { status, community, subArea, transactionType, beds, propertyType, q }
 
     let query = supabase
       .from("bayut_market_listings")
       .select(
         "id, community, master_community, sub_area, listing_number, permit_number, title, price, currency, rent_period, location, beds, baths, size_sqft, built_up_sqft, plot_sqft, property_type, agency, agent_name, listing_url, transaction_type, status, last_seen, first_seen"
       )
-      .order("last_seen", { ascending: false })
       .limit(limit)
 
     query = applyFilters(query, filters)
+    query = applySort(query, sort)
 
     const { data, error } = await query
     if (error) {
@@ -121,7 +148,6 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Stats over filtered set (same filters, higher cap for averages)
     let statsQuery = supabase
       .from("bayut_market_listings")
       .select("price, transaction_type, status")
@@ -148,16 +174,12 @@ export async function GET(request: NextRequest) {
     const subAreas = Array.from(
       new Set(
         (communityRows || [])
+          .filter((r: { community: string; master_community: string | null }) => {
+            if (!community || community === "all") return true
+            return r.community === community || r.master_community === community
+          })
           .map((r: { sub_area: string | null; community: string }) => r.sub_area || r.community)
           .filter(Boolean)
-          .filter((name: string) => {
-            if (!community || community === "all") return true
-            return (communityRows || []).some(
-              (r: { community: string; master_community: string | null; sub_area: string | null }) =>
-                (r.sub_area || r.community) === name &&
-                (r.community === community || r.master_community === community)
-            )
-          })
       )
     ).sort() as string[]
 
@@ -170,6 +192,7 @@ export async function GET(request: NextRequest) {
       subAreas,
       count: listings.length,
       stats,
+      sort,
     })
   } catch (error) {
     console.error("market-listings GET failed", error)
