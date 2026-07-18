@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { BayutLink, BayutTitleLink } from "@/components/zaylo/bayut-link"
+import { MarketSubnav } from "@/components/zaylo/market-subnav"
 import { transactionLink } from "@/lib/zaylo/bayut-links"
 
 type Tx = {
@@ -100,9 +101,11 @@ export default function MarketTransactionsPage() {
   const [propertyType, setPropertyType] = useState("all")
   const [transactionType, setTransactionType] = useState("sale")
   const [sort, setSort] = useState("newest")
+  const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const params = new URLSearchParams({ limit: "500", sort })
       if (community !== "all") params.set("community", community)
@@ -113,14 +116,16 @@ export default function MarketTransactionsPage() {
 
       const res = await fetch(`/api/market-transactions?${params.toString()}`)
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Failed to load transactions")
       setRows(data.transactions || [])
       setCommunities(data.communities || [])
       setSubAreas(data.subAreas || [])
       setAnalysis(data.analysis || null)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
       setRows([])
       setAnalysis(null)
+      setError(err instanceof Error ? err.message : "Failed to load transactions")
     } finally {
       setLoading(false)
     }
@@ -141,18 +146,27 @@ export default function MarketTransactionsPage() {
 
   return (
     <div className="space-y-6 px-4 py-6 lg:px-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
-          <p className="text-sm text-muted-foreground">
-            Bayut completed deals · last 3 months · Mudon, DAMAC Hills, Town Square, Villanova, Arabian Ranches 1–3
-          </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-3">
+          <MarketSubnav />
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
+            <p className="text-sm text-muted-foreground">
+              Bayut completed deals · last 3 months · Mudon (incl. Arabella), DAMAC Hills, Town Square, Villanova, AR 1–3
+            </p>
+          </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
           Refresh
         </Button>
       </div>
+
+      {error ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
 
       {analysis && (
         <div className="rounded-xl border bg-card p-5">

@@ -81,8 +81,8 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (community && community !== "all") {
-      const c = community.replace(/"/g, "")
-      query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
+      const c = community.replace(/["\\,()]/g, "").trim()
+      if (c) query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
     }
     if (subArea && subArea !== "all") query = query.eq("sub_area", subArea)
     if (transactionType && transactionType !== "all") query = query.eq("transaction_type", transactionType)

@@ -44,8 +44,8 @@ function applyFilters(
 ) {
   if (opts.status !== "all") query = query.eq("status", opts.status)
   if (opts.community && opts.community !== "all") {
-    const c = opts.community.replace(/"/g, "")
-    query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
+    const c = opts.community.replace(/["\\,()]/g, "").trim()
+    if (c) query = query.or(`community.eq."${c}",master_community.eq."${c}"`)
   }
   if (opts.subArea && opts.subArea !== "all") query = query.eq("sub_area", opts.subArea)
   if (opts.transactionType && opts.transactionType !== "all") {
