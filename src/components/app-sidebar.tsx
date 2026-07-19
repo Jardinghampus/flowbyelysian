@@ -16,7 +16,6 @@ import {
   Sun,
   TrendingUp,
   Mail,
-  Newspaper,
   MapPin,
   FileText,
   PenLine,
@@ -92,6 +91,7 @@ interface NavItem {
   icon: React.ReactNode
   roles: UserRole[] | "all"
   hampusOnly?: boolean
+  badge?: string
 }
 
 const iconClass = "h-[22px] w-[22px] flex-shrink-0"
@@ -131,23 +131,23 @@ const navSections: NavSection[] = [
       { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Team", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
-      { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "Live" },
       { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
-      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "AI" },
       { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
-      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "New" },
       {
         label: "Description Generator (AI/SEO)",
         href: "/app/seo-generator",
         icon: <FileText className={iconClass} />,
         roles: ["admin", "agent"],
         hampusOnly: true,
+        badge: "AI",
       },
-      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
-      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
-      { label: "Deal Board", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "2/8" },
+      { label: "Deal Board", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "3" },
     ],
   },
   // Admin only extras (kept out of agent daily path)

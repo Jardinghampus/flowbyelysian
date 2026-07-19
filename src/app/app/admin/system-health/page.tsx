@@ -49,12 +49,6 @@ const checks: Array<Omit<HealthCheck, "status" | "detail" | "updatedAt">> = [
     description: "Owner intelligence summary endpoint.",
     endpoint: "/api/owners/stats",
   },
-  {
-    id: "news",
-    label: "News API",
-    description: "External news feed configuration.",
-    endpoint: "/api/news",
-  },
 ]
 
 function classify(endpoint: string, payload: unknown): Pick<HealthCheck, "status" | "detail"> {
@@ -100,12 +94,6 @@ function classify(endpoint: string, payload: unknown): Pick<HealthCheck, "status
 
   if (endpoint.includes("owners")) {
     return { status: "ready", detail: `${Number(data.totalOwners ?? 0)} owners loaded.` }
-  }
-
-  if (endpoint.includes("news")) {
-    return data.configured === false
-      ? { status: "config_needed", detail: "NEWS_API_KEY is not configured." }
-      : { status: "ready", detail: `${Number(data.totalResults ?? 0)} news results available.` }
   }
 
   return { status: "ready", detail: "Endpoint returned successfully." }

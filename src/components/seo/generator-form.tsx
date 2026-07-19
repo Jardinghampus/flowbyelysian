@@ -54,6 +54,15 @@ export function GeneratorForm() {
 
       const data = await response.json();
       setGeneratedText(data.optimizedText);
+      void fetch("/api/team-feed/tool", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType: "tool_description",
+          title: "Generated a new listing description",
+          areaName: formData.community[0] || "Dubai",
+        }),
+      });
     } catch (error) {
       console.error("Error generating text:", error);
     } finally {

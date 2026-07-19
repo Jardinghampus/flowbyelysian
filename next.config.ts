@@ -69,7 +69,6 @@ const nextConfig: NextConfig = {
       { source: '/mail', destination: '/app/mail', permanent: false },
       { source: '/market', destination: '/app/market-pulse', permanent: false },
       { source: '/marketplace', destination: '/app/exchange', permanent: false },
-      { source: '/news', destination: '/app/news', permanent: false },
       { source: '/performance', destination: '/app/performance', permanent: false },
       { source: '/pricing', destination: '/app/pricing', permanent: false },
       { source: '/seo-generator', destination: '/app/seo-generator', permanent: false },

@@ -23,7 +23,6 @@ const footerLinks = {
     { label: "About Us", href: "/about" },
     { label: "Our Team", href: "/team" },
     { label: "Careers", href: "/careers" },
-    { label: "News & Insights", href: "/news" },
     { label: "Contact", href: "/contact" },
   ],
   legal: [

@@ -76,6 +76,18 @@ function eventHeadline(type: string) {
       return "New Request"
     case "listing_pocket":
       return "Pocket Listing"
+    case "tool_description":
+      return "AI Description"
+    case "tool_deal":
+      return "Deal Board"
+    case "tool_training":
+      return "Training"
+    case "tool_areas":
+      return "Areas"
+    case "tool_lookup":
+      return "Owner Lookup"
+    case "tool_performance":
+      return "Performance"
     default:
       return "Listing Update"
   }
@@ -102,7 +114,9 @@ function FeedEventCard({
   onShare: (id: string) => void
 }) {
   const meta = listingMeta(event)
+  const isTool = event.event_type.startsWith("tool_")
   const isLive = event.event_type === "listing_live"
+  const showBanner = isLive || isTool
   const agency = cleanNotes(meta?.notes)
   const agentProfile: AgentProfile | null =
     event.agent_profile ||
@@ -131,14 +145,19 @@ function FeedEventCard({
         "overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md",
         isLive && "ring-1"
       )}
-      style={isLive ? { borderColor: `${TEAM_COLOR}40`, boxShadow: `0 0 0 1px ${TEAM_COLOR}14` } : undefined}
+      style={isLive ? { borderColor: `${TEAM_COLOR}40`, boxShadow: `0 0 0 1px ${TEAM_COLOR}14` } : isTool ? { borderColor: `${TEAM_COLOR}25` } : undefined}
     >
-      {isLive ? (
+      {showBanner ? (
         <div
           className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white"
-          style={{ background: `linear-gradient(90deg, ${TEAM_COLOR}, #2d5082)` }}
+          style={{
+            background: isTool
+              ? `linear-gradient(90deg, #2d5082, ${TEAM_COLOR})`
+              : `linear-gradient(90deg, ${TEAM_COLOR}, #2d5082)`,
+          }}
         >
           {eventHeadline(event.event_type)}
+          {isTool ? " · Early access" : ""}
         </div>
       ) : null}
 
@@ -149,15 +168,23 @@ function FeedEventCard({
           </div>
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
-          {!isLive ? (
+          {!showBanner ? (
             <Badge variant={eventBadgeVariant(event.event_type)}>{eventHeadline(event.event_type)}</Badge>
           ) : null}
-          <Badge variant="outline" className="capitalize">
-            {event.transaction_type}
-          </Badge>
-          <Badge variant="secondary" className="capitalize">
-            {event.property_type || "property"}
-          </Badge>
+          {!isTool ? (
+            <>
+              <Badge variant="outline" className="capitalize">
+                {event.transaction_type}
+              </Badge>
+              <Badge variant="secondary" className="capitalize">
+                {event.property_type || "property"}
+              </Badge>
+            </>
+          ) : (
+            <Badge variant="outline" className="text-[10px]">
+              Premium tool
+            </Badge>
+          )}
           <span className="text-xs text-muted-foreground">
             {new Date(event.created_at).toLocaleString("en-AE", {
               dateStyle: "medium",
@@ -179,6 +206,8 @@ function FeedEventCard({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {!isTool ? (
+            <>
           <div className="rounded-xl bg-muted/50 px-3 py-2">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Price</p>
             <p className="mt-0.5 text-sm font-semibold">{formatPrice(event.price, event.transaction_type)}</p>
@@ -204,6 +233,12 @@ function FeedEventCard({
               {meta?.size ? `${meta.size.toLocaleString()} sqft` : "—"}
             </p>
           </div>
+            </>
+          ) : (
+            <div className="col-span-full rounded-xl border border-dashed bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+              Team tool activity — visible to everyone, full access is limited.
+            </div>
+          )}
         </div>
 
         {meta?.availability || agency ? (
@@ -219,6 +254,7 @@ function FeedEventCard({
           </div>
         ) : null}
 
+        {!isTool && event.listing_id ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
             size="sm"
@@ -238,6 +274,7 @@ function FeedEventCard({
             </a>
           </Button>
         </div>
+        ) : null}
       </div>
     </article>
   )

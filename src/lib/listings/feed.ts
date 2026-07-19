@@ -1,6 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 
-export type FeedEventType = "listing_live" | "listing_pocket" | "listing_request" | "listing_updated"
+export type FeedEventType =
+  | "listing_live"
+  | "listing_pocket"
+  | "listing_request"
+  | "listing_updated"
+  | "tool_description"
+  | "tool_deal"
+  | "tool_training"
+  | "tool_areas"
+  | "tool_lookup"
+  | "tool_performance"
 
 export async function emitTeamFeedEvent(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,5 +54,39 @@ export async function emitTeamFeedEvent(
     price: listing.price ?? null,
     bedrooms: listing.bedrooms ?? null,
     property_type: listing.type || "",
+  })
+}
+
+export async function emitToolFeedEvent(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any> | { from: (t: string) => any },
+  input: {
+    actorId: string
+    actorName: string
+    eventType: Extract<
+      FeedEventType,
+      | "tool_description"
+      | "tool_deal"
+      | "tool_training"
+      | "tool_areas"
+      | "tool_lookup"
+      | "tool_performance"
+    >
+    title: string
+    areaName?: string
+  }
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("team_feed_events").insert({
+    event_type: input.eventType,
+    listing_id: null,
+    actor_id: input.actorId,
+    actor_name: input.actorName,
+    title: input.title,
+    area_name: input.areaName || "",
+    status: "tool",
+    inquiry_type: "tool",
+    transaction_type: "sale",
+    property_type: "tool",
   })
 }

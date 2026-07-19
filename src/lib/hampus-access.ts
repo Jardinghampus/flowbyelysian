@@ -26,7 +26,6 @@ export const HAMPUS_ONLY_PATHS = [
   "/app/ai-assistant",
   "/app/areas",
   "/app/seo-generator",
-  "/app/news",
   "/app/training",
   "/app/pipeline",
   "/inloggade",

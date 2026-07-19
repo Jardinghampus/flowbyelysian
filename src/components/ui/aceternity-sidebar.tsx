@@ -10,6 +10,7 @@ interface Links {
   label: string
   href: string
   icon: React.JSX.Element | React.ReactNode
+  badge?: string
 }
 
 interface SidebarContextProps {
@@ -200,7 +201,7 @@ export const SidebarLink = ({
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
         className={cn(
-          "text-neutral-700 dark:text-neutral-200 text-sm transition duration-150 whitespace-pre",
+          "text-neutral-700 dark:text-neutral-200 text-sm transition duration-150 whitespace-pre flex-1 min-w-0",
           !disabled && "group-hover/sidebar:translate-x-1",
           isActive && !disabled && "text-primary font-medium",
           disabled && "opacity-40 cursor-not-allowed"
@@ -208,6 +209,16 @@ export const SidebarLink = ({
       >
         {link.label}
       </motion.span>
+      {link.badge && open ? (
+        <span
+          className={cn(
+            "ml-auto shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
+            disabled ? "bg-muted text-muted-foreground" : "bg-primary/15 text-primary"
+          )}
+        >
+          {link.badge}
+        </span>
+      ) : null}
     </>
   )
 

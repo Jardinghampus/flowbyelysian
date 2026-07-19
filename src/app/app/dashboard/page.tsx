@@ -8,6 +8,7 @@ import {
   Kanban, ExternalLink, Search, BarChart3, Home,
 } from "lucide-react"
 import { useUnifiedStats, type FollowUpOwner, type RecentOutreach } from "@/hooks/use-unified-stats"
+import { PremiumTeasers } from "@/components/dashboard/premium-teasers"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 
@@ -125,6 +126,8 @@ export default function Page() {
           href="/app/performance"
         />
       </div>
+
+      <PremiumTeasers />
 
       {/* ─── MAIN GRID ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">

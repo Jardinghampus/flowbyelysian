@@ -8,6 +8,7 @@ import { ThemeCustomizer, ThemeCustomizerTrigger } from "@/components/theme-cust
 import { RoleProvider, useRole } from "@/contexts/role-context"
 import { FullscreenProvider } from "@/contexts/fullscreen-context"
 import { MobileBottomTabs } from "@/components/mobile-bottom-tabs"
+import { QuickAddFab } from "@/components/quick-add/quick-add-fab"
 import { usePathname, useRouter } from "next/navigation"
 import { Lock } from "lucide-react"
 
@@ -70,6 +71,7 @@ export default function AppLayout({
               </main>
 
               <MobileBottomTabs />
+              <QuickAddFab />
 
               <div className="hidden md:block">
                 <ThemeCustomizerTrigger onClick={() => setThemeCustomizerOpen(true)} />
