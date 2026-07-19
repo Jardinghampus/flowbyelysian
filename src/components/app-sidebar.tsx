@@ -34,6 +34,7 @@ import {
   Activity,
   Rss,
   Monitor,
+  Share2,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -131,6 +132,14 @@ const navSections: NavSection[] = [
       { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "Live" },
       { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      {
+        label: "Social Posts",
+        href: "/app/social-posts",
+        icon: <Share2 className={iconClass} />,
+        roles: ["admin", "agent"],
+        hampusOnly: true,
+        badge: "IG",
+      },
       { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true, badge: "AI" },

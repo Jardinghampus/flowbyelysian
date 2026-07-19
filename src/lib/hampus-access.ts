@@ -35,6 +35,7 @@ export const HAMPUS_ONLY_PATHS = [
   "/app/seo-generator",
   "/app/training",
   "/app/pipeline",
+  "/app/social-posts",
   "/inloggade",
 ] as const
 
