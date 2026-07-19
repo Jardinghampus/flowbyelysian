@@ -136,7 +136,7 @@ export const MobileSidebar = ({
       >
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg">
-            <Logo size={32} square />
+            <Logo size={32} />
           </div>
           <span className="font-bold text-lg">Zaylo</span>
         </div>

@@ -55,7 +55,7 @@ function SignInForm() {
     <Card className="w-full max-w-md border-white/10 bg-neutral-950/75 text-white shadow-2xl shadow-black/50 backdrop-blur-xl">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
-          <Logo size={48} />
+          <Logo size={44} tone="hero" className="ring-1 ring-white/10" />
         </div>
         <CardTitle className="text-2xl text-white">Welcome to Zaylo</CardTitle>
         <CardDescription className="text-neutral-400">

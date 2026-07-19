@@ -87,7 +87,7 @@ export default function DealPage() {
         </button>
 
         <div className="flex items-center gap-3 mb-8">
-          <Logo size={32} />
+          <Logo size={36} />
           <span className="text-lg font-semibold tracking-tight text-zinc-400">Zaylo</span>
         </div>
 

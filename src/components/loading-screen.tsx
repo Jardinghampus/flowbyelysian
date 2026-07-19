@@ -40,11 +40,7 @@ export function LoadingScreen({ message = "Loading...", showLogo = true }: Loadi
 
         {/* Logo and Message */}
         <div className="relative z-10 flex flex-col items-center gap-6">
-          {showLogo && (
-            <div className="animate-pulse">
-              <Logo size={64} />
-            </div>
-          )}
+          {showLogo && <Logo size={56} tone="hero" />}
           <div className="flex flex-col items-center gap-2">
             <h2 className="text-xl font-semibold text-white">{message}</h2>
             <div className="flex gap-1">

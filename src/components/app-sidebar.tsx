@@ -306,9 +306,7 @@ const LogoFull = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
       href={homeHref}
       className="font-bold flex items-center gap-3 text-black dark:text-white py-1 px-3 relative z-20"
     >
-      <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl">
-        <Logo size={36} square />
-      </div>
+      <Logo size={32} />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -326,9 +324,7 @@ const LogoIcon = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
       href={homeHref}
       className="font-bold flex items-center justify-center py-1 relative z-20"
     >
-      <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl">
-        <Logo size={36} square />
-      </div>
+      <Logo size={32} />
     </Link>
   )
 }

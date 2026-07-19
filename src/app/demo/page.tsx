@@ -121,7 +121,7 @@ export default function DemoPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10" />
         <div className="relative max-w-6xl mx-auto px-6 py-20">
           <div className="flex items-center gap-3 mb-8">
-            <Logo size={40} />
+            <Logo size={40} tone="hero" />
             <span className="text-2xl font-semibold tracking-tight">Zaylo</span>
           </div>
 
