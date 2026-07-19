@@ -40,8 +40,6 @@ import { usePathname } from "next/navigation"
 import { useTheme } from "@/hooks/use-theme"
 import { useRole, type UserRole } from "@/contexts/role-context"
 import { Logo } from "@/components/logo"
-import { useDocumentSettings } from "@/hooks/use-document-settings"
-import Image from "next/image"
 import { BRAND_NAME } from "@/lib/brand"
 import { isHampusEmail } from "@/lib/hampus-access"
 import { cn } from "@/lib/utils"
@@ -181,7 +179,6 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme()
   const { role, isInternal, userEmail } = useRole()
   const { isFullscreen } = useFullscreenContext()
-  const { settings: docSettings } = useDocumentSettings()
   const [open, setOpen] = useState(false)
 
   const effectiveOpen = open
@@ -211,7 +208,7 @@ export function AppSidebar() {
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} />}
+          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} />}
 
           {/* User Profile */}
           <SidebarUserInfo open={effectiveOpen} />
@@ -303,18 +300,14 @@ export function AppSidebar() {
   )
 }
 
-const LogoFull = ({ homeHref = "/user/dashboard", logoUrl }: { homeHref?: string; logoUrl?: string | null }) => {
+const LogoFull = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
   return (
     <Link
       href={homeHref}
       className="font-bold flex items-center gap-3 text-black dark:text-white py-1 px-3 relative z-20"
     >
-      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-        {logoUrl ? (
-          <Image src={logoUrl} alt="Logo" width={36} height={36} className="object-contain w-full h-full" unoptimized />
-        ) : (
-          <Logo size={22} className="text-primary-foreground" />
-        )}
+      <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl">
+        <Logo size={36} square />
       </div>
       <motion.span
         initial={{ opacity: 0 }}
@@ -327,18 +320,14 @@ const LogoFull = ({ homeHref = "/user/dashboard", logoUrl }: { homeHref?: string
   )
 }
 
-const LogoIcon = ({ homeHref = "/user/dashboard", logoUrl }: { homeHref?: string; logoUrl?: string | null }) => {
+const LogoIcon = ({ homeHref = "/user/dashboard" }: { homeHref?: string }) => {
   return (
     <Link
       href={homeHref}
       className="font-bold flex items-center justify-center py-1 relative z-20"
     >
-      <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-        {logoUrl ? (
-          <Image src={logoUrl} alt="Logo" width={36} height={36} className="object-contain w-full h-full" unoptimized />
-        ) : (
-          <Logo size={22} className="text-primary-foreground" />
-        )}
+      <div className="h-9 w-9 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-xl">
+        <Logo size={36} square />
       </div>
     </Link>
   )

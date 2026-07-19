@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { Menu, X, Phone } from "lucide-react"
+import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -44,15 +45,8 @@ export function Navbar() {
           <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
-              <div
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-xl font-bold text-lg transition-colors",
-                  isScrolled
-                    ? "bg-neutral-900 text-white"
-                    : "bg-white text-neutral-900"
-                )}
-              >
-                Z
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl">
+                <Logo size={40} square />
               </div>
               <span
                 className={cn(

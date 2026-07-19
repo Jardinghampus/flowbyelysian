@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { Logo } from "@/components/logo"
 import { SpaceBackground } from "@/components/landing/space-background"
 
 export default function LandingPage() {
@@ -9,6 +10,7 @@ export default function LandingPage() {
       <SpaceBackground intense />
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-6">
         <div className="flex max-w-lg flex-col items-center text-center">
+          <Logo size={56} square className="mb-6" />
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.35em] text-neutral-400">
             Dubai brokerage OS
           </p>

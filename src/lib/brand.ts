@@ -5,6 +5,10 @@ export const BRAND_DESCRIPTION =
   "Zaylo — Dubai brokerage CRM, market intelligence, and agent tools."
 export const BRAND_TAGLINE = "Dubai brokerage CRM and market intelligence"
 
+/** Liquid metal shader source image (Paper Design). */
+export const BRAND_LOGO_IMAGE =
+  "https://app.paper.design/file-assets/01KXX3E6BM1ZXHKRJFBH8PHT8K/01KXX3RYKTF4CH3A3Y34A82Q68.png"
+
 /** Derrick Signature team identity (fixed — not user-editable). */
 export const TEAM_COMPANY_NAME = "Derrick Signature Properties LLC"
 export const TEAM_COMPANY_WEBSITE = "derricksignatureproperties.ae"

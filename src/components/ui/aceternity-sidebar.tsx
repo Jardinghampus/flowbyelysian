@@ -1,5 +1,6 @@
 "use client"
 
+import { Logo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 import Link, { LinkProps } from "next/link"
 import React, { useState, createContext, useContext, useCallback, useRef } from "react"
@@ -134,8 +135,8 @@ export const MobileSidebar = ({
         {...props}
       >
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">Z</span>
+          <div className="h-8 w-8 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg">
+            <Logo size={32} square />
           </div>
           <span className="font-bold text-lg">Zaylo</span>
         </div>
