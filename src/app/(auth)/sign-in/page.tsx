@@ -57,17 +57,17 @@ function SignInForm() {
           <Logo size={48} />
         </div>
         <CardTitle className="text-2xl">Welcome to Zaylo</CardTitle>
-        <CardDescription>Sign in with your email and password</CardDescription>
+        <CardDescription>Sign in with your name or email</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Name or email</Label>
             <Input
               id="email"
               type="text"
               autoComplete="username"
-              placeholder="you@example.com"
+              placeholder="hampus, aaron, elsje, laura"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

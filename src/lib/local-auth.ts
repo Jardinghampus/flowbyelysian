@@ -285,9 +285,17 @@ export async function getVerifiedSessionUser(): Promise<LocalSessionUser | null>
 
 const DEFAULT_BOOTSTRAP_EMAIL = "hampus@zaylo.com"
 
+const TEAM_LOGIN_ALIASES: Record<string, string> = {
+  hampus: "hampus@zaylo.com",
+  aaron: "aaron@zaylo.com",
+  elsje: "elsje@zaylo.com",
+  laura: "laura@zaylo.com",
+}
+
 export function normalizeLoginEmail(raw: string) {
   const value = raw.trim().toLowerCase()
-  if (value === "hampus") return DEFAULT_BOOTSTRAP_EMAIL
+  if (TEAM_LOGIN_ALIASES[value]) return TEAM_LOGIN_ALIASES[value]
+  if (!value.includes("@")) return `${value}@zaylo.com`
   return value
 }
 
