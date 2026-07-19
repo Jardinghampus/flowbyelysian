@@ -12,7 +12,19 @@ export async function GET(request: NextRequest) {
   const supabase = createUntypedServerClient()
   const { data, error } = await supabase
     .from("team_feed_events")
-    .select("*")
+    .select(
+      `
+      *,
+      listings (
+        bathrooms,
+        size,
+        notes,
+        owner_name,
+        sub_area,
+        availability
+      )
+    `
+    )
     .order("created_at", { ascending: false })
     .limit(limit)
 

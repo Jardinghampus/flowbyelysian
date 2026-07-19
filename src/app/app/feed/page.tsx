@@ -1,11 +1,32 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { ExternalLink, Link2, Loader2, RefreshCw, Sparkles } from "lucide-react"
+import {
+  Bath,
+  BedDouble,
+  Building2,
+  ExternalLink,
+  Link2,
+  Loader2,
+  MapPin,
+  RefreshCw,
+  Sparkles,
+  User,
+} from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useListingShare } from "@/components/listings/listing-share-actions"
+import { cn } from "@/lib/utils"
+
+type FeedListingMeta = {
+  bathrooms?: number | null
+  size?: number | null
+  notes?: string | null
+  owner_name?: string | null
+  sub_area?: string | null
+  availability?: string | null
+}
 
 type FeedEvent = {
   id: string
@@ -21,6 +42,7 @@ type FeedEvent = {
   bedrooms: number | null
   property_type: string
   created_at: string
+  listings?: FeedListingMeta | FeedListingMeta[] | null
 }
 
 type MatchRow = {
@@ -32,23 +54,166 @@ type MatchRow = {
   request: { id: string; title: string; area_name: string; price: number; bedrooms: number | null } | null
 }
 
+function listingMeta(event: FeedEvent): FeedListingMeta | null {
+  const raw = event.listings
+  if (!raw) return null
+  return Array.isArray(raw) ? raw[0] ?? null : raw
+}
+
 function formatPrice(price: number | null, tx: string) {
   if (price == null) return "—"
   const n = `AED ${Math.round(price).toLocaleString("en-AE")}`
-  return tx === "rent" ? `${n}/yr` : n
+  return tx === "rent" ? `${n}/year` : n
 }
 
-function eventLabel(type: string) {
+function eventHeadline(type: string) {
   switch (type) {
-    case "listing_request":
-      return "Request"
-    case "listing_pocket":
-      return "Pocket"
     case "listing_live":
-      return "Live"
+      return "New Live Listing"
+    case "listing_request":
+      return "New Request"
+    case "listing_pocket":
+      return "Pocket Listing"
     default:
-      return "Update"
+      return "Listing Update"
   }
+}
+
+function eventBadgeVariant(type: string): "default" | "secondary" | "outline" {
+  if (type === "listing_live") return "default"
+  if (type === "listing_pocket") return "secondary"
+  return "outline"
+}
+
+function cleanNotes(notes?: string | null) {
+  if (!notes) return null
+  return notes.replace(/\s*·\s*seed:[^\s·]+/gi, "").trim()
+}
+
+function FeedEventCard({
+  event,
+  busyId,
+  onShare,
+}: {
+  event: FeedEvent
+  busyId: string | null
+  onShare: (id: string) => void
+}) {
+  const meta = listingMeta(event)
+  const isLive = event.event_type === "listing_live"
+  const agency = cleanNotes(meta?.notes)
+
+  return (
+    <article
+      className={cn(
+        "overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md",
+        isLive && "border-emerald-500/30 ring-1 ring-emerald-500/10"
+      )}
+    >
+      {isLive ? (
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
+          {eventHeadline(event.event_type)}
+        </div>
+      ) : null}
+
+      <div className="p-4 md:p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          {!isLive ? (
+            <Badge variant={eventBadgeVariant(event.event_type)}>{eventHeadline(event.event_type)}</Badge>
+          ) : null}
+          <Badge variant="outline" className="capitalize">
+            {event.transaction_type}
+          </Badge>
+          <Badge variant="secondary" className="capitalize">
+            {event.property_type || "property"}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {new Date(event.created_at).toLocaleString("en-AE", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </span>
+        </div>
+
+        <h3 className="mt-3 text-lg font-semibold leading-snug tracking-tight md:text-xl">
+          {event.title || "Untitled listing"}
+        </h3>
+
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            {event.area_name}
+            {meta?.sub_area ? ` · ${meta.sub_area}` : ""}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <User className="h-3.5 w-3.5 shrink-0" />
+            Owner {meta?.owner_name || event.actor_name}
+          </span>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-xl bg-muted/50 px-3 py-2">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Price</p>
+            <p className="mt-0.5 text-sm font-semibold">{formatPrice(event.price, event.transaction_type)}</p>
+          </div>
+          <div className="rounded-xl bg-muted/50 px-3 py-2">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Beds</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold">
+              <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
+              {event.bedrooms == null ? "—" : event.bedrooms === 0 ? "Studio" : event.bedrooms}
+            </p>
+          </div>
+          <div className="rounded-xl bg-muted/50 px-3 py-2">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Baths</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold">
+              <Bath className="h-3.5 w-3.5 text-muted-foreground" />
+              {meta?.bathrooms ?? "—"}
+            </p>
+          </div>
+          <div className="rounded-xl bg-muted/50 px-3 py-2">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Size</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+              {meta?.size ? `${meta.size.toLocaleString()} sqft` : "—"}
+            </p>
+          </div>
+        </div>
+
+        {meta?.availability || agency ? (
+          <div className="mt-3 space-y-1 rounded-xl border border-dashed bg-muted/20 px-3 py-2 text-sm">
+            {meta?.availability ? (
+              <p>
+                <span className="font-medium text-foreground">Availability:</span> {meta.availability}
+              </p>
+            ) : null}
+            {agency ? (
+              <p className="text-muted-foreground line-clamp-2">{agency}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            disabled={busyId === event.listing_id}
+            onClick={() => onShare(event.listing_id)}
+          >
+            {busyId === event.listing_id ? (
+              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Link2 className="mr-2 h-3.5 w-3.5" />
+            )}
+            Share link
+          </Button>
+          <Button size="sm" variant="outline" asChild>
+            <a href={`/app/inventory?highlight=${event.listing_id}`}>
+              View listing <ExternalLink className="ml-1 h-3.5 w-3.5" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    </article>
+  )
 }
 
 export default function TeamFeedPage() {
@@ -85,7 +250,7 @@ export default function TeamFeedPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Team Feed</h1>
           <p className="text-sm text-muted-foreground">
-            New live, pocket, and requests — share links without exposing owner contacts.
+            New live listings, pocket stock, and requests — with owner-safe sharing.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -152,51 +317,14 @@ export default function TeamFeedPage() {
             Feed is empty. New live / pocket / requests appear here automatically.
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-4 lg:grid-cols-2">
             {events.map((event) => (
-              <article
+              <FeedEventCard
                 key={event.id}
-                className="rounded-xl border bg-card p-4 shadow-sm"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">{eventLabel(event.event_type)}</Badge>
-                  <Badge variant="outline" className="capitalize">
-                    {event.transaction_type}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {event.actor_name} · {new Date(event.created_at).toLocaleString("en-AE")}
-                  </span>
-                </div>
-                <h3 className="mt-2 font-semibold leading-snug">{event.title || "Untitled"}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {event.area_name || "—"}
-                  {event.bedrooms != null ? ` · ${event.bedrooms === 0 ? "Studio" : `${event.bedrooms} BR`}` : ""}
-                  {event.property_type ? ` · ${event.property_type}` : ""}
-                </p>
-                <p className="mt-1 text-sm font-medium">
-                  {formatPrice(event.price, event.transaction_type)}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={busyId === event.listing_id}
-                    onClick={() => void copyLink(event.listing_id)}
-                  >
-                    {busyId === event.listing_id ? (
-                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Link2 className="mr-2 h-3.5 w-3.5" />
-                    )}
-                    Share link
-                  </Button>
-                  <Button size="sm" variant="ghost" asChild>
-                    <a href={`/app/inventory?highlight=${event.listing_id}`}>
-                      Open <ExternalLink className="ml-1 h-3.5 w-3.5" />
-                    </a>
-                  </Button>
-                </div>
-              </article>
+                event={event}
+                busyId={busyId}
+                onShare={(id) => void copyLink(id)}
+              />
             ))}
           </div>
         )}

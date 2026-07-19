@@ -11,7 +11,8 @@
     "zaylo:worker": "npm --prefix workers/zaylo-import-worker run zaylo:worker --",
     "zaylo:scrape": "npm --prefix workers/zaylo-import-worker run import-market",
     "zaylo:content": "npm --prefix workers/zaylo-import-worker run generate-content",
-    "reset:users": "tsx scripts/reset-team-users.ts"
+    "reset:users": "tsx scripts/reset-team-users.ts",
+    "seed:hampus-listings": "tsx scripts/seed-hampus-live-listings.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.25",
