@@ -78,6 +78,45 @@ function pickTopSubArea(rows: TxLite[]): string | null {
   return best
 }
 
+function pickTopSubAreas(rows: TxLite[], limit = 3): string | null {
+  const counts = new Map<string, number>()
+  for (const row of rows) {
+    const sub = row.sub_area?.trim()
+    if (!sub) continue
+    counts.set(sub, (counts.get(sub) || 0) + 1)
+  }
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit)
+  if (!ranked.length) return null
+  return ranked.map(([name]) => name).join(" · ")
+}
+
+function bedsMixLabel(rows: TxLite[]): string | null {
+  const counts = new Map<number, number>()
+  for (const row of rows) {
+    if (row.bedrooms == null) continue
+    counts.set(row.bedrooms, (counts.get(row.bedrooms) || 0) + 1)
+  }
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3)
+  if (!ranked.length) return null
+  return ranked
+    .map(([beds]) => (beds === 0 ? "Studio" : `${beds}BR`))
+    .join(" · ")
+}
+
+function sampleWindowLabel(rows: TxLite[]): string | null {
+  if (!rows.length) return null
+  const dates = rows
+    .map((r) => r.transaction_date)
+    .filter((d): d is string => Boolean(d))
+    .sort()
+  const n = rows.length
+  if (!dates.length) return `${n} txs in sample`
+  const oldest = dates[0]!
+  const newest = dates[dates.length - 1]!
+  if (oldest === newest) return `${n} txs · ${newest}`
+  return `${n} txs · ${oldest} → ${newest}`
+}
+
 function computeMetrics(
   focus: FocusCommunity,
   all: TxLite[],
@@ -101,6 +140,10 @@ function computeMetrics(
     .map((r) => Number(r.price_aed))
     .filter((n) => n > 0)
   const pps = useRows.map((r) => Number(r.price_per_sqft_aed)).filter((n) => n > 0)
+  const salePps = useRows
+    .filter((r) => r.transaction_type === "sale")
+    .map((r) => Number(r.price_per_sqft_aed))
+    .filter((n) => n > 0)
 
   const types = new Map<string, number>()
   for (const r of useRows) {
@@ -120,7 +163,11 @@ function computeMetrics(
     rentCount: rents.length,
     saleCount: sales.length,
     avgPricePerSqft: avg(pps),
+    salePricePerSqft: avg(salePps),
     propertyTypeHint,
+    bedsMix: bedsMixLabel(useRows),
+    topSubAreas: pickTopSubAreas(rows),
+    sampleWindow: sampleWindowLabel(useRows),
   }
 }
 
@@ -202,12 +249,15 @@ function pickInterestingTransactions(all: TxLite[], weekIndex: number): Highligh
     const community = row.community || row.master_community || "Dubai"
     const place = row.sub_area?.trim() ? `${row.sub_area}, ${community}` : community
     const prop = (row.property_type || "Property").replace(/town house/i, "Townhouse")
+    const pps = Number(row.price_per_sqft_aed)
     return {
       place,
       bedsLabel: formatBeds(row.bedrooms) || "—",
       propertyType: prop,
       priceLabel: formatPrice(Number(row.price_aed)),
       dealType: row.transaction_type === "rent" ? "rent" : "sale",
+      ppsLabel: pps > 0 ? `AED ${Math.round(pps).toLocaleString("en-AE")}/sqft` : null,
+      dateLabel: row.transaction_date || null,
     }
   })
 }

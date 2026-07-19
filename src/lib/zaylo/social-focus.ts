@@ -116,7 +116,15 @@ export type SocialPostMetrics = {
   rentCount: number
   saleCount: number
   avgPricePerSqft: number | null
+  /** Sale-only AED/sqft when available */
+  salePricePerSqft: number | null
   propertyTypeHint: string
+  /** e.g. "3BR · 4BR" — beds that dominate the sample */
+  bedsMix: string | null
+  /** Top sub-areas by volume, e.g. "Arabella · Al Ranim · Rahat" */
+  topSubAreas: string | null
+  /** Human window, e.g. "Last 90 days · 42 txs" */
+  sampleWindow: string | null
 }
 
 /** One row on the weekly "5 transactions" card — desk-framing, not closed-deal claims. */
@@ -126,6 +134,8 @@ export type HighlightTransaction = {
   propertyType: string
   priceLabel: string
   dealType: "sale" | "rent"
+  ppsLabel?: string | null
+  dateLabel?: string | null
 }
 
 export type BuiltSocialPost = {
@@ -197,7 +207,16 @@ export function buildCaption(
   const samples = metrics.rentCount + metrics.saleCount
   const trustLine =
     samples > 0
-      ? `Based on ${samples} recent Bayut transactions · ${metrics.propertyTypeHint}`
+      ? [
+          metrics.sampleWindow || `${samples} recent Bayut txs`,
+          metrics.propertyTypeHint,
+          metrics.bedsMix ? `Beds: ${metrics.bedsMix}` : null,
+          metrics.avgPricePerSqft
+            ? `~AED ${Math.round(metrics.avgPricePerSqft).toLocaleString("en-AE")}/sqft`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
       : "Needs fresh transaction import before posting"
 
   const hashtags = [
@@ -221,14 +240,20 @@ export function buildCaption(
       body = [
         `📍 ${place}`,
         ``,
-        `Rent avg: ${rent}`,
-        `Sale avg: ${sale}`,
+        `Rent avg: ${rent}${metrics.rentMedian ? ` · med ${formatAedCompact(metrics.rentMedian)}` : ""}`,
+        `Sale avg: ${sale}${metrics.saleMedian ? ` · med ${formatAedCompact(metrics.saleMedian)}` : ""}`,
+        metrics.avgPricePerSqft
+          ? `📐 ~AED ${Math.round(metrics.avgPricePerSqft).toLocaleString("en-AE")} / sqft`
+          : "",
+        metrics.bedsMix ? `🛏 ${metrics.bedsMix}` : "",
+        metrics.topSubAreas ? `🗺 Hot clusters: ${metrics.topSubAreas}` : "",
+        metrics.sampleWindow ? `📊 ${metrics.sampleWindow}` : "",
         ``,
         `This is the pulse — not the deal.`,
         `Layout, plot, street, and owner situation still move the price.`,
         ``,
         `Save this if you track Dubai land villas & townhouses.`,
-      ]
+      ].filter(Boolean)
       break
     case "sub_area_deep_dive":
       hook = metrics.subArea
@@ -324,7 +349,8 @@ export function buildWeeklyCaption(
 
   const lines = highlights.map((h, i) => {
     const type = h.dealType === "sale" ? "Sold" : "Rented"
-    return `${i + 1}. ${h.place} · ${h.bedsLabel} ${h.propertyType} · ${type} ${h.priceLabel}`
+    const extra = [h.ppsLabel, h.dateLabel].filter(Boolean).join(" · ")
+    return `${i + 1}. ${h.place} · ${h.bedsLabel} ${h.propertyType} · ${type} ${h.priceLabel}${extra ? ` · ${extra}` : ""}`
   })
 
   const hook = "This week on my desk — 5 transactions worth knowing"
@@ -363,7 +389,11 @@ export function emptyMetrics(label = "Dubai Land"): SocialPostMetrics {
     rentCount: 0,
     saleCount: 0,
     avgPricePerSqft: null,
+    salePricePerSqft: null,
     propertyTypeHint: "Villa / Townhouse",
+    bedsMix: null,
+    topSubAreas: null,
+    sampleWindow: null,
   }
 }
 

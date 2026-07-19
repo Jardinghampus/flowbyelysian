@@ -35,6 +35,10 @@ export function SocialCard({ post, agent, className, cardRef }: SocialCardProps)
   const isWeekly = post.concept === "weekly_transactions"
   const rent = formatAedCompact(post.metrics.rentAvg ?? post.metrics.rentMedian)
   const sale = formatAedCompact(post.metrics.saleAvg ?? post.metrics.saleMedian)
+  const rentMed = formatAedCompact(post.metrics.rentMedian)
+  const saleMed = formatAedCompact(post.metrics.saleMedian)
+  const ppsVal = post.metrics.salePricePerSqft ?? post.metrics.avgPricePerSqft
+  const pps = ppsVal ? `AED ${Math.round(ppsVal).toLocaleString("en-AE")}` : null
   const place = post.metrics.subArea
     ? `${post.metrics.subArea} · ${post.communityLabel}`
     : post.communityLabel
@@ -77,7 +81,7 @@ export function SocialCard({ post, agent, className, cardRef }: SocialCardProps)
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <p className="truncate text-2xl font-semibold tracking-tight">{agent.fullName}</p>
               <VerifiedIcon className="h-6 w-6 shrink-0 text-sky-400" fill="currentColor" />
             </div>
@@ -90,32 +94,34 @@ export function SocialCard({ post, agent, className, cardRef }: SocialCardProps)
           </span>
         </div>
 
-        <p className="mt-10 text-sm font-semibold uppercase tracking-[0.28em] text-sky-300/90">
+        <p className="mt-8 text-sm font-semibold uppercase tracking-[0.28em] text-sky-300/90">
           {post.scheduleLabel}
         </p>
-        <h2 className="mt-3 text-[52px] font-black leading-[1.05] tracking-tight">{post.headline}</h2>
-        <p className="mt-4 text-xl leading-relaxed text-white/70">{post.hook}</p>
+        <h2 className="mt-3 text-[48px] font-black leading-[1.05] tracking-tight">{post.headline}</h2>
+        <p className="mt-3 text-lg leading-relaxed text-white/70">{post.hook}</p>
 
         {isWeekly ? (
-          <div className="mt-10 flex flex-1 flex-col gap-4">
+          <div className="mt-8 flex flex-1 flex-col gap-3">
             {highlights.slice(0, 5).map((h, i) => (
               <div
                 key={`${h.place}-${i}`}
-                className="flex items-start gap-4 rounded-[22px] border border-white/10 bg-white/[0.06] px-5 py-4"
+                className="flex items-start gap-4 rounded-[20px] border border-white/10 bg-white/[0.06] px-5 py-3.5"
               >
                 <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black"
                   style={{ backgroundColor: TEAM_COLOR }}
                 >
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-lg font-semibold tracking-tight">{h.place}</p>
+                  <p className="truncate text-base font-semibold tracking-tight">{h.place}</p>
                   <p className="mt-0.5 text-sm text-white/50">
                     {h.bedsLabel} {h.propertyType} · {h.dealType === "sale" ? "Sale" : "Rent"}
+                    {h.ppsLabel ? ` · ${h.ppsLabel}` : ""}
+                    {h.dateLabel ? ` · ${h.dateLabel}` : ""}
                   </p>
                 </div>
-                <p className="shrink-0 text-lg font-black tracking-tight">{h.priceLabel}</p>
+                <p className="shrink-0 text-base font-black tracking-tight">{h.priceLabel}</p>
               </div>
             ))}
             {highlights.length < 5 ? (
@@ -126,38 +132,66 @@ export function SocialCard({ post, agent, className, cardRef }: SocialCardProps)
           </div>
         ) : (
           <>
-            <div className="mt-10 grid grid-cols-2 gap-5">
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.06] p-7">
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="rounded-[24px] border border-white/10 bg-white/[0.06] p-6">
                 <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300/90">
                   Rent avg
                 </p>
-                <p className="mt-3 text-4xl font-black tracking-tight">{rent}</p>
-                <p className="mt-2 text-sm text-white/45">{post.rentLabel}</p>
+                <p className="mt-2 text-4xl font-black tracking-tight">{rent}</p>
+                <p className="mt-1 text-sm text-white/45">
+                  {post.rentLabel}
+                  {rentMed !== "—" && rentMed !== rent ? ` · med ${rentMed}` : ""}
+                </p>
               </div>
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.06] p-7">
+              <div className="rounded-[24px] border border-white/10 bg-white/[0.06] p-6">
                 <p className="text-xs font-semibold uppercase tracking-wider text-sky-300/90">
                   Sale avg
                 </p>
-                <p className="mt-3 text-4xl font-black tracking-tight">{sale}</p>
-                <p className="mt-2 text-sm text-white/45">{post.saleLabel}</p>
+                <p className="mt-2 text-4xl font-black tracking-tight">{sale}</p>
+                <p className="mt-1 text-sm text-white/45">
+                  {post.saleLabel}
+                  {saleMed !== "—" && saleMed !== sale ? ` · med ${saleMed}` : ""}
+                </p>
               </div>
             </div>
 
-            <div className="mt-6 rounded-[28px] border border-dashed border-white/15 bg-black/20 px-6 py-5">
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="rounded-[18px] border border-white/10 bg-black/25 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/45">AED/sqft</p>
+                <p className="mt-1 text-lg font-black tracking-tight">{pps || "—"}</p>
+              </div>
+              <div className="rounded-[18px] border border-white/10 bg-black/25 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/45">Beds</p>
+                <p className="mt-1 truncate text-lg font-black tracking-tight">
+                  {post.metrics.bedsMix || "—"}
+                </p>
+              </div>
+              <div className="rounded-[18px] border border-white/10 bg-black/25 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/45">Sample</p>
+                <p className="mt-1 text-lg font-black tracking-tight">
+                  {post.metrics.rentCount + post.metrics.saleCount || "—"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[22px] border border-dashed border-white/15 bg-black/20 px-5 py-4">
               <p className="text-base font-medium text-white/80">{place}</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/50">{post.trustLine}</p>
+              {post.metrics.topSubAreas ? (
+                <p className="mt-1 text-sm text-white/55">Clusters: {post.metrics.topSubAreas}</p>
+              ) : null}
+              <p className="mt-2 text-sm leading-relaxed text-white/45">{post.trustLine}</p>
             </div>
           </>
         )}
 
-        <div className="mt-auto pt-8">
+        <div className="mt-auto pt-6">
           <div
-            className="rounded-full px-6 py-5 text-center text-xl font-bold text-white"
+            className="rounded-full px-6 py-4 text-center text-xl font-bold text-white"
             style={{ backgroundColor: TEAM_COLOR }}
           >
             {agent.phone ? `${agent.fullName} · ${agent.phone}` : `DM "Market"`}
           </div>
-          <p className="mt-4 text-center text-sm text-white/40">
+          <p className="mt-3 text-center text-sm text-white/40">
             {agent.company || "Derrick Signature Properties LLC"} ·{" "}
             {agent.website || "derricksignatureproperties.ae"}
           </p>
