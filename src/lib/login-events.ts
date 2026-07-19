@@ -3,6 +3,8 @@ import type { LocalRole } from "@/lib/local-auth"
 
 export const SESSION_ACTIVE_DAYS = 14
 
+export type LoginEventOutcome = "login" | "not_you"
+
 export type LoginEventRow = {
   id: string
   user_id: string | null
@@ -12,6 +14,7 @@ export type LoginEventRow = {
   ip_address: string | null
   user_agent: string | null
   logged_in_at: string
+  outcome: LoginEventOutcome
 }
 
 export type TeamLoginStatus = {
@@ -31,12 +34,13 @@ async function loginEventsTable() {
 }
 
 export async function recordLoginEvent(input: {
-  userId: string
+  userId: string | null
   email: string
   fullName: string
   role: LocalRole
   ipAddress?: string | null
   userAgent?: string | null
+  outcome?: LoginEventOutcome
 }) {
   const table = await loginEventsTable()
   const { error } = await table.insert({
@@ -46,6 +50,7 @@ export async function recordLoginEvent(input: {
     role: input.role,
     ip_address: input.ipAddress || null,
     user_agent: input.userAgent || null,
+    outcome: input.outcome ?? "login",
   })
 
   if (error) {
@@ -81,7 +86,9 @@ export async function getTeamLoginStatus(): Promise<TeamLoginStatus[]> {
   return ((users || []) as { id: string; email: string; full_name: string; role: LocalRole }[]).map(
     (user) => {
       const userEvents = events.filter(
-        (event) => event.user_id === user.id || event.email.toLowerCase() === user.email.toLowerCase()
+        (event) =>
+          (event.user_id === user.id || event.email.toLowerCase() === user.email.toLowerCase()) &&
+          (event.outcome ?? "login") === "login"
       )
       const lastLoginAt = userEvents[0]?.logged_in_at ?? null
       return {

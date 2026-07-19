@@ -12,6 +12,13 @@ export function isHampusEmail(email: string | null | undefined): boolean {
   )
 }
 
+/** True when a sign-in form targets Hampus (alias or email). */
+export function isHampusLoginAttempt(raw: string, normalizedEmail?: string) {
+  if (isHampusEmail(raw)) return true
+  const normalized = (normalizedEmail || raw).trim().toLowerCase()
+  return normalized === HAMPUS_EMAIL
+}
+
 /** Page paths (and subpaths) that only Hampus may access. */
 export const HAMPUS_ONLY_PATHS = [
   "/zaylo",

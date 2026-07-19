@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { isLocalAuthEnabled } from "@/lib/auth-mode"
+import { HAMPUS_EMAIL, isHampusLoginAttempt } from "@/lib/hampus-access"
 import {
   LOCAL_SESSION_COOKIE,
   bootstrapAdminIfEmpty,
@@ -20,6 +21,21 @@ function clientIp(request: NextRequest) {
   )
 }
 
+async function recordHampusNotYouAttempt(
+  request: NextRequest,
+  user: { id: string; full_name: string; role: "admin" | "agent" } | null
+) {
+  await recordLoginEvent({
+    userId: user?.id ?? null,
+    email: HAMPUS_EMAIL,
+    fullName: "Not you",
+    role: user?.role ?? "admin",
+    ipAddress: clientIp(request),
+    userAgent: request.headers.get("user-agent"),
+    outcome: "not_you",
+  })
+}
+
 export async function POST(request: NextRequest) {
   if (!isLocalAuthEnabled) {
     return NextResponse.json({ error: "Local auth is not enabled" }, { status: 400 })
@@ -38,12 +54,19 @@ export async function POST(request: NextRequest) {
 
     const email = normalizeLoginEmail(emailRaw)
     const user = await findUserByEmail(email)
+    const hampusAttempt = isHampusLoginAttempt(emailRaw, email)
 
     if (!user || user.status !== "active") {
+      if (hampusAttempt) {
+        await recordHampusNotYouAttempt(request, user)
+      }
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
     }
 
     if (!verifyPassword(password, user.password_hash)) {
+      if (hampusAttempt) {
+        await recordHampusNotYouAttempt(request, user)
+      }
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
     }
 
@@ -57,6 +80,7 @@ export async function POST(request: NextRequest) {
       role: sessionUser.role,
       ipAddress: clientIp(request),
       userAgent: request.headers.get("user-agent"),
+      outcome: "login",
     })
 
     const response = NextResponse.json({

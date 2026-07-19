@@ -35,6 +35,7 @@ type LoginEvent = {
   ip_address: string | null
   user_agent: string | null
   logged_in_at: string
+  outcome?: "login" | "not_you"
 }
 
 function formatWhen(iso: string | null) {
@@ -101,6 +102,7 @@ export default function InloggadePage() {
   }
 
   const activeCount = team.filter((m) => m.likelyActive).length
+  const notYouCount = events.filter((e) => e.outcome === "not_you").length
 
   return (
     <div className="space-y-6">
@@ -147,10 +149,8 @@ export default function InloggadePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Senaste inloggning</CardDescription>
-            <CardTitle className="text-lg font-semibold">
-              {formatWhen(events[0]?.logged_in_at ?? null)}
-            </CardTitle>
+            <CardDescription>Not you (Hampus)</CardDescription>
+            <CardTitle className="text-3xl text-red-600 dark:text-red-400">{notYouCount}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -194,7 +194,7 @@ export default function InloggadePage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Inloggningslogg</CardTitle>
-          <CardDescription>Varje lyckad inloggning med tid och enhet</CardDescription>
+          <CardDescription>Lyckade inloggningar och misslyckade Hampus-försök</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {loading && events.length === 0 ? (
@@ -209,6 +209,7 @@ export default function InloggadePage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Status</TableHead>
                   <TableHead>Namn</TableHead>
                   <TableHead>E-post</TableHead>
                   <TableHead>Roll</TableHead>
@@ -218,8 +219,20 @@ export default function InloggadePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {events.map((event) => (
-                  <TableRow key={event.id}>
+                {events.map((event) => {
+                  const suspicious = event.outcome === "not_you"
+                  return (
+                  <TableRow
+                    key={event.id}
+                    className={suspicious ? "bg-red-50/80 dark:bg-red-950/20" : undefined}
+                  >
+                    <TableCell>
+                      {suspicious ? (
+                        <Badge variant="destructive">Not you</Badge>
+                      ) : (
+                        <Badge variant="outline">OK</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{event.full_name}</TableCell>
                     <TableCell className="text-muted-foreground">{event.email}</TableCell>
                     <TableCell>
@@ -235,7 +248,8 @@ export default function InloggadePage() {
                       {shortAgent(event.user_agent)}
                     </TableCell>
                   </TableRow>
-                ))}
+                  )
+                })}
               </TableBody>
             </Table>
           )}
