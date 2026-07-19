@@ -440,6 +440,9 @@ export async function GET() {
       "price_update",
       "weekly_transactions",
       "what_id_buy",
+      "listing_as_brand",
+      "first_impression",
+      "seller_questions",
     ]
 
     return NextResponse.json({

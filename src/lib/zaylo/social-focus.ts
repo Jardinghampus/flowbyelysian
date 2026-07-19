@@ -19,6 +19,9 @@ export type PostConcept =
   | "price_update"
   | "weekly_transactions"
   | "what_id_buy"
+  | "listing_as_brand"
+  | "first_impression"
+  | "seller_questions"
 
 export type FocusCommunity = {
   id: FocusCommunityId
@@ -87,30 +90,34 @@ export type ScheduleSlot = {
  * Day = day-of-month (1–28).
  */
 export const MONTHLY_POST_SCHEDULE: ScheduleSlot[] = [
-  { day: 1, communityId: "arabian-ranches", concept: "market_pulse", label: "AR rent vs sale pulse", roiRole: "authority" },
+  { day: 1, communityId: "arabian-ranches", concept: "first_impression", label: "AR 8-second hook", roiRole: "reach" },
   { day: 2, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 1", roiRole: "proof" },
   { day: 3, communityId: "mudon", concept: "education", label: "Mudon education", roiRole: "trust" },
   { day: 4, communityId: "mudon", concept: "sub_area_deep_dive", label: "Mudon sub-area deep dive", roiRole: "authority" },
   { day: 5, communityId: "town-square", concept: "what_id_buy", label: "What I'd buy · Town Square", roiRole: "desire" },
-  { day: 6, communityId: "villanova", concept: "viral_hook", label: "Villanova viral hook", roiRole: "reach" },
+  { day: 6, communityId: "villanova", concept: "seller_questions", label: "3 questions before you list", roiRole: "desire" },
+  { day: 7, communityId: "dubai-hills", concept: "listing_as_brand", label: "List like a brand · DH", roiRole: "desire" },
   { day: 8, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 2", roiRole: "proof" },
   { day: 9, communityId: "dubai-hills", concept: "education", label: "Dubai Hills education", roiRole: "trust" },
   { day: 10, communityId: "dubai-hills", concept: "price_update", label: "Dubai Hills price update", roiRole: "desire" },
   { day: 11, communityId: "mira-oasis", concept: "market_pulse", label: "Mira Oasis pulse", roiRole: "authority" },
   { day: 12, communityId: "arabian-ranches", concept: "sub_area_deep_dive", label: "AR cluster deep dive", roiRole: "authority" },
   { day: 13, communityId: "arabian-ranches", concept: "what_id_buy", label: "What I'd buy · AR", roiRole: "desire" },
+  { day: 14, communityId: "mudon", concept: "listing_as_brand", label: "List like a brand · Mudon", roiRole: "desire" },
   { day: 15, communityId: "mudon", concept: "viral_hook", label: "Mudon viral hook", roiRole: "reach" },
   { day: 16, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 3", roiRole: "proof" },
   { day: 17, communityId: "town-square", concept: "education", label: "Town Square education", roiRole: "trust" },
   { day: 18, communityId: "town-square", concept: "price_update", label: "Town Square price update", roiRole: "desire" },
   { day: 19, communityId: "villanova", concept: "sub_area_deep_dive", label: "Villanova deep dive", roiRole: "authority" },
-  { day: 20, communityId: "villanova", concept: "education", label: "Villanova education", roiRole: "trust" },
+  { day: 20, communityId: "villanova", concept: "first_impression", label: "Villanova 8-second hook", roiRole: "reach" },
+  { day: 21, communityId: "mira-oasis", concept: "seller_questions", label: "Seller questions · Mira", roiRole: "desire" },
   { day: 22, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 4", roiRole: "proof" },
   { day: 23, communityId: "mira-oasis", concept: "sub_area_deep_dive", label: "Mira Oasis deep dive", roiRole: "authority" },
   { day: 24, communityId: "mira-oasis", concept: "what_id_buy", label: "What I'd buy · Mira", roiRole: "desire" },
   { day: 25, communityId: "dubai-hills", concept: "market_pulse", label: "Dubai Hills pulse", roiRole: "authority" },
-  { day: 26, communityId: "arabian-ranches", concept: "viral_hook", label: "AR viral (bonus)", roiRole: "reach" },
+  { day: 26, communityId: "arabian-ranches", concept: "listing_as_brand", label: "List like a brand · AR", roiRole: "desire" },
   { day: 27, communityId: "town-square", concept: "market_pulse", label: "Town Square pulse", roiRole: "authority" },
+  { day: 28, communityId: "villanova", concept: "viral_hook", label: "Villanova brand hook", roiRole: "reach" },
 ]
 
 export type SocialPostMetrics = {
@@ -197,6 +204,12 @@ export function conceptLabel(concept: PostConcept): string {
       return "New Transactions"
     case "what_id_buy":
       return "What I'd Buy"
+    case "listing_as_brand":
+      return "List Like a Brand"
+    case "first_impression":
+      return "8-Second Hook"
+    case "seller_questions":
+      return "Seller Questions"
   }
 }
 
@@ -459,6 +472,90 @@ export function buildCaption(
         `If your budget sits near this band, message me "Shortlist" and I will send three options with comps.`,
       ].filter(Boolean)
       break
+    case "listing_as_brand":
+      hook = `Portal ads don't sell. Brands do — ${focus.label}`
+      headline = "LIST LIKE A BRAND"
+      igBody = [
+        `If you're selling in ${focus.label}:`,
+        ``,
+        `Photos are expected.`,
+        `Video + story + reach = competition on price.`,
+        ``,
+        `Sale pulse: ${sale}`,
+        `Rent pulse: ${rent}`,
+        ``,
+        `DM "Owner" for a street-level brand plan.`,
+      ]
+      liBody = [
+        `Sell your home in ${focus.label} like a luxury brand — not a portal ad.`,
+        ``,
+        `Luxury buyers purchase lifestyle and perception. The way a property is positioned changes the offers it attracts.`,
+        ``,
+        `My desk approach:`,
+        `1) Emotion — a short lifestyle clip, not only stills`,
+        `2) Story — street, plot, light, layout (not just bed count)`,
+        `3) Reach — my Market Desk audience on Instagram + LinkedIn, plus comps from live transactions`,
+        `4) Positioning — rare opportunity framing backed by this week's numbers (sale ${sale} · rent ${rent})`,
+        ``,
+        `If you want a quiet read on your home before you list, message me "Owner".`,
+      ]
+      break
+    case "first_impression":
+      hook = `${sale} — that's the ${focus.label} sale pulse. 8 seconds.`
+      headline = "8 SECONDS"
+      igBody = [
+        `${focus.label.toUpperCase()}`,
+        ``,
+        `Sale: ${sale}`,
+        `Rent: ${rent}`,
+        metrics.topSubAreas ? `Clusters: ${metrics.topSubAreas}` : "",
+        ``,
+        `You have 8 seconds online.`,
+        `I lead with the number — then the deal.`,
+        ``,
+        `DM "Market"`,
+      ].filter(Boolean)
+      liBody = [
+        `First impression — ${focus.label}`,
+        ``,
+        `Attention is scarce. I lead with one clear number, then context.`,
+        ``,
+        `Sale average in sample: ${sale}. Rent: ${rent}.`,
+        metrics.sampleWindow ? `Sample window: ${metrics.sampleWindow}.` : "",
+        ``,
+        `The brand people hire is the one that shows up with clarity — every week — in the communities that matter.`,
+        ``,
+        `Message "Market" for a private shortlist.`,
+      ].filter(Boolean)
+      break
+    case "seller_questions":
+      hook = `3 questions to ask before you list in ${focus.label}`
+      headline = "BEFORE YOU LIST"
+      igBody = [
+        `1) How will you use video — not just photos?`,
+        `2) What reach beyond the portal?`,
+        `3) How do you elevate perception so buyers compete?`,
+        ``,
+        `Vague answers = value left on the table.`,
+        ``,
+        `${focus.label} pulse → Sale ${sale} · Rent ${rent}`,
+        ``,
+        `DM "Owner"`,
+      ]
+      liBody = [
+        `Before you list in ${focus.label}, ask your agent these three questions:`,
+        ``,
+        `1) How will you use video to tell the story of my home — not only still photography?`,
+        `2) What reach do you have beyond local portal browsers (your own audience, expats, investors)?`,
+        `3) How will your marketing elevate perception so buyers compete — instead of me competing on price?`,
+        ``,
+        `If the answers are unclear, you may be leaving value on the table.`,
+        ``,
+        `Current desk pulse for context: sale ${sale} · rent ${rent}.`,
+        ``,
+        `I market Dubai land homes like a brand campaign on top of live comps. Message "Owner" for a street-level plan.`,
+      ]
+      break
     case "weekly_transactions":
       hook = "This week on my desk"
       headline = "NEW TRANSACTIONS"
@@ -584,6 +681,18 @@ Rule: never cold without this week's proof asset.`,
 
 If useful, I can send 3 options + why each fits. Reply "Shortlist".
 Attach this week's PNG when you send.`,
+  ownerBrandPitch: `I don't list homes as portal ads. I market them like a brand.
+
+For your home in {community}:
+1) Lifestyle clip + stills
+2) Comps from my weekly Dubai Land desk
+3) Distribution to people who already follow Market Desk
+4) Quiet owner strategy if you want off-market first
+
+Ask any agent: video? reach beyond portal? perception that makes buyers compete?
+Vague answers = value left on the table.
+
+Reply "Owner".`,
 }
 
 export const SOCIAL_POST_IDEAS = [

@@ -36,10 +36,19 @@ import {
   SOCIAL_EXPORT_HEIGHT,
   SOCIAL_EXPORT_WIDTH,
   conceptLabel,
+  formatAedCompact,
   roiRoleLabel,
   type BuiltSocialPost,
   type FocusCommunityId,
 } from "@/lib/zaylo/social-focus"
+import {
+  BRAND_QUARTERLY_CHECK,
+  HAMPUS_BRAND_BIBLE,
+  LISTING_AS_BRAND_PITCH,
+  REEL_SCRIPTS,
+  fillCommunity,
+} from "@/lib/zaylo/serhant-playbook"
+import { MEDIA_DESK_DAILY_SOP, STORIES_OVERLAY_LINES } from "@/lib/zaylo/media-desk-sop"
 
 type AgentPayload = {
   fullName: string
@@ -55,6 +64,7 @@ type Playbook = {
   liReply: string
   coldOwner: string
   coldBuyer: string
+  ownerBrandPitch?: string
 }
 
 type ApiPayload = {
@@ -234,7 +244,11 @@ export default function MediaDeskPage() {
 
   const copyPlaybook = async (key: keyof Playbook) => {
     if (!data?.playbook) return
-    let text = data.playbook[key]
+    let text = data.playbook[key] || ""
+    if (key === "ownerBrandPitch" && !text) {
+      text = LISTING_AS_BRAND_PITCH.ownerPitchScript
+    }
+    if (!text) return
     if (selected) {
       text = text
         .replace(/\{community\}/g, selected.communityLabel)
@@ -518,7 +532,7 @@ export default function MediaDeskPage() {
                   <BookOpen className="h-4 w-4" />
                   Playbook
                 </CardTitle>
-                <CardDescription>DM reply · LI reply · cold with proof</CardDescription>
+                <CardDescription>DM · LI · cold with proof · list-like-a-brand</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" onClick={() => void copyPlaybook("dmReply")}>
@@ -532,6 +546,126 @@ export default function MediaDeskPage() {
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => void copyPlaybook("coldBuyer")}>
                   Cold buyer + proof
+                </Button>
+                <Button size="sm" variant="default" onClick={() => void copyPlaybook("ownerBrandPitch")}>
+                  Owner brand pitch
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Brand bible (Serhant Step 1)</CardTitle>
+                <CardDescription>Identity · audience · 8-second rule</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="font-medium">{HAMPUS_BRAND_BIBLE.identity}</p>
+                <p className="text-muted-foreground">{HAMPUS_BRAND_BIBLE.superpower}</p>
+                <p className="text-xs text-muted-foreground">{HAMPUS_BRAND_BIBLE.eightSecondHook}</p>
+                <p className="text-xs text-muted-foreground">{HAMPUS_BRAND_BIBLE.consistencyRule}</p>
+                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  {BRAND_QUARTERLY_CHECK.map((item) => (
+                    <li key={item}>· {item}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">List like a brand</CardTitle>
+                <CardDescription>Seller questions + luxury listing pillars</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <ol className="list-decimal space-y-1 pl-4 text-muted-foreground">
+                  {LISTING_AS_BRAND_PITCH.sellerQuestions.map((q) => (
+                    <li key={q}>{q}</li>
+                  ))}
+                </ol>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const community = selected?.communityLabel || "Mudon"
+                    await navigator.clipboard.writeText(
+                      fillCommunity(LISTING_AS_BRAND_PITCH.ownerPitchScript, community)
+                    )
+                    toast.success("Owner listing-brand script copied")
+                  }}
+                >
+                  Copy full owner pitch
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Reel scripts (video &gt; photos)</CardTitle>
+                <CardDescription>15s educate + entertain — Serhant media presence</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {REEL_SCRIPTS.map((reel) => (
+                  <div key={reel.id} className="rounded-lg border p-2.5 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold">{reel.title}</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7"
+                        onClick={async () => {
+                          const community = selected?.communityLabel || "Dubai Land"
+                          const text = [
+                            reel.title,
+                            "",
+                            ...reel.beats,
+                            "",
+                            fillCommunity(reel.captionHook, community),
+                          ].join("\n")
+                          await navigator.clipboard.writeText(text)
+                          toast.success("Reel script copied")
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                    <ul className="mt-1 space-y-0.5 text-muted-foreground">
+                      {reel.beats.map((b) => (
+                        <li key={b}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Daily SOP + Stories lines</CardTitle>
+                <CardDescription>Broadcast consistently — then measure DMs</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-xs">
+                <ol className="list-decimal space-y-1 pl-4 text-muted-foreground">
+                  {MEDIA_DESK_DAILY_SOP.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ol>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    if (!selected) return
+                    const sale = formatAedCompact(
+                      selected.metrics.saleAvg ?? selected.metrics.saleMedian
+                    )
+                    const rent = formatAedCompact(
+                      selected.metrics.rentAvg ?? selected.metrics.rentMedian
+                    )
+                    const lines = STORIES_OVERLAY_LINES(selected.communityLabel, sale, rent)
+                    await navigator.clipboard.writeText(lines.join("\n"))
+                    toast.success("Stories overlay lines copied")
+                  }}
+                >
+                  Copy Stories overlays
                 </Button>
               </CardContent>
             </Card>

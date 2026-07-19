@@ -146,11 +146,20 @@ export function ScraperUpdateCard() {
 
         {!status?.workerConfigured ? (
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            Queues listings + TX scrapes. Run worker to execute:{" "}
+            Queues listings + TX scrapes. Run worker:{" "}
             <code className="text-[9px]">pnpm zaylo:worker -- --job process-queue</code>
+            {" · "}
+            <a href="/app/social-posts" className="underline">
+              Open Media Desk
+            </a>
           </p>
         ) : (
-          <p className="text-[10px] text-muted-foreground">Worker webhook configured — Update will trigger it.</p>
+          <p className="text-[10px] text-muted-foreground">
+            Worker webhook configured — Update will trigger it.{" "}
+            <a href="/app/social-posts" className="underline">
+              Media Desk
+            </a>
+          </p>
         )}
       </div>
     </div>

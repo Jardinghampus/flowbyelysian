@@ -34,11 +34,14 @@ export default function MarketMagnetPage() {
     <div className="min-h-screen bg-[#f7f5f0] text-slate-900">
       <div className="mx-auto max-w-3xl px-6 py-16">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-          Dubai Land · Villas & Townhouses
+          Dubai Land · Villas & Townhouses · Market Desk
         </p>
-        <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Market pulse</h1>
+        <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
+          The numbers landlords and buyers actually use
+        </h1>
         <p className="mt-3 max-w-xl text-lg text-slate-600">
-          Live rent and sale bands for the communities Hampus tracks every week — not Marina, not Downtown.
+          Not a brokerage ad. A weekly desk for Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai
+          Hills & Town Square — comps first, then the shortlist.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-2">
@@ -76,7 +79,18 @@ export default function MarketMagnetPage() {
                   <p className="mt-1 text-sm text-slate-500">{pulse.saleCount} transactions</p>
                 </div>
               </div>
-              <p className="mt-6 text-sm text-slate-600">{pulse.cta}</p>
+              <p className="mt-6 text-sm text-slate-600">
+                {pulse.cta} Brands are built in public — this desk is how Hampus shows the work before
+                the viewing.
+              </p>
+              <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <p className="font-semibold text-slate-800">Before you list — ask any agent:</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-4">
+                  <li>How will you use video, not just photos?</li>
+                  <li>What reach beyond the portal?</li>
+                  <li>How do you make buyers compete on perception?</li>
+                </ol>
+              </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button asChild style={{ backgroundColor: TEAM_COLOR }}>
                   <a href="https://instagram.com" target="_blank" rel="noreferrer">
