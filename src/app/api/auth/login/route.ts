@@ -10,6 +10,15 @@ import {
   toSessionUser,
   verifyPassword,
 } from "@/lib/local-auth"
+import { recordLoginEvent } from "@/lib/login-events"
+
+function clientIp(request: NextRequest) {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    null
+  )
+}
 
 export async function POST(request: NextRequest) {
   if (!isLocalAuthEnabled) {
@@ -40,6 +49,16 @@ export async function POST(request: NextRequest) {
 
     const sessionUser = toSessionUser(user)
     const token = createSessionToken(sessionUser)
+
+    await recordLoginEvent({
+      userId: sessionUser.id,
+      email: sessionUser.email,
+      fullName: sessionUser.fullName,
+      role: sessionUser.role,
+      ipAddress: clientIp(request),
+      userAgent: request.headers.get("user-agent"),
+    })
+
     const response = NextResponse.json({
       user: {
         id: sessionUser.id,

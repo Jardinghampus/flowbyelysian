@@ -24,6 +24,7 @@ export const HAMPUS_ONLY_PATHS = [
   "/app/mail",
   "/app/smart",
   "/app/ai-assistant",
+  "/inloggade",
 ] as const
 
 export function isHampusOnlyPath(pathname: string | null | undefined): boolean {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth, currentUser, DEMO_USER_ID } from "@/lib/demo-auth"
 import { isClerkAuthEnabled, isLocalAuthEnabled } from "@/lib/auth-mode"
+import { isHampusEmail } from "@/lib/hampus-access"
 
 type ApiRole = "admin" | "manager" | "operator" | "agent"
 
@@ -98,6 +99,17 @@ export async function requireSocialAccess(): Promise<GuardResult> {
 
   if (!guard.context.canAccessSocial) {
     return { ok: false, response: forbidden("Social media access is limited to Hampus.") }
+  }
+
+  return guard
+}
+
+export async function requireHampusUser(): Promise<GuardResult> {
+  const guard = await requireApiUser()
+  if (!guard.ok) return guard
+
+  if (!isHampusEmail(guard.context.email)) {
+    return { ok: false, response: forbidden("Only Hampus can access this.") }
   }
 
   return guard

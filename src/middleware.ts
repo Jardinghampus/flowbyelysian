@@ -13,6 +13,7 @@ const isProtectedRoute = createRouteMatcher([
   "/user(.*)",
   "/dashboard(.*)",
   "/zaylo(.*)",
+  "/inloggade(.*)",
   "/inventory(.*)",
   "/pipeline(.*)",
   "/api/admin(.*)",
