@@ -157,14 +157,14 @@ export function createSocialDraft(metric: MarketMetric): SocialPostDraft {
     headline: `${metric.beds}BR ${metric.propertyType.toLowerCase()} pulse`,
     body: `Rental avg: ${rent}\nSelling avg: ${sale}`,
     trustLine: dataWarning,
-    cta: `DM "${metric.subCommunity}" and I will send the current range.`,
+    cta: `Write "Market" in DM and I'll get back to you.`,
     caption: [
       `${area} ${metric.beds}BR ${metric.propertyType.toLowerCase()} pulse.`,
       `Rental average: ${rent}.`,
       `Selling average: ${sale}.`,
       dataWarning,
       "The edge is not guessing the headline number. It is knowing which layout, plot, street, and owner situation changes the deal.",
-      `DM me "${metric.subCommunity}" if you want the latest range for your exact unit.`,
+      `Write "Market" in DM and I'll get back to you.`,
     ].join("\n\n"),
   }
 }

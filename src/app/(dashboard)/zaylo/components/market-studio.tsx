@@ -392,27 +392,28 @@ function PostSvg({ metric }: { metric: MarketMetric }) {
     <svg data-market-post-svg viewBox="0 0 1350 1080" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
       <defs>
         <linearGradient id="zayloPostBg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#0b0f19" />
+          <stop offset="0%" stopColor="#0b1220" />
           <stop offset="48%" stopColor="#111827" />
-          <stop offset="100%" stopColor="#052e2b" />
+          <stop offset="100%" stopColor="#1e3a5f" />
         </linearGradient>
       </defs>
       <rect width="1350" height="1080" fill="url(#zayloPostBg)" />
       <rect x="58" y="58" width="1234" height="964" rx="34" fill="none" stroke="#f8fafc" strokeOpacity="0.22" strokeWidth="2" />
-      <text x="92" y="128" fill="#67e8f9" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">{warning}</text>
+      <text x="92" y="128" fill="#93c5fd" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">{warning}</text>
       <text x="92" y="216" fill="#f8fafc" fontFamily="Inter, Arial" fontSize="78" fontWeight="900">{headline}</text>
       <text x="92" y="286" fill="#d1d5db" fontFamily="Inter, Arial" fontSize="42" fontWeight="700">{sub}</text>
       <rect x="92" y="372" width="552" height="230" rx="26" fill="#f8fafc" fillOpacity="0.08" stroke="#f8fafc" strokeOpacity="0.18" />
-      <text x="128" y="440" fill="#a7f3d0" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">RENTAL AVG</text>
+      <text x="128" y="440" fill="#93c5fd" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">RENTAL AVG</text>
       <text x="128" y="535" fill="#f8fafc" fontFamily="Inter, Arial" fontSize="74" fontWeight="950">{rent}</text>
       <rect x="706" y="372" width="552" height="230" rx="26" fill="#f8fafc" fillOpacity="0.08" stroke="#f8fafc" strokeOpacity="0.18" />
-      <text x="742" y="440" fill="#bfdbfe" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">SELLING AVG</text>
+      <text x="742" y="440" fill="#93c5fd" fontFamily="Inter, Arial" fontSize="34" fontWeight="800">SELLING AVG</text>
       <text x="742" y="535" fill="#f8fafc" fontFamily="Inter, Arial" fontSize="74" fontWeight="950">{sale}</text>
       <text x="92" y="708" fill="#f8fafc" fontFamily="Inter, Arial" fontSize="58" fontWeight="900">The headline number is not enough.</text>
       <text x="92" y="776" fill="#d1d5db" fontFamily="Inter, Arial" fontSize="34" fontWeight="600">The deal changes by layout, plot, street, and owner situation.</text>
-      <rect x="92" y="860" width="752" height="86" rx="43" fill="#67e8f9" />
-      <text x="136" y="916" fill="#082f49" fontFamily="Inter, Arial" fontSize="34" fontWeight="900">DM "{metric.subCommunity}" FOR THE RANGE</text>
-      <text x="1046" y="916" fill="#f8fafc" fontFamily="Inter, Arial" fontSize="32" fontWeight="900">ZAYLO</text>
+      <rect x="92" y="860" width="1166" height="86" rx="43" fill="#1e3a5f" />
+      <text x="136" y="916" fill="#ffffff" fontFamily="Inter, Arial" fontSize="32" fontWeight="900">
+        Write &quot;Market&quot; in DM and I&apos;ll get back to you
+      </text>
     </svg>
   )
 }

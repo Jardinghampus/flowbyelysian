@@ -226,7 +226,7 @@ export function buildCaption(
         `Two homes on the same street can be AED hundreds of thousands apart.`,
         `I track ${focus.label} so you don't buy the average.`,
         ``,
-        `Comment "${metrics.subArea || focus.label}" and I'll send the current range.`,
+        `Comment "Market" in DM and I'll get back to you.`,
       ]
       break
     case "education":
@@ -274,7 +274,7 @@ export function buildCaption(
           : "",
         ``,
         `Bookmark this for your next viewing week.`,
-        `DM "${focus.label}" for the exact unit range.`,
+        `Write "Market" in DM and I'll get back to you.`,
       ].filter(Boolean)
       break
   }
