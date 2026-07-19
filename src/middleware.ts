@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { LOCAL_SESSION_COOKIE, parseSessionToken } from "@/lib/local-auth-edge"
+import { isHampusEmail, isHampusOnlyPath } from "@/lib/hampus-access"
 
 const authMode = (process.env.AUTH_MODE || "local").toLowerCase()
 const isClerkAuthEnabled = authMode === "clerk"
@@ -101,6 +102,13 @@ async function localAuthMiddleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = "/app/dashboard"
     url.searchParams.set("error", "social-restricted")
+    return NextResponse.redirect(url)
+  }
+
+  if (isHampusOnlyPath(request.nextUrl.pathname) && !isHampusEmail(session.email)) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/app/dashboard"
+    url.searchParams.set("error", "hampus-only")
     return NextResponse.redirect(url)
   }
 

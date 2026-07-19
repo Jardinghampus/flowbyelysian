@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 
-const DEFAULT_TEAM_SLUG = "flow-by-elysian"
+const DEFAULT_TEAM_SLUG = "zaylo"
 
 export async function getDefaultTeamId(supabase: SupabaseClient): Promise<string | null> {
   const { data, error } = await supabase

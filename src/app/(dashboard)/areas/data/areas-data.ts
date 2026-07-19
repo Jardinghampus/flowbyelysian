@@ -121,7 +121,7 @@ export const areasData: Area[] = [
         commission: 32000,
         listings: 54,
         phone: "+971 50 123 4567",
-        email: "paola@elysian.ae",
+        email: "paola@zaylo.ae",
       },
       {
         id: "a2",
@@ -131,7 +131,7 @@ export const areasData: Area[] = [
         commission: 65000,
         listings: 100,
         phone: "+971 50 234 5678",
-        email: "madelon@elysian.ae",
+        email: "madelon@zaylo.ae",
       },
     ],
     listings: [
@@ -244,7 +244,7 @@ export const areasData: Area[] = [
         commission: 40000,
         listings: 65,
         phone: "+971 50 345 6789",
-        email: "hampus@elysian.ae",
+        email: "hampus@zaylo.ae",
       },
     ],
     listings: [
@@ -343,7 +343,7 @@ export const areasData: Area[] = [
         commission: 95000,
         listings: 23,
         phone: "+971 50 456 7890",
-        email: "alex@elysian.ae",
+        email: "alex@zaylo.ae",
       },
     ],
     listings: [
@@ -442,7 +442,7 @@ export const areasData: Area[] = [
         commission: 2000,
         listings: 43,
         phone: "+971 50 567 8901",
-        email: "jane@elysian.ae",
+        email: "jane@zaylo.ae",
       },
     ],
     listings: [

@@ -1,4 +1,4 @@
--- Flow by Elysian - Supabase Schema
+-- Zaylo - Supabase Schema
 -- Run this in Supabase SQL Editor to create all tables
 
 -- Enable UUID extension

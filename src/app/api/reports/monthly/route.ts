@@ -14,7 +14,7 @@ function getMockReportData(month: string, year: number): MonthlyReportData {
   return {
     month,
     year,
-    companyName: "Elysian Real Estate",
+    companyName: "Zaylo",
     totalRevenue: 45750000,
     totalCommission: 1372500,
     totalDeals: 28,

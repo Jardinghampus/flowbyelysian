@@ -673,7 +673,7 @@ function AgentProductivitySection() {
               </blockquote>
               <div>
                 <p className="font-semibold text-white">Ahmed Al Khouri</p>
-                <p className="text-sm text-white/60">Sales Director, Elysian Real Estate</p>
+                <p className="text-sm text-white/60">Sales Director, Zaylo</p>
               </div>
             </div>
           </div>
@@ -730,7 +730,7 @@ function ROISection() {
               Measurable ROI From Day One
             </h2>
             <p className="text-lg text-neutral-600 mb-8">
-              Flow delivers quantifiable returns across every metric that matters.
+              Zaylo delivers quantifiable returns across every metric that matters.
               See the impact on your bottom line with clear, trackable KPIs.
             </p>
 
@@ -902,7 +902,7 @@ function CTASection() {
             Ready to Transform Your Operations?
           </h2>
           <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
-            Join leading real estate companies already using Flow to supercharge their teams.
+            Join leading real estate companies already using Zaylo to supercharge their teams.
             Schedule a demo and see the platform in action.
           </p>
 
@@ -915,7 +915,7 @@ function CTASection() {
               <ArrowRight className="h-5 w-5" />
             </Link>
             <a
-              href="https://wa.me/971501234567?text=Hi%2C%20I%27d%20like%20to%20schedule%20a%20demo%20of%20Flow"
+              href="https://wa.me/971501234567?text=Hi%2C%20I%27d%20like%20to%20schedule%20a%20demo%20of%20Zaylo"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/30 px-8 py-4 text-white font-semibold hover:bg-white/10 transition-colors backdrop-blur-sm"

@@ -134,9 +134,9 @@ export const MobileSidebar = ({
       >
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">F</span>
+            <span className="text-primary-foreground font-bold text-sm">Z</span>
           </div>
-          <span className="font-bold text-lg">FLOW</span>
+          <span className="font-bold text-lg">Zaylo</span>
         </div>
         <button
           className="flex z-20 p-2 -mr-2 rounded-lg active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
@@ -178,14 +178,55 @@ export const SidebarLink = ({
   link,
   className,
   isActive,
+  disabled,
   ...props
 }: {
   link: Links
   className?: string
   isActive?: boolean
+  disabled?: boolean
   props?: LinkProps
 }) => {
   const { open, animate, closeSidebar } = useSidebar()
+
+  const content = (
+    <>
+      <div className={cn("flex-shrink-0", isActive && !disabled && "text-primary", disabled && "opacity-40")}>
+        {link.icon}
+      </div>
+      <motion.span
+        animate={{
+          display: animate ? (open ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (open ? 1 : 0) : 1,
+        }}
+        className={cn(
+          "text-neutral-700 dark:text-neutral-200 text-sm transition duration-150 whitespace-pre",
+          !disabled && "group-hover/sidebar:translate-x-1",
+          isActive && !disabled && "text-primary font-medium",
+          disabled && "opacity-40 cursor-not-allowed"
+        )}
+      >
+        {link.label}
+      </motion.span>
+    </>
+  )
+
+  if (disabled) {
+    return (
+      <div
+        role="presentation"
+        aria-disabled
+        title="Only Hampus can access this"
+        className={cn(
+          "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-lg transition-all duration-200 cursor-not-allowed",
+          className
+        )}
+      >
+        {content}
+      </div>
+    )
+  }
+
   return (
     <Link
       href={link.href}
@@ -199,21 +240,7 @@ export const SidebarLink = ({
       )}
       {...props}
     >
-      <div className={cn("flex-shrink-0", isActive && "text-primary")}>
-        {link.icon}
-      </div>
-      <motion.span
-        animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
-        }}
-        className={cn(
-          "text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre",
-          isActive && "text-primary font-medium"
-        )}
-      >
-        {link.label}
-      </motion.span>
+      {content}
     </Link>
   )
 }

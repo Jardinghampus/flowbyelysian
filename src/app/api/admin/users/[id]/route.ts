@@ -7,6 +7,7 @@ import {
   updateAppUser,
   type LocalRole,
 } from "@/lib/local-auth"
+import { isHampusEmail } from "@/lib/hampus-access"
 import { clerkClient } from "@/lib/demo-auth"
 
 export async function GET(
@@ -94,16 +95,16 @@ export async function PATCH(
         return NextResponse.json({ error: "User not found" }, { status: 404 })
       }
 
+      if (role === "admin" && !isHampusEmail(existing.email)) {
+        return NextResponse.json({ error: "Only Hampus can be admin." }, { status: 400 })
+      }
+
       const updated = await updateAppUser(id, {
         role,
         full_name: fullName || undefined,
         password: body.password || undefined,
         status: body.status,
-        can_access_social:
-          existing.full_name.toLowerCase() === "hampus" ||
-          existing.email.startsWith("hampus@")
-            ? true
-            : false,
+        can_access_social: isHampusEmail(existing.email),
       })
 
       return NextResponse.json({

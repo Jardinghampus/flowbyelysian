@@ -43,7 +43,8 @@ import { useRole, type UserRole } from "@/contexts/role-context"
 import { Logo } from "@/components/logo"
 import { useDocumentSettings } from "@/hooks/use-document-settings"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
+import { isHampusEmail } from "@/lib/hampus-access"
 import { motion } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -88,7 +89,8 @@ interface NavItem {
   label: string
   href: string
   icon: React.ReactNode
-  roles: UserRole[] | "all"  // which roles can see this item
+  roles: UserRole[] | "all"
+  hampusOnly?: boolean
 }
 
 const iconClass = "h-[22px] w-[22px] flex-shrink-0"
@@ -108,14 +110,14 @@ const navSections: NavSection[] = [
     roles: ["admin", "agent"],
     items: [
       { label: "Home", href: "/app/dashboard", icon: <LayoutDashboard className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Follow-ups", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Follow-ups", href: "/app/data", icon: <Database className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Leads", href: "/app/leads", icon: <ClipboardList className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Listings", href: "/app/inventory", icon: <Building2 className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Team Feed", href: "/app/feed", icon: <Rss className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Active Listings", href: "/app/market-listings", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Transactions", href: "/app/market-transactions", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Deals", href: "/app/deals", icon: <Handshake className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Calendar", href: "/app/calendar", icon: <CalendarDays className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Deals", href: "/app/deals", icon: <Handshake className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
     ],
   },
   // Secondary tools
@@ -125,11 +127,15 @@ const navSections: NavSection[] = [
     items: [
       { label: "Documents", href: "/app/documents", icon: <PenLine className={iconClass} />, roles: ["admin", "agent"] },
       { label: "Landlord Report", href: "/app/landlord-report", icon: <FileText className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Owner Lookup", href: "/app/owner-intelligence", icon: <Search className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Team", href: "/app/users", icon: <Users className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"] },
-      { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"] },
+      { label: "Performance", href: "/app/performance", icon: <TrendingUp className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Live Board", href: "/app/performance/live", icon: <Monitor className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Zaylo (Hampus)", href: "/zaylo", icon: <RadioTower className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
     ],
   },
   // Admin only extras (kept out of agent daily path)
@@ -138,10 +144,6 @@ const navSections: NavSection[] = [
     roles: ["admin"],
     items: [
       { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin"] },
-      { label: "Market Stats", href: "/app/market-statistics", icon: <BarChart3 className={iconClass} />, roles: ["admin"] },
-      { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin"] },
-      { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin"] },
-      { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin"] },
       { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin"] },
       { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin"] },
       { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin"] },
@@ -176,14 +178,16 @@ const bottomLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const { role, isInternal, canAccessSocial } = useRole()
+  const { role, isInternal, userEmail } = useRole()
   const { isFullscreen } = useFullscreenContext()
   const { settings: docSettings } = useDocumentSettings()
   const [open, setOpen] = useState(false)
 
   const effectiveOpen = open
 
-  // Filter sections and items based on current role + social access
+  const isHampus = isHampusEmail(userEmail)
+
+  // Filter sections and items based on current role; Hampus-only items stay visible but disabled for others.
   const visibleSections = useMemo(() => {
     return navSections
       .filter((section) => {
@@ -193,20 +197,20 @@ export function AppSidebar() {
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => {
-          if (item.href === "/zaylo" && !canAccessSocial) return false
+          if (item.hampusOnly && isInternal) return true
           if (item.roles === "all") return true
           return item.roles.includes(role)
         }),
       }))
       .filter((section) => section.items.length > 0)
-  }, [role, canAccessSocial])
+  }, [role, isInternal])
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
       <SidebarBody className="justify-between gap-6 md:gap-8 border-r border-neutral-200/60 dark:border-white/[0.06]">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
-          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} displayName={docSettings.header_display_name} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} />}
+          {effectiveOpen ? <LogoFull homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} /> : <LogoIcon homeHref={isInternal ? "/app/dashboard" : "/user/my-opportunities"} logoUrl={docSettings.header_logo_url} />}
 
           {/* User Profile */}
           <SidebarUserInfo open={effectiveOpen} />
@@ -229,11 +233,13 @@ export function AppSidebar() {
                 )}
                 {section.items.map((item, idx) => {
                   const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+                  const disabled = Boolean(item.hampusOnly && !isHampus)
                   return (
                     <SidebarLink
                       key={`${sIdx}-${idx}`}
                       link={item}
                       isActive={isActive}
+                      disabled={disabled}
                     />
                   )
                 })}
@@ -296,7 +302,7 @@ export function AppSidebar() {
   )
 }
 
-const LogoFull = ({ homeHref = "/user/dashboard", logoUrl, displayName }: { homeHref?: string; logoUrl?: string | null; displayName?: string }) => {
+const LogoFull = ({ homeHref = "/user/dashboard", logoUrl }: { homeHref?: string; logoUrl?: string | null }) => {
   return (
     <Link
       href={homeHref}
@@ -314,7 +320,7 @@ const LogoFull = ({ homeHref = "/user/dashboard", logoUrl, displayName }: { home
         animate={{ opacity: 1 }}
         className="font-bold text-xl whitespace-pre tracking-tight"
       >
-        {displayName || "Zaylo"}
+        {BRAND_NAME}
       </motion.span>
     </Link>
   )

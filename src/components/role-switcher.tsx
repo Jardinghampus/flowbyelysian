@@ -10,9 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { isHampusEmail } from "@/lib/hampus-access"
+
 const SWITCH_EMAILS = new Set([
-  "hampus@flowbyelysian.com",
-  "laura@flowbyelysian.com",
+  "hampus@zaylo.com",
 ])
 
 const VIEW_ROLE_KEY = "zaylo_view_role"

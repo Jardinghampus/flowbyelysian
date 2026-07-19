@@ -25,7 +25,7 @@ const teamMembers: TeamMember[] = [
     role: "Senior Sales Director",
     specialization: "Palm Jumeirah & Emirates Hills",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2574&auto=format&fit=crop",
-    email: "ahmed@elysian.ae",
+    email: "ahmed@zaylo.ae",
     phone: "+971 50 123 4567",
   },
   {
@@ -34,7 +34,7 @@ const teamMembers: TeamMember[] = [
     role: "Luxury Property Specialist",
     specialization: "Downtown Dubai & DIFC",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=2574&auto=format&fit=crop",
-    email: "sarah@elysian.ae",
+    email: "sarah@zaylo.ae",
     phone: "+971 50 234 5678",
   },
   {
@@ -43,7 +43,7 @@ const teamMembers: TeamMember[] = [
     role: "Villa Communities Expert",
     specialization: "Arabian Ranches & Tilal Al Ghaf",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2670&auto=format&fit=crop",
-    email: "mohammed@elysian.ae",
+    email: "mohammed@zaylo.ae",
     phone: "+971 50 345 6789",
   },
   {
@@ -52,7 +52,7 @@ const teamMembers: TeamMember[] = [
     role: "Marina & JBR Specialist",
     specialization: "Dubai Marina & JBR",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2670&auto=format&fit=crop",
-    email: "emma@elysian.ae",
+    email: "emma@zaylo.ae",
     phone: "+971 50 456 7890",
   },
   {
@@ -61,7 +61,7 @@ const teamMembers: TeamMember[] = [
     role: "Investment Consultant",
     specialization: "Off-Plan & Investment Properties",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=2574&auto=format&fit=crop",
-    email: "omar@elysian.ae",
+    email: "omar@zaylo.ae",
     phone: "+971 50 567 8901",
   },
   {
@@ -70,7 +70,7 @@ const teamMembers: TeamMember[] = [
     role: "Client Relations Manager",
     specialization: "VIP & International Clients",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=2561&auto=format&fit=crop",
-    email: "fatima@elysian.ae",
+    email: "fatima@zaylo.ae",
     phone: "+971 50 678 9012",
   },
 ]
@@ -263,7 +263,7 @@ export function TeamSection() {
           Want to join our team of elite real estate professionals?
         </p>
         <a
-          href="mailto:careers@elysian.ae"
+          href="mailto:careers@zaylo.ae"
           className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-8 py-4 text-white font-medium hover:bg-neutral-800 transition-colors"
         >
           View Career Opportunities

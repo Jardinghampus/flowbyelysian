@@ -10,7 +10,8 @@
     "types:generate": "supabase gen types typescript --linked > src/lib/types/database.types.ts",
     "zaylo:worker": "npm --prefix workers/zaylo-import-worker run zaylo:worker --",
     "zaylo:scrape": "npm --prefix workers/zaylo-import-worker run import-market",
-    "zaylo:content": "npm --prefix workers/zaylo-import-worker run generate-content"
+    "zaylo:content": "npm --prefix workers/zaylo-import-worker run generate-content",
+    "reset:users": "tsx scripts/reset-team-users.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.25",

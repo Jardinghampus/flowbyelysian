@@ -98,7 +98,7 @@ export default function LandingPage() {
               Call Us Now
             </a>
             <a
-              href="mailto:hello@elysian.ae"
+              href="mailto:hello@zaylo.ae"
               className="inline-flex items-center justify-center rounded-full border-2 border-neutral-900 px-8 py-4 text-neutral-900 font-semibold hover:bg-neutral-900 hover:text-white transition-colors"
             >
               Send an Email

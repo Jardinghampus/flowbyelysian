@@ -21,7 +21,7 @@ export async function GET() {
         company_website: 'www.derricksignatureproperties.ae',
         company_address: 'Office 605, Al Barsha Business Square, Dubai, UAE',
         header_logo_url: null,
-        header_display_name: 'ZFLOW',
+        header_display_name: 'Zaylo',
       })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest) {
         company_website: body.company_website,
         company_address: body.company_address,
         header_logo_url: body.header_logo_url,
-        header_display_name: body.header_display_name || 'ZFLOW',
+        header_display_name: body.header_display_name || 'Zaylo',
         updated_at: new Date().toISOString(),
       })
       .eq('id', existing.id)
@@ -77,7 +77,7 @@ export async function PUT(req: NextRequest) {
       company_website: body.company_website,
       company_address: body.company_address,
       header_logo_url: body.header_logo_url,
-      header_display_name: body.header_display_name || 'ZFLOW',
+      header_display_name: body.header_display_name || 'Zaylo',
     })
     .select()
     .single()

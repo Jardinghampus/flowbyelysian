@@ -67,7 +67,7 @@ function SignInForm() {
               id="email"
               type="text"
               autoComplete="username"
-              placeholder="hampus@flowbyelysian.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

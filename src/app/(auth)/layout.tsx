@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Authentication - ShadcnStore",
-  description: "Sign in to your account or create a new one",
+  title: `Sign in · ${BRAND_NAME}`,
+  description: `Sign in to ${BRAND_NAME} — ${BRAND_TAGLINE}`,
 };
 
 export default function AuthLayout({
@@ -10,9 +11,5 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-background">
-      {children}
-    </div>
-  );
+  return children;
 }

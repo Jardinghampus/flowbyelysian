@@ -128,7 +128,7 @@ export function ZayloControlCenter({ initialState }: { initialState: ZayloState 
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Zaylo Intelligence</h1>
           <p className="text-muted-foreground">
-            Listing scraper, PDF imports, market intel, reports, and social drafts inside Flow.
+            Listing scraper, PDF imports, market intel, reports, and social drafts inside Zaylo.
           </p>
         </div>
         <Button variant="outline" onClick={refreshState}>

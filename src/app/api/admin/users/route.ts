@@ -7,6 +7,7 @@ import {
   listAppUsers,
   type LocalRole,
 } from "@/lib/local-auth"
+import { isHampusEmail } from "@/lib/hampus-access"
 
 export async function GET() {
   try {
@@ -85,11 +86,12 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Social media is reserved for Hampus only.
-      const social =
-        fullName.toLowerCase() === "hampus" ||
-        email === "hampus@flowbyelysian.com" ||
-        email.startsWith("hampus@")
+      if (role === "admin" && !isHampusEmail(email)) {
+        return NextResponse.json({ error: "Only Hampus can be admin." }, { status: 400 })
+      }
+
+      // Social media + Hampus-only tools reserved for Hampus.
+      const social = isHampusEmail(email)
 
       const user = await createAppUser({
         email,

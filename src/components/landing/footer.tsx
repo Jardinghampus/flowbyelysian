@@ -34,10 +34,10 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Instagram, href: "https://instagram.com/elysian", label: "Instagram" },
-  { icon: Linkedin, href: "https://linkedin.com/company/elysian", label: "LinkedIn" },
-  { icon: Facebook, href: "https://facebook.com/elysian", label: "Facebook" },
-  { icon: Twitter, href: "https://twitter.com/elysian", label: "Twitter" },
+  { icon: Instagram, href: "https://instagram.com/", label: "Instagram" },
+  { icon: Linkedin, href: "https://linkedin.com/", label: "LinkedIn" },
+  { icon: Facebook, href: "https://facebook.com/", label: "Facebook" },
+  { icon: Twitter, href: "https://twitter.com/", label: "Twitter" },
 ]
 
 export function Footer() {
@@ -77,12 +77,12 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 font-bold text-xl text-white">
-                E
+                Z
               </div>
-              <span className="text-2xl font-bold">ELYSIAN</span>
+              <span className="text-2xl font-bold">Zaylo</span>
             </Link>
             <p className="text-white/60 mb-6 max-w-sm leading-relaxed">
-              Dubai&apos;s premier luxury real estate agency, specializing in exceptional properties across the city&apos;s most prestigious addresses.
+              Dubai brokerage CRM, market intelligence, and agent tools — built by Hampus.
             </p>
 
             {/* Contact Info */}
@@ -95,11 +95,11 @@ export function Footer() {
                 +971 50 123 4567
               </a>
               <a
-                href="mailto:hello@elysian.ae"
+                href="mailto:hello@zaylo.ae"
                 className="flex items-center gap-3 text-white/80 hover:text-blue-400 transition-colors"
               >
                 <Mail className="h-5 w-5" />
-                hello@elysian.ae
+                hello@zaylo.ae
               </a>
               <div className="flex items-start gap-3 text-white/60">
                 <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -183,7 +183,7 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/40 text-sm">
-              © {new Date().getFullYear()} Elysian Real Estate. All rights reserved.
+              © {new Date().getFullYear()} Zaylo. All rights reserved.
             </p>
             <div className="flex gap-6">
               {footerLinks.legal.map((link) => (

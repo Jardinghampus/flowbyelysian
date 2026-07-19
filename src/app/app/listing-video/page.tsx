@@ -438,7 +438,7 @@ export default function ListingVideoPage() {
               <Input
                 value={agentBranding}
                 onChange={(e) => setAgentBranding(e.target.value)}
-                placeholder="Your Name — Elysian Properties"
+                placeholder="Your Name — Zaylo"
                 className="text-xs"
               />
             </div>

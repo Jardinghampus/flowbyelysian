@@ -23,7 +23,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full cursor-pointer">
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarImage src="https://notion-avatars.netlify.app/api/avatar/?preset=female-2" alt="@shadcn" />
+            <AvatarImage src="https://notion-avatars.netlify.app/api/avatar/?preset=female-2" alt="User avatar" />
             <AvatarFallback>SC</AvatarFallback>
           </Avatar>
         </Button>
@@ -31,7 +31,7 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">shadcn</p>
+            <p className="text-sm font-medium leading-none">Agent</p>
             <p className="text-xs leading-none text-muted-foreground">
               m@example.com
             </p>

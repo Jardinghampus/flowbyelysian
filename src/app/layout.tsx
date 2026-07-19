@@ -5,15 +5,34 @@ import { ClerkProviderWrapper } from "@/components/clerk-provider-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 import { Toaster } from "@/components/ui/sonner";
+import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_TAGLINE, BRAND_TITLE } from "@/lib/brand";
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
-  title: "Zaylo",
-  description: "Zaylo — Dubai brokerage CRM and market intelligence",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
+  metadataBase: new URL(appUrl),
+  title: {
+    default: BRAND_TITLE,
+    template: `%s · ${BRAND_NAME}`,
+  },
+  description: BRAND_DESCRIPTION,
+  applicationName: BRAND_NAME,
+  authors: [{ name: "Hampus" }],
+  creator: "Hampus",
+  openGraph: {
+    type: "website",
+    locale: "en_AE",
+    siteName: BRAND_NAME,
+    title: BRAND_TITLE,
+    description: BRAND_TAGLINE,
+  },
+  twitter: {
+    card: "summary",
+    title: BRAND_TITLE,
+    description: BRAND_TAGLINE,
+  },
+  appleWebApp: {
+    title: BRAND_NAME,
   },
 };
 

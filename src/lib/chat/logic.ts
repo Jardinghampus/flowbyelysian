@@ -162,7 +162,7 @@ export function processMessage(sessionId: string, message: string): ProcessResul
 
       if (contactInfo.name && contactInfo.phone) {
         response =
-          `Thank you, ${contactInfo.name}! An agent from Elysian Real Estate will contact you at ${contactInfo.phone} shortly.\n\n` +
+          `Thank you, ${contactInfo.name}! A Zaylo agent will contact you at ${contactInfo.phone} shortly.\n\n` +
           "In the meantime, feel free to browse our website for more properties."
 
         nextState = "DONE"

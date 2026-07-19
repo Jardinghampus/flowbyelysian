@@ -105,7 +105,7 @@ export default function MailPage() {
             </div>
             <CardTitle className="text-2xl">Connect Your Gmail</CardTitle>
             <CardDescription>
-              Connect your Gmail account to view and manage your emails directly from Flow.
+              Connect your Gmail account to view and manage your emails directly from Zaylo.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -116,7 +116,7 @@ export default function MailPage() {
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-primary">✓</span>
-                Send emails directly from Flow
+                Send emails directly from Zaylo
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-primary">✓</span>

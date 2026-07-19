@@ -247,9 +247,9 @@ export default function PropertiesPage() {
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900 text-white font-bold text-lg">
-              E
+              Z
             </div>
-            <span className="text-xl font-bold text-neutral-900">ELYSIAN</span>
+            <span className="text-xl font-bold text-neutral-900">Zaylo</span>
           </Link>
           <Link
             href="/dashboard"
@@ -519,7 +519,7 @@ export default function PropertiesPage() {
       <footer className="border-t border-neutral-100 py-8">
         <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
           <p className="text-sm text-neutral-500">
-            &copy; {new Date().getFullYear()} Elysian Real Estate
+            &copy; {new Date().getFullYear()} Zaylo
           </p>
           <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
             Back to Home

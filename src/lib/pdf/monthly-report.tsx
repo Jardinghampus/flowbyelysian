@@ -238,7 +238,7 @@ export function MonthlyReport({ data }: MonthlyReportProps) {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>FLOW</Text>
-          <Text style={styles.subtitle}>by Elysian Real Estate</Text>
+          <Text style={styles.subtitle}>by Zaylo</Text>
         </View>
 
         {/* Report Title */}
@@ -330,7 +330,7 @@ export function MonthlyReport({ data }: MonthlyReportProps) {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.logo}>FLOW</Text>
-          <Text style={styles.subtitle}>by Elysian Real Estate</Text>
+          <Text style={styles.subtitle}>by Zaylo</Text>
         </View>
 
         <Text style={styles.title}>Insights & Recommendations</Text>

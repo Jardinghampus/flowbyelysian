@@ -185,7 +185,7 @@ Stand out in a competitive market with strong personal branding.
   // Way of Work Modules
   {
     id: "5",
-    title: "Getting Started with Flow",
+    title: "Getting Started with Zaylo",
     description: "Learn the basics of using Zaylo. This module covers navigation, key features, and best practices.",
     category: "way-of-work",
     content: `## Welcome to Zaylo
@@ -255,7 +255,7 @@ Structure your day for maximum productivity and results.
 ### End of Day (17:00 - 18:00)
 
 1. Update CRM with day's activities
-2. Log all viewings in Flow
+2. Log all viewings in Zaylo
 3. Plan tomorrow's schedule
 4. Review performance metrics`,
     documents: [

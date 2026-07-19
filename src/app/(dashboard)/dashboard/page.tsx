@@ -59,10 +59,10 @@ export default function Page() {
         className="text-center py-2"
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-          Welcome to <ColourfulText text="Eflow" />
+          Welcome to <ColourfulText text="Zaylo" />
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Your real estate dashboard powered by Elysian
+          Your real estate dashboard powered by Zaylo
         </p>
       </motion.div>
 

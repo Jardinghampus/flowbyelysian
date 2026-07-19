@@ -283,7 +283,7 @@ export async function getVerifiedSessionUser(): Promise<LocalSessionUser | null>
   return toSessionUser(row)
 }
 
-const DEFAULT_BOOTSTRAP_EMAIL = "hampus@flowbyelysian.com"
+const DEFAULT_BOOTSTRAP_EMAIL = "hampus@zaylo.com"
 
 export function normalizeLoginEmail(raw: string) {
   const value = raw.trim().toLowerCase()
@@ -302,9 +302,7 @@ export async function bootstrapAdminIfEmpty(email: string, password: string) {
   const normalized = normalizeLoginEmail(email)
   const bootstrapEmail = (process.env.LOCAL_BOOTSTRAP_EMAIL || DEFAULT_BOOTSTRAP_EMAIL).toLowerCase()
   const isHampus =
-    normalized === bootstrapEmail ||
-    normalized === "hampus@flowbyelysian.com" ||
-    normalized.startsWith("hampus@")
+    normalized === bootstrapEmail || normalized.startsWith("hampus@")
 
   if (!isHampus) {
     throw new Error("First setup: sign in as Hampus to create the admin account.")
