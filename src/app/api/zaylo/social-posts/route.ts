@@ -5,6 +5,7 @@ import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
 import {
   FOCUS_COMMUNITIES,
   MONTHLY_POST_SCHEDULE,
+  MEDIA_DESK_PLAYBOOK,
   buildCaption,
   buildWeeklyCaption,
   conceptLabel,
@@ -268,7 +269,8 @@ function buildAreaPost(
   metrics: SocialPostMetrics,
   agent: { fullName: string; phone: string },
   scheduleDay: number | null,
-  scheduleLabel: string
+  scheduleLabel: string,
+  roiRole: BuiltSocialPost["roiRole"] = "authority"
 ): BuiltSocialPost {
   const copy = buildCaption(concept, focus, metrics, agent)
   const samples = metrics.rentCount + metrics.saleCount
@@ -279,6 +281,7 @@ function buildAreaPost(
     concept,
     scheduleDay,
     scheduleLabel,
+    roiRole,
     hook: copy.hook,
     headline: copy.headline,
     rentLabel:
@@ -290,7 +293,9 @@ function buildAreaPost(
         ? `${metrics.saleCount} sale txs`
         : "No sale txs",
     trustLine: copy.trustLine,
-    caption: copy.caption,
+    caption: copy.captionIg,
+    captionIg: copy.captionIg,
+    captionLi: copy.captionLi,
     hashtags: copy.hashtags,
     metrics,
     status: samples > 0 ? "ready" : "needs_data",
@@ -302,7 +307,8 @@ function buildWeeklyPost(
   agent: { fullName: string; phone: string },
   scheduleDay: number,
   scheduleLabel: string,
-  weekIndex: number
+  weekIndex: number,
+  roiRole: BuiltSocialPost["roiRole"] = "proof"
 ): BuiltSocialPost {
   const copy = buildWeeklyCaption(highlights, agent, scheduleLabel)
   return {
@@ -312,12 +318,15 @@ function buildWeeklyPost(
     concept: "weekly_transactions",
     scheduleDay,
     scheduleLabel,
+    roiRole,
     hook: copy.hook,
     headline: copy.headline,
     rentLabel: "",
     saleLabel: "",
     trustLine: copy.trustLine,
-    caption: copy.caption,
+    caption: copy.captionIg,
+    captionIg: copy.captionIg,
+    captionLi: copy.captionLi,
     hashtags: copy.hashtags,
     metrics: emptyMetrics("Dubai Land"),
     highlights,
@@ -341,36 +350,67 @@ export async function GET() {
     }
 
     const supabase = createUntypedServerClient()
-    const { data, error } = await supabase
-      .from("bayut_transactions")
-      .select(
-        "community, master_community, sub_area, property_type, transaction_type, price_aed, price_per_sqft_aed, bedrooms, transaction_date"
-      )
-      .order("transaction_date", { ascending: false })
-      .limit(4000)
+    const [{ data, error }, postedRes] = await Promise.all([
+      supabase
+        .from("bayut_transactions")
+        .select(
+          "community, master_community, sub_area, property_type, transaction_type, price_aed, price_per_sqft_aed, bedrooms, transaction_date"
+        )
+        .order("transaction_date", { ascending: false })
+        .limit(4000),
+      supabase
+        .from("zaylo_social_posts")
+        .select("schedule_key, posted_ig_at, posted_li_at, desk_status")
+        .not("schedule_key", "is", null)
+        .limit(200),
+    ])
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    const postedMap = new Map<
+      string,
+      { postedIgAt: string | null; postedLiAt: string | null; deskStatus: string }
+    >()
+    for (const row of postedRes.data || []) {
+      if (!row.schedule_key) continue
+      postedMap.set(row.schedule_key as string, {
+        postedIgAt: (row.posted_ig_at as string) || null,
+        postedLiAt: (row.posted_li_at as string) || null,
+        deskStatus: (row.desk_status as string) || "ready",
+      })
+    }
+
     const rows = (data || []) as TxLite[]
     const today = new Date().getDate()
+    const monthKey = new Date().toISOString().slice(0, 7)
     let weeklyIndex = 0
 
     const scheduled: BuiltSocialPost[] = MONTHLY_POST_SCHEDULE.map((slot) => {
+      let post: BuiltSocialPost
       if (slot.communityId === "weekly" || slot.concept === "weekly_transactions") {
         const idx = weeklyIndex++
         const highlights = pickInterestingTransactions(rows, idx)
-        return buildWeeklyPost(highlights, agent, slot.day, slot.label, idx)
+        post = buildWeeklyPost(highlights, agent, slot.day, slot.label, idx, slot.roiRole)
+      } else {
+        const focus = FOCUS_COMMUNITIES.find((c) => c.id === slot.communityId)!
+        const forceSub =
+          slot.concept === "sub_area_deep_dive"
+            ? pickTopSubArea(rows.filter((r) => matchesFocus(r, focus)))
+            : null
+        const metrics = computeMetrics(focus, rows, forceSub)
+        post = buildAreaPost(focus, slot.concept, metrics, agent, slot.day, slot.label, slot.roiRole)
       }
 
-      const focus = FOCUS_COMMUNITIES.find((c) => c.id === slot.communityId)!
-      const forceSub =
-        slot.concept === "sub_area_deep_dive"
-          ? pickTopSubArea(rows.filter((r) => matchesFocus(r, focus)))
-          : null
-      const metrics = computeMetrics(focus, rows, forceSub)
-      return buildAreaPost(focus, slot.concept, metrics, agent, slot.day, slot.label)
+      const scheduleKey = `${monthKey}-day${slot.day}-${slot.concept}-${slot.communityId}`
+      post.id = scheduleKey
+      const posted = postedMap.get(scheduleKey)
+      if (posted) {
+        post.postedIgAt = posted.postedIgAt
+        post.postedLiAt = posted.postedLiAt
+      }
+      return post
     })
 
     const communityCards = FOCUS_COMMUNITIES.map((focus) => {
@@ -383,7 +423,14 @@ export async function GET() {
     })
 
     const todays = scheduled.filter((p) => p.scheduleDay === today)
-    const upcoming = scheduled.filter((p) => (p.scheduleDay ?? 0) >= today).slice(0, 5)
+    const upcoming = scheduled.filter((p) => (p.scheduleDay ?? 0) >= today).slice(0, 7)
+    const catchUp = scheduled.filter(
+      (p) =>
+        (p.scheduleDay ?? 99) < today &&
+        p.status === "ready" &&
+        !(p.postedIgAt && p.postedLiAt)
+    )
+    const postedThisMonth = scheduled.filter((p) => p.postedIgAt || p.postedLiAt).length
 
     const concepts: PostConcept[] = [
       "market_pulse",
@@ -392,6 +439,7 @@ export async function GET() {
       "viral_hook",
       "price_update",
       "weekly_transactions",
+      "what_id_buy",
     ]
 
     return NextResponse.json({
@@ -400,8 +448,11 @@ export async function GET() {
       communityCards,
       today: todays,
       upcoming,
+      catchUp,
+      postedThisMonth,
       postsPerCommunity: postsPerCommunityThisMonth(),
       ideas: SOCIAL_POST_IDEAS,
+      playbook: MEDIA_DESK_PLAYBOOK,
       conceptLabels: Object.fromEntries(concepts.map((c) => [c, conceptLabel(c)])),
       exportSize: { width: 1080, height: 1350 },
       generatedAt: new Date().toISOString(),

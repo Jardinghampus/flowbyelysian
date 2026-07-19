@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import {
@@ -422,6 +422,71 @@ export default function PipelinePage() {
   const [timelineOpen, setTimelineOpen] = useState(false)
   const [activeCard, setActiveCard] = useState<PipelineCard | null>(null)
   const [overColumnId, setOverColumnId] = useState<string | null>(null)
+  const [loadingOps, setLoadingOps] = useState(true)
+
+  useEffect(() => {
+    async function loadOpportunities() {
+      setLoadingOps(true)
+      try {
+        const res = await fetch("/api/opportunities?limit=100", { cache: "no-store" })
+        if (!res.ok) return
+        const json = await res.json()
+        const ops = (json.opportunities || []) as Array<Record<string, unknown>>
+
+        const mapStatus = (status: string): string => {
+          const s = status.toLowerCase()
+          if (s === "new" || s === "unassigned") return "new"
+          if (s === "viewing" || s === "contacted") return "viewing"
+          if (s === "in_progress" || s === "negotiation") return "negotiation"
+          if (s === "matched" || s === "offer") return "offer"
+          if (s === "closed" || s === "won" || s === "matched_closed") return "closed"
+          return "new"
+        }
+
+        const next = initialColumns.map((col) => ({ ...col, cards: [] as PipelineCard[] }))
+        for (const op of ops) {
+          const colId = mapStatus(String(op.status || "new"))
+          const col = next.find((c) => c.id === colId) || next[0]!
+          const created = op.created_at ? new Date(String(op.created_at)) : new Date()
+          const days = Math.max(0, Math.floor((Date.now() - created.getTime()) / 86400000))
+          col.cards.push({
+            id: String(op.id),
+            title: String(op.full_name || "Lead"),
+            area: String(op.area || op.source || "Dubai Land"),
+            propertyType: String(op.property_type || "Villa / Townhouse"),
+            price: Number(op.price || op.qualify_budget_aed || 0),
+            size: Number(op.size || 0),
+            bedrooms: Number(op.bedrooms || op.qualify_beds || 0),
+            agent: { name: "Hampus" },
+            client: {
+              name: String(op.full_name || "Lead"),
+              phone: op.phone ? String(op.phone) : undefined,
+              email: op.email ? String(op.email) : undefined,
+            },
+            priority: days > 5 ? "high" : days > 2 ? "medium" : "low",
+            daysInStage: days,
+            timeline: [
+              {
+                id: "1",
+                date: created.toISOString(),
+                action: `Source: ${op.source || "unknown"}`,
+                by: "System",
+                note: op.notes ? String(op.notes).slice(0, 120) : undefined,
+              },
+            ],
+            notes: String(op.notes || op.media_post_id || ""),
+            transactionType: String(op.type || "buy") === "rent" ? "rent" : "sale",
+          })
+        }
+        setColumns(next)
+      } catch {
+        // keep empty columns
+      } finally {
+        setLoadingOps(false)
+      }
+    }
+    void loadOpportunities()
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -524,6 +589,19 @@ export default function PipelinePage() {
         )
       })
 
+      const statusMap: Record<string, string> = {
+        new: "new",
+        viewing: "contacted",
+        negotiation: "in_progress",
+        offer: "matched",
+        closed: "closed",
+      }
+      void fetch("/api/opportunities", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: cardId, status: statusMap[targetColumnId] || "new" }),
+      }).catch(() => {})
+
       const targetColTitle = columns.find((c) => c.id === targetColumnId)?.title
       toast.success(`Moved to ${targetColTitle}`)
     },
@@ -562,6 +640,9 @@ export default function PipelinePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Pipeline</h1>
+            <p className="text-sm text-muted-foreground">
+              {loadingOps ? "Loading opportunities…" : "Live from Leads / Media Desk inbound"}
+            </p>
             <p className="text-muted-foreground text-sm">
               Drag cards between stages or click for full timeline.
             </p>

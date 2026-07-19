@@ -18,14 +18,13 @@ export type PostConcept =
   | "viral_hook"
   | "price_update"
   | "weekly_transactions"
+  | "what_id_buy"
 
 export type FocusCommunity = {
   id: FocusCommunityId
   label: string
-  /** DB community / master_community match values */
   communities: string[]
   tagline: string
-  /** Preferred property types for this beat */
   propertyTypes: Array<"Villa" | "Townhouse">
 }
 
@@ -79,31 +78,39 @@ export type ScheduleSlot = {
   communityId: ScheduleCommunityId
   concept: PostConcept
   label: string
+  /** ROI role for briefing */
+  roiRole: "proof" | "trust" | "authority" | "desire" | "reach"
 }
 
 /**
- * Fixed monthly calendar — each focus community ≥2×, plus weekly "5 transactions" every week.
- * Day = day-of-month (1–28 so every month works).
+ * Monthly calendar aligned to Serhant micro media house bible.
+ * Day = day-of-month (1–28).
  */
 export const MONTHLY_POST_SCHEDULE: ScheduleSlot[] = [
-  { day: 1, communityId: "arabian-ranches", concept: "market_pulse", label: "AR rent vs sale pulse" },
-  { day: 2, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 1" },
-  { day: 3, communityId: "mudon", concept: "sub_area_deep_dive", label: "Mudon sub-area deep dive" },
-  { day: 5, communityId: "town-square", concept: "education", label: "Town Square education" },
-  { day: 7, communityId: "villanova", concept: "viral_hook", label: "Villanova viral hook" },
-  { day: 8, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 2" },
-  { day: 9, communityId: "dubai-hills", concept: "price_update", label: "Dubai Hills price update" },
-  { day: 11, communityId: "mira-oasis", concept: "market_pulse", label: "Mira Oasis pulse" },
-  { day: 13, communityId: "arabian-ranches", concept: "sub_area_deep_dive", label: "AR cluster deep dive" },
-  { day: 15, communityId: "mudon", concept: "viral_hook", label: "Mudon viral hook" },
-  { day: 16, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 3" },
-  { day: 17, communityId: "town-square", concept: "price_update", label: "Town Square price update" },
-  { day: 19, communityId: "villanova", concept: "education", label: "Villanova education" },
-  { day: 21, communityId: "dubai-hills", concept: "market_pulse", label: "Dubai Hills pulse" },
-  { day: 22, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 4" },
-  { day: 23, communityId: "mira-oasis", concept: "sub_area_deep_dive", label: "Mira Oasis deep dive" },
-  { day: 25, communityId: "arabian-ranches", concept: "education", label: "AR education (bonus)" },
-  { day: 27, communityId: "town-square", concept: "viral_hook", label: "Town Square viral (bonus)" },
+  { day: 1, communityId: "arabian-ranches", concept: "market_pulse", label: "AR rent vs sale pulse", roiRole: "authority" },
+  { day: 2, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 1", roiRole: "proof" },
+  { day: 3, communityId: "mudon", concept: "education", label: "Mudon education", roiRole: "trust" },
+  { day: 4, communityId: "mudon", concept: "sub_area_deep_dive", label: "Mudon sub-area deep dive", roiRole: "authority" },
+  { day: 5, communityId: "town-square", concept: "what_id_buy", label: "What I'd buy · Town Square", roiRole: "desire" },
+  { day: 6, communityId: "villanova", concept: "viral_hook", label: "Villanova viral hook", roiRole: "reach" },
+  { day: 8, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 2", roiRole: "proof" },
+  { day: 9, communityId: "dubai-hills", concept: "education", label: "Dubai Hills education", roiRole: "trust" },
+  { day: 10, communityId: "dubai-hills", concept: "price_update", label: "Dubai Hills price update", roiRole: "desire" },
+  { day: 11, communityId: "mira-oasis", concept: "market_pulse", label: "Mira Oasis pulse", roiRole: "authority" },
+  { day: 12, communityId: "arabian-ranches", concept: "sub_area_deep_dive", label: "AR cluster deep dive", roiRole: "authority" },
+  { day: 13, communityId: "arabian-ranches", concept: "what_id_buy", label: "What I'd buy · AR", roiRole: "desire" },
+  { day: 15, communityId: "mudon", concept: "viral_hook", label: "Mudon viral hook", roiRole: "reach" },
+  { day: 16, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 3", roiRole: "proof" },
+  { day: 17, communityId: "town-square", concept: "education", label: "Town Square education", roiRole: "trust" },
+  { day: 18, communityId: "town-square", concept: "price_update", label: "Town Square price update", roiRole: "desire" },
+  { day: 19, communityId: "villanova", concept: "sub_area_deep_dive", label: "Villanova deep dive", roiRole: "authority" },
+  { day: 20, communityId: "villanova", concept: "education", label: "Villanova education", roiRole: "trust" },
+  { day: 22, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 4", roiRole: "proof" },
+  { day: 23, communityId: "mira-oasis", concept: "sub_area_deep_dive", label: "Mira Oasis deep dive", roiRole: "authority" },
+  { day: 24, communityId: "mira-oasis", concept: "what_id_buy", label: "What I'd buy · Mira", roiRole: "desire" },
+  { day: 25, communityId: "dubai-hills", concept: "market_pulse", label: "Dubai Hills pulse", roiRole: "authority" },
+  { day: 26, communityId: "arabian-ranches", concept: "viral_hook", label: "AR viral (bonus)", roiRole: "reach" },
+  { day: 27, communityId: "town-square", concept: "market_pulse", label: "Town Square pulse", roiRole: "authority" },
 ]
 
 export type SocialPostMetrics = {
@@ -116,18 +123,13 @@ export type SocialPostMetrics = {
   rentCount: number
   saleCount: number
   avgPricePerSqft: number | null
-  /** Sale-only AED/sqft when available */
   salePricePerSqft: number | null
   propertyTypeHint: string
-  /** e.g. "3BR · 4BR" — beds that dominate the sample */
   bedsMix: string | null
-  /** Top sub-areas by volume, e.g. "Arabella · Al Ranim · Rahat" */
   topSubAreas: string | null
-  /** Human window, e.g. "Last 90 days · 42 txs" */
   sampleWindow: string | null
 }
 
-/** One row on the weekly "5 transactions" card — desk-framing, not closed-deal claims. */
 export type HighlightTransaction = {
   place: string
   bedsLabel: string
@@ -138,6 +140,12 @@ export type HighlightTransaction = {
   dateLabel?: string | null
 }
 
+export type DeskPostedState = {
+  postedIgAt: string | null
+  postedLiAt: string | null
+  deskStatus: string
+}
+
 export type BuiltSocialPost = {
   id: string
   communityId: ScheduleCommunityId
@@ -145,16 +153,22 @@ export type BuiltSocialPost = {
   concept: PostConcept
   scheduleDay: number | null
   scheduleLabel: string
+  roiRole: ScheduleSlot["roiRole"]
   hook: string
   headline: string
   rentLabel: string
   saleLabel: string
   trustLine: string
+  /** @deprecated use captionIg */
   caption: string
+  captionIg: string
+  captionLi: string
   hashtags: string
   metrics: SocialPostMetrics
   highlights?: HighlightTransaction[]
   status: "ready" | "needs_data"
+  postedIgAt?: string | null
+  postedLiAt?: string | null
 }
 
 export function formatAedCompact(value: number | null): string {
@@ -181,6 +195,23 @@ export function conceptLabel(concept: PostConcept): string {
       return "Price Update"
     case "weekly_transactions":
       return "New Transactions"
+    case "what_id_buy":
+      return "What I'd Buy"
+  }
+}
+
+export function roiRoleLabel(role: ScheduleSlot["roiRole"]): string {
+  switch (role) {
+    case "proof":
+      return "Proof"
+    case "trust":
+      return "Trust"
+    case "authority":
+      return "Authority"
+    case "desire":
+      return "Desire"
+    case "reach":
+      return "Reach"
   }
 }
 
@@ -190,9 +221,35 @@ type AgentBits = {
   handle?: string
 }
 
-function agentFooter(agent: AgentBits) {
+function agentFooterIg(agent: AgentBits) {
   const phone = agent.phone?.trim() || "DM for number"
   return `${agent.fullName} · ${phone}\n${TEAM_COMPANY_NAME}\n${TEAM_COMPANY_WEBSITE}`
+}
+
+function agentFooterLi(agent: AgentBits) {
+  const phone = agent.phone?.trim() || "message me directly"
+  return `${agent.fullName}\nVilla & Townhouse Specialist · Dubai Land\n${phone}\n${TEAM_COMPANY_NAME} · ${TEAM_COMPANY_WEBSITE}`
+}
+
+type CaptionBundle = {
+  hook: string
+  headline: string
+  captionIg: string
+  captionLi: string
+  hashtags: string
+  trustLine: string
+}
+
+function igHashtags(focusLabel: string) {
+  return [
+    "#DubaiRealEstate",
+    "#DubaiVillas",
+    "#DubaiTownhouses",
+    `#${focusLabel.replace(/\s+/g, "")}`,
+    "#PropertyInvestment",
+    "#DubaiLand",
+    "#Zaylo",
+  ].join(" ")
 }
 
 export function buildCaption(
@@ -200,7 +257,7 @@ export function buildCaption(
   focus: FocusCommunity,
   metrics: SocialPostMetrics,
   agent: AgentBits
-): { hook: string; headline: string; caption: string; hashtags: string; trustLine: string } {
+): CaptionBundle {
   const place = metrics.subArea ? `${metrics.subArea}, ${focus.label}` : focus.label
   const rent = formatAedCompact(metrics.rentAvg ?? metrics.rentMedian)
   const sale = formatAedCompact(metrics.saleAvg ?? metrics.saleMedian)
@@ -219,25 +276,17 @@ export function buildCaption(
           .join(" · ")
       : "Needs fresh transaction import before posting"
 
-  const hashtags = [
-    "#DubaiRealEstate",
-    "#DubaiVillas",
-    "#DubaiTownhouses",
-    `#${focus.label.replace(/\s+/g, "")}`,
-    "#PropertyInvestment",
-    "#DubaiLand",
-    "#Zaylo",
-  ].join(" ")
-
+  const hashtags = igHashtags(focus.label)
   let hook = ""
   let headline = ""
-  let body: string[] = []
+  let igBody: string[] = []
+  let liBody: string[] = []
 
   switch (concept) {
     case "market_pulse":
       hook = `${focus.label}: the real rent vs sale number right now`
       headline = `${focus.label.toUpperCase()} PULSE`
-      body = [
+      igBody = [
         `📍 ${place}`,
         ``,
         `Rent avg: ${rent}${metrics.rentMedian ? ` · med ${formatAedCompact(metrics.rentMedian)}` : ""}`,
@@ -247,12 +296,29 @@ export function buildCaption(
           : "",
         metrics.bedsMix ? `🛏 ${metrics.bedsMix}` : "",
         metrics.topSubAreas ? `🗺 Hot clusters: ${metrics.topSubAreas}` : "",
-        metrics.sampleWindow ? `📊 ${metrics.sampleWindow}` : "",
         ``,
         `This is the pulse — not the deal.`,
-        `Layout, plot, street, and owner situation still move the price.`,
+        `DM "Market" for a private shortlist.`,
+      ].filter(Boolean)
+      liBody = [
+        `Market memo — ${focus.label}`,
         ``,
-        `Save this if you track Dubai land villas & townhouses.`,
+        `I track villa and townhouse transactions across Dubai land every week. Here is the live pulse for ${place}.`,
+        ``,
+        `Rent average: ${rent}${metrics.rentMedian ? ` (median ${formatAedCompact(metrics.rentMedian)})` : ""} · ${metrics.rentCount} rent txs`,
+        `Sale average: ${sale}${metrics.saleMedian ? ` (median ${formatAedCompact(metrics.saleMedian)})` : ""} · ${metrics.saleCount} sale txs`,
+        metrics.avgPricePerSqft
+          ? `Approx AED ${Math.round(metrics.avgPricePerSqft).toLocaleString("en-AE")} per sqft in this sample.`
+          : "",
+        metrics.bedsMix ? `Beds dominating the sample: ${metrics.bedsMix}.` : "",
+        metrics.topSubAreas ? `Most active clusters: ${metrics.topSubAreas}.` : "",
+        metrics.sampleWindow ? `Sample: ${metrics.sampleWindow}.` : "",
+        ``,
+        `The average is a starting point — not the deal. Layout, plot, street, and owner motivation still move price by hundreds of thousands.`,
+        ``,
+        `If you are buying or selling in ${focus.label}, message me "Market" and I will send a shortlist sized to your budget within 48 hours.`,
+        ``,
+        `I focus exclusively on Dubai land villas and townhouses — Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills, Town Square.`,
       ].filter(Boolean)
       break
     case "sub_area_deep_dive":
@@ -260,7 +326,7 @@ export function buildCaption(
         ? `${metrics.subArea} inside ${focus.label} — what the avg hides`
         : `${focus.label} by sub-area — where the edge is`
       headline = metrics.subArea ? metrics.subArea.toUpperCase() : `${focus.label.toUpperCase()} · SUB-AREAS`
-      body = [
+      igBody = [
         `Deep dive: ${place}`,
         ``,
         `Rent: ${rent} · Sale: ${sale}`,
@@ -268,13 +334,25 @@ export function buildCaption(
         `Two homes on the same street can be AED hundreds of thousands apart.`,
         `I track ${focus.label} so you don't buy the average.`,
         ``,
-        `Comment "Market" in DM and I'll get back to you.`,
+        `DM "Market"`,
       ]
+      liBody = [
+        `Sub-area note — ${place}`,
+        ``,
+        `In ${focus.label}, the community average hides the real market. Street, phase, and layout create the spread.`,
+        ``,
+        `Current sample: rent ${rent} · sale ${sale}.`,
+        metrics.topSubAreas ? `Volume clusters right now: ${metrics.topSubAreas}.` : "",
+        ``,
+        `I do not sell "the average home." I sell the right street for your use case — family, yield, or exit liquidity.`,
+        ``,
+        `Message me if you want a cluster-level shortlist for ${focus.label}.`,
+      ].filter(Boolean)
       break
     case "education":
       hook = `Stop buying the headline number in ${focus.label}`
       headline = "THE NUMBER ≠ THE DEAL"
-      body = [
+      igBody = [
         `${place}`,
         ``,
         `Everyone screenshots the average.`,
@@ -286,67 +364,121 @@ export function buildCaption(
         `• Street noise & park proximity`,
         `• Motivated vs patient owner`,
         ``,
-        `That's how you become selective — not just busy.`,
+        `DM "Market"`,
+      ]
+      liBody = [
+        `Averages are not advice.`,
+        ``,
+        `In ${focus.label}, rent sits around ${rent} and sales around ${sale} in the current sample. That is useful context — and dangerous if you treat it as the offer price.`,
+        ``,
+        `Four variables move deals more than the headline number:`,
+        `1. Layout and upgrade quality`,
+        `2. Plot geometry (corner vs back-to-back)`,
+        `3. Street noise and park proximity`,
+        `4. Owner motivation and timeline`,
+        ``,
+        `This is how you become selective instead of busy.`,
+        ``,
+        `If you want a deal-level read for ${focus.label}, reply "Market" with your budget and beds.`,
       ]
       break
     case "viral_hook":
       hook = `Everyone asks me about ${focus.label}. Here's the honest answer.`
       headline = "THE HONEST ANSWER"
-      body = [
+      igBody = [
         focus.tagline,
         ``,
         `Live pulse → Rent ${rent} · Sale ${sale}`,
         ``,
         `I'm building the clearest villa / townhouse desk for Dubai land.`,
-        `Not Marina apartments. Not Downtown noise.`,
+        `Not Marina. Not Downtown.`,
         ``,
-        `Follow for weekly ${focus.label} numbers — no fluff.`,
+        `DM "Market"`,
+      ]
+      liBody = [
+        `The honest answer on ${focus.label}`,
+        ``,
+        focus.tagline,
+        ``,
+        `Live pulse from recent transactions: rent ${rent} · sale ${sale}.`,
+        ``,
+        `I built my desk around Dubai land villas and townhouses on purpose. Narrow beats loud. If that is your market, you will see the numbers here every week — no fluff.`,
+        ``,
+        `Message me if you want the shortlist, not the scroll.`,
       ]
       break
     case "price_update":
       hook = `${focus.label} price update — rent & sale`
       headline = "PRICE UPDATE"
-      body = [
+      igBody = [
         `📍 ${place}`,
         ``,
-        `🟢 Rent avg: ${rent} (${metrics.rentCount} txs)`,
-        `🔵 Sale avg: ${sale} (${metrics.saleCount} txs)`,
+        `Rent avg: ${rent} (${metrics.rentCount} txs)`,
+        `Sale avg: ${sale} (${metrics.saleCount} txs)`,
         metrics.avgPricePerSqft
           ? `📐 ~AED ${Math.round(metrics.avgPricePerSqft).toLocaleString("en-AE")} / sqft`
           : "",
         ``,
-        `Bookmark this for your next viewing week.`,
-        `Write "Market" in DM and I'll get back to you.`,
+        `DM "Market"`,
+      ].filter(Boolean)
+      liBody = [
+        `Price update — ${focus.label}`,
+        ``,
+        `Rent: ${rent} across ${metrics.rentCount} transactions.`,
+        `Sale: ${sale} across ${metrics.saleCount} transactions.`,
+        metrics.avgPricePerSqft
+          ? `Approx AED ${Math.round(metrics.avgPricePerSqft).toLocaleString("en-AE")} / sqft.`
+          : "",
+        ``,
+        `Bookmark this before your next viewing week. If you want a private shortlist sized to budget, message me "Market".`,
+      ].filter(Boolean)
+      break
+    case "what_id_buy":
+      hook = `What I'd buy in ${focus.label} this week`
+      headline = "WHAT I'D BUY"
+      igBody = [
+        `📍 ${place}`,
+        ``,
+        `Sale band: ${sale}`,
+        `Rent band: ${rent}`,
+        metrics.bedsMix ? `Focus beds: ${metrics.bedsMix}` : "",
+        metrics.topSubAreas ? `I'd look first: ${metrics.topSubAreas}` : "",
+        ``,
+        `Not financial advice — my desk filter.`,
+        `DM "Shortlist"`,
+      ].filter(Boolean)
+      liBody = [
+        `What I would buy in ${focus.label} this week`,
+        ``,
+        `Current sale band in sample: ${sale}. Rent band: ${rent}.`,
+        metrics.bedsMix ? `Beds I am screening first: ${metrics.bedsMix}.` : "",
+        metrics.topSubAreas ? `Clusters I would walk first: ${metrics.topSubAreas}.` : "",
+        ``,
+        `This is not a tip. It is how I filter inventory for clients who want Dubai land villas and townhouses without wasting viewing weeks.`,
+        ``,
+        `If your budget sits near this band, message me "Shortlist" and I will send three options with comps.`,
       ].filter(Boolean)
       break
     case "weekly_transactions":
-      // Built separately via buildWeeklyCaption
       hook = "This week on my desk"
       headline = "NEW TRANSACTIONS"
-      body = []
+      igBody = []
+      liBody = []
       break
   }
 
-  const caption = [...body, "", agentFooter(agent), "", hashtags].join("\n")
+  const captionIg = [...igBody, "", agentFooterIg(agent), "", hashtags].join("\n")
+  const captionLi = [...liBody, "", agentFooterLi(agent)].join("\n")
 
-  return { hook, headline, caption, hashtags, trustLine }
+  return { hook, headline, captionIg, captionLi, hashtags, trustLine }
 }
 
-/** Weekly USP post: 5 desk-worthy txs, no "why" — market update framed as your beat. */
 export function buildWeeklyCaption(
   highlights: HighlightTransaction[],
   agent: AgentBits,
   weekLabel: string
-): { hook: string; headline: string; caption: string; hashtags: string; trustLine: string } {
-  const hashtags = [
-    "#DubaiRealEstate",
-    "#DubaiVillas",
-    "#DubaiTownhouses",
-    "#DubaiLand",
-    "#PropertyMarket",
-    "#Zaylo",
-  ].join(" ")
-
+): CaptionBundle {
+  const hashtags = igHashtags("DubaiLand")
   const lines = highlights.map((h, i) => {
     const type = h.dealType === "sale" ? "Sold" : "Rented"
     const extra = [h.ppsLabel, h.dateLabel].filter(Boolean).join(" · ")
@@ -360,7 +492,7 @@ export function buildWeeklyCaption(
       ? "Weekly market desk · Dubai land villas & townhouses"
       : "Needs more recent transactions — run scrape-transactions"
 
-  const caption = [
+  const captionIg = [
     weekLabel,
     "",
     "This week on my desk:",
@@ -368,14 +500,28 @@ export function buildWeeklyCaption(
     ...lines,
     "",
     "I track Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills & Town Square every week.",
-    "Write \"Market\" in DM if you want the shortlist for your budget.",
+    'DM "Market" for a shortlist sized to your budget.',
     "",
-    agentFooter(agent),
+    agentFooterIg(agent),
     "",
     hashtags,
   ].join("\n")
 
-  return { hook, headline, caption, hashtags, trustLine }
+  const captionLi = [
+    weekLabel,
+    "",
+    "This week on my desk — five transactions landlords and buyers should know about in Dubai land.",
+    "",
+    ...lines,
+    "",
+    "I do not post these to chase likes. I post them so serious buyers and sellers see that I live in the comps — Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills, Town Square.",
+    "",
+    "If you want a private shortlist for your budget and beds, message me \"Market\". If you own in these communities and want a quiet sale read, message me \"Owner\".",
+    "",
+    agentFooterLi(agent),
+  ].join("\n")
+
+  return { hook, headline, captionIg, captionLi, hashtags, trustLine }
 }
 
 export function emptyMetrics(label = "Dubai Land"): SocialPostMetrics {
@@ -409,6 +555,37 @@ export function postsPerCommunityThisMonth(): Record<FocusCommunityId, number> {
   return counts
 }
 
+/** Playbook scripts for Media Desk */
+export const MEDIA_DESK_PLAYBOOK = {
+  dmReply: `Thanks for writing Market.
+
+Quick qualify so I send the right shortlist:
+1) Buy or sell?
+2) Budget (AED)?
+3) Beds?
+4) Preferred communities? (AR / Mira / Mudon / Villanova / Dubai Hills / Town Square)
+5) Timeline?
+
+I'll reply within a few hours with 3 options + comps.`,
+  liReply: `Thanks for reaching out.
+
+I cover Dubai land villas and townhouses — Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills, Town Square.
+
+Share budget, beds, and timeline and I'll send a short private shortlist with recent comps.`,
+  coldOwner: `Hi {name} — I track closed deals weekly in {community}.
+
+This week's desk note is live (rent/sale comps for villas & townhouses). Attach the Media Desk PNG before you send.
+
+If you're considering a quiet sale or a rent reset, I can give you a street-level read — no pitch deck.
+Reply "Owner" or WhatsApp me and I'll send the relevant comps for your home.
+
+Rule: never cold without this week's proof asset.`,
+  coldBuyer: `Hi {name} — private shortlist angle in {community} based on this week's closed comps (Media Desk), not portal averages.
+
+If useful, I can send 3 options + why each fits. Reply "Shortlist".
+Attach this week's PNG when you send.`,
+}
+
 export const SOCIAL_POST_IDEAS = [
   "Before/after: asking price vs last 5 sold in the same cluster",
   "Owner psychology: why this street closes faster",
@@ -420,6 +597,6 @@ export const SOCIAL_POST_IDEAS = [
   "Client story (anonymous): the upgrade that paid for itself",
 ]
 
-/** IG portrait — export at this exact size. */
 export const SOCIAL_EXPORT_WIDTH = 1080
 export const SOCIAL_EXPORT_HEIGHT = 1350
+export const CATEGORY_LOCK = "Dubai Land · Villas & Townhouses"

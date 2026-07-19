@@ -36,6 +36,8 @@ export function MarketStudio() {
     url: "",
   })
 
+  // Deprecated as posting UI — Media Desk OS is source of truth for IG/LI posts.
+
   useEffect(() => {
     async function loadState() {
       try {
@@ -141,6 +143,15 @@ export function MarketStudio() {
 
   return (
     <div className="space-y-6">
+      <Card className="border-amber-500/40 bg-amber-500/5">
+        <CardContent className="py-4 text-sm">
+          Posting UI moved to{" "}
+          <a href="/app/social-posts" className="font-semibold underline">
+            Media Desk OS
+          </a>{" "}
+          (IG + LinkedIn). This studio remains for source links and scrape control only.
+        </CardContent>
+      </Card>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2">
