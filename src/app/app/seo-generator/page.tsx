@@ -7,7 +7,7 @@ export default function SEOGeneratorPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
             <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Property SEO Generator</h1>
+              <h1 className="text-3xl font-bold mb-2">Description Generator (AI/SEO)</h1>
               <p className="text-muted-foreground">
                 Optimize your Propertyfinder listings in seconds with AI-powered descriptions
               </p>

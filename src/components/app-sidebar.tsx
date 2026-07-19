@@ -137,20 +137,20 @@ const navSections: NavSection[] = [
       { label: "Gmail", href: "/app/mail", icon: <Mail className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "Smart", href: "/app/smart", icon: <Brain className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
       { label: "AI Bot", href: "/app/ai-assistant", icon: <Sparkles className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      {
+        label: "Description Generator (AI/SEO)",
+        href: "/app/seo-generator",
+        icon: <FileText className={iconClass} />,
+        roles: ["admin", "agent"],
+        hampusOnly: true,
+      },
+      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
+      { label: "Deal Board", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin", "agent"], hampusOnly: true },
     ],
   },
   // Admin only extras (kept out of agent daily path)
-  {
-    title: "Tools",
-    roles: ["admin"],
-    items: [
-      { label: "Areas", href: "/app/areas", icon: <MapPin className={iconClass} />, roles: ["admin"] },
-      { label: "SEO Generator", href: "/app/seo-generator", icon: <FileText className={iconClass} />, roles: ["admin"] },
-      { label: "News", href: "/app/news", icon: <Newspaper className={iconClass} />, roles: ["admin"] },
-      { label: "Training", href: "/app/training", icon: <GraduationCap className={iconClass} />, roles: ["admin"] },
-      { label: "Deal Board", href: "/app/pipeline", icon: <Kanban className={iconClass} />, roles: ["admin"] },
-    ],
-  },
   {
     title: "System",
     roles: ["admin"],

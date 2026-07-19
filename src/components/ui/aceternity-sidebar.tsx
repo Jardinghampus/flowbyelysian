@@ -216,7 +216,7 @@ export const SidebarLink = ({
       <div
         role="presentation"
         aria-disabled
-        title="Only Hampus can access this"
+        title="Early access — not enabled for your account yet"
         className={cn(
           "flex items-center justify-start gap-2 group/sidebar py-2 px-2 rounded-lg transition-all duration-200 cursor-not-allowed",
           className
