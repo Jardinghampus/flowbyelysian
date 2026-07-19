@@ -111,16 +111,25 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   gallery: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
     marginBottom: 16,
   },
-  galleryImage: {
+  galleryHeader: {
+    width: "100%",
+    height: 160,
+    objectFit: "cover",
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  galleryRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+  galleryCard: {
     width: "48%",
     height: 110,
     objectFit: "cover",
-    borderRadius: 8,
+    borderRadius: 10,
   },
   agentCard: {
     marginTop: 8,
@@ -166,8 +175,8 @@ export type ListingSharePdfProps = {
 }
 
 export function ListingSharePdf({ listing, sharedBy, sharedAt, note }: ListingSharePdfProps) {
-  const hero = listing.images[0]
-  const gallery = listing.images.slice(1, 5)
+  const teaserImages = listing.images.slice(0, 5)
+  const [headerImage, ...gridImages] = teaserImages
   const location = [listing.area, listing.subArea].filter(Boolean).join(" · ") || "Dubai"
   const beds =
     listing.bedrooms === 0 ? "Studio" : listing.bedrooms != null ? String(listing.bedrooms) : "—"
@@ -178,12 +187,7 @@ export function ListingSharePdf({ listing, sharedBy, sharedAt, note }: ListingSh
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.heroWrap}>
-          {hero ? (
-            // eslint-disable-next-line jsx-a11y/alt-text
-            <Image src={hero} style={styles.heroImage} />
-          ) : (
-            <View style={styles.heroFallback} />
-          )}
+          <View style={styles.heroFallback} />
           <Text style={styles.brand}>ZAYLO</Text>
           <View style={styles.heroOverlay}>
             <View style={styles.badgeRow}>
@@ -228,14 +232,26 @@ export function ListingSharePdf({ listing, sharedBy, sharedAt, note }: ListingSh
             </View>
           ) : null}
 
-          {gallery.length > 0 ? (
+          {teaserImages.length > 0 ? (
             <View>
-              <Text style={styles.sectionTitle}>Gallery</Text>
+              <Text style={styles.sectionTitle}>Property photos</Text>
               <View style={styles.gallery}>
-                {gallery.map((src) => (
+                {headerImage ? (
                   // eslint-disable-next-line jsx-a11y/alt-text
-                  <Image key={src} src={src} style={styles.galleryImage} />
-                ))}
+                  <Image src={headerImage} style={styles.galleryHeader} />
+                ) : null}
+                {[0, 2].map((rowStart) => {
+                  const row = gridImages.slice(rowStart, rowStart + 2)
+                  if (!row.length) return null
+                  return (
+                    <View key={rowStart} style={styles.galleryRow}>
+                      {row.map((src) => (
+                        // eslint-disable-next-line jsx-a11y/alt-text
+                        <Image key={src} src={src} style={styles.galleryCard} />
+                      ))}
+                    </View>
+                  )
+                })}
               </View>
             </View>
           ) : null}

@@ -30,6 +30,7 @@ import { AIMatchingDialog } from "./components/ai-matching-dialog"
 import { MatchingTable, getUserMatches } from "./components/matching-table"
 import { MyMatchesView } from "./components/my-matches-view"
 import { useRole } from "@/contexts/role-context"
+import { useAgentProfilesMap } from "@/hooks/use-agent-profile"
 
 export type ListingStatus = "live" | "pocket" | "unofficial"
 export type ListingType = "villa" | "apartment" | "townhouse" | "penthouse" | "plot" | "office" | "retail"
@@ -152,6 +153,7 @@ export default function InventoryPage() {
   const currentUserName = user?.fullName ?? user?.firstName ?? ""
 
   const [listings, setListings] = useState<Listing[]>([])
+  const ownerProfiles = useAgentProfilesMap(listings.map((l) => l.ownerId))
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isMatchingOpen, setIsMatchingOpen] = useState(false)
@@ -619,6 +621,7 @@ export default function InventoryPage() {
                   currentUserId={currentUserId}
                   currentUserName={currentUserName}
                   isAdmin={isAdmin}
+                  ownerProfiles={ownerProfiles}
                   onDelete={handleDeleteListing}
                   onUpdate={handleUpdateListing}
                   existingSubAreas={subAreas}

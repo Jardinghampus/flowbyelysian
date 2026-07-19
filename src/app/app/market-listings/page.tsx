@@ -175,7 +175,7 @@ export default function MarketListingsPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Active Listings</h1>
             <p className="text-sm text-muted-foreground">
-              Bayut live scrape — Mudon (incl. Arabella), DAMAC Hills, Town Square, Villanova, Arabian Ranches 1–3
+              Bayut live scrape — Mudon, Mira Oasis, DAMAC Hills, Town Square, Villanova, Arabian Ranches 1–3
             </p>
           </div>
         </div>

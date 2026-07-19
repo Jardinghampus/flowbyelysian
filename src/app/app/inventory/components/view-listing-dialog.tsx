@@ -12,18 +12,21 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ListingShareButtons } from "@/components/listings/listing-share-actions"
 import { ListingContactButton } from "@/components/listings/listing-contact-button"
+import { AgentProfileCard } from "@/components/agent-profile-card"
+import { TEAM_COLOR, type AgentProfile } from "@/lib/brand"
 import type { Listing } from "../page"
 
 interface ViewListingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   listing: Listing
+  ownerProfile?: AgentProfile | null
   canEdit: boolean
   onEdit: () => void
 }
 
 const statusColors: Record<string, string> = {
-  live: "bg-green-500/10 text-green-600 border-green-500/20",
+  live: "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/20",
   pocket: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
   unofficial: "bg-gray-500/10 text-gray-600 border-gray-500/20",
 }
@@ -34,7 +37,7 @@ const inquiryColors: Record<string, string> = {
 }
 
 const transactionColors: Record<string, string> = {
-  sale: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  sale: "bg-[#1e3a5f]/10 text-[#2d5082] border-[#1e3a5f]/20",
   rent: "bg-orange-500/10 text-orange-600 border-orange-500/20",
 }
 
@@ -51,6 +54,7 @@ export function ViewListingDialog({
   open,
   onOpenChange,
   listing,
+  ownerProfile,
   canEdit,
   onEdit,
 }: ViewListingDialogProps) {
@@ -171,30 +175,37 @@ export function ViewListingDialog({
           </div>
         )}
 
-        {/* Agent/Owner */}
-        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-          <User className="h-4 w-4 text-muted-foreground" />
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Listed by</p>
-            <p className="font-medium">{listing.ownerName}</p>
-          </div>
+        <div className="rounded-xl border bg-muted/30 p-3">
+          <AgentProfileCard
+            profile={
+              ownerProfile || {
+                fullName: listing.ownerName,
+                profileImageUrl: null,
+              }
+            }
+            size="lg"
+            showCompany
+            showRole
+            showWebsite
+          />
           {listing.contactName || listing.contactPhone ? (
-            <div className="text-right mr-2">
+            <div className="mt-3 border-t pt-3 text-sm">
               <p className="text-xs text-muted-foreground">Owner contact</p>
-              <p className="text-sm font-medium">{listing.contactName || "—"}</p>
-              {listing.contactPhone && (
-                <p className="text-xs text-muted-foreground">{listing.contactPhone}</p>
-              )}
+              <p className="font-medium">{listing.contactName || "—"}</p>
+              {listing.contactPhone ? (
+                <p className="text-muted-foreground">{listing.contactPhone}</p>
+              ) : null}
             </div>
           ) : null}
-          {listing.ownerContactId && (
+          {listing.ownerContactId ? (
             <a
               href="/app/data"
-              className="text-xs text-[#C9A84C] hover:underline flex items-center gap-1"
+              className="mt-2 inline-flex items-center gap-1 text-xs hover:underline"
+              style={{ color: TEAM_COLOR }}
             >
-              In Contacts
+              View in Contacts
             </a>
-          )}
+          ) : null}
         </div>
 
         <Separator />

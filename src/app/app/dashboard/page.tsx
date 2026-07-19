@@ -21,7 +21,7 @@ function Num({ n, className }: { n: number; className?: string }) {
 
 function StatCell({ label, value, sub, href, accent }: { label: string; value: number; sub?: string; href: string; accent?: string }) {
   return (
-    <Link href={href} className="group flex flex-col gap-0.5 rounded-lg border border-border/50 bg-card px-3 py-2 hover:border-[#C9A84C]/40 transition-colors">
+    <Link href={href} className="group flex flex-col gap-0.5 rounded-lg border border-border/50 bg-card px-3 py-2 hover:border-[#1e3a5f]/40 transition-colors">
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70">{label}</span>
       <Num n={value} className={cn("text-xl", accent)} />
       {sub && <span className="text-[10px] text-muted-foreground">{sub}</span>}
@@ -59,7 +59,7 @@ function OutreachRow({ log }: { log: RecentOutreach }) {
         {log.outcome && <span className="text-muted-foreground"> — {log.outcome}</span>}
       </span>
       {log.status_changed_to && (
-        <span className="text-[10px] px-1 rounded bg-[#C9A84C]/10 text-[#C9A84C]">→ {log.status_changed_to}</span>
+        <span className="text-[10px] px-1 rounded bg-[#1e3a5f]/10 text-[#1e3a5f]">→ {log.status_changed_to}</span>
       )}
       <span className="text-[10px] text-muted-foreground font-mono flex-shrink-0">
         {formatDistanceToNow(new Date(log.logged_at), { addSuffix: true })}
@@ -159,10 +159,10 @@ export default function Page() {
           <div className="rounded-lg border border-border/50 bg-card">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-3.5 w-3.5 text-[#C9A84C]" />
+                <CalendarDays className="h-3.5 w-3.5 text-[#2d5082]" />
                 <span className="text-xs font-semibold">Due Today</span>
                 {stats.followUps.dueToday.length > 0 && (
-                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold flex items-center justify-center">
+                  <span className="h-4 min-w-[16px] px-1 rounded-full bg-[#1e3a5f] text-white text-[10px] font-bold flex items-center justify-center">
                     {stats.followUps.dueToday.length}
                   </span>
                 )}
@@ -214,7 +214,7 @@ export default function Page() {
                 { label: "New / Unassigned", value: stats.leads.new, color: "bg-blue-400" },
                 { label: "Contacted", value: stats.leads.contacted, color: "bg-amber-400" },
                 { label: "In Progress", value: stats.leads.inProgress, color: "bg-purple-400" },
-                { label: "Matched", value: stats.leads.matched, color: "bg-emerald-400" },
+                { label: "Matched", value: stats.leads.matched, color: "bg-[#2d5082]" },
               ].map((row) => (
                 <div key={row.label} className="flex items-center gap-2">
                   <div className={cn("h-2 w-2 rounded-full", row.color)} />
@@ -234,7 +234,7 @@ export default function Page() {
           <div className="rounded-lg border border-border/50 bg-card">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
               <div className="flex items-center gap-2">
-                <Building2 className="h-3.5 w-3.5 text-emerald-400" />
+                <Building2 className="h-3.5 w-3.5 text-[#2d5082]" />
                 <span className="text-xs font-semibold">Inventory</span>
               </div>
               <Link href="/app/inventory" className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-0.5">
@@ -242,8 +242,8 @@ export default function Page() {
               </Link>
             </div>
             <div className="p-3 grid grid-cols-3 gap-2">
-              <div className="text-center rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-2">
-                <Num n={stats.listings.live} className="text-lg text-emerald-400" />
+              <div className="text-center rounded-lg bg-[#1e3a5f]/5 border border-[#1e3a5f]/15 p-2">
+                <Num n={stats.listings.live} className="text-lg text-[#2d5082]" />
                 <p className="text-[10px] text-muted-foreground">Live</p>
               </div>
               <div className="text-center rounded-lg bg-amber-500/5 border border-amber-500/10 p-2">
@@ -261,7 +261,7 @@ export default function Page() {
           <div className="rounded-lg border border-border/50 bg-card">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
               <div className="flex items-center gap-2">
-                <Database className="h-3.5 w-3.5 text-[#C9A84C]" />
+                <Database className="h-3.5 w-3.5 text-[#2d5082]" />
                 <span className="text-xs font-semibold">Owner Database</span>
               </div>
               <Link href="/app/data" className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-0.5">
@@ -278,7 +278,7 @@ export default function Page() {
                 <p className="text-[10px] text-muted-foreground">Considering</p>
               </div>
               <div className="text-center">
-                <Num n={stats.owners.listed} className="text-lg text-emerald-400" />
+                <Num n={stats.owners.listed} className="text-lg text-[#2d5082]" />
                 <p className="text-[10px] text-muted-foreground">Listed</p>
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function Page() {
           <div className="rounded-lg border border-border/50 bg-card">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border/50">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                <TrendingUp className="h-3.5 w-3.5 text-[#2d5082]" />
                 <span className="text-xs font-semibold">Today&apos;s Activity</span>
               </div>
               <Link href="/app/performance" className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-0.5">
@@ -315,7 +315,7 @@ export default function Page() {
               </div>
               <div className="text-center rounded-lg border p-2">
                 <div className="flex items-center justify-center gap-1">
-                  <Building2 className="h-3 w-3 text-emerald-400" />
+                  <Building2 className="h-3 w-3 text-[#2d5082]" />
                   <Num n={stats.activity.viewingsToday} className="text-lg" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">Viewings</p>
@@ -372,7 +372,7 @@ export default function Page() {
 
       {loading && (
         <div className="fixed bottom-4 right-4 flex items-center gap-2 text-[10px] text-muted-foreground bg-card border rounded-full px-3 py-1.5 shadow-lg">
-          <div className="h-2 w-2 rounded-full bg-[#C9A84C] animate-pulse" />
+          <div className="h-2 w-2 rounded-full bg-[#1e3a5f] animate-pulse" />
           Syncing...
         </div>
       )}

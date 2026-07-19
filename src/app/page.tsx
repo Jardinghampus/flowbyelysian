@@ -1,14 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { ShootingStars } from "@/components/ui/shooting-stars"
-import { StarsBackground } from "@/components/ui/stars-background"
+import { SpaceBackground } from "@/components/landing/space-background"
 
 export default function LandingPage() {
   return (
     <main className="fixed inset-0 h-[100dvh] w-screen overflow-hidden overscroll-none bg-neutral-950 text-white touch-none">
-      <div className="relative flex h-full w-full flex-col items-center justify-center px-6">
-        <div className="relative z-10 flex max-w-lg flex-col items-center text-center">
+      <SpaceBackground intense />
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-6">
+        <div className="flex max-w-lg flex-col items-center text-center">
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.35em] text-neutral-400">
             Dubai brokerage OS
           </p>
@@ -34,14 +34,6 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-
-        <ShootingStars
-          starColor="#ffffff"
-          trailColor="#a3a3a3"
-          minDelay={800}
-          maxDelay={3200}
-        />
-        <StarsBackground starDensity={0.00025} />
       </div>
     </main>
   )

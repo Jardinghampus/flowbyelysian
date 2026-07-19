@@ -45,6 +45,9 @@ import {
 } from "@/components/ui/collapsible"
 import { toast } from "sonner"
 import { useRole } from "@/contexts/role-context"
+import { AgentProfileCard } from "@/components/agent-profile-card"
+import { useMyAgentProfile } from "@/hooks/use-agent-profile"
+import { TEAM_COMPANY_NAME } from "@/lib/brand"
 import type { LandlordReportData, ViewingEntry, LeadEntry } from "@/lib/pdf/landlord-report"
 
 // Demo listings for selection
@@ -123,6 +126,7 @@ function mapLead(raw: Record<string, unknown>): LeadEntry {
 
 export default function LandlordReportPage() {
   const { userName, userEmail } = useRole()
+  const { profile: agentProfile } = useMyAgentProfile()
   const [listings, setListings] = useState<ListingOption[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
   const [selectedListingId, setSelectedListingId] = useState<string>("")
@@ -328,9 +332,10 @@ export default function LandlordReportPage() {
         availability: selectedListing.availability,
         listingStatus: selectedListing.status,
         daysOnMarket: getDaysOnMarket(selectedListing.createdAt),
-        agentName: userName || "Agent",
-        agentPhone: "",
-        agentEmail: userEmail || "",
+        agentName: agentProfile?.fullName || userName || "Agent",
+        agentPhone: agentProfile?.phone || "",
+        agentEmail: agentProfile?.email || userEmail || "",
+        companyName: TEAM_COMPANY_NAME,
         reportDate: new Date().toISOString(),
         reportTitle,
         pricingNotes,
@@ -397,6 +402,14 @@ export default function LandlordReportPage() {
           </p>
         </div>
       </div>
+
+      {agentProfile ? (
+        <Card className="mb-6 border-[#1e3a5f]/20">
+          <CardContent className="pt-6">
+            <AgentProfileCard profile={agentProfile} size="lg" showCompany showRole showWebsite />
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Listing Selector */}
       <Card className="mb-6">

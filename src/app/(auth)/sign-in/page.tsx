@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Logo } from "@/components/logo"
 import { Loader2 } from "lucide-react"
+import { SpaceBackground } from "@/components/landing/space-background"
 
 function SignInForm() {
   const router = useRouter()
@@ -51,18 +52,22 @@ function SignInForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-white/10 bg-neutral-950/75 text-white shadow-2xl shadow-black/50 backdrop-blur-xl">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
           <Logo size={48} />
         </div>
-        <CardTitle className="text-2xl">Welcome to Zaylo</CardTitle>
-        <CardDescription>Sign in with your name or email</CardDescription>
+        <CardTitle className="text-2xl text-white">Welcome to Zaylo</CardTitle>
+        <CardDescription className="text-neutral-400">
+          Sign in with your name or email
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignIn} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Name or email</Label>
+            <Label htmlFor="email" className="text-neutral-300">
+              Name or email
+            </Label>
             <Input
               id="email"
               type="text"
@@ -71,10 +76,13 @@ function SignInForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="border-white/15 bg-white/5 text-white placeholder:text-neutral-500"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-neutral-300">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
@@ -82,10 +90,16 @@ function SignInForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="border-white/15 bg-white/5 text-white"
             />
           </div>
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-          <Button type="submit" className="w-full cursor-pointer" size="lg" disabled={loading}>
+          {error ? <p className="text-sm text-red-400">{error}</p> : null}
+          <Button
+            type="submit"
+            className="w-full cursor-pointer rounded-full bg-white text-neutral-950 hover:bg-neutral-200"
+            size="lg"
+            disabled={loading}
+          >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Sign in
           </Button>
@@ -97,17 +111,20 @@ function SignInForm() {
 
 export default function Page() {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 overflow-hidden bg-neutral-950 p-6 md:p-10">
+      <SpaceBackground intense />
       <Suspense
         fallback={
-          <Card className="w-full max-w-md">
+          <Card className="relative z-10 w-full max-w-md border-white/10 bg-neutral-950/75 backdrop-blur-xl">
             <CardContent className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
             </CardContent>
           </Card>
         }
       >
-        <SignInForm />
+        <div className="relative z-10 w-full max-w-md">
+          <SignInForm />
+        </div>
       </Suspense>
     </div>
   )

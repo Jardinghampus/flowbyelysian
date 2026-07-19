@@ -87,7 +87,7 @@ const statusConfig: Record<OpportunityStatus, { label: string; color: string; bg
   new: { label: "New", color: "text-blue-700", bg: "bg-blue-100 dark:bg-blue-500/20", icon: AlertCircle },
   contacted: { label: "Contacted", color: "text-amber-700", bg: "bg-amber-100 dark:bg-amber-500/20", icon: Phone },
   in_progress: { label: "In Progress", color: "text-violet-700", bg: "bg-violet-100 dark:bg-violet-500/20", icon: Loader2 },
-  matched: { label: "Matched", color: "text-emerald-700", bg: "bg-emerald-100 dark:bg-emerald-500/20", icon: CheckCircle2 },
+  matched: { label: "Matched", color: "text-[#1e3a5f]", bg: "bg-[#1e3a5f]/10 dark:bg-[#1e3a5f]/20", icon: CheckCircle2 },
   closed: { label: "Closed", color: "text-neutral-700", bg: "bg-neutral-100 dark:bg-neutral-500/20", icon: CheckCircle2 },
   cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-100 dark:bg-red-500/20", icon: XCircle },
 }
@@ -112,7 +112,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
   return (
     <div className="rounded-xl border p-4 space-y-2">
       <div className="flex items-center gap-2">
-        <Database className="h-4 w-4 text-[#C9A84C]" />
+        <Database className="h-4 w-4 text-[#2d5082]" />
         <h3 className="text-sm font-bold">Owner Database Link</h3>
       </div>
       {owner ? (
@@ -126,7 +126,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
           </div>
           <a
             href="/app/data"
-            className="text-xs text-[#C9A84C] hover:underline"
+            className="text-xs text-[#1e3a5f] hover:underline"
           >
             View in Data â†’
           </a>
@@ -136,7 +136,7 @@ function LinkedOwnerSection({ phone, name, area }: { phone: string; name: string
           <p className="text-xs text-muted-foreground">No matching owner found in database</p>
           <a
             href={`/app/data?prefillName=${encodeURIComponent(name)}&prefillPhone=${encodeURIComponent(phone)}&prefillArea=${encodeURIComponent(area || "")}`}
-            className="text-xs text-[#C9A84C] hover:underline"
+            className="text-xs text-[#1e3a5f] hover:underline"
           >
             + Add to Data
           </a>
@@ -349,7 +349,7 @@ export default function LeadsPage() {
           { label: "New", value: stats.new, color: "text-blue-600" },
           { label: "Contacted", value: stats.contacted, color: "text-amber-600" },
           { label: "In Progress", value: stats.inProgress, color: "text-violet-600" },
-          { label: "Matched", value: stats.matched, color: "text-emerald-600" },
+          { label: "Matched", value: stats.matched, color: "text-[#2d5082]" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-xl border bg-card p-4">
             <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>

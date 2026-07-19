@@ -303,6 +303,7 @@ export interface LandlordReportData {
   agentName: string
   agentPhone: string
   agentEmail: string
+  companyName?: string
   // Report content
   reportDate: string
   reportTitle: string
@@ -359,6 +360,11 @@ export function LandlordReport({ data }: LandlordReportProps) {
             <Text style={styles.headerValue}>{formatDate(data.reportDate)}</Text>
             <Text style={{ ...styles.headerLabel, marginTop: 6 }}>Prepared By</Text>
             <Text style={styles.headerValue}>{data.agentName}</Text>
+            {data.companyName ? (
+              <Text style={{ ...styles.headerValue, marginTop: 4, fontSize: 9, color: "#1e3a5f" }}>
+                {data.companyName}
+              </Text>
+            ) : null}
           </View>
         </View>
 

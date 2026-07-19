@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireApiUser } from "@/lib/api/guards"
 import { createUntypedServerClient } from "@/lib/supabase/server-untyped"
+import { getAgentProfilesByUserIds } from "@/lib/user-profile"
 
 export async function GET(request: NextRequest) {
   const guard = await requireApiUser()
@@ -32,6 +33,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message, events: [] }, { status: 500 })
   }
 
-  // Privacy: feed never includes owner contacts — only public listing facts + agent name
-  return NextResponse.json({ events: data || [] })
+  const events = data || []
+  const profiles = await getAgentProfilesByUserIds(events.map((event) => String(event.actor_id)))
+
+  return NextResponse.json({
+    events: events.map((event) => ({
+      ...event,
+      agent_profile: profiles.get(String(event.actor_id)) || null,
+    })),
+  })
 }

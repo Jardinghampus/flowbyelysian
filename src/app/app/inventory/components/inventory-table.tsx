@@ -44,6 +44,8 @@ import { EditListingDialog } from "./edit-listing-dialog"
 import { ViewListingDialog } from "./view-listing-dialog"
 import { ListingShareMenuItems } from "@/components/listings/listing-share-actions"
 import { ListingContactButton } from "@/components/listings/listing-contact-button"
+import { AgentProfileCard } from "@/components/agent-profile-card"
+import { TEAM_COLOR, type AgentProfile } from "@/lib/brand"
 import { defaultOutreachMessage, openWhatsApp } from "@/lib/whatsapp"
 import type { Listing } from "../page"
 
@@ -52,13 +54,14 @@ interface InventoryTableProps {
   currentUserId: string
   currentUserName: string
   isAdmin: boolean
+  ownerProfiles?: Record<string, AgentProfile>
   onDelete: (id: string) => void
   onUpdate: (listing: Listing) => void
   existingSubAreas?: string[]
 }
 
 const statusColors: Record<string, string> = {
-  live: "bg-green-500/10 text-green-600 border-green-500/20",
+  live: "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/20",
   pocket: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
   unofficial: "bg-gray-500/10 text-gray-600 border-gray-500/20",
 }
@@ -69,7 +72,7 @@ const inquiryColors: Record<string, string> = {
 }
 
 const transactionColors: Record<string, string> = {
-  sale: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  sale: "bg-[#1e3a5f]/10 text-[#2d5082] border-[#1e3a5f]/20",
   rent: "bg-orange-500/10 text-orange-600 border-orange-500/20",
 }
 
@@ -91,6 +94,7 @@ export function InventoryTable({
   currentUserId,
   currentUserName,
   isAdmin,
+  ownerProfiles = {},
   onDelete,
   onUpdate,
   existingSubAreas = [],
@@ -191,18 +195,27 @@ export function InventoryTable({
                         </Badge>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
-                        <User className="h-3 w-3 text-muted-foreground" />
-                        <span className={`text-sm ${isOwner ? "font-medium text-primary" : "text-muted-foreground"}`}>
-                          {isOwner ? (currentUserName || "You") : listing.ownerName}
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <AgentProfileCard
+                        size="sm"
+                        showCompany={false}
+                        profile={
+                          ownerProfiles[listing.ownerId] || {
+                            fullName: isOwner ? currentUserName || "You" : listing.ownerName,
+                            profileImageUrl: null,
+                          }
+                        }
+                      />
+                      {listing.ownerContactId ? (
+                        <span
+                          className="mt-1 inline-flex items-center gap-0.5 text-[10px]"
+                          style={{ color: TEAM_COLOR }}
+                          title="Linked to owner in Data tab"
+                        >
+                          <Link2 className="h-2.5 w-2.5" />
+                          In contacts
                         </span>
-                        {listing.ownerContactId && (
-                          <span className="inline-flex items-center gap-0.5 text-[10px] text-[#C9A84C]" title="Linked to owner in Data tab">
-                            <Link2 className="h-2.5 w-2.5" />
-                          </span>
-                        )}
-                      </div>
+                      ) : null}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <ListingContactButton
@@ -351,6 +364,7 @@ export function InventoryTable({
           open={!!viewListing}
           onOpenChange={() => setViewListing(null)}
           listing={viewListing}
+          ownerProfile={ownerProfiles[viewListing.ownerId] || null}
           canEdit={canModify(viewListing)}
           onEdit={() => {
             setEditListing(viewListing)

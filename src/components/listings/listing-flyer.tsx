@@ -3,6 +3,7 @@
 import { Download, ExternalLink, MapPin, BedDouble, Bath, Maximize2, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ListingFlyerTeaser } from "@/components/listings/listing-flyer-teaser"
 import { formatListingPrice, type ShareableListing } from "@/lib/listings/share"
 import { cn } from "@/lib/utils"
 
@@ -35,8 +36,7 @@ function Spec({
 }
 
 export function ListingFlyer({ listing, sharedBy, note, pdfUrl, className }: ListingFlyerProps) {
-  const hero = listing.images[0] || null
-  const gallery = listing.images.slice(1, 5)
+  const teaserImages = listing.images.slice(0, 5)
   const location = [listing.area, listing.subArea].filter(Boolean).join(" · ") || "Dubai"
   const beds =
     listing.bedrooms === 0 ? "Studio" : listing.bedrooms != null ? String(listing.bedrooms) : "—"
@@ -45,17 +45,10 @@ export function ListingFlyer({ listing, sharedBy, note, pdfUrl, className }: Lis
 
   return (
     <div className={cn("min-h-svh bg-[#0c0c0d] text-white", className)}>
-      {/* Hero */}
-      <section className="relative min-h-[58vh] w-full overflow-hidden">
-        {hero ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={hero} alt={listing.title} className="absolute inset-0 h-full w-full object-cover" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 via-neutral-900 to-black" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0d] via-[#0c0c0d]/55 to-black/30" />
+      <section className="relative w-full overflow-hidden border-b border-white/10">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#141416] via-[#0c0c0d] to-[#0c0c0d]" />
 
-        <div className="relative z-10 mx-auto flex h-full min-h-[58vh] w-full max-w-5xl flex-col justify-between px-5 pb-10 pt-6 sm:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-5xl space-y-6 px-5 py-6 sm:px-8 sm:py-8">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/80">Zaylo</p>
             <Button
@@ -82,7 +75,7 @@ export function ListingFlyer({ listing, sharedBy, note, pdfUrl, className }: Lis
                 {listing.status}
               </Badge>
             </div>
-            <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
               {listing.title}
             </h1>
             <p className="flex items-center gap-2 text-sm text-white/75 sm:text-base">
@@ -93,6 +86,8 @@ export function ListingFlyer({ listing, sharedBy, note, pdfUrl, className }: Lis
               {formatListingPrice(listing.price, listing.transactionType)}
             </p>
           </div>
+
+          <ListingFlyerTeaser images={teaserImages} title={listing.title} />
         </div>
       </section>
 
@@ -114,23 +109,6 @@ export function ListingFlyer({ listing, sharedBy, note, pdfUrl, className }: Lis
               Availability
             </p>
             <p className="mt-2 text-sm leading-relaxed text-white/85">{listing.availability}</p>
-          </div>
-        ) : null}
-
-        {gallery.length > 0 ? (
-          <div className="space-y-3">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/50">Gallery</p>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {gallery.map((src) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={src}
-                  src={src}
-                  alt=""
-                  className="aspect-[4/3] w-full rounded-xl object-cover"
-                />
-              ))}
-            </div>
           </div>
         ) : null}
 

@@ -169,7 +169,7 @@ export default function MarketTransactionsPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
             <p className="text-sm text-muted-foreground">
-              Bayut completed deals · last 3 months · Mudon (incl. Arabella), DAMAC Hills, Town Square, Villanova, AR 1–3
+              Bayut completed deals · last 3 months · Mudon, Mira Oasis, DAMAC Hills, Town Square, Villanova, AR 1–3
             </p>
           </div>
         </div>

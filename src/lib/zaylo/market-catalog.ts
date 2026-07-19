@@ -103,11 +103,6 @@ export const zayloAreaCatalog: ZayloAreaCatalogItem[] = [
   area("Mudon", "Naseem", "dubai/mudon/naseem", ["Villa"]),
   area("Mudon", "Rahat", "dubai/mudon/rahat", ["Villa"]),
 
-  area("Mira", "Mira 1", "dubai/reem/mira/mira-1"),
-  area("Mira", "Mira 2", "dubai/reem/mira/mira-2"),
-  area("Mira", "Mira 3", "dubai/reem/mira/mira-3"),
-  area("Mira", "Mira 4", "dubai/reem/mira/mira-4"),
-  area("Mira", "Mira 5", "dubai/reem/mira/mira-5"),
   area("Mira Oasis", "Mira Oasis 1", "dubai/reem/mira-oasis/mira-oasis-1"),
   area("Mira Oasis", "Mira Oasis 2", "dubai/reem/mira-oasis/mira-oasis-2"),
   area("Mira Oasis", "Mira Oasis 3", "dubai/reem/mira-oasis/mira-oasis-3"),

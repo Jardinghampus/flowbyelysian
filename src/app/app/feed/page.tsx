@@ -11,12 +11,13 @@ import {
   MapPin,
   RefreshCw,
   Sparkles,
-  User,
 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useListingShare } from "@/components/listings/listing-share-actions"
+import { AgentProfileCard } from "@/components/agent-profile-card"
+import { TEAM_COLOR, type AgentProfile } from "@/lib/brand"
 import { cn } from "@/lib/utils"
 
 type FeedListingMeta = {
@@ -43,6 +44,7 @@ type FeedEvent = {
   property_type: string
   created_at: string
   listings?: FeedListingMeta | FeedListingMeta[] | null
+  agent_profile?: AgentProfile | null
 }
 
 type MatchRow = {
@@ -102,21 +104,50 @@ function FeedEventCard({
   const meta = listingMeta(event)
   const isLive = event.event_type === "listing_live"
   const agency = cleanNotes(meta?.notes)
+  const agentProfile: AgentProfile | null =
+    event.agent_profile ||
+    (event.actor_name
+      ? {
+          id: "",
+          email: "",
+          fullName: meta?.owner_name || event.actor_name,
+          firstName: event.actor_name.split(" ")[0] || event.actor_name,
+          lastName: event.actor_name.split(" ").slice(1).join(" "),
+          phone: "",
+          location: "",
+          brn: "",
+          language: "english",
+          jobTitle: "",
+          profileImageUrl: null,
+          company: "",
+          website: "",
+          role: "agent",
+        }
+      : null)
 
   return (
     <article
       className={cn(
         "overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-md",
-        isLive && "border-emerald-500/30 ring-1 ring-emerald-500/10"
+        isLive && "ring-1"
       )}
+      style={isLive ? { borderColor: `${TEAM_COLOR}40`, boxShadow: `0 0 0 1px ${TEAM_COLOR}14` } : undefined}
     >
       {isLive ? (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
+        <div
+          className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white"
+          style={{ background: `linear-gradient(90deg, ${TEAM_COLOR}, #2d5082)` }}
+        >
           {eventHeadline(event.event_type)}
         </div>
       ) : null}
 
       <div className="p-4 md:p-5">
+        {agentProfile ? (
+          <div className="mb-4 rounded-xl border bg-muted/30 p-3">
+            <AgentProfileCard profile={agentProfile} size="md" showCompany showRole />
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           {!isLive ? (
             <Badge variant={eventBadgeVariant(event.event_type)}>{eventHeadline(event.event_type)}</Badge>
@@ -144,10 +175,6 @@ function FeedEventCard({
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             {event.area_name}
             {meta?.sub_area ? ` · ${meta.sub_area}` : ""}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5 shrink-0" />
-            Owner {meta?.owner_name || event.actor_name}
           </span>
         </div>
 
