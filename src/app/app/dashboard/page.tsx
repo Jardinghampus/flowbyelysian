@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { useUnifiedStats, type FollowUpOwner, type RecentOutreach } from "@/hooks/use-unified-stats"
 import { PremiumTeasers } from "@/components/dashboard/premium-teasers"
+import { ScraperUpdateCard } from "@/components/dashboard/scraper-update-card"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 
@@ -128,6 +129,9 @@ export default function Page() {
       </div>
 
       <PremiumTeasers />
+
+      {/* Hampus-only: scrape freshness + Update scraper */}
+      <ScraperUpdateCard />
 
       {/* ─── MAIN GRID ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">

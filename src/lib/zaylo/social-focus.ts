@@ -9,12 +9,15 @@ export type FocusCommunityId =
   | "dubai-hills"
   | "town-square"
 
+export type ScheduleCommunityId = FocusCommunityId | "weekly"
+
 export type PostConcept =
   | "market_pulse"
   | "sub_area_deep_dive"
   | "education"
   | "viral_hook"
   | "price_update"
+  | "weekly_transactions"
 
 export type FocusCommunity = {
   id: FocusCommunityId
@@ -58,7 +61,7 @@ export const FOCUS_COMMUNITIES: FocusCommunity[] = [
   {
     id: "dubai-hills",
     label: "Dubai Hills",
-    communities: ["Dubai Hills Estate", "DAMAC Hills"],
+    communities: ["Dubai Hills Estate"],
     tagline: "Hills-side villas & townhouses — golf, parks, families",
     propertyTypes: ["Villa", "Townhouse"],
   },
@@ -73,27 +76,31 @@ export const FOCUS_COMMUNITIES: FocusCommunity[] = [
 
 export type ScheduleSlot = {
   day: number
-  communityId: FocusCommunityId
+  communityId: ScheduleCommunityId
   concept: PostConcept
   label: string
 }
 
 /**
- * Fixed monthly calendar — each focus community appears at least twice.
+ * Fixed monthly calendar — each focus community ≥2×, plus weekly "5 transactions" every week.
  * Day = day-of-month (1–28 so every month works).
  */
 export const MONTHLY_POST_SCHEDULE: ScheduleSlot[] = [
   { day: 1, communityId: "arabian-ranches", concept: "market_pulse", label: "AR rent vs sale pulse" },
+  { day: 2, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 1" },
   { day: 3, communityId: "mudon", concept: "sub_area_deep_dive", label: "Mudon sub-area deep dive" },
   { day: 5, communityId: "town-square", concept: "education", label: "Town Square education" },
   { day: 7, communityId: "villanova", concept: "viral_hook", label: "Villanova viral hook" },
+  { day: 8, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 2" },
   { day: 9, communityId: "dubai-hills", concept: "price_update", label: "Dubai Hills price update" },
   { day: 11, communityId: "mira-oasis", concept: "market_pulse", label: "Mira Oasis pulse" },
   { day: 13, communityId: "arabian-ranches", concept: "sub_area_deep_dive", label: "AR cluster deep dive" },
   { day: 15, communityId: "mudon", concept: "viral_hook", label: "Mudon viral hook" },
+  { day: 16, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 3" },
   { day: 17, communityId: "town-square", concept: "price_update", label: "Town Square price update" },
   { day: 19, communityId: "villanova", concept: "education", label: "Villanova education" },
   { day: 21, communityId: "dubai-hills", concept: "market_pulse", label: "Dubai Hills pulse" },
+  { day: 22, communityId: "weekly", concept: "weekly_transactions", label: "New transactions · week 4" },
   { day: 23, communityId: "mira-oasis", concept: "sub_area_deep_dive", label: "Mira Oasis deep dive" },
   { day: 25, communityId: "arabian-ranches", concept: "education", label: "AR education (bonus)" },
   { day: 27, communityId: "town-square", concept: "viral_hook", label: "Town Square viral (bonus)" },
@@ -112,9 +119,18 @@ export type SocialPostMetrics = {
   propertyTypeHint: string
 }
 
+/** One row on the weekly "5 transactions" card — desk-framing, not closed-deal claims. */
+export type HighlightTransaction = {
+  place: string
+  bedsLabel: string
+  propertyType: string
+  priceLabel: string
+  dealType: "sale" | "rent"
+}
+
 export type BuiltSocialPost = {
   id: string
-  communityId: FocusCommunityId
+  communityId: ScheduleCommunityId
   communityLabel: string
   concept: PostConcept
   scheduleDay: number | null
@@ -127,6 +143,7 @@ export type BuiltSocialPost = {
   caption: string
   hashtags: string
   metrics: SocialPostMetrics
+  highlights?: HighlightTransaction[]
   status: "ready" | "needs_data"
 }
 
@@ -152,6 +169,8 @@ export function conceptLabel(concept: PostConcept): string {
       return "Viral Hook"
     case "price_update":
       return "Price Update"
+    case "weekly_transactions":
+      return "New Transactions"
   }
 }
 
@@ -172,9 +191,7 @@ export function buildCaption(
   metrics: SocialPostMetrics,
   agent: AgentBits
 ): { hook: string; headline: string; caption: string; hashtags: string; trustLine: string } {
-  const place = metrics.subArea
-    ? `${metrics.subArea}, ${focus.label}`
-    : focus.label
+  const place = metrics.subArea ? `${metrics.subArea}, ${focus.label}` : focus.label
   const rent = formatAedCompact(metrics.rentAvg ?? metrics.rentMedian)
   const sale = formatAedCompact(metrics.saleAvg ?? metrics.saleMedian)
   const samples = metrics.rentCount + metrics.saleCount
@@ -277,11 +294,77 @@ export function buildCaption(
         `Write "Market" in DM and I'll get back to you.`,
       ].filter(Boolean)
       break
+    case "weekly_transactions":
+      // Built separately via buildWeeklyCaption
+      hook = "This week on my desk"
+      headline = "NEW TRANSACTIONS"
+      body = []
+      break
   }
 
   const caption = [...body, "", agentFooter(agent), "", hashtags].join("\n")
 
   return { hook, headline, caption, hashtags, trustLine }
+}
+
+/** Weekly USP post: 5 desk-worthy txs, no "why" — market update framed as your beat. */
+export function buildWeeklyCaption(
+  highlights: HighlightTransaction[],
+  agent: AgentBits,
+  weekLabel: string
+): { hook: string; headline: string; caption: string; hashtags: string; trustLine: string } {
+  const hashtags = [
+    "#DubaiRealEstate",
+    "#DubaiVillas",
+    "#DubaiTownhouses",
+    "#DubaiLand",
+    "#PropertyMarket",
+    "#Zaylo",
+  ].join(" ")
+
+  const lines = highlights.map((h, i) => {
+    const type = h.dealType === "sale" ? "Sold" : "Rented"
+    return `${i + 1}. ${h.place} · ${h.bedsLabel} ${h.propertyType} · ${type} ${h.priceLabel}`
+  })
+
+  const hook = "This week on my desk — 5 transactions worth knowing"
+  const headline = "NEW TRANSACTIONS"
+  const trustLine =
+    highlights.length >= 5
+      ? "Weekly market desk · Dubai land villas & townhouses"
+      : "Needs more recent transactions — run scrape-transactions"
+
+  const caption = [
+    weekLabel,
+    "",
+    "This week on my desk:",
+    "",
+    ...lines,
+    "",
+    "I track Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills & Town Square every week.",
+    "Write \"Market\" in DM if you want the shortlist for your budget.",
+    "",
+    agentFooter(agent),
+    "",
+    hashtags,
+  ].join("\n")
+
+  return { hook, headline, caption, hashtags, trustLine }
+}
+
+export function emptyMetrics(label = "Dubai Land"): SocialPostMetrics {
+  return {
+    community: label,
+    subArea: null,
+    rentAvg: null,
+    saleAvg: null,
+    rentMedian: null,
+    saleMedian: null,
+    rentCount: 0,
+    saleCount: 0,
+    avgPricePerSqft: null,
+    propertyTypeHint: "Villa / Townhouse",
+  }
 }
 
 export function postsPerCommunityThisMonth(): Record<FocusCommunityId, number> {
@@ -290,6 +373,7 @@ export function postsPerCommunityThisMonth(): Record<FocusCommunityId, number> {
     number
   >
   for (const slot of MONTHLY_POST_SCHEDULE) {
+    if (slot.communityId === "weekly") continue
     counts[slot.communityId] += 1
   }
   return counts
@@ -305,3 +389,7 @@ export const SOCIAL_POST_IDEAS = [
   "Sub-area ranking: best value / best lifestyle / best yield",
   "Client story (anonymous): the upgrade that paid for itself",
 ]
+
+/** IG portrait — export at this exact size. */
+export const SOCIAL_EXPORT_WIDTH = 1080
+export const SOCIAL_EXPORT_HEIGHT = 1350

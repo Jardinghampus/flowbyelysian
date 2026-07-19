@@ -27,7 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { conceptLabel, type BuiltSocialPost, type FocusCommunityId } from "@/lib/zaylo/social-focus"
+import {
+  SOCIAL_EXPORT_HEIGHT,
+  SOCIAL_EXPORT_WIDTH,
+  conceptLabel,
+  type BuiltSocialPost,
+  type FocusCommunityId,
+} from "@/lib/zaylo/social-focus"
 import Link from "next/link"
 
 type AgentPayload = {
@@ -105,14 +111,21 @@ export default function SocialPostsPage() {
     try {
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 2,
-        backgroundColor: "#0a0a0b",
+        pixelRatio: 1,
+        width: SOCIAL_EXPORT_WIDTH,
+        height: SOCIAL_EXPORT_HEIGHT,
+        backgroundColor: "#050505",
+        style: {
+          transform: "none",
+          width: `${SOCIAL_EXPORT_WIDTH}px`,
+          height: `${SOCIAL_EXPORT_HEIGHT}px`,
+        },
       })
       const a = document.createElement("a")
       a.href = dataUrl
-      a.download = `zaylo-${selected.communityId}-${selected.concept}-day${selected.scheduleDay || "x"}.png`
+      a.download = `zaylo-1080x1350-${selected.communityId}-${selected.concept}-day${selected.scheduleDay || "x"}.png`
       a.click()
-      toast.success("PNG downloaded — ready to post")
+      toast.success("PNG 1080×1350 downloaded — ready to post")
     } catch {
       toast.error("Export failed — try again")
     } finally {
@@ -137,8 +150,8 @@ export default function SocialPostsPage() {
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Social Posts</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Transaction-backed posts for Arabian Ranches, Mira Oasis, Mudon, Villanova, Dubai Hills &
-            Town Square. Download → paste caption → post. Each area ≥2× / month.
+            1080×1350 posts from live transactions. Area pulses ≥2× / month + weekly “New
+            transactions” (5 desk picks). Download → paste caption → post.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -216,7 +229,7 @@ export default function SocialPostsPage() {
             </Card>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1fr_560px]">
+          <div className="grid gap-6 xl:grid-cols-[1fr_minmax(0,560px)]">
             <div className="space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
@@ -225,14 +238,15 @@ export default function SocialPostsPage() {
                       <CalendarDays className="h-4 w-4" />
                       Monthly schedule
                     </CardTitle>
-                    <CardDescription>Click a day → preview → download</CardDescription>
+                    <CardDescription>Click a day → preview → download 1080×1350</CardDescription>
                   </div>
                   <Select value={filterCommunity} onValueChange={setFilterCommunity}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All areas</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="weekly">Weekly · New TX</SelectItem>
                       <SelectItem value="arabian-ranches">Arabian Ranches</SelectItem>
                       <SelectItem value="mira-oasis">Mira Oasis</SelectItem>
                       <SelectItem value="mudon">Mudon</SelectItem>
@@ -304,9 +318,27 @@ export default function SocialPostsPage() {
               {selected && data.agent ? (
                 <>
                   <div className="overflow-x-auto rounded-2xl border bg-neutral-950 p-4">
-                    <div className="mx-auto w-fit">
-                      <SocialCard post={selected} agent={data.agent} cardRef={cardRef} />
+                    <div
+                      className="mx-auto overflow-hidden"
+                      style={{
+                        width: SOCIAL_EXPORT_WIDTH / 2,
+                        height: SOCIAL_EXPORT_HEIGHT / 2,
+                      }}
+                    >
+                      <div
+                        style={{
+                          transform: "scale(0.5)",
+                          transformOrigin: "top left",
+                          width: SOCIAL_EXPORT_WIDTH,
+                          height: SOCIAL_EXPORT_HEIGHT,
+                        }}
+                      >
+                        <SocialCard post={selected} agent={data.agent} cardRef={cardRef} />
+                      </div>
                     </div>
+                    <p className="mt-3 text-center text-[11px] text-white/40">
+                      Preview 50% · export {SOCIAL_EXPORT_WIDTH}×{SOCIAL_EXPORT_HEIGHT}
+                    </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -316,7 +348,7 @@ export default function SocialPostsPage() {
                       ) : (
                         <Download className="mr-2 h-4 w-4" />
                       )}
-                      Download PNG
+                      Download 1080×1350
                     </Button>
                     <Button variant="outline" onClick={() => void copyCaption()} className="flex-1">
                       {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}

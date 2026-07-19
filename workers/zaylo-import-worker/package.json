@@ -11,7 +11,10 @@
     "enrich-listings": "tsx src/index.ts --job enrich-listings",
     "weekly:refresh": "tsx scripts/weekly-market-refresh.ts",
     "run:all-phases": "tsx scripts/run-all-phases.ts",
+    "chain:after-import": "tsx scripts/chain-after-import.ts",
+    "scrape:mira-oasis": "tsx src/index.ts --job import-market",
     "generate-content": "tsx src/index.ts --job generate-content",
+    "process-queue": "tsx src/index.ts --job process-queue",
     "generate-urls": "tsx data/generate-urls.ts",
     "seed-urls": "tsx data/seed-curated-urls.ts",
     "zaylo:worker": "tsx src/index.ts"
