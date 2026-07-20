@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import type { Page } from "playwright"
+import { config } from "./config.js"
 
 export function compactWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim()
@@ -40,7 +41,10 @@ export function randomDelay(minMs: number, maxMs: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, delay))
 }
 
-export async function waitForManualVerification(page: Page, timeoutMs = 180_000): Promise<boolean> {
+export async function waitForManualVerification(
+  page: Page,
+  timeoutMs = config.CAPTCHA_WAIT_MS
+): Promise<boolean> {
   console.log("\nPlease solve the verification in the browser (waiting up to 3 min)...")
   const started = Date.now()
   while (Date.now() - started < timeoutMs) {
@@ -126,6 +130,15 @@ export function masterFromCommunity(community: string): string {
     return "Arabian Ranches"
   }
   if (/mudon|arabella|ranim|rahat|al salam/i.test(community)) return "Mudon"
+  if (/mira oasis/i.test(community)) return "Mira Oasis"
+  if (
+    /dubai hills|maple|sidra|golf place|golf grove|club villas|fairway vistas|parkway vistas|majestic vistas|emerald hills/i.test(
+      community
+    )
+  ) {
+    return "Dubai Hills Estate"
+  }
+  if (/tilal al ghaf|harmony|elan|aura gardens/i.test(community)) return "Tilal Al Ghaf"
   return community
 }
 
@@ -138,6 +151,9 @@ export const TARGET_POCKETS = [
   "Arabian Ranches",
   "Arabian Ranches 2",
   "Arabian Ranches 3",
+  "Mira Oasis",
+  "Dubai Hills Estate",
+  "Tilal Al Ghaf",
 ] as const
 
 export function isTargetPocket(location: string): boolean {
@@ -205,6 +221,11 @@ export function normalizeSubAreaLeaf(leaf: string, master: string): string {
   }
   if (master === "Town Square") {
     s = s.replace(/^Town\s+Square\s+/i, "").trim()
+  }
+  if (master === "Mira Oasis") {
+    s = s.replace(/^Mira\s+Oasis\s+/i, "").trim()
+    const phase = s.match(/^(\d+)$/)
+    if (phase) return `Mira Oasis ${phase[1]}`
   }
   if (/^Arabian Ranches/i.test(master)) {
     s = s.replace(/^Arabian\s+Ranches(?:\s*[123])?\s+/i, "").trim()

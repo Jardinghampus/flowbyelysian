@@ -207,6 +207,17 @@ export const BAYUT_COMMUNITIES: CommunityDef[] = [
     ],
   },
   {
+    id: "mira-oasis",
+    name: "Mira Oasis",
+    basePath: "reem/mira-oasis",
+    areas: [
+      { name: "Mira Oasis", slug: "" },
+      { name: "Mira Oasis 1", slug: "mira-oasis-1" },
+      { name: "Mira Oasis 2", slug: "mira-oasis-2" },
+      { name: "Mira Oasis 3", slug: "mira-oasis-3" },
+    ],
+  },
+  {
     id: "mudon",
     name: "Mudon",
     basePath: "mudon",
@@ -238,6 +249,66 @@ export const BAYUT_COMMUNITIES: CommunityDef[] = [
       },
       { name: "Naseem", slug: "naseem" },
       { name: "Rahat", slug: "rahat" },
+    ],
+  },
+  {
+    id: "tilal-al-ghaf",
+    name: "Tilal Al Ghaf",
+    basePath: "tilal-al-ghaf",
+    areas: [
+      { name: "Tilal Al Ghaf", slug: "" },
+      {
+        name: "Harmony",
+        slug: "harmony",
+        children: [
+          { name: "Harmony 1", slug: "harmony-1" },
+          { name: "Harmony 2", slug: "harmony-2" },
+          { name: "Harmony 3", slug: "harmony-3" },
+        ],
+      },
+      { name: "Elan", slug: "elan" },
+      { name: "Aura Gardens", slug: "aura-gardens" },
+    ],
+  },
+  {
+    id: "dubai-hills-estate",
+    name: "Dubai Hills Estate",
+    basePath: "dubai-hills-estate",
+    areas: [
+      { name: "Dubai Hills Estate", slug: "" },
+      {
+        name: "Maple",
+        slug: "maple",
+        children: [
+          { name: "Maple 1", slug: "maple-1" },
+          { name: "Maple 2", slug: "maple-2" },
+          { name: "Maple 3", slug: "maple-3" },
+        ],
+      },
+      {
+        name: "Sidra Villas",
+        slug: "sidra-villas",
+        children: [
+          { name: "Sidra 1", slug: "sidra-1" },
+          { name: "Sidra 2", slug: "sidra-2" },
+          { name: "Sidra 3", slug: "sidra-3" },
+        ],
+      },
+      {
+        name: "Golf Place",
+        slug: "golf-place",
+        children: [
+          { name: "Golf Place 1", slug: "golf-place-1" },
+          { name: "Golf Place 2", slug: "golf-place-2" },
+        ],
+      },
+      { name: "Golf Place Terraces", slug: "golf-place-terraces" },
+      { name: "Golf Grove", slug: "golf-grove" },
+      { name: "Club Villas", slug: "club-villas" },
+      { name: "Fairway Vistas", slug: "fairway-vistas" },
+      { name: "Parkway Vistas", slug: "parkway-vistas" },
+      { name: "Majestic Vistas", slug: "majestic-vistas" },
+      { name: "Emerald Hills", slug: "emerald-hills" },
     ],
   },
   {
