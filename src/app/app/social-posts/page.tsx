@@ -67,9 +67,14 @@ type Playbook = {
   ownerBrandPitch?: string
 }
 
+type CommunityCard = {
+  post: BuiltSocialPost
+}
+
 type ApiPayload = {
   agent: AgentPayload
   schedule: BuiltSocialPost[]
+  communityCards?: CommunityCard[]
   today: BuiltSocialPost[]
   upcoming: BuiltSocialPost[]
   catchUp: BuiltSocialPost[]
@@ -143,10 +148,24 @@ export default function MediaDeskPage() {
   }, [isLoaded, userEmail, router, load])
 
   const posts = data?.schedule || []
+  const anytimePosts = useMemo(
+    () => (data?.communityCards || []).map((c) => c.post),
+    [data?.communityCards]
+  )
+  const allPosts = useMemo(() => {
+    const map = new Map<string, BuiltSocialPost>()
+    for (const p of posts) map.set(p.id, p)
+    for (const p of anytimePosts) map.set(p.id, p)
+    return [...map.values()]
+  }, [posts, anytimePosts])
   const filtered =
-    filterCommunity === "all" ? posts : posts.filter((p) => p.communityId === filterCommunity)
-  const selected = posts.find((p) => p.id === selectedId) || filtered[0] || null
+    filterCommunity === "all"
+      ? posts
+      : posts.filter((p) => p.communityId === filterCommunity)
+  const selected =
+    allPosts.find((p) => p.id === selectedId) || filtered[0] || anytimePosts[0] || null
   const todayPost = data?.today[0] || null
+  const canExport = selected?.status === "ready"
 
   const weekStrip = useMemo(() => {
     const today = new Date().getDate()
@@ -161,27 +180,63 @@ export default function MediaDeskPage() {
     toast.success(platform === "ig" ? "IG caption copied" : "LinkedIn caption copied")
   }
 
-  const downloadPng = async (platform: SocialCardTheme) => {
-    if (!cardRef.current || !selected) return
+  const renderPng = async (platform: SocialCardTheme) => {
+    if (!cardRef.current || !selected) throw new Error("No card")
     setTheme(platform)
+    await new Promise((r) => setTimeout(r, 220))
+    return toPng(cardRef.current, {
+      cacheBust: true,
+      pixelRatio: 1,
+      width: SOCIAL_EXPORT_WIDTH,
+      height: SOCIAL_EXPORT_HEIGHT,
+      backgroundColor: platform === "linkedin" ? "#f7f5f0" : "#050505",
+    })
+  }
+
+  const triggerDownload = (dataUrl: string, platform: SocialCardTheme) => {
+    if (!selected) return
+    const a = document.createElement("a")
+    a.href = dataUrl
+    a.download = `zaylo-${platform}-1080x1350-${selected.id}.png`
+    a.click()
+  }
+
+  const downloadPng = async (platform: SocialCardTheme) => {
+    if (!selected) return
+    if (!canExport) {
+      toast.error("No live TX data — run Update scraper first")
+      return
+    }
     setExporting(true)
-    // allow paint
-    await new Promise((r) => setTimeout(r, 80))
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 1,
-        width: SOCIAL_EXPORT_WIDTH,
-        height: SOCIAL_EXPORT_HEIGHT,
-        backgroundColor: platform === "linkedin" ? "#f7f5f0" : "#050505",
-      })
-      const a = document.createElement("a")
-      a.href = dataUrl
-      a.download = `zaylo-${platform}-1080x1350-${selected.id}.png`
-      a.click()
-      toast.success(`${platform === "instagram" ? "IG" : "LI"} PNG downloaded`)
+      const dataUrl = await renderPng(platform)
+      triggerDownload(dataUrl, platform)
+      toast.success(`${platform === "instagram" ? "IG" : "LI"} 1080×1350 downloaded`)
     } catch {
-      toast.error("Export failed")
+      toast.error("Export failed — try again or refresh")
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  /** One pack = IG PNG + LI PNG + IG caption on clipboard — ready to paste into apps. */
+  const downloadPostPack = async () => {
+    if (!selected) return
+    if (!canExport) {
+      toast.error("No live TX data — run Update scraper first")
+      return
+    }
+    setExporting(true)
+    try {
+      const ig = await renderPng("instagram")
+      triggerDownload(ig, "instagram")
+      await new Promise((r) => setTimeout(r, 300))
+      const li = await renderPng("linkedin")
+      triggerDownload(li, "linkedin")
+      await navigator.clipboard.writeText(selected.captionIg)
+      toast.success("Post pack ready — IG+LI PNGs downloaded, IG caption copied")
+    } catch {
+      toast.error("Post pack failed — try single PNG export")
     } finally {
       setExporting(false)
     }
@@ -276,9 +331,11 @@ export default function MediaDeskPage() {
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Hampus · Media Desk OS
           </p>
-          <h1 className="text-2xl font-bold tracking-tight">What to post · IG + LinkedIn</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Post pack · 1080×1350</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Daily briefing, dual captions, mark posted, inbound DM → lead. Dark IG · light LI.
+            Pick a post → Download post pack → paste caption in IG/LI.{" "}
+            <span className="text-foreground/80">/pulse</span> is the public magnet for DMs — not the
+            export tool.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -360,24 +417,47 @@ export default function MediaDeskPage() {
           <CardDescription>
             {todayPost
               ? `${todayPost.scheduleLabel} · ${roiRoleLabel(todayPost.roiRole)} · ${todayPost.status === "ready" ? "Live data" : "Needs scrape"}`
-              : "Rest day — pick catch-up or any ready post"}
+              : "Rest day — pick catch-up, anytime pulse, or any ready post"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {todayPost ? (
-            <Button size="sm" onClick={() => setSelectedId(todayPost.id)}>
-              Open today&apos;s post
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {todayPost ? (
+              <Button size="sm" onClick={() => setSelectedId(todayPost.id)}>
+                Open today&apos;s post
+              </Button>
+            ) : null}
+            {(data?.catchUp || []).slice(0, 3).map((p) => (
+              <Button key={p.id} size="sm" variant="outline" onClick={() => setSelectedId(p.id)}>
+                Catch-up D{p.scheduleDay}
+              </Button>
+            ))}
+            <Button size="sm" variant="secondary" onClick={() => setInboundOpen((v) => !v)}>
+              <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+              Log DM lead
             </Button>
+          </div>
+          {anytimePosts.length > 0 ? (
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                Anytime pulse (same TX data as /pulse, as a post card)
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {anytimePosts.map((p) => (
+                  <Button
+                    key={p.id}
+                    size="sm"
+                    variant={selected?.id === p.id ? "default" : "outline"}
+                    onClick={() => setSelectedId(p.id)}
+                    disabled={p.status !== "ready"}
+                  >
+                    {p.communityLabel}
+                    {p.status !== "ready" ? " · needs data" : ""}
+                  </Button>
+                ))}
+              </div>
+            </div>
           ) : null}
-          {(data?.catchUp || []).slice(0, 3).map((p) => (
-            <Button key={p.id} size="sm" variant="outline" onClick={() => setSelectedId(p.id)}>
-              Catch-up D{p.scheduleDay}
-            </Button>
-          ))}
-          <Button size="sm" variant="secondary" onClick={() => setInboundOpen((v) => !v)}>
-            <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-            Log DM lead
-          </Button>
         </CardContent>
       </Card>
 
@@ -689,6 +769,9 @@ export default function MediaDeskPage() {
                   >
                     LI light
                   </Button>
+                  <Badge variant={canExport ? "default" : "destructive"} className="self-center">
+                    {canExport ? "1080×1350 ready" : "Needs scrape"}
+                  </Badge>
                 </div>
                 <div className="overflow-x-auto rounded-2xl border bg-neutral-950 p-3">
                   <div
@@ -708,14 +791,32 @@ export default function MediaDeskPage() {
                   </div>
                 </div>
 
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => void downloadPostPack()}
+                  disabled={exporting || !canExport}
+                >
+                  {exporting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  Download post pack (IG + LI PNG + caption)
+                </Button>
+
                 <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={() => void downloadPng("instagram")} disabled={exporting}>
+                  <Button onClick={() => void downloadPng("instagram")} disabled={exporting || !canExport}>
                     <Download className="mr-1.5 h-4 w-4" />
-                    IG PNG
+                    IG PNG only
                   </Button>
-                  <Button onClick={() => void downloadPng("linkedin")} disabled={exporting} variant="secondary">
+                  <Button
+                    onClick={() => void downloadPng("linkedin")}
+                    disabled={exporting || !canExport}
+                    variant="secondary"
+                  >
                     <Download className="mr-1.5 h-4 w-4" />
-                    LI PNG
+                    LI PNG only
                   </Button>
                   <Button variant="outline" onClick={() => void copyCaption("ig")}>
                     <Copy className="mr-1.5 h-4 w-4" />
