@@ -295,7 +295,7 @@ export default function MediaDeskPage() {
             <Link href="/app/pipeline">Deal Board</Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/market" target="_blank">
+            <Link href="/pulse" target="_blank">
               Public magnet
             </Link>
           </Button>
